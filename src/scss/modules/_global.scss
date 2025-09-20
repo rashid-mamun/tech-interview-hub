@@ -1,0 +1,41 @@
+:root {
+  --font-sans: 'Murecho', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  --font-monospace: 'Fira Code', 'Monaco', 'Courier New', Courier, monospace;
+  --ifm-font-family-base: var(--font-sans);
+  --ifm-heading-font-family: var(--font-sans);
+  --ifm-font-family-monospace: var(--font-monspace);
+
+  --ifm-color-primary: #1882ff;
+  --ifm-color-primary-dark: #126fde;
+  --ifm-color-primary-darker: #0e56ab;
+  --ifm-color-primary-darkest: #073c7a;
+  --ifm-color-primary-light: #5ca7ff;
+  --ifm-color-primary-lighter: #d4e8ff;
+  --ifm-color-primary-lightest: #e8f3ff;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --ifm-navbar-item-padding-horizontal: 16px;
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #1882ff;
+  --ifm-color-primary-dark: #126fde;
+  --ifm-color-primary-darker: #0e56ab;
+  --ifm-color-primary-darkest: #073c7a;
+  --ifm-color-primary-light: #5ca7ff;
+  --ifm-color-primary-lighter: #5ca7ff;
+  --ifm-color-primary-lightest: #5ca7ff;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+html {
+  font-family: var(--font-sans);
+}
+
+code {
+  font-size: 14px !important;
+  padding: 1px 4px;
+  font-family: var(--font-monospace) !important;
+}
+
