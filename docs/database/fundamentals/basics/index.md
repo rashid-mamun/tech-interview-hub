@@ -5,8 +5,6 @@ title: 'Basics'
 
 # Database Fundamentals
 
-এই guide এ database, Database Management System (DBMS), এবং modern software development এ তাদের practical application সম্পর্কে essential concept গুলো আলোচনা করা হয়েছে।
-
 ## ১. What is a database?
 
 **Database** হলো একটি structured collection of data যেটা systematically store, manage এবং retrieve করা যায়। অর্থাৎ, data যাতে সহজে **insert, update, delete, query** করা যায়, সেজন্য database ব্যবহৃত হয়।

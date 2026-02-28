@@ -5,33 +5,46 @@ title: 'Redundancy'
 
 # Data Redundancy
 
-Data redundancy হলো database এ same information এর unnecessary duplication, যা storage space waste করে এবং data inconsistency এর কারণ হতে পারে।
+**Data Redundancy** হলো database-এ একই তথ্য multiple জায়গায় unnecessarily store করা, যা:
+
+- Storage waste করে  
+- Data inconsistency তৈরি করে  
+- Maintenance কঠিন করে তোলে  
+
+Proper database design না হলে redundancy সহজেই তৈরি হয়।
 
 ## ৬. What is data redundancy?
 
-**Data Redundancy** হলো database এ same data multiple জায়গায় unnecessarily store করা, যা data management এ various problem create করে।
+Database-এ একই data যদি একাধিক table বা row-এ store করা হয় এবং সেটা technically দরকার না হয়, তখন তাকে **data redundancy** বলা হয়।
 
 #### Redundancy এর ধরন:
 
-#### ১. **Unnecessary Duplication**:
+##### ❌ ১. Unnecessary Duplication (Bad Design)
+
 ```sql
--- ❌ Redundant design
 CREATE TABLE orders_bad (
     order_id INT PRIMARY KEY,
-    customer_name VARCHAR(100),     -- Redundant
-    customer_email VARCHAR(100),    -- Redundant  
-    customer_phone VARCHAR(15),     -- Redundant
-    customer_address TEXT,          -- Redundant
-    product_name VARCHAR(200),      -- Redundant
-    product_price DECIMAL(10,2),    -- Redundant
+    customer_name VARCHAR(100),
+    customer_email VARCHAR(100),
+    customer_phone VARCHAR(15),
+    customer_address TEXT,
+    product_name VARCHAR(200),
+    product_price DECIMAL(10,2),
     quantity INT,
     order_date DATE
 );
-```
+````
 
-#### ২. **Normalized Approach** (Redundancy কমানোর জন্য):
+এখানে:
+
+* Customer info বারবার repeat হবে
+* Product info বারবার repeat হবে
+* Data change হলে multiple row update করতে হবে
+
+
+##### ✅ Normalized Approach (Better Design)
+
 ```sql
--- ✅ Normalized design
 CREATE TABLE customers (
     customer_id INT PRIMARY KEY,
     name VARCHAR(100),
@@ -43,8 +56,7 @@ CREATE TABLE customers (
 CREATE TABLE products (
     product_id INT PRIMARY KEY,
     name VARCHAR(200),
-    price DECIMAL(10,2),
-    category VARCHAR(50)
+    price DECIMAL(10,2)
 );
 
 CREATE TABLE orders (
@@ -59,20 +71,29 @@ CREATE TABLE order_items (
     order_id INT,
     product_id INT,
     quantity INT,
-    price_at_time DECIMAL(10,2),  -- Price snapshot
+    price_at_time DECIMAL(10,2),
     FOREIGN KEY (order_id) REFERENCES orders(order_id),
     FOREIGN KEY (product_id) REFERENCES products(product_id)
 );
 ```
 
-#### Redundancy এর ধরন:
+এখন:
 
-| Type | Description | Example |
-|------|-------------|---------|
-| **Structural Redundancy** | Same field multiple table এ | Customer name in orders and payments table |
-| **Tuple Redundancy** | Complete duplicate row | Same order entry দুইবার |
-| **Attribute Redundancy** | Derived field যা calculate করা যায় | Total amount যা calculate করা যায় |
-| **Functional Redundancy** | Same information different format এ | Birth date এবং age দুটোই store করা |
+* Customer info একবারই store হচ্ছে
+* Product info একবারই store হচ্ছে
+* Relationship foreign key দিয়ে maintain হচ্ছে
+
+
+
+#### Redundancy-এর ধরন
+
+| Type                  | Description                 | Example                                   |
+| --------------------- | --------------------------- | ----------------------------------------- |
+| Structural Redundancy | Same field multiple table-এ | Customer name in orders & payments        |
+| Tuple Redundancy      | Same row duplicate          | Same order inserted twice                 |
+| Attribute Redundancy  | Calculated field store করা  | total_amount stored instead of calculated |
+| Functional Redundancy | Same info different format  | birth_date & age দুটোই store              |
+
 
 ### Why is redundancy bad?
 
