@@ -3,8 +3,6 @@ sidebar_position: 7
 title: 'Integrity'
 ---
 
-# Data Integrity
-
 Data integrity হলো database এ stored data এর accuracy, consistency এবং reliability maintain করার process, যা business rule এবং constraint enforcement এর মাধ্যমে achieve করা হয়।
 
 ## ৭. What is data integrity?
@@ -12,13 +10,15 @@ Data integrity হলো database এ stored data এর accuracy, consistency �
 **Data Integrity** হলো database এ data এর correctness, consistency এবং validity ensure করার mechanism যা data quality এবং reliability maintain করে।
 
 #### Data Integrity এর মূল উপাদান:
-- **Accuracy**: Data সঠিক এবং error-free
-- **Consistency**: Data system জুড়ে uniform এবং coherent  
-- **Validity**: Data business rule এবং constraint অনুসরণ করে
-- **Completeness**: Required data missing নেই
-- **Reliability**: Data trusted এবং dependable
+
+- **Accuracy** → Data সঠিক এবং error-free
+- **Consistency** → System জুড়ে একই তথ্য একইভাবে present থাকে
+- **Validity** → Defined rules এবং constraints অনুসরণ করে
+- **Completeness** → Required field missing নয়
+- **Reliability** → Data trusted এবং dependable  
 
 #### উদাহরণ:
+
 ```sql
 -- Data integrity constraint example
 CREATE TABLE employees (
@@ -26,35 +26,26 @@ CREATE TABLE employees (
     name VARCHAR(100) NOT NULL,                    -- Entity integrity
     email VARCHAR(100) UNIQUE NOT NULL,            -- Entity integrity
     age INT CHECK (age >= 18 AND age <= 65),       -- Domain integrity
-    department_id INT,                             
+    department_id INT,
     salary DECIMAL(10,2) CHECK (salary > 0),       -- Domain integrity
     hire_date DATE DEFAULT CURRENT_DATE,
     FOREIGN KEY (department_id) REFERENCES departments(dept_id) -- Referential integrity
 );
-
--- Business rule enforcement
-CREATE TABLE orders (
-    order_id INT PRIMARY KEY,
-    customer_id INT NOT NULL,
-    order_date DATE NOT NULL,
-    total_amount DECIMAL(10,2) CHECK (total_amount >= 0),
-    status ENUM('pending', 'confirmed', 'shipped', 'delivered', 'cancelled'),
-    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
-);
 ```
 
 #### Data Integrity এর গুরুত্ব:
+
 - **Business Decision**: Reliable data দিয়ে সঠিক decision নেওয়া
-- **Legal Compliance**: Regulatory requirement meet করা  
+- **Legal Compliance**: Regulatory requirement meet করা
 - **Customer Trust**: Accurate information provide করা
 - **System Reliability**: Consistent application behavior
 - **Cost Reduction**: Data error correction এর cost কমানো
 
-### Types of integrity (entity, referential, domain)?
+### Types of Integrity (Entity, Referential, Domain)
 
 Database system এ তিন ধরনের integrity constraint আছে যা collectively data quality ensure করে:
 
-#### ১. **Entity Integrity**:
+#### ১. Entity Integrity
 
 Entity integrity ensure করে যে প্রতিটি table এর প্রতিটি row uniquely identifiable।
 
@@ -73,12 +64,14 @@ CREATE TABLE customers (
 );
 
 -- These operations violate entity integrity:
--- INSERT INTO customers (customer_id, name) VALUES (NULL, 'John'); -- ERROR: Primary key cannot be NULL
+-- INSERT INTO customers (customer_id, name) VALUES (NULL, 'John'); 
+-- ERROR: Primary key cannot be NULL
 -- INSERT INTO customers (customer_id, name) VALUES (1, 'John'); 
--- INSERT INTO customers (customer_id, name) VALUES (1, 'Jane'); -- ERROR: Duplicate primary key
+-- INSERT INTO customers (customer_id, name) VALUES (1, 'Jane'); 
+-- ERROR: Duplicate primary key
 ```
 
-#### ২. **Referential Integrity**:
+#### ২. Referential Integrity
 
 Referential integrity maintain করে table গুলোর মধ্যে relationship এর consistency।
 
@@ -110,11 +103,13 @@ INSERT INTO departments (dept_id, dept_name) VALUES (1, 'IT');
 INSERT INTO employees (emp_id, name, department_id) VALUES (101, 'John', 1); -- OK
 
 -- Invalid operations:
--- INSERT INTO employees (emp_id, name, department_id) VALUES (102, 'Jane', 999); -- ERROR: Department 999 doesn't exist
--- DELETE FROM departments WHERE dept_id = 1; -- OK if CASCADE, ERROR if RESTRICT
+-- INSERT INTO employees (emp_id, name, department_id) VALUES (102, 'Jane', 999); 
+-- ERROR: Department 999 doesn't exist
+-- DELETE FROM departments WHERE dept_id = 1; 
+-- OK if CASCADE, ERROR if RESTRICT
 ```
 
-#### ৩. **Domain Integrity**:
+#### ৩. Domain Integrity
 
 Domain integrity ensure করে যে column value গুলো defined range বা format এর মধ্যে আছে।
 
@@ -123,12 +118,12 @@ Domain integrity ensure করে যে column value গুলো defined range
 CREATE TABLE products (
     product_id INT PRIMARY KEY,
     name VARCHAR(200) NOT NULL,
-    price DECIMAL(10,2) CHECK (price > 0),              -- Price must be positive
-    category ENUM('electronics', 'clothing', 'books'),   -- Limited valid values
-    rating DECIMAL(2,1) CHECK (rating >= 0 AND rating <= 5), -- Rating between 0-5
+    price DECIMAL(10,2) CHECK (price > 0),                    -- Price must be positive
+    category ENUM('electronics', 'clothing', 'books'),         -- Limited valid values
+    rating DECIMAL(2,1) CHECK (rating >= 0 AND rating <= 5),  -- Rating between 0-5
     stock_quantity INT DEFAULT 0 CHECK (stock_quantity >= 0), -- Non-negative stock
     manufacture_date DATE CHECK (manufacture_date <= CURRENT_DATE), -- Cannot be future date
-    expiry_date DATE CHECK (expiry_date > manufacture_date),  -- Expiry after manufacture
+    expiry_date DATE CHECK (expiry_date > manufacture_date),   -- Expiry after manufacture
     sku VARCHAR(20) NOT NULL UNIQUE,
     is_active BOOLEAN DEFAULT TRUE
 );
@@ -144,7 +139,7 @@ CREATE TABLE users (
 );
 ```
 
-#### **Integrity Types Comparison**:
+#### Integrity Types Comparison
 
 | Integrity Type | Purpose | Implementation | Example |
 |----------------|---------|----------------|---------|
@@ -152,286 +147,114 @@ CREATE TABLE users (
 | **Referential** | Relationship consistency | FOREIGN KEY constraints | Order must have valid customer |
 | **Domain** | Value validation | CHECK constraints, Data types | Age must be between 0-120 |
 
-### How does DBMS enforce referential integrity?
+### How Does DBMS Enforce Referential Integrity?
 
-DBMS multiple mechanism use করে referential integrity enforce করে:
+DBMS মূলত **Foreign Key Constraints** এবং কিছু **Referential Actions**-এর মাধ্যমে referential integrity নিশ্চিত করে। সহজ কথায়, এটি নিশ্চিত করে যে Child টেবিলের প্রতিটি রেকর্ড যেন Parent টেবিলের একটি বৈধ রেকর্ডের সাথে যুক্ত থাকে।
 
-#### ১. **Foreign Key Constraints**:
+নিচে DBMS-এর এই এনফোর্সমেন্ট মেকানিজমগুলো বিস্তারিত আলোচনা করা হলো:
 
-```sql
--- Basic foreign key constraint
-CREATE TABLE orders (
-    order_id INT PRIMARY KEY,
-    customer_id INT,
-    order_date DATE,
-    CONSTRAINT fk_customer 
-        FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
-);
 
--- Multi-column foreign key
-CREATE TABLE order_items (
-    item_id INT PRIMARY KEY,
-    order_id INT,
-    product_id INT,
-    quantity INT,
-    CONSTRAINT fk_order_product 
-        FOREIGN KEY (order_id, product_id) REFERENCES order_products(order_id, product_id)
-);
-```
+#### Foreign Key Constraints (মূল ভিত্তি)
 
-#### ২. **Referential Actions**:
+যখন আপনি একটি টেবিলের কলামকে অন্য টেবিলের প্রাইমারি কী-এর সাথে Foreign Key হিসেবে ডিফাইন করেন, তখন DBMS একটি ইন্টারনাল "পাহারাদার" সেট করে দেয়। এটি প্রতিটি **INSERT** এবং **UPDATE** অপারেশন মনিটর করে।
 
-```sql
--- Different referential actions
-CREATE TABLE employees (
-    emp_id INT PRIMARY KEY,
-    name VARCHAR(100),
-    manager_id INT,
-    department_id INT,
-    
-    -- CASCADE: Delete/update child records when parent changes
-    FOREIGN KEY (manager_id) REFERENCES employees(emp_id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    
-    -- SET NULL: Set foreign key to NULL when parent is deleted
-    FOREIGN KEY (department_id) REFERENCES departments(dept_id)
-        ON DELETE SET NULL
-        ON UPDATE SET NULL
-);
+**বিহেভিয়ার:** আপনি যদি child টেবিলে এমন কোনো ভ্যালু ইনসার্ট করতে চান যা parent টেবিলে নেই, তবে DBMS সাথে সাথে সেটি ব্লক করে দেয়।
 
--- RESTRICT: Prevent parent deletion if children exist
-CREATE TABLE categories (
-    category_id INT PRIMARY KEY,
-    category_name VARCHAR(100)
-);
 
-CREATE TABLE products (
-    product_id INT PRIMARY KEY,
-    name VARCHAR(100),
-    category_id INT,
-    FOREIGN KEY (category_id) REFERENCES categories(category_id)
-        ON DELETE RESTRICT  -- Cannot delete category if products exist
-        ON UPDATE RESTRICT
-);
-```
 
-#### ৩. **Enforcement Process**:
+#### Referential Actions (ডেটা পরিবর্তনের রুলস)
+
+parent টেবিলের ডেটা যখন delete বা update করা হয়, তখন child টেবিলের ওপর তার প্রভাব কেমন হবে তা DBMS ৪টি উপায়ে নিয়ন্ত্রণ করে:
+
+| Action | বর্ণনা (How it works) |
+|--------|------------------------|
+| **CASCADE** | parent টেবিলে কোনো আইডি update বা delete করলে child টেবিলের সংশ্লিষ্ট রেকর্ডগুলো **অটোমেটিক** update বা delete হয়ে যায়। |
+| **SET NULL** | parent রো delete হলে child টেবিলের foreign কি কলামটিকে **NULL** করে দেয়। (কলামটি Nullable হতে হবে)। |
+| **RESTRICT / NO ACTION** | যদি child টেবিলে কোনো ডিপেন্ডেন্ট ডেটা থাকে, তবে parent ডেটা delete করতে দেয় না (Error দেয়)। এটিই ডিফল্ট। |
+| **SET DEFAULT** | parent রো delete হলে child টেবিলের ভ্যালুটিকে একটি **Default** ভ্যালুতে সেট করে দেয়। |
+
+
+
+#### Triggers (কাস্টম এনফোর্সমেন্ট)
+
+কখনও কখনও foreign কি কনস্ট্রেইন্ট যথেষ্ট হয় না। ধরুন, আপনি চান delete করার আগে আরও জটিল কোনো কন্ডিশন চেক করতে। তখন DBMS **Before Delete** বা **Before Update** ট্রিগার ব্যবহার করে এই লজিক এনফোর্স করে। এটি কনস্ট্রেইন্টের চেয়েও ফ্লেক্সিবল কিন্তু কিছুটা স্লো।
+
+
+
+#### Indexing (দ্রুত চেক করার জন্য)
+
+referential integrity এনফোর্স করা ডাটাবেজের জন্য কস্টলি হতে পারে। তাই DBMS সাধারণত foreign কি কলামগুলোর ওপর অটোমেটিক একটি **Index** তৈরি করে। যখনই আপনি parent থেকে কিছু delete করেন, DBMS দ্রুত ইনডেক্স ব্যবহার করে চেক করে দেখে যে child টেবিলে কোনো বাধা আছে কি না।
+
+
+
+#### ACID Compliance (ট্রানজ্যাকশন কন্ট্রোল)
+
+DBMS referential integrity নিশ্চিত করার সময় **Atomicity** ফলো করে। যদি আপনি ক্যাসকেডিং delete (Cascade Delete) করেন এবং মাঝপথে সার্ভার বন্ধ হয়ে যায়, তবে DBMS পুরো অপারেশনটি **Rollback** করে। এটি নিশ্চিত করে যে কোনোভাবেই ডাটাবেজে অর্ধেক delete হওয়া বা অনাথ (Orphaned) রেকর্ড থাকবে না।
+
+
+
+#### একটি প্র্যাকটিক্যাল উদাহরণ:
 
 ```sql
--- DBMS checks referential integrity at different times:
-
--- 1. INSERT operation check
-INSERT INTO orders (order_id, customer_id, order_date) 
-VALUES (1001, 500, '2024-01-15');
--- DBMS checks: Does customer_id 500 exist in customers table?
-
--- 2. UPDATE operation check  
-UPDATE orders SET customer_id = 501 WHERE order_id = 1001;
--- DBMS checks: Does customer_id 501 exist in customers table?
-
--- 3. DELETE operation check
-DELETE FROM customers WHERE customer_id = 500;
--- DBMS checks: Are there any orders with customer_id = 500?
--- Action depends on referential action (CASCADE, RESTRICT, SET NULL)
-
--- 4. Parent table UPDATE check
-UPDATE customers SET customer_id = 502 WHERE customer_id = 500;
--- DBMS checks: Are there child records? What action to take?
+ALTER TABLE Orders
+ADD CONSTRAINT fk_customer
+FOREIGN KEY (customer_id) 
+REFERENCES Customers(id)
+ON DELETE CASCADE; -- এখানে DBMS অটোমেশন এনফোর্স করছে
 ```
 
-#### ৪. **Deferred Constraint Checking**:
+এখন যদি আপনি `Customers` টেবিল থেকে কোনো কাস্টমার delete করেন, DBMS অটোমেটিক তার সব `Orders` delete করে integrity বজায় রাখবে।
 
-```sql
--- Some DBMS support deferred constraint checking
--- Useful for complex transactions
+### What Happens When Foreign Key Constraint is Violated?
 
-SET CONSTRAINTS fk_customer DEFERRED;
+যখন আপনি কোনো **Foreign Key Constraint** ভায়োলেট বা লঙ্ঘন করেন, তখন ডাটাবেজ ইঞ্জিন একটি এরর মেসেজ দেয় এবং আপনার করা অপারেশনটি (INSERT, UPDATE, বা DELETE) আটকে দেয়। এটি মূলত ডাটাবেজের **Referential Integrity** বা তথ্যের নির্ভুলতা রক্ষা করার জন্য করা হয়।
 
--- These operations might temporarily violate constraints
-INSERT INTO orders (order_id, customer_id) VALUES (1001, 999);
-INSERT INTO customers (customer_id, name) VALUES (999, 'New Customer');
+নিচে বিস্তারিত আলোচনা করা হলো কী কী কারণে এই ভায়োলেশন হতে পারে এবং তখন ডাটাবেজ কীভাবে রিঅ্যাক্ট করে:
 
--- Constraint checked at transaction commit
-COMMIT; -- All constraints must be satisfied here
-```
 
-### What happens when foreign key constraint is violated?
+#### কখন Foreign Key Constraint ভায়োলেট হয়?
 
-Foreign key constraint violation হলে DBMS specific error message দিয়ে operation reject করে:
+Foreign Key মূলত দুটি টেবিলের মধ্যে সম্পর্ক তৈরি করে: একটি **Parent Table** (যেখানে মূল ডেটা থাকে) এবং একটি **Child Table** (যেখানে রেফারেন্স থাকে)। ভায়োলেশন প্রধানত দুটি ক্ষেত্রে ঘটে:
 
-#### ১. **INSERT Violation**:
+##### Child Table-এ এমন ডেটা যোগ করা যা Parent Table-এ নেই (Insert/Update Violation):
 
-```sql
--- Attempt to insert order with non-existent customer
-INSERT INTO orders (order_id, customer_id, order_date) 
-VALUES (1001, 999, '2024-01-15');
+ধরুন আপনার কাছে `Departments` (Parent) এবং `Employees` (Child) টেবিল আছে। `Employees` টেবিলে `dept_id` হলো Foreign Key। আপনি যদি এমন একজন এমপ্লয়ি ইনসার্ট করতে চান যার `dept_id` হলো **১০**, কিন্তু `Departments` টেবিলে ১০ নম্বর আইডিটি নেই, তবে ডাটাবেজ এই অপারেশনটি করতে দেবে না।
 
--- Error message (MySQL):
--- ERROR 1452 (23000): Cannot add or update a child row: 
--- a foreign key constraint fails (`database`.`orders`, 
--- CONSTRAINT `fk_customer` FOREIGN KEY (`customer_id`) 
--- REFERENCES `customers` (`customer_id`))
+##### Parent Table থেকে ডেটা মুছে ফেলা যা Child Table-এ ব্যবহৃত হচ্ছে (Delete/Update Violation):
 
--- PostgreSQL error:
--- ERROR: insert or update on table "orders" violates foreign key constraint "fk_customer"
--- DETAIL: Key (customer_id)=(999) is not present in table "customers".
-```
+আপনি যদি `Departments` টেবিল থেকে আইডি **১০** মুছে ফেলতে চান, কিন্তু অলরেডি কিছু এমপ্লয়ি সেই ১০ নম্বর ডিপার্টমেন্টে অ্যাসাইন করা থাকে, তবে ডাটাবেজ সেই ডিলিট অপারেশনটি ভায়োলেশন হিসেবে গণ্য করবে।
 
-#### ২. **UPDATE Violation**:
 
-```sql
--- Attempt to update to non-existent reference
-UPDATE orders SET customer_id = 888 WHERE order_id = 1001;
 
--- Error: Foreign key constraint violation
--- The operation is rolled back, no changes made
-```
+#### ডাটাবেজ কীভাবে রেসপন্স করে?
 
-#### ৩. **DELETE Violation (RESTRICT mode)**:
+যখনই কোনো ভায়োলেশন ধরা পড়ে, ডাটাবেজ নিচের পদক্ষেপগুলো নেয়:
 
-```sql
--- Setup with RESTRICT constraint
-ALTER TABLE orders ADD CONSTRAINT fk_customer_restrict
-    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
-    ON DELETE RESTRICT;
+1. **Operation Blocked:** ডাটাবেজ কোয়েরিটি রান করতে দেয় না।
+2. **Error Message:** একটি এরর কোড জেনারেট করে (যেমন MySQL-এ এরর কোড `1451` বা `1452`)।
+3. **Rollback:** যদি এটি কোনো ট্রানজ্যাকশনের অংশ হয়, তবে পুরো প্রসেসটি রোলব্যাক হয় যাতে ডেটা ইনকনসিস্টেন্ট না হয়।
 
--- Attempt to delete customer with existing orders
-DELETE FROM customers WHERE customer_id = 100;
 
--- Error message:
--- ERROR 1451 (23000): Cannot delete or update a parent row: 
--- a foreign key constraint fails (`database`.`orders`, 
--- CONSTRAINT `fk_customer_restrict` FOREIGN KEY (`customer_id`) 
--- REFERENCES `customers` (`customer_id`))
-```
 
-#### ৪. **Handling Different Referential Actions**:
+#### ভায়োলেশন এড়ানোর উপায় (Referential Actions)
 
-```sql
--- Example setup with different actions
-CREATE TABLE departments (dept_id INT PRIMARY KEY, name VARCHAR(100));
-CREATE TABLE employees (
-    emp_id INT PRIMARY KEY,
-    name VARCHAR(100),
-    dept_id INT,
-    manager_id INT,
-    FOREIGN KEY (dept_id) REFERENCES departments(dept_id) ON DELETE SET NULL,
-    FOREIGN KEY (manager_id) REFERENCES employees(emp_id) ON DELETE CASCADE
-);
+ডেটা ডিলিট বা আপডেট করার সময় এই ভায়োলেশন যেন না হয়, সেজন্য ডাটাবেজে কিছু 'Actions' সেট করা যায়:
 
--- Test data
-INSERT INTO departments VALUES (1, 'IT'), (2, 'HR');
-INSERT INTO employees VALUES (101, 'Manager', 1, NULL);
-INSERT INTO employees VALUES (102, 'Employee', 1, 101);
+- **RESTRICT/NO ACTION (Default):** কোনো পরিবর্তন করতে দেয় না, সরাসরি এরর দেয়।
+- **CASCADE:** প্যারেন্ট টেবিলের ডেটা ডিলিট করলে চাইল্ড টেবিলের রিলেটেড সব ডেটা অটোমেটিক ডিলিট হয়ে যায়।
+- **SET NULL:** প্যারেন্ট টেবিলের ডেটা ডিলিট করলে চাইল্ড টেবিলের রেফারেন্স কলামটি `NULL` হয়ে যায়।
+- **SET DEFAULT:** এটি ডিলিট করা ডেটার জায়গায় একটি ডিফল্ট ভ্যালু বসিয়ে দেয়।
 
--- CASCADE example: Delete manager
-DELETE FROM employees WHERE emp_id = 101;
--- Result: Employee 102 is also deleted (CASCADE)
 
--- SET NULL example: Delete department  
-DELETE FROM departments WHERE dept_id = 1;
--- Result: All employees in dept 1 have dept_id set to NULL
-```
 
-#### ৫. **Application Error Handling**:
+#### কেন এটি গুরুত্বপূর্ণ?
 
-```javascript
-// JavaScript/Node.js example
-async function createOrder(customerId, orderData) {
-    try {
-        const order = await db.query(
-            'INSERT INTO orders (customer_id, order_date, total) VALUES (?, ?, ?)',
-            [customerId, orderData.date, orderData.total]
-        );
-        return { success: true, orderId: order.insertId };
-    } catch (error) {
-        if (error.code === 'ER_NO_REFERENCED_ROW_2') {
-            return { 
-                success: false, 
-                error: 'Invalid customer ID. Customer does not exist.' 
-            };
-        }
-        throw error; // Re-throw unexpected errors
-    }
-}
-```
+Foreign Key Constraint না থাকলে ডাটাবেজে **"Orphaned Records"** তৈরি হতো। অর্থাৎ এমন কিছু রেকর্ড থাকতো যাদের কোনো অস্তিত্বশীল প্যারেন্ট নেই (যেমন এমন একজন কর্মচারী যার কোনো ডিপার্টমেন্ট নেই)। এটি ডাটাবেজ রিপোর্টিং এবং অ্যাপ্লিকেশনের লজিক নষ্ট করে দেয়।
 
-```python
-# Python example with proper error handling
-import mysql.connector
-from mysql.connector import Error
+#### Best Practices for Handling Violations
 
-def create_order(customer_id, order_data):
-    try:
-        cursor.execute(
-            "INSERT INTO orders (customer_id, order_date, total) VALUES (%s, %s, %s)",
-            (customer_id, order_data['date'], order_data['total'])
-        )
-        connection.commit()
-        return {'success': True, 'order_id': cursor.lastrowid}
-    
-    except mysql.connector.IntegrityError as e:
-        if e.errno == 1452:  # Foreign key constraint violation
-            return {
-                'success': False,
-                'error': 'Customer not found. Please verify customer ID.'
-            }
-        raise e
-```
-
-#### ৬. **Best Practices for Handling Constraint Violations**:
-
-#### **Prevention Strategy**:
-```sql
--- Validate before insertion
-CREATE PROCEDURE CreateOrderSafely(
-    IN p_customer_id INT,
-    IN p_order_date DATE,
-    IN p_total DECIMAL(10,2)
-)
-BEGIN
-    DECLARE customer_exists INT DEFAULT 0;
-    
-    -- Check if customer exists
-    SELECT COUNT(*) INTO customer_exists 
-    FROM customers 
-    WHERE customer_id = p_customer_id;
-    
-    IF customer_exists = 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Customer not found';
-    ELSE
-        INSERT INTO orders (customer_id, order_date, total)
-        VALUES (p_customer_id, p_order_date, p_total);
-    END IF;
-END;
-```
-
-#### **User-Friendly Error Messages**:
-```sql
--- Create custom error handling
-DELIMITER //
-CREATE TRIGGER before_order_insert
-BEFORE INSERT ON orders
-FOR EACH ROW
-BEGIN
-    DECLARE customer_name VARCHAR(100);
-    
-    SELECT name INTO customer_name 
-    FROM customers 
-    WHERE customer_id = NEW.customer_id;
-    
-    IF customer_name IS NULL THEN
-        SIGNAL SQLSTATE '45000' 
-        SET MESSAGE_TEXT = CONCAT('Customer with ID ', NEW.customer_id, ' does not exist. Please verify the customer ID.');
-    END IF;
-END //
-DELIMITER ;
-```
-
-#### **Summary of Constraint Violation Handling**:
 1. **Prevention** - Validate data before database operations
-2. **Graceful Error Handling** - Catch and handle constraint violations properly  
+2. **Graceful Error Handling** - Catch and handle constraint violations properly
 3. **User-Friendly Messages** - Convert technical errors to meaningful messages
 4. **Logging** - Log constraint violations for debugging
 5. **Recovery** - Provide options for users to correct invalid data

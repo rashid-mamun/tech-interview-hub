@@ -7,6 +7,8 @@ title: 'Keys'
 
 Database key হলো table এর row গুলোকে uniquely identify করার mechanism এবং table গুলোর মধ্যে relationship establish করার fundamental component।
 
+ডাটাবেস design এবং data integrity নিশ্চিত করার জন্য key অত্যন্ত গুরুত্বপূ
+
 ## ৫. What are keys in databases?
 
 **Database Key** হলো একটি column বা column এর combination যা table এর প্রতিটি row কে uniquely identify করে এবং data integrity maintain করে।
@@ -20,6 +22,7 @@ Database key হলো table এর row গুলোকে uniquely identify ক
 #### Key এর প্রকারভেদ:
 
 #### ১. **Primary Key**:
+Primary Key হলো table-এর main identifier। একটি table-এ শুধুমাত্র একটি primary key থাকতে পারে।
 ```sql
 -- Single column primary key
 CREATE TABLE users (
@@ -38,6 +41,7 @@ CREATE TABLE order_items (
 ```
 
 #### ২. **Foreign Key**:
+Foreign key একটি table-কে অন্য table-এর primary key-এর সাথে connect করে।
 ```sql
 CREATE TABLE orders (
     order_id INT PRIMARY KEY,
@@ -48,6 +52,7 @@ CREATE TABLE orders (
 ```
 
 #### ৩. **Unique Key**:
+Unique key duplicate value prevent করে, কিন্তু primary key-এর মতো main identifier নয়।
 ```sql
 CREATE TABLE users (
     user_id INT PRIMARY KEY,
@@ -58,6 +63,7 @@ CREATE TABLE users (
 ```
 
 #### ৪. **Candidate Key**:
+Table-এর যেকোনো column বা column combination যা uniquely identify করতে পারে, সেটি candidate key।
 ```sql
 -- Multiple columns can serve as candidate keys
 CREATE TABLE employees (
@@ -128,6 +134,9 @@ Database design এ key এর hierarchy বোঝা data modeling এর জ�
 #### **Candidate Key**:
 Table এর যেকোনো column বা column combination যা uniquely identify করতে পারে, সেটি candidate key।
 
+সব possible unique identifiers গুলো candidate key।
+
+
 ```sql
 -- Example table with multiple candidate keys
 CREATE TABLE employees (
@@ -164,6 +173,14 @@ ALTER TABLE employees ADD UNIQUE KEY uk_passport (passport);
 | **4. Document Decision** | Record why specific key was chosen as primary | emp_id is sequential and never changes |
 
 #### Primary Key Selection Criteria:
+
+ভালো primary key-এর বৈশিষ্ট্য:
+
+* Simple
+* Short
+* Stable
+* Never changes
+* Meaningless (business data নয়)
 
 ```sql
 -- Good primary key characteristics
