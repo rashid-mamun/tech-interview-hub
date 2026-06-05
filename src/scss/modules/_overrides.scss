@@ -398,7 +398,9 @@
   border: 0;
   border-left: 1px solid var(--docs-border);
   border-radius: 0;
-  padding: 4px 0 4px 14px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 4px 0 4px 8px;
   background: transparent;
   box-shadow: none;
 }
@@ -410,8 +412,8 @@
 
 .table-of-contents__link {
   border-radius: 8px;
-  padding: 6px 8px;
-  margin: 2px 0;
+  padding: 6px 7px;
+  margin: 2px 4px 2px 0;
   display: block;
   color: var(--docs-text-muted);
   font-size: 12.5px;
@@ -514,6 +516,16 @@
   justify-content: center;
 }
 
+.docs-layout-toggle-icon {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.2;
+}
+
 .docs-layout-toggle-btn[aria-pressed='true'] {
   color: #ffffff;
   background: #1477ee;
@@ -560,9 +572,21 @@ body.docs-left-hidden.docs-right-hidden .theme-doc-markdown {
 }
 
 /*=== Consistent Docs Grid ===*/
+[class*='docRoot_'] {
+  width: 100%;
+}
+
+[class*='docRoot_']>[class*='docMainContainer_'] {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: none;
+}
+
 [class*='docMainContainer_'] .container {
   max-width: none;
   width: 100%;
+  margin-left: 0;
+  margin-right: 0;
   padding-top: 0 !important;
   padding-left: 0;
   padding-right: 0;
@@ -587,11 +611,16 @@ body.docs-left-hidden.docs-right-hidden .theme-doc-markdown {
 }
 
 [class*='docMainContainer_'] .row>.col.col--3 {
-  flex: 0 0 260px;
-  max-width: 260px;
-  width: 260px;
+  --ifm-col-width: 220px !important;
+  flex: 0 0 220px !important;
+  max-width: 220px !important;
+  width: 220px !important;
+  min-width: 220px;
+  box-sizing: border-box;
   padding-left: 0;
   padding-right: 0;
+  margin-left: 0;
+  margin-right: 0;
   position: sticky;
   top: 0;
   height: 100vh;
@@ -605,11 +634,12 @@ body.docs-left-hidden.docs-right-hidden .theme-doc-markdown {
 
 .theme-doc-toc-desktop {
   position: static;
+  width: 100%;
   height: 100vh;
   max-height: 100vh;
   overflow-y: auto;
   scrollbar-width: thin;
-  padding-top: 12px;
+  padding: 12px 2px 16px 0;
 }
 
 /*=== Breadcrumbs ===*/
@@ -672,9 +702,11 @@ body.docs-left-hidden.docs-right-hidden .theme-doc-markdown {
   }
 
   [class*='docMainContainer_'] .row>.col.col--3 {
-    flex-basis: 230px;
-    max-width: 230px;
-    width: 230px;
+    --ifm-col-width: 200px !important;
+    flex-basis: 200px !important;
+    max-width: 200px !important;
+    width: 200px !important;
+    min-width: 200px;
   }
 
   .theme-doc-markdown {
