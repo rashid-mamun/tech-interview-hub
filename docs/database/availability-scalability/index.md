@@ -1,6 +1,6 @@
 ---
 sidebar_position: 9
-title: ''
+title: 'Availability and Scalability'
 ---
 
 ## 🏢 **9. High Availability & Scalability**

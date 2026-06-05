@@ -1,6 +1,6 @@
 ---
 sidebar_position: 8
-title: ''
+title: 'NoSQL'
 ---
 
 ## 🌐 **8. NoSQL Databases**

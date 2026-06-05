@@ -1,6 +1,6 @@
 ---
 sidebar_position: 5
-title: ''
+title: 'Transactions'
 ---
 
 ## **51. What is a transaction?**

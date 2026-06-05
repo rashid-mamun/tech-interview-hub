@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-title: ''
+title: 'Equality and Type'
 ---
 
 ## 1. What is the difference between `==` and `===`?

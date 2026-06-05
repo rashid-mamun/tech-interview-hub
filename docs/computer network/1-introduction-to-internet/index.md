@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-title: ''
+title: 'Introduction to the Internet'
 ---
 ## 🌐 1. What is the concept of the Internet?
 

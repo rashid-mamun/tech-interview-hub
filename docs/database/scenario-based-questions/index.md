@@ -1,6 +1,6 @@
 ---
 sidebar_position: 10
-title: ''
+title: 'Scenario Based Questions'
 ---
 
 ## 🛠️ **16. Scenario-Based Questions (System Design)**

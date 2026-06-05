@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-title: ''
+title: 'Hoisting'
 ---
 
 ## 1. What is hoisting in JavaScript?

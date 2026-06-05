@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-title: ''
+title: 'Messaging and Queues'
 ---
 
 

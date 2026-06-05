@@ -1,6 +1,6 @@
 ---
 sidebar_position: 3
-title: ''
+title: 'SQL Functions and Operations'
 ---
 
 ## **20. What is ORDER BY and GROUP BY?**

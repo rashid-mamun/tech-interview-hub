@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-title: ''
+title: 'Docker Basic'
 ---
 
 ## 🆚 2. What is the difference between a Docker Image and a Docker Container?

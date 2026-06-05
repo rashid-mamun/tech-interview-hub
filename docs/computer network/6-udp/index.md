@@ -1,6 +1,6 @@
 ---
 sidebar_position: 2
-title: ''
+title: 'UDP'
 ---
 
 ## 🚀 45. What is UDP, and how does it differ from TCP?

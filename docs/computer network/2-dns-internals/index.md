@@ -1,6 +1,6 @@
 ---
 sidebar_position: 2
-title: ''
+title: 'DNS Internals'
 ---
 
 ## 8. What is the Domain Name System (DNS)?

@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-title: ''
+title: 'System Design Fundamentals and Approach'
 ---
 
 ## 1. How do you approach a system design interview question?

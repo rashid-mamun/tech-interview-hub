@@ -1,6 +1,6 @@
 ---
 sidebar_position: 2
-title: ''
+title: 'Server-Client Architecture'
 ---
 
 ## 17. What is the Client-Server model?

@@ -1,6 +1,6 @@
 ---
 sidebar_position: 2
-title: ''
+title: 'HTTP & HTTPS'
 ---
 ## 🌐 60. What are HTTP and HTTPS protocols?
 **HTTP (HyperText Transfer Protocol)** হলো ইন্টারনেটে ক্লায়েন্ট (ব্রাউজার) এবং সার্ভারের মধ্যে তথ্য আদান-প্রদান করার মূল প্রোটোকল। এটি রিকোয়েস্ট-রেসপন্স মডেলে কাজ করে এবং পোর্ট 80 ব্যবহার করে।

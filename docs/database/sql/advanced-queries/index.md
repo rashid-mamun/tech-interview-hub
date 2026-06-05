@@ -1,6 +1,6 @@
 ---
 sidebar_position: 2
-title: ''
+title: 'Advanced SQL Queries'
 ---
 
 ## **16. What is a Subquery?**

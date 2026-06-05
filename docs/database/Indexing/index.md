@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-title: ''
+title: 'Indexing'
 ---
 
 ## **39. What is an Index?**

@@ -12,7 +12,7 @@ const siteDescription =
 const config: Config = {
   title: 'Tech Interview Hub',
   tagline: siteDescription,
-  favicon: 'img/favicon.ico',
+  favicon: 'img/favicon.svg',
   url: siteUrl,
   baseUrl: siteBaseUrl,
   organizationName: 'rashid-mamun',

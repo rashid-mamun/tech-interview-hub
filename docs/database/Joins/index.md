@@ -1,6 +1,6 @@
 ---
 sidebar_position: 2
-title: ''
+title: 'Joins'
 ---
 
 ## **26. What are SQL joins?**

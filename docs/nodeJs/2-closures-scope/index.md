@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-title: ''
+title: 'Closures and Scope'
 ---
 
 ## 1. What is lexical scope in JavaScript?

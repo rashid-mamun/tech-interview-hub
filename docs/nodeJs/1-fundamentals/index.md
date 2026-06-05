@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-title: ''
+title: 'Node.js Fundamentals'
 ---
 ## 3. What is the difference between synchronous and asynchronous code in Node.js?
 **Synchronous (sync)** code মানে হলো — একটি কাজ শেষ না হওয়া পর্যন্ত পরের কাজ শুরু হবে না। একটি line execute হচ্ছে, বাকি সব **অপেক্ষা করছে**।

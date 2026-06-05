@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-title: ''
+title: 'Authentication and Authorization'
 ---
 
 ## 1. What is the difference between authentication and authorization?

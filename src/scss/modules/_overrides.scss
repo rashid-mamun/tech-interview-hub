@@ -435,6 +435,12 @@
   color: var(--ifm-color-primary);
 }
 
+.pagination-nav {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
 .pagination-nav__link {
   border: 1px solid var(--docs-border);
   border-radius: 8px;
@@ -443,6 +449,15 @@
   min-height: 92px;
   padding: 16px;
   transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.pagination-nav__link--next {
+  grid-column: 2;
+}
+
+.pagination-nav__link--prev:only-child,
+.pagination-nav__link--next:only-child {
+  grid-column: 1 / -1;
 }
 
 .pagination-nav__link:hover {

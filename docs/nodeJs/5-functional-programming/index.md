@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-title: ''
+title: 'Functional Programming'
 ---
 
 ## 1. What is a pure function?
