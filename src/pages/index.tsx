@@ -13,6 +13,7 @@ export default function Home(): JSX.Element {
           content="Tech Interview Hub, tech-interview-hub, Rashid Mamun, backend interview questions, system design interview, database interview questions, computer networking interview questions, Docker interview questions, Node.js interview questions, NestJS interview questions, Bangla programming notes"
         />
         <meta name="author" content="Rashid Mamun" />
+        <meta name="google-site-verification" content="cAhJkw9HN0dfCLlevCXA591yh_UUW-nH7yzYZqZhVss" />
         <meta property="og:title" content="Tech Interview Hub - Developer Interview Documentation" />
         <meta property="og:description" content={siteConfig.tagline} />
         <meta property="og:url" content="https://rashid-mamun.github.io/tech-interview-hub" />

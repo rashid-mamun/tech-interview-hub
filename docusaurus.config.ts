@@ -72,6 +72,7 @@ const config: Config = {
           'tech interview hub, tech-interview-hub, rashid mamun, backend interview questions, system design interview, node js interview questions, database interview questions, computer networking interview questions, docker interview questions, nestjs interview questions, bangla programming notes, developer interview preparation, tech-interview-hub github'
       },
       { name: 'author', content: 'Rashid Mamun' },
+      { name: 'google-site-verification', content: 'cAhJkw9HN0dfCLlevCXA591yh_UUW-nH7yzYZqZhVss' },
       { name: 'robots', content: 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1' },
       { property: 'og:type', content: 'website' },
       { property: 'og:site_name', content: 'Tech Interview Hub' },
