@@ -1,71 +1,57 @@
 .home {
   .hero-section {
-    background-repeat: no-repeat;
-    background-size: cover;
-    height: calc(100vh - 150px);
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 32px 0;
+    background:
+      linear-gradient(rgba(20, 99, 216, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(20, 99, 216, 0.06) 1px, transparent 1px),
+      linear-gradient(180deg, #f8fbff 0%, #ffffff 46%, #f5faf7 100%);
+    background-size: 28px 28px, 28px 28px, auto;
 
     &__box {
-      position: relative;
-      display: flex;
-      max-width: 800px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+      gap: 32px;
+      width: min(1120px, calc(100vw - 32px));
       margin: 0 auto;
       align-items: center;
-      justify-content: center;
-      text-align: center;
-      height: 100%;
-      padding: 4rem;
-      background: linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0.6) 0%,
-        #fff 50%,
-        rgba(255, 255, 255, 0.6) 100%
-      );
-    }
-
-    &__brackets {
-      position: absolute;
-      height: 260px;
-
-      &--left {
-        left: 0;
-      }
-
-      &--right {
-        right: 0;
-      }
     }
 
     &__content {
-      padding: 16px;
+      padding: 0;
     }
 
     &__title {
-      font-size: 32px;
-      line-height: 40px;
-      font-weight: 600;
-
-      @media only screen and (min-width: 720px) {
-        font-size: 36px;
-        line-height: 48px;
-      }
-
-      @media only screen and (min-width: 996px) {
-        font-size: 48px;
-        line-height: 56px;
-      }
+      margin: 0 0 16px;
+      color: #0c1728;
+      font-size: clamp(2.4rem, 6vw, 5.25rem);
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: 0;
     }
 
     &__subtitle {
-      color: #1a2b3d;
+      max-width: 720px;
+      margin: 0;
+      color: #334155;
+      font-size: clamp(1.05rem, 2vw, 1.35rem);
+      line-height: 1.55;
     }
 
     &__description {
-      font-size: 14px;
-      line-height: 18px;
-      color: #9ba6b2;
+      max-width: 700px;
+      margin: 18px 0 0;
+      font-size: 15px;
+      line-height: 1.75;
+      color: #64748b;
+    }
+
+    &__actions {
+      display: flex;
+      margin-top: 28px;
     }
 
     &__button {
@@ -73,30 +59,114 @@
       align-items: center;
       justify-content: center;
       border-radius: 9999px;
-      font-weight: 475;
-      font-size: 16px;
+      font-weight: 700;
+      font-size: 15px;
       line-height: 28px;
+      padding: 0.75rem 1.4rem;
+    }
+
+    &__topics {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid #d9e2ee;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+    }
+
+    &__topic {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      padding: 0 14px;
+      border: 1px solid #e3eaf4;
+      border-radius: 8px;
+      color: #172033;
+      background: #ffffff;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+
+      &:hover {
+        border-color: #1463d8;
+        color: #1463d8;
+        background: #eef6ff;
+        text-decoration: none;
+      }
     }
   }
 }
 
 [data-theme='dark'] .home {
   .hero-section {
+    background:
+      linear-gradient(rgba(106, 176, 255, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(106, 176, 255, 0.08) 1px, transparent 1px),
+      linear-gradient(180deg, #111a27 0%, #0f1623 56%, #101b26 100%);
+    background-size: 28px 28px, 28px 28px, auto;
+
+    &__title {
+      color: #f6fbff;
+    }
+
     &__subtitle {
-      color: #9ba6b2;
+      color: #d8e4f2;
     }
 
     &__description {
-      color: #77818c;
+      color: #98a8bd;
     }
 
-    &__box {
-      background: linear-gradient(
-        90deg,
-        rgba(27, 27, 29, 0.6) 0%,
-        #1b1b1d 50%,
-        rgba(27, 27, 29, 0.6) 100%
-      );
+    &__topics {
+      border-color: #314259;
+      background: rgba(21, 31, 45, 0.92);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.32);
+    }
+
+    &__topic {
+      border-color: #314259;
+      color: #e4ebf5;
+      background: #111a27;
+
+      &:hover {
+        border-color: #6ab0ff;
+        color: #6ab0ff;
+        background: #162a42;
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: 996px) {
+  .home {
+    .hero-section {
+      align-items: flex-start;
+      padding: 24px 0;
+
+      &__box {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: 560px) {
+  .home {
+    .hero-section {
+      &__title {
+        font-size: 2.25rem;
+      }
+
+      &__topics {
+        padding: 8px;
+      }
+
+      &__topic {
+        min-height: 44px;
+      }
     }
   }
 }
