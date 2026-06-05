@@ -3,6 +3,13 @@
     var RIGHT_KEY = 'docs:rightHidden';
     var CONTROLS_ID = 'docs-layout-toggles-runtime';
 
+    var icons = {
+        sidebar: '<svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>',
+        toc: '<svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12"/><path d="M4 6h.01M4 12h.01M4 18h.01"/></svg>',
+        showLeft: '<svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/><path d="M4 6v12"/></svg>',
+        showRight: '<svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/><path d="M20 6v12"/></svg>',
+    };
+
     function isDocsPage() {
         return window.location.pathname.indexOf('/docs') === 0;
     }
@@ -35,13 +42,13 @@
         if (leftBtn) {
             leftBtn.setAttribute('aria-pressed', state.leftHidden ? 'true' : 'false');
             leftBtn.title = state.leftHidden ? 'Show Left Sidebar' : 'Hide Left Sidebar';
-            leftBtn.innerHTML = state.leftHidden ? '→' : '☰';
+            leftBtn.innerHTML = state.leftHidden ? icons.showLeft : icons.sidebar;
         }
 
         if (rightBtn) {
             rightBtn.setAttribute('aria-pressed', state.rightHidden ? 'true' : 'false');
             rightBtn.title = state.rightHidden ? 'Show Table of Contents' : 'Hide Table of Contents';
-            rightBtn.innerHTML = state.rightHidden ? '←' : '≡';
+            rightBtn.innerHTML = state.rightHidden ? icons.showRight : icons.toc;
         }
     }
 
@@ -78,8 +85,8 @@
         controls.appendChild(rightBtn);
 
         controls.addEventListener('click', function (event) {
-            var target = event.target;
-            if (!(target instanceof HTMLButtonElement)) {
+            var target = event.target.closest('button');
+            if (!target) {
                 return;
             }
 

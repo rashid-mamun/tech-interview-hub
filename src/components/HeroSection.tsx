@@ -1,36 +1,47 @@
 import React from 'react';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
-import BracketLeft from '../assets/icons/bracket-left.svg';
-import BracketRight from '../assets/icons/bracket-right.svg';
+
+const docSections = [
+  { label: 'Computer Network', to: '/docs/computer%20network/' },
+  { label: 'System Design', to: '/docs/system%20design/' },
+  { label: 'Database', to: '/docs/database/' },
+  { label: 'Docker', to: '/docs/docker/' },
+  { label: 'Node.js', to: '/docs/nodeJs/' },
+  { label: 'NestJS', to: '/docs/nestJs/' }
+];
 
 export const HeroSection = () => {
   const { siteConfig } = useDocusaurusContext();
 
   return (
     <section className="home">
-      <div style={{ backgroundImage: 'url("./img/bg.svg")' }} className="hero-section">
+      <div className="hero-section">
         <div className="container">
           <div className="hero-section__box">
-            <BracketLeft className="hero-section__brackets hero-section__brackets--left" />
             <div className="hero-section__content">
               <h1 className="hero-section__title">{siteConfig.title}</h1>
               <p className="hero-section__subtitle">{siteConfig.tagline}</p>
-              <div className="hero-section__divider" />
               <p className="hero-section__description">
-                ShareTrip is the country’s first and leading Online Travel Aggregator (OTA). Since
-                our inception, we have dreamt of making travel easier for people of all ages and we
-                move forward to make that dream into reality.
+                Bangla-friendly documentation for practical interview preparation, organized by
+                topic and optimized for long-form reading.
               </p>
-              <Link className="hero-section__button button button--primary button--lg" to="/docs">
-                Read the Docs
-              </Link>
+              <div className="hero-section__actions">
+                <Link className="hero-section__button button button--primary button--lg" to="/docs">
+                  Start Reading
+                </Link>
+              </div>
             </div>
-            <BracketRight className="hero-section__brackets hero-section__brackets--right" />
+            <div className="hero-section__topics" aria-label="Documentation sections">
+              {docSections.map(section => (
+                <Link key={section.to} className="hero-section__topic" to={section.to}>
+                  {section.label}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </div>
     </section>
   );
 };
-

@@ -1,10 +1,29 @@
 {
-  "name": "techInterviewHub",
+  "name": "tech-interview-hub",
   "version": "0.0.0",
   "private": true,
+  "description": "Tech Interview Hub is a Docusaurus documentation website for backend, system design, database, networking, Docker, Node.js, and NestJS interview preparation.",
+  "homepage": "https://rashid-mamun.github.io/tech-interview-hub/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rashid-mamun/tech-interview-hub.git"
+  },
+  "keywords": [
+    "tech-interview-hub",
+    "backend-interview",
+    "system-design",
+    "database-interview",
+    "computer-networking",
+    "docker-interview",
+    "nodejs-interview",
+    "nestjs-interview",
+    "bangla-programming-notes",
+    "docusaurus"
+  ],
+  "author": "Rashid Mamun",
   "scripts": {
     "docusaurus": "docusaurus",
-    "start": "docusaurus start",
+    "start": "docusaurus start --host 127.0.0.1 --port 4000",
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
