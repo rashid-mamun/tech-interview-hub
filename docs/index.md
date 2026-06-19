@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 0
 title: 'Getting Started'
 description: 'Tech Interview Hub documentation index for backend, system design, database, networking, Docker, Node.js, and NestJS interview preparation.'
 keywords:
