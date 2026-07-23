@@ -15,10 +15,10 @@ title: 'Express Framework'
 
 ## 2.Optional route parameter কীভাবে define করবে?
 
-Parameter-এর শেষে `?` দিলেই সেটা optional হয়ে যায়:
+Route path-এ `{}` (braces) দিয়ে অংশটুকু wrap করলে সেটা optional হয়ে যায়:
 
 ```js
-app.get('/users/:id?', (req, res) => {
+app.get('/users{/:id}', (req, res) => {
   if (req.params.id) {
     res.send(`User: ${req.params.id}`);
   } else {
@@ -64,7 +64,17 @@ router.get('/profile', profileHandler);
 app.use('/api', router);
 ```
 
-নিচের diagram-এ request flow দেখানো হয়েছে:---
+Request flow-টা সংক্ষেপে এভাবে বোঝা যায়:
+
+```
+Request
+  → Application-level middleware (app.use করা সব middleware, সব route-এর জন্য)
+  → Router-level middleware (শুধু matched router-এর জন্য, যেমন router.use)
+  → Route handler
+  → Response
+```
+
+---
 
 ## 5.`next()` call না করলে কী হয়?
 
@@ -84,24 +94,35 @@ app.get('/', (req, res) => {
 
 ---
 
-## 6.`express-async-errors` দিয়ে async error কীভাবে catch করবে?
+## 6.Async route handler-এ error কীভাবে catch হয়?
 
-Express নিজে `async` function-এর ভেতরের `throw` বা rejected Promise ধরতে পারে না। তাই normally প্রতিটা route-এ `try/catch` লিখতে হয়।
-
-`express-async-errors` package টা Express-এর route handler-গুলোকে monkey-patch করে দেয়, ফলে async error automatically Express-এর error middleware-এ চলে যায়।
+Async route handler বা middleware কোনো Promise reject করলে বা `throw` করলে, Express নিজে থেকেই সেটাকে ধরে error-handling middleware-এ পাঠিয়ে দেয় — এর জন্য আলাদা কোনো package বা manual `try/catch` লাগে না।
 
 ```js
-require('express-async-errors'); // শুধু এটা import করলেই হয়
-
 app.get('/user', async (req, res) => {
-  const user = await db.findUser(req.query.id); // error হলে auto catch হবে
+  const user = await db.findUser(req.query.id); // reject হলে Express নিজেই next(err) call করে
   res.json(user);
-  // try/catch লাগছে না!
 });
 
 // এই error handler সব async error পাবে
 app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message });
+});
+```
+
+`try/catch` তখনই দরকার যখন error-টা নিজে handle করে ভিন্ন কিছু করতে চাও (যেমন custom message দেওয়া, retry করা, বা নির্দিষ্ট error type অনুযায়ী আলাদা response দেওয়া):
+
+```js
+app.get('/user', async (req, res, next) => {
+  try {
+    const user = await db.findUser(req.query.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json(user);
+  } catch (err) {
+    next(err); // চাইলে এখানেও Express নিজেই ধরে নিত
+  }
 });
 ```
 

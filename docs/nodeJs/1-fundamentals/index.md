@@ -233,7 +233,7 @@ app.get('/calculate', async (req, res) => {
 
 
 ## 4. What is the difference between Node.js and traditional multi-threaded servers?
-###
+
 Traditional web servers যেমন **Apache (PHP)** বা **Java Tomcat** প্রতিটি incoming request-এর জন্য একটি নতুন **thread** তৈরি করে। অন্যদিকে Node.js **একটিমাত্র thread** ব্যবহার করে সব request handle করে।
 
 #### Architecture তুলনা:
@@ -304,7 +304,12 @@ app.get('/users', async (req, res) => {
 app.listen(3000);
 ```
 > Node.js concurrency মানে **parallel execution** নয় — মানে **smart waiting**। কেউ I/O-এর জন্য অপেক্ষা করার সময় অন্যকে serve করো।
+
 ### What kind of workloads is Node.js not well-suited for, and why?
+Node.js সবচেয়ে দুর্বল **CPU-bound / CPU-intensive** কাজে — যেমন ভারী গাণিতিক হিসাব, image/video processing, machine learning training, বড় ডেটাসেট sorting বা encryption। কারণ Node.js মূলত **একটিমাত্র thread**-এ JavaScript execute করে; কোনো heavy computation চললে সেই thread ব্যস্ত থাকে, ফলে Event Loop অন্য কোনো request-ই serve করতে পারে না — পুরো server temporarily freeze হয়ে যায়।
+
+এই ধরনের কাজের জন্য Java, Go, বা Python-এর মতো ভাষা (যেগুলো native multi-threading বা multi-processing সহজে support করে) বেশি উপযুক্ত। Node.js-এ এই সীমাবদ্ধতা কাটাতে হলে Worker Threads, Child Process, বা আলাদা microservice-এ কাজ পাঠাতে হয় (উপরে আলোচনা করা হয়েছে)।
+
 ### What is the C10K problem and how does Node.js address it?
 **C10K Problem** (১৯৯৯ সালে Dan Kegel তুলেছিলেন): একটি server কীভাবে **একসাথে ১০,০০০ client connection** handle করবে?
 
@@ -330,8 +335,8 @@ app.listen(3000);
     ├─ libuv epoll/kqueue use করে
     └─ Callback ready হলে process করো ✅
 
-RAM: ~50KB per connection (vs 1MB per thread)
-→ 10,000 connections = ~500MB RAM (manageable!) ✅
+RAM: per-connection overhead thread-এর তুলনায় অনেক কম (কয়েক KB পর্যায়ে)
+→ 10,000 connections manageable মাত্র কয়েকশো MB RAM-এই ✅
 ```
 ```javascript
 // Node.js automatically handles C10K
@@ -571,14 +576,14 @@ V8-এর **Garbage Collector (GC)** memory-কে দুটো প্রধা�
 │  │  │ From  │   To   │ │  │  বাস করে এখানে      │  │
 │  │  │ Space │ Space  │ │  │                      │  │
 │  │  └───────┴────────┘ │  │                      │  │
-│  │  (1-8 MB)           │  │  (Hundreds of MB)    │  │
+│  │  (তুলনামূলক ছোট)     │  │  (তুলনামূলক অনেক বড়) │  │
 │  └─────────────────────┘  └─────────────────────┘  │
 └────────────────────────────────────────────────────┘
 ```
 #### Young Generation (New Space):
 | বিষয় | বিবরণ |
 |------|-------|
-| **Size** | ছোট (1–8 MB) |
+| **Size** | তুলনামূলক ছোট (V8 version ও engine flags অনুযায়ী কয়েক MB পর্যায়ে) |
 | **Object** | নতুন তৈরি, short-lived object |
 | **GC Algorithm** | **Scavenger (Minor GC)** |
 | **GC Speed** | ⚡ অত্যন্ত দ্রুত (milliseconds) |
@@ -590,12 +595,12 @@ function processRequest(req) {
     return transform(temp);
 }
 ```
-Young Generation-এ **Scavenger** algorithm কাজ করে।সে From Space থেকে জীবিত object গুলো To Space-এ copy করে, মৃতগুলো ফেলে দেয়। তারপর From ↔ To swap হয়।
+Young Generation-এ **Scavenger** algorithm কাজ করে। সে From Space থেকে জীবিত object গুলো To Space-এ copy করে, মৃতগুলো ফেলে দেয়। তারপর From ↔ To swap হয়।
 
 #### Old Generation (Old Space):
 | বিষয় | বিবরণ |
 |------|-------|
-| **Size** | বড় (hundreds of MB বা বেশি) |
+| **Size** | বড় (hundreds of MB বা বেশি, application-এর প্রয়োজন অনুযায়ী বাড়ে) |
 | **Object** | Young Generation থেকে **survive** করা object |
 | **GC Algorithm** | **Mark-Sweep-Compact (Major GC)** |
 | **GC Speed** | 🐢 তুলনামূলক ধীর |
@@ -714,7 +719,7 @@ console.log(process.uptime());  // Process চলার সময় (seconds)
 
 
 ## 9. What is a REPL in Node.js?
-###
+
 **REPL** মানে **Read-Eval-Print Loop**। এটি Node.js-এর একটি built-in **interactive programming environment** যেখানে তুমি সরাসরি JavaScript code লিখলে সাথে সাথে execute হয় এবং result দেখায়।
 ```
 R → Read    (তোমার input পড়ে)
@@ -790,7 +795,7 @@ false
 > data.public_repos
 100
 ```
-> Node.js REPL top-level `await` support করে (v14.8.0+)
+> Node.js REPL-এ top-level `await` by default enable আছে **v13.6.0 এবং v12.17.0** থেকে (`--experimental-repl-await` flag দিয়ে এটা আরও আগে, v10 থেকেই ব্যবহার করা যেত)।
 
 #### ৫. Live Debugging — Object Inspect:
 ```javascript

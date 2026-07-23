@@ -227,6 +227,7 @@ function paintWall() {
 paintWall();
 console.log(color); // "red" — global এখনো অপরিবর্তিত
 ```
+
 ## 2. What is a closure and how does it work?
 
 **Closure** হলো এমন একটি **function** যেটি তার **outer (lexical) scope**-এর **variables**গুলো মনে রাখে — এমনকি সেই outer function-এর **execution** শেষ হয়ে যাওয়ার পরেও।
@@ -399,7 +400,7 @@ fn = null; // ← reference সরিয়ে দিলাম
 
 > ⚠️ **Memory Leak সতর্কতা:** Closure অপ্রয়োজনীয়ভাবে বড় data ধরে রাখলে **memory leak** হতে পারে। Reference সরিয়ে দিলে **Garbage Collector** সেই memory মুক্ত করে।
 
-## ৩. What are real-world use cases of closures?
+## 3. What are real-world use cases of closures?
 
 ### How are closures used in data privacy (encapsulation)?
 
@@ -554,6 +555,7 @@ buttons.forEach(({ id, label }) => {
 // Submit আবার click: Button "Submit" (id: btn-1) — clicked 2 times
 // Cancel click করলে: Button "Cancel" (id: btn-2) — clicked 1 times ← আলাদা counter!
 ```
+
 #### Debounce Function — Closure-এর Practical Power:
 
 ```javascript
@@ -586,10 +588,9 @@ debouncedSearch("node");     // timer শুরু → 500ms পরে চলে
 // API call: searching for "node" ← শুধু একটিই!
 ```
 
-## ৪. Closures in Loops — Common Pitfalls
+## 4. Closures in Loops — Common Pitfalls
 
-
-###  `var` কেন Loop-এ Async Code-এ ভুল করে?
+### `var` কেন Loop-এ Async Code-এ ভুল করে?
 
 সমস্যাটা বোঝার জন্য আগে `var`-এর **function scope** সম্পর্কে জানতে হবে।
 
@@ -736,6 +737,7 @@ Memory-তে IIFE দিয়ে:
 └──────────────┘  └──────────────┘  └──────────────┘
   (নিজস্ব scope)   (নিজস্ব scope)   (নিজস্ব scope)
 ```
+
 ## 5. How can closures cause memory leaks?
 
 **Memory leak** হলো এমন পরিস্থিতি যেখানে **Garbage Collector** memory মুক্ত করতে পারে না — কারণ সেই memory-র দিকে এখনও একটি **reference** আছে, যদিও সেটির আর কোনো প্রয়োজন নেই।

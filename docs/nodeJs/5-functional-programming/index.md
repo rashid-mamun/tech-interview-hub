@@ -236,15 +236,18 @@ const data = await withRetry(() => fetch('/api/data').then(r => r.json()));
 **`map`** — প্রতিটি element transform করে নতুন array:
 
 ```js
-const prices = [100, 250, 80, 320];
-
 // ❌ Imperative style:
+const prices = [100, 250, 80, 320];
 const discounted = [];
 for (let i = 0; i < prices.length; i++) {
   discounted.push(prices[i] * 0.9);
 }
+// discounted → [90, 225, 72, 288]
+```
 
+```js
 // ✅ map:
+const prices = [100, 250, 80, 320];
 const discounted = prices.map(price => price * 0.9);
 // [90, 225, 72, 288]
 
@@ -460,10 +463,10 @@ const user = { name: 'Ali', age: 25 };
 user.age = 26; // direct mutation — original বদলে গেল
 
 // ✅ Immutable — নতুন copy তৈরি করা হয়:
-const user = { name: 'Ali', age: 25 };
-const updatedUser = { ...user, age: 26 }; // নতুন object
+const user2 = { name: 'Ali', age: 25 };
+const updatedUser = { ...user2, age: 26 }; // নতুন object
 
-console.log(user.age);        // 25 — অপরিবর্তিত ✅
+console.log(user2.age);       // 25 — অপরিবর্তিত ✅
 console.log(updatedUser.age); // 26 — নতুন object
 ```
 
@@ -506,11 +509,10 @@ const discountedCart = addDiscount(myCart);
 console.log(myCart.total); // 90 — original বদলে গেছে!
 
 // ✅ Immutable version:
-function addDiscount(cart) {
+function addDiscountImmutable(cart) {
   return { ...cart, total: cart.total * 0.9 }; // নতুন object
 }
-console.log(myCart.total);         // 100 — অপরিবর্তিত ✅
-console.log(discountedCart.total); // 90
+console.log(myCart.total); // 100 — অপরিবর্তিত ✅ (নতুন কল থেকে)
 ```
 
 **৩. Concurrent safety — Node.js async code-এ:**
@@ -524,7 +526,7 @@ async function handleRequest() {
 }
 
 // ✅ Immutable — কোনো shared state নেই:
-async function handleRequest(data) {
+async function handleRequestImmutable(data) {
   return { ...data, requests: data.requests + 1 }; // নতুন object
 }
 ```
@@ -568,7 +570,7 @@ frozenConfig.db.name = 'hacked'; // ❌ TypeError in strict mode
 ```js
 // Object update — spread:
 const original = { a: 1, b: 2, c: 3 };
-const updated  = { ...original, b: 99 }; // b override হলো
+const updatedObj = { ...original, b: 99 }; // b override হলো
 // original অপরিবর্তিত ✅
 
 // Array update — spread:
@@ -579,15 +581,15 @@ const withNew      = [...arr, 6];                          // [1,2,3,4,5,6]
 // Remove:
 const withoutThird = arr.filter((_, i) => i !== 2);        // [1,2,4,5]
 // Update:
-const updated      = arr.map((v, i) => i === 1 ? 99 : v); // [1,99,3,4,5]
+const updatedArr   = arr.map((v, i) => i === 1 ? 99 : v); // [1,99,3,4,5]
 ```
 
 **`const` — reference immutable, value নয়:**
 
 ```js
-const arr = [1, 2, 3];
-arr.push(4);        // ⚠️ কাজ করে, কিন্তু immutability নষ্ট করে — avoid করুন
-arr = [1, 2, 3, 4]; // ❌ TypeError — reference reassign করা যায় না
+const arr2 = [1, 2, 3];
+arr2.push(4);        // ⚠️ কাজ করে, কিন্তু immutability নষ্ট করে — avoid করুন
+// arr2 = [1, 2, 3, 4]; // ❌ TypeError — reference reassign করা যায় না
 
 // ✅ Array-এর content freeze করতে:
 const frozenArr = Object.freeze([1, 2, 3]);
@@ -597,14 +599,14 @@ frozenArr.push(4); // TypeError ✅
 **`structuredClone` দিয়ে deep copy:**
 
 ```js
-const original = { user: { name: 'Ali', scores: [90, 85] } };
-const copy = structuredClone(original); // deep clone
+const originalData = { user: { name: 'Ali', scores: [90, 85] } };
+const copy = structuredClone(originalData); // deep clone
 
 copy.user.name = 'Rahim';
 copy.user.scores.push(95);
 
-console.log(original.user.name);   // 'Ali'    — অপরিবর্তিত ✅
-console.log(original.user.scores); // [90, 85] — অপরিবর্তিত ✅
+console.log(originalData.user.name);   // 'Ali'    — অপরিবর্তিত ✅
+console.log(originalData.user.scores); // [90, 85] — অপরিবর্তিত ✅
 ```
 
 ---
@@ -618,7 +620,7 @@ console.log(original.user.scores); // [90, 85] — অপরিবর্তি�
 const bigArray = new Array(100000).fill(0);
 
 // প্রতিটি এই operation নতুন 100000 element-এর array তৈরি করে:
-const updated = [...bigArray, 1]; // O(n) time ও memory
+const updatedBig = [...bigArray, 1]; // O(n) time ও memory
 ```
 
 **সমাধান ১ — Structural sharing (Persistent Data Structures):**
@@ -643,13 +645,13 @@ console.log(newState.users[0].score); // 95 ✅
 
 ```js
 // ❌ প্রতি step-এ নতুন object:
-let state = { a: 1, b: 2, c: 3 };
-state = { ...state, a: 10 }; // copy
-state = { ...state, b: 20 }; // copy
-state = { ...state, c: 30 }; // copy
+let batchState = { a: 1, b: 2, c: 3 };
+batchState = { ...batchState, a: 10 }; // copy
+batchState = { ...batchState, b: 20 }; // copy
+batchState = { ...batchState, c: 30 }; // copy
 
 // ✅ একসাথে update করুন:
-state = { ...state, a: 10, b: 20, c: 30 }; // একটি copy
+batchState = { ...batchState, a: 10, b: 20, c: 30 }; // একটি copy
 ```
 
 **Performance summary:**

@@ -29,7 +29,7 @@ JavaScript-এ `this` নির্ধারণের **৪টি binding rule** 
                           lexical scope থেকে নেয়
 ```
 ---
-### What is the default binding rule?
+### Rule 1 — What is the default binding rule?
 কোনো object ছাড়া, plain function call হলে `this` হয় **global object** (`window` browser-এ, `global` Node.js-এ)।
 
 ```js
@@ -250,13 +250,13 @@ console.log(bob);         // undefined — কিছু return হয়নি
 
 **Global context-এ `this`:**
 
-Browser-এ top-level code-এ `this` হয় `window` object। Node.js-এ top-level `this` হয় `module.exports` (empty object `{}`), কিন্তু global object পাওয়া যায় `globalThis` দিয়ে।
+Browser-এ top-level code-এ `this` হয় `window` object। Node.js-এ (CommonJS module system-এ) top-level `this` হয় `module.exports` (empty object `{}`), কিন্তু global object পাওয়া যায় `globalThis` দিয়ে।
 
 ```js
 // Browser
 console.log(this === window); // true
 
-// Node.js (top-level)
+// Node.js (top-level, CommonJS)
 console.log(this);           // {} — module.exports
 console.log(globalThis);     // global object
 ```
@@ -416,19 +416,35 @@ bike.describe(); // Honda চলে 80 km/h বেগে   → this = bike
 
 **Class-এ `this` হারানোর সমস্যা (callback):**
 
+এই সমস্যাটা দুটো আলাদা case-এ ভাগ করে দেখা যাক — কারণ regular function callback আসলে error throw করে, তাই দুটো একসাথে run করানো ঠিক হবে না।
+
 ```js
 class Timer {
   constructor() {
     this.seconds = 0;
   }
 
-  start() {
-    // ❌ this হারিয়ে যাবে — setTimeout callback-এ this = undefined (strict mode)
+  // ❌ ভুল উপায় — regular function callback-এ this হারায়
+  startBroken() {
     setTimeout(function () {
-      this.seconds++;          // TypeError!
+      this.seconds++; // TypeError: Cannot read properties of undefined
+      // কারণ class body সবসময় strict mode-এ চলে, তাই এখানে this = undefined
     }, 1000);
+  }
+}
 
-    // ✅ সমাধান: arrow function ব্যবহার করুন
+const t1 = new Timer();
+t1.startBroken(); // 💥 Uncaught TypeError (callback চলার সময়)
+```
+
+```js
+class Timer {
+  constructor() {
+    this.seconds = 0;
+  }
+
+  // ✅ সঠিক উপায় — arrow function lexical this নেয়
+  start() {
     setTimeout(() => {
       this.seconds++;          // this → Timer instance (lexical binding)
       console.log(this.seconds);
@@ -436,9 +452,11 @@ class Timer {
   }
 }
 
-const t = new Timer();
-t.start(); // 1
+const t2 = new Timer();
+t2.start(); // 1
 ```
+
+> ⚠️ **সতর্কতা:** যদি একই method-এর ভেতর regular function callback আর arrow function callback একসাথে schedule করা হয় (দুটোই `setTimeout(..., 1000)`), তাহলে প্রথমে schedule হওয়া callback-টাই আগে চলে (FIFO order same delay-তে)। Regular function callback যদি আগে থাকে এবং সেটা error throw করে, Node.js-এ সেই uncaught exception default ভাবে পুরো process বন্ধ করে দেয় — ফলে পরের (সঠিক) arrow function callback-টা চলার সুযোগই পায় না। তাই broken আর working example সবসময় আলাদা করে দেখানো/test করা উচিত।
 
 **Constructor function vs Class — তুলনা:**
 
@@ -446,7 +464,7 @@ t.start(); // 1
 |---|---|---|
 | Syntax | পুরোনো, কম readable | আধুনিক, পরিষ্কার |
 | Strict mode | না (default) | সবসময় strict |
-| Hoisting | ✅ হয় | ❌ হয় না |
+| Hoisting | ✅ হয় | ⚠️ Class name TDZ-তে hoist হয়, কিন্তু declaration-এর আগে ব্যবহার করা যায় না |
 | `this` behavior | একই | একই |
 | Inheritance | `prototype` দিয়ে | `extends` দিয়ে |
 

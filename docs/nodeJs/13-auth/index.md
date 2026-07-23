@@ -88,6 +88,8 @@ OAuth 2.0 হলো একটি authorization framework যা ইউজার�
 2. Login সফল হলে Google একটি `code` সহ আমাদের redirect URI-তে পাঠায়।
 3. Backend সেই `code`-টি Google-এর কাছে পাঠিয়ে `access_token` বা `id_token` নিয়ে আসে।
 
+> **Security Note:** Production-এ redirect করার সময় একটি random `state` parameter পাঠানো এবং callback-এ সেটা যাচাই করা উচিত — এটি CSRF attack প্রতিরোধ করে। নিচের উদাহরণে simplicity-র জন্য সেটা বাদ দেওয়া হয়েছে।
+
 **Implementation (without Passport):**
 ```javascript
 app.get('/auth/callback', async (req, res) => {
@@ -222,7 +224,8 @@ app.use(session({
 app.post('/login', async (req, res) => {
     const user = await verifyCredentials(req.body);
     // Login-এর পর সম্পূর্ণ নতুন Session ID তৈরি করা
-    req.session.regenerate((err) => { 
+    req.session.regenerate((err) => {
+        if (err) return res.status(500).json({ error: 'Session error' });
         req.session.userId = user.id;
         res.json({ message: 'Logged in securely' });
     });
@@ -273,15 +276,17 @@ app.delete('/posts/:id',
 
 MFA হলো সিকিউরিটির একটি এক্সট্রা লেয়ার যেখানে পাসওয়ার্ড ছাড়াও ইউজারকে দ্বিতীয় কোনো প্রমাণ (যেমন SMS OTP বা Google Authenticator code) দিতে হয়। Node.js-এ Time-based One-Time Password (TOTP) ব্যবহার করে MFA তৈরি করা যায় `otplib` লাইব্রেরি দিয়ে।
 
+> **নোট:** `otplib`-এ `totp` একটি low-level primitive (raw RFC 6238 implementation), যেটাতে সরাসরি `generateSecret` বা Base32 encoding থাকে না। Google Authenticator-এর সাথে compatible secret generation, QR URI তৈরি এবং verification-এর জন্য `authenticator` namespace ব্যবহার করতে হয় — এটাই library-র official, recommended API।
+
 **Implementation Flow:**
 ```javascript
-const { totp } = require('otplib');
+const { authenticator } = require('otplib');
 const QRCode = require('qrcode');
 
 // ১. MFA Setup (User-এর জন্য App-এ)
 app.post('/auth/mfa/setup', authenticate, async (req, res) => {
-    const secret = totp.generateSecret(); 
-    const otpauthUrl = totp.keyuri(req.user.email, 'MySecureApp', secret);
+    const secret = authenticator.generateSecret();
+    const otpauthUrl = authenticator.keyuri(req.user.email, 'MySecureApp', secret);
 
     await User.update(req.user.id, { mfaSecret: secret });
 
@@ -297,7 +302,7 @@ app.post('/auth/login', async (req, res) => {
     if (user.mfaEnabled) {
         if (!req.body.totpCode) return res.status(401).json({ error: 'MFA Code required' });
         
-        const isValid = totp.verify({ token: req.body.totpCode, secret: user.mfaSecret });
+        const isValid = authenticator.verify({ token: req.body.totpCode, secret: user.mfaSecret });
         if (!isValid) return res.status(401).json({ error: 'Invalid MFA code' });
     }
     
@@ -388,10 +393,15 @@ const apiKeyMiddleware = async (req, res, next) => {
 };
 
 // ৩. IP Whitelisting (Internal Network-এর জন্য)
+// নোট: CIDR range (যেমন '10.0.0.0/8') এর সাথে exact-match Array.includes() কাজ করে না,
+// কারণ এটি শুধু string equality চেক করে, subnet calculation করে না।
+// তাই একটি CIDR-aware লাইব্রেরি (যেমন `ip-range-check` বা `ipaddr.js`) ব্যবহার করতে হয়।
+const { ipRangeCheck } = require('ip-range-check'); // npm i ip-range-check
 const ipWhitelist = ['10.0.0.0/8', '192.168.0.0/16'];
+
 const ipWhitelistMiddleware = (req, res, next) => {
     const clientIp = req.ip || req.connection.remoteAddress;
-    if (!ipWhitelist.includes(clientIp)) {
+    if (!ipRangeCheck(clientIp, ipWhitelist)) {
         return res.status(403).json({ error: 'Access denied from this network' });
     }
     next();

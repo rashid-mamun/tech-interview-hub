@@ -62,7 +62,9 @@ SQL Injection প্রতিরোধ করার সবচেয়ে কা
 
 Node.js-এ prevention এর উপায়:
 - SQL query তে সরাসরি user input concatenate (যেমন `SELECT * FROM users WHERE email = '` + req.body.email + `'`) করা থেকে বিরত থাকা।
-- `pg` বা `mysql2` লাইব্রেরিতে parameterized queries ব্যবহার করা (যেমন `SELECT * FROM users WHERE email = $1`)।
+- Parameterized queries ব্যবহার করা — তবে placeholder-এর syntax library ভেদে আলাদা:
+  - **`pg` (PostgreSQL):** numbered placeholder ব্যবহার করে — `SELECT * FROM users WHERE email = $1`, `$2` ইত্যাদি।
+  - **`mysql2`:** `?` placeholder ব্যবহার করে — `SELECT * FROM users WHERE email = ?`
 - Stored procedures ব্যবহার করা।
 - সবচেয়ে নিরাপদ উপায় হলো ORM বা Query Builder ব্যবহার করা।
 
@@ -90,8 +92,9 @@ Node.js-এ prevention এর উপায়:
 
 ### What is the SameSite cookie attribute and how does it mitigate CSRF?
 `SameSite` হলো একটি cookie attribute যা নির্ধারণ করে cross-site রিকোয়েস্টের সাথে cookie পাঠানো হবে কিনা।
-- `Strict`: কুকি শুধুমাত্র সেইম সাইটের রিকোয়েস্টেই পাঠানো হবে। অন্য কোনো সাইট থেকে আসা লিঙ্কে ক্লিক করলেও কুকি যাবেক্ত না।
+- `Strict`: কুকি শুধুমাত্র সেইম সাইটের রিকোয়েস্টেই পাঠানো হবে। অন্য কোনো সাইট থেকে আসা লিঙ্কে ক্লিক করলেও কুকি যাবে না।
 - `Lax`: ডিফল্ট হিসেবে কাজ করে। Top-level navigation (যেমন লিংকে ক্লিক করা) এ কুকি পাঠানো হবে, কিন্তু cross-site POST/PUT রিকোয়েস্টে পাঠানো হবে না।
+
 এটি third-party সাইটগুলোকে ইউজারের authenticated session ব্যবহার করে request পাঠানো থেকে বিরত রাখে, যা অনেকাংশেই CSRF প্রতিরোধ করে।
 
 ---
@@ -132,7 +135,7 @@ Node.js-এ `rate-limit-redis` স্টোর ব্যবহার করে `
 
 ### What is the difference between rate limiting and throttling?
 - **Rate Limiting:** এটি নির্দিষ্ট সময়ের মধ্যে সর্বোচ্চ কতগুলো রিকোয়েস্ট করা যাবে তার একটি হার্ড লিমিট (Hard Limit) সেট করে। লিমিট পার হওয়ার পর সার্ভার `429 Too Many Requests` status code ফেরত দেয়।
-- **Throttling:** এটি રিকোয়েস্ট পুরোপুরি ব্লক না করে, এর প্রসেসিং স্পিড কমিয়ে দেয় বা রিকোয়েস্টগুলোকে একটি queue তে রাখে। এটি সার্ভারকে ওভারলোড হওয়া থেকে বাঁচায় এবং ক্লায়েন্টকে ধীরগতিতে রেসপন্স দেয়।
+- **Throttling:** এটি রিকোয়েস্ট পুরোপুরি ব্লক না করে, এর প্রসেসিং স্পিড কমিয়ে দেয় বা রিকোয়েস্টগুলোকে একটি queue তে রাখে। এটি সার্ভারকে ওভারলোড হওয়া থেকে বাঁচায় এবং ক্লায়েন্টকে ধীরগতিতে রেসপন্স দেয়।
 
 ---
 
@@ -146,7 +149,7 @@ DDoS (Distributed Denial of Service) attack সরাসরি পুরোট�
 
 ### What role does a reverse proxy (Nginx, Cloudflare) play in DDoS protection?
 Reverse proxy (যেমন Nginx, HAProxy) এবং CDN (যেমন Cloudflare, AWS Shield) DDoS প্রতিরোধের মূল লেয়ার হিসেবে কাজ করে:
-- **Traffic Filtering:** Cloudflare এর মতন সার্ভিসগুলো নেটওয়ার্ক লেয়ারেই ફায়ারওয়াল রুলস (Firewall rules) চেক করে ক্ষতিকর ট্রাফিক ব্লক করতে পারে।
+- **Traffic Filtering:** Cloudflare এর মতন সার্ভিসগুলো নেটওয়ার্ক লেয়ারেই ফায়ারওয়াল রুলস (Firewall rules) চেক করে ক্ষতিকর ট্রাফিক ব্লক করতে পারে।
 - **Load Distribution:** এরা ট্রাফিককে বিভিন্ন গ্লোবাল সার্ভারে ছড়িয়ে দেয়, ফলে একটি সার্ভার ওভারলোড হয় না।
 - **Caching:** এরা স্ট্যাটিক ফাইলগুলো ক্যাশ করে রাখে, যার ফলে মূল Node.js সার্ভারের উপর চাপ অনেক কমে যায়।
 
