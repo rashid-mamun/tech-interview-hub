@@ -10,7 +10,7 @@ title: 'Encapsulation'
 
 ## 🔐 6. What are access modifiers, and how do they enforce encapsulation?
 - What is the difference between public, private, protected, and (in some languages) package-private/internal access?
-- What is the difference between "protected" access in different languages (e.g., C++ vs Java vs Python's convention-based privacy)?
+- What is the difference between "protected" access in different languages (e.g., C++ vs Java convention-based privacy)?
 
 ## 🪞 7. What are getters and setters, and why are they used instead of direct field access?
 - What are the trade-offs of exposing getters/setters for every private field ("anemic" classes)?
