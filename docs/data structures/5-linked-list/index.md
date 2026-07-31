@@ -8,6 +8,43 @@ title: 'Linked List'
 
 **Linked List** হলো একটা linear data structure যেখানে element গুলো (যাদের **node** বলা হয়) memory তে **contiguous** না থেকে, বরং scattered ভাবে store হয়, এবং প্রতিটি node তার পরবর্তী node এর memory address (**pointer/reference**) ধরে রাখে। প্রতিটি node এ থাকে দুইটা অংশ: **data** এবং **pointer(s)** (next node এর দিকে নির্দেশ করে)।
 
+**Node structure diagram:**
+
+```text
+একটা singly linked list node:
+
++---------+----------+
+|  data   |   next   |
++---------+----------+
+|   10    | address  |
++---------+----------+
+
+Linked list:
+
+head
+ |
+ v
++------+      +------+      +------+      +------+
+|  10  | ---> |  20  | ---> |  30  | ---> | NULL |
++------+      +------+      +------+      +------+
+
+এখানে 10, 20, 30 memory তে পাশাপাশি থাকতেই হবে এমন না।
+প্রতিটি node next pointer দিয়ে পরের node এর address ধরে রাখে।
+```
+
+**Array vs Linked List memory view:**
+
+```text
+Array:
+Index:    0    1    2    3
+Memory: [10] [20] [30] [40]   <- contiguous
+
+Linked List:
+[10 | next] ---> [20 | next] ---> [30 | next] ---> [40 | NULL]
+ 0xA1            0xF7            0xB3            0xC9
+ scattered memory address হতে পারে।
+```
+
 **Array vs Linked List — মূল পার্থক্য:**
 
 | বৈশিষ্ট্য | Array | Linked List |
@@ -23,6 +60,12 @@ title: 'Linked List'
 ### What is the difference between a singly linked list, doubly linked list, and circular linked list?
 
 **Singly Linked List**: প্রতিটি node শুধু **পরবর্তী node** এর দিকে নির্দেশ করে (এক দিকে traverse করা যায়)।
+
+```text
+Singly:
+head -> 10 -> 20 -> 30 -> NULL
+```
+
 ```cpp
 struct Node {
     int data;
@@ -31,6 +74,14 @@ struct Node {
 ```
 
 **Doubly Linked List**: প্রতিটি node **পরবর্তী এবং আগের** — দুই দিকের node কে reference করে। এতে **উভয় দিক থেকে** traverse করা যায়, এবং কোনো node delete করা সহজ হয় (আগের node এর reference সরাসরি পাওয়া যায়, খুঁজতে হয় না)।
+
+```text
+Doubly:
+NULL <- 10 <-> 20 <-> 30 -> NULL
+
+প্রতিটি node এর prev এবং next দুইটা pointer থাকে।
+```
+
 ```cpp
 struct Node {
     int data;
@@ -40,6 +91,16 @@ struct Node {
 ```
 
 **Circular Linked List**: শেষ node টা `NULL` না হয়ে আবার **প্রথম node** কে point করে (একটা loop তৈরি হয়)। এটা singly বা doubly — দুই ধরনেরই হতে পারে। Circular queue বা round-robin scheduling এর মতো সমস্যায় এটা কাজে লাগে।
+
+```text
+Circular:
+
+head -> 10 -> 20 -> 30
+        ^           |
+        |___________|
+
+শেষ node 30 আবার head 10 কে point করছে।
+```
 
 ---
 
@@ -64,6 +125,46 @@ struct Node {
 ---
 
 ## 🔁 22. How do you reverse a linked list?
+
+Reverse করার মূল কাজ হলো প্রতিটি node এর `next` pointer উল্টো দিকে ঘুরিয়ে দেওয়া।
+
+```text
+Before:
+head
+ |
+ v
+1 -> 2 -> 3 -> 4 -> NULL
+
+After:
+head
+ |
+ v
+4 -> 3 -> 2 -> 1 -> NULL
+```
+
+**Pointer movement walkthrough:**
+
+```text
+Initial:
+prev = NULL
+curr = 1
+
+Step 1:
+nextTemp = 2
+1 -> NULL
+prev = 1
+curr = 2
+
+Partial:
+NULL <- 1    2 -> 3 -> 4 -> NULL
+
+Step 2:
+NULL <- 1 <- 2    3 -> 4 -> NULL
+prev = 2
+curr = 3
+
+শেষে prev নতুন head হবে।
+```
 
 ```cpp
 #include <bits/stdc++.h>
@@ -124,6 +225,26 @@ Reversed list: 4 -> 3 -> 2 -> 1
 
 ### How would you do it iteratively vs recursively?
 
+**Recursive reverse diagram:**
+
+```text
+reverse(1 -> 2 -> 3 -> NULL)
+
+Recursive call reaches last node:
+3 -> NULL
+
+Return 3 as newHead.
+Then unwind:
+2->next->next = 2   means 3 -> 2
+2->next = NULL
+
+1->next->next = 1   means 2 -> 1
+1->next = NULL
+
+Final:
+3 -> 2 -> 1 -> NULL
+```
+
 ```cpp
 Node* reverseRecursive(Node* head) {
     // Base case: empty list বা শেষ node
@@ -152,6 +273,30 @@ Reversed list: 4 -> 3 -> 2 -> 1
 ### How would you reverse a linked list in groups of k?
 
 **সমস্যা:** প্রতি `k` টা node কে group আকারে reverse করতে হবে (যদি শেষে `k` এর চেয়ে কম node থাকে, সেগুলো unchanged থাকবে)।
+
+**Example diagram (`k = 2`):**
+
+```text
+Before:
+1 -> 2 -> 3 -> 4 -> 5 -> NULL
+
+Group 1: [1, 2] reverse -> 2 -> 1
+Group 2: [3, 4] reverse -> 4 -> 3
+Group 3: [5]    size < k, unchanged
+
+After:
+2 -> 1 -> 4 -> 3 -> 5 -> NULL
+```
+
+**Example diagram (`k = 3`):**
+
+```text
+Before:
+1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> NULL
+
+After:
+3 -> 2 -> 1 -> 6 -> 5 -> 4 -> 7 -> NULL
+```
 
 ```cpp
 #include <bits/stdc++.h>
@@ -232,6 +377,29 @@ Reversed in groups of 2: 2 -> 1 -> 4 -> 3 -> 5
 
 এই algorithm এ দুইটা pointer ব্যবহার করা হয় — একটা **slow (tortoise)** যেটা প্রতিবার এক ঘর এগোয়, এবং একটা **fast (hare)** যেটা প্রতিবার দুই ঘর এগোয়। যদি linked list এ কোনো **cycle (loop)** থাকে, তাহলে fast pointer একসময় slow pointer কে "ধরে ফেলবে" (একই node এ মিলবে) — ঠিক যেমন একটা circular track এ দ্রুত দৌড়ানো কেউ ধীরে দৌড়ানো কাউকে একসময় lap করে ধরে ফেলে। যদি cycle না থাকে, fast pointer `NULL` এ পৌঁছে যাবে।
 
+**Cycle diagram:**
+
+```text
+1 -> 2 -> 3 -> 4 -> 5
+     ^              |
+     |______________|
+
+Cycle starts at node 2.
+```
+
+**Slow/Fast movement example:**
+
+```text
+List: 1 -> 2 -> 3 -> 4 -> 5 -> 2 ...
+
+Step    slow    fast
+0       1       1
+1       2       3
+2       3       5
+3       4       3
+4       5       5   <- meet, cycle exists
+```
+
 ```cpp
 #include <bits/stdc++.h>
 using namespace std;
@@ -279,6 +447,28 @@ Has cycle: Yes
 
 **Mathematical insight:** যখন `slow` এবং `fast` pointer মিলে যায়, সেই meeting point থেকে **একটা নতুন pointer** (`slow2`) কে `head` থেকে শুরু করানো হয়, এবং `slow` কে একই জায়গায় (meeting point এ) রেখে দুইজনকেই **এক ঘর করে** move করানো হয়। যেখানে তারা আবার মিলবে, সেটাই cycle এর **entry point (starting node)**।
 
+```text
+Cycle:
+
+head
+ |
+ v
+1 -> 2 -> 3 -> 4 -> 5
+     ^              |
+     |______________|
+
+ধরি meeting point = 5
+
+Pointer A starts from head: 1
+Pointer B starts from meeting point: 5
+
+Move both one step:
+A: 1 -> 2
+B: 5 -> 2
+
+Meet at 2, so cycle start = 2
+```
+
 ```cpp
 Node* detectCycleStart(Node* head) {
     Node* slow = head;
@@ -316,6 +506,32 @@ Node* detectCycleStart(Node* head) {
 ## 🎯 24. How do you find the middle of a linked list in a single pass?
 
 Slow/fast pointer technique ব্যবহার করে: `slow` এক ঘর করে এবং `fast` দুই ঘর করে এগোয়। যখন `fast` শেষে পৌঁছায়, তখন `slow` ঠিক **middle** এ থাকে (কারণ `fast` দ্বিগুণ গতিতে move করে, তাই `slow` অর্ধেক distance পার হবে)।
+
+**Movement diagram:**
+
+```text
+List: 1 -> 2 -> 3 -> 4 -> 5 -> NULL
+
+Step    slow    fast
+0       1       1
+1       2       3
+2       3       5
+
+fast end এ, slow = 3, তাই middle = 3
+```
+
+Even length হলে common implementation second middle return করে:
+
+```text
+List: 1 -> 2 -> 3 -> 4 -> NULL
+
+Step    slow    fast
+0       1       1
+1       2       3
+2       3       NULL
+
+middle = 3 (second middle)
+```
 
 ```cpp
 #include <bits/stdc++.h>
@@ -366,6 +582,25 @@ Middle node value: 3
 2. Middle থেকে দ্বিতীয় অর্ধেক (second half) কে **reverse** করা
 3. প্রথম অর্ধেক এবং reversed দ্বিতীয় অর্ধেক কে **element-by-element compare** করা
 4. (Optional) list কে আগের অবস্থায় ফিরিয়ে আনতে দ্বিতীয় অর্ধেক আবার reverse করা
+
+**Palindrome walkthrough:**
+
+```text
+List:
+1 -> 2 -> 3 -> 2 -> 1
+
+Step 1: middle = 3
+
+Step 2: reverse second half after middle
+First half:  1 -> 2 -> 3
+Second half: 1 -> 2
+
+Step 3: compare
+1 == 1
+2 == 2
+
+Palindrome = true
+```
 
 ```cpp
 #include <bits/stdc++.h>
@@ -443,6 +678,36 @@ Is palindrome: Yes
 
 ## 🔀 25. How would you merge two sorted linked lists?
 
+দুইটা sorted linked list merge করার সময় প্রতিবার দুই list এর current node এর ছোট value result list এ attach করা হয়।
+
+**Example diagram:**
+
+```text
+l1: 1 -> 3 -> 5 -> NULL
+l2: 2 -> 4 -> 6 -> NULL
+
+dummy -> 1
+dummy -> 1 -> 2
+dummy -> 1 -> 2 -> 3
+dummy -> 1 -> 2 -> 3 -> 4
+dummy -> 1 -> 2 -> 3 -> 4 -> 5
+dummy -> 1 -> 2 -> 3 -> 4 -> 5 -> 6
+
+Result:
+1 -> 2 -> 3 -> 4 -> 5 -> 6 -> NULL
+```
+
+**Pointer idea:**
+
+```text
+dummy -> result head সহজে return করার জন্য
+tail  -> result এর last node track করে
+
+প্রতিবার:
+tail->next = smaller node
+tail = tail->next
+```
+
 ```cpp
 #include <bits/stdc++.h>
 using namespace std;
@@ -516,6 +781,30 @@ Merged list: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 **সবচেয়ে efficient approach: Min-Heap (Priority Queue) ব্যবহার করা**
 
 **মূল ধারণা:** প্রতিটি list এর **head node** গুলো একটা min-heap এ রাখা হয়। প্রতিবার heap থেকে সবচেয়ে ছোট value বের করে result এ যোগ করা হয়, এবং সেই node এর পরবর্তী node (যদি থাকে) heap এ push করা হয়।
+
+**Heap walkthrough:**
+
+```text
+l1: 1 -> 4 -> 5
+l2: 1 -> 3 -> 4
+l3: 2 -> 6
+
+Initial heap contains heads:
+[1(l1), 1(l2), 2(l3)]
+
+pop 1(l1), push 4(l1)
+result: 1
+heap: [1(l2), 2(l3), 4(l1)]
+
+pop 1(l2), push 3(l2)
+result: 1 -> 1
+heap: [2(l3), 3(l2), 4(l1)]
+
+continue...
+
+Final:
+1 -> 1 -> 2 -> 3 -> 4 -> 4 -> 5 -> 6
+```
 
 ```cpp
 #include <bits/stdc++.h>
@@ -611,6 +900,26 @@ Level 2:  1 -------> 5 -------> 9
 Level 1:  1 -> 3 --> 5 -> 7 --> 9
 Level 0:  1 -> 3 -> 5 -> 7 -> 9  (সব element, base list)
 ```
+
+**Search example for 7:**
+
+```text
+Level 3:  head ----> 1 ------------------------> 9
+                    |
+Level 2:            1 ----------> 5 ----------> 9
+                                  |
+Level 1:            1 -> 3 -----> 5 -> 7 -----> 9
+                                           |
+Level 0:            1 -> 3 -> 5 -> 7 -> 9
+
+Search 7:
+start highest level
+head -> 1, next 9 is bigger than 7, go down
+1 -> 5, next 9 is bigger than 7, go down
+5 -> 7 found
+```
+
+Normal linked list এ `7` খুঁজতে `1 -> 3 -> 5 -> 7` sequential যেতে হয়। Skip list upper levels দিয়ে কিছু node skip করতে পারে।
 
 **কেন এটা performance improve করে:** একটা normal (single-level) sorted linked list এ কোনো element খুঁজতে `O(n)` সময় লাগে, কারণ প্রতিটি node একে একে check করতে হয় — linked list এ **binary search করা সম্ভব না** (কারণ random access নেই)। Skip list এ, search শুরু হয় **সবচেয়ে উপরের (sparse) level** থেকে, এবং যখন target value এর চেয়ে বড় কোনো node পাওয়া যায়, তখন **নিচের level** এ নেমে সূক্ষ্মভাবে search continue করা হয়। এভাবে প্রতিটি level এ অনেকটা distance "skip" করে এগোনো যায়, যা কার্যত **binary search এর মতো logarithmic efficiency** দেয়।
 

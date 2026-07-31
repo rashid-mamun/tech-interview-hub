@@ -12,6 +12,37 @@ String হলো মূলত **characters এর একটা sequence/array**�
 - **Java** তে string internally একটা `char[]` (Java 9 এর আগে) বা `byte[]` (Java 9 থেকে, compact strings feature সহ) array দিয়ে represent হয়
 - **Python** এ string `str` object হিসেবে store হয়, যেখানে encoding (Latin-1, UCS-2, বা UCS-4) content অনুযায়ী automatically নির্বাচিত হয়
 
+**String memory diagram:**
+
+```text
+string s = "hello"
+
+Index:      0    1    2    3    4
+Character: 'h'  'e'  'l'  'l'  'o'
+Address:   A   A+1  A+2  A+3  A+4
+
+std::string object:
++---------+----------+----------+
+| pointer | length=5 | capacity |
++---------+----------+----------+
+     |
+     v
+  character buffer: [h][e][l][l][o]
+```
+
+**C-style string vs C++ string:**
+
+```text
+C string:
+['h']['e']['l']['l']['o']['\0']
+                         ^
+                    null terminator
+
+C++ std::string:
+['h']['e']['l']['l']['o']
+length metadata আলাদা থাকে, তাই '\0' দিয়ে length বুঝতে হয় না।
+```
+
 ```cpp
 #include <bits/stdc++.h>
 using namespace std;
@@ -57,20 +88,55 @@ String কে **immutable** design করার পেছনে কয়েক�
 
 (লক্ষণীয়: C++ এর `std::string` কিন্তু **mutable** — Java/Python এর মতো immutable না। এটা language design choice এর পার্থক্য।)
 
+**Immutable string example:**
+
+```text
+Java/Python style:
+
+s = "cat"
+s = s + "s"
+
+Old object: "cat"   unchanged
+New object: "cats"  created
+
+s এখন নতুন object কে point করে।
+```
+
 ---
 
 ### What is string interning, and how does it save memory?
 
 **String Interning** হলো একটা technique যেখানে একই content এর একাধিক string এর জন্য একটাই copy memory তে (**String Pool** এ) রাখা হয়, এবং সব identical string সেই একই object কে reference করে।
 
-```java
-// Java উদাহরণ (concept বোঝানোর জন্য)
-String s1 = "hello";
-String s2 = "hello";
-// s1 == s2 → true, দুইটাই একই interned object কে point করছে
+**String pool diagram:**
 
-String s3 = new String("hello");
-// s3 == s1 → false, 'new' দিয়ে আলাদা object তৈরি হয়েছে heap এ
+```text
+String Pool:
+
+         +---------+
+s1 ----> | "hello" |
+s2 ----> | "hello" |
+         +---------+
+
+দুইটা reference, কিন্তু memory তে একটাই "hello" object।
+
+Without interning:
+s1 -> ["hello"]
+s2 -> ["hello"]
+দুইটা আলাদা copy লাগত।
+```
+
+```text
+Java-like concept:
+
+s1 = "hello"
+s2 = "hello"
+
+s1 এবং s2 একই interned object কে reference করে।
+
+s3 = explicitly new string object with value "hello"
+
+s3 এর value same, কিন্তু object আলাদা হতে পারে।
 ```
 
 **Memory save হওয়ার কারণ:** যদি কোনো program এ `"hello"` string ১০০ বার ব্যবহৃত হয়, interning ছাড়া প্রতিটির জন্য আলাদা memory allocate হতো। Interning এর মাধ্যমে শুধু **একবার** memory allocate হয়, বাকি সব reference সেই একই object কে point করে।
@@ -82,6 +148,20 @@ C++ এ direct string interning নেই (`std::string` mutable), তবে sim
 ## ➕ 12. Why is repeated string concatenation in a loop inefficient, and what's the alternative?
 
 C++ এ `std::string` mutable হলেও, `+` অপারেটর দিয়ে concatenate করলে প্রতিবার existing buffer এ জায়গা না থাকলে **নতুন, বড় buffer allocate করে পুরো content copy** করতে হয় (dynamic array resize এর মতো)।
+
+**Repeated concatenation problem:**
+
+```text
+Build "abcd" one char at a time:
+
+Step 1: "" + "a"    -> "a"
+Step 2: "a" + "b"   -> "ab"     copy old 1 char
+Step 3: "ab" + "c"  -> "abc"    copy old 2 chars
+Step 4: "abc" + "d" -> "abcd"   copy old 3 chars
+
+Immutable string হলে total copy:
+1 + 2 + 3 + ... + n = O(n^2)
+```
 
 ```cpp
 #include <bits/stdc++.h>
@@ -118,6 +198,15 @@ Result length: 50000
 ### How does StringBuilder (or equivalent) improve performance?
 
 C++ এ `std::string` নিজেই mutable এবং internally **dynamic array এর মতো doubling strategy** ব্যবহার করে বলে আলাদা `StringBuilder` লাগে না, তবে performance আরো optimize করতে `reserve()` ব্যবহার করে **আগে থেকেই capacity allocate** করে রাখা যায় (Java এর `StringBuilder(int capacity)` constructor এর মতো):
+
+```text
+Without reserve:
+capacity full হলে বারবার new buffer allocate + copy
+
+With reserve(n):
+[ ][ ][ ][ ][ ][ ][ ][ ] ... n slots
+আগে থেকেই enough capacity, তাই repeated reallocation কমে যায়।
+```
 
 ```cpp
 #include <bits/stdc++.h>
@@ -168,7 +257,27 @@ With reserve(): 6 ms
 
 ## 🔄 13. How do you check if two strings are anagrams of each other?
 
+**Anagram** মানে দুইটা string এর character frequency একই, শুধু order আলাদা।
+
+```text
+"listen"
+"silent"
+
+Both have:
+e:1, i:1, l:1, n:1, s:1, t:1
+
+তাই তারা anagram।
+```
+
 **Approach 1: Sorting-based**
+
+```text
+listen -> eilnst
+silent -> eilnst
+
+Sorted strings same -> anagram
+```
+
 ```cpp
 #include <bits/stdc++.h>
 using namespace std;
@@ -194,6 +303,27 @@ int main() {
 - **Time Complexity**: `O(n log n)` **Space Complexity**: `O(n)` (sorted copy বা sort algorithm এর জন্য)
 
 ### What approaches exist (sorting vs. frequency count) and what are their complexities?
+
+**Frequency count walkthrough:**
+
+```text
+s1 = "anagram"
+s2 = "nagaram"
+
+Process s1:
+a:3, n:1, g:1, r:1, m:1
+
+Process s2 by decrement:
+n -> 0
+a -> 2
+g -> 0
+a -> 1
+r -> 0
+a -> 0
+m -> 0
+
+সব frequency 0 -> anagram
+```
 
 ```cpp
 #include <bits/stdc++.h>
@@ -244,9 +374,33 @@ int main() {
 
 Time complexity তখনও `O(n)` থাকে, কিন্তু constant factor বাড়ে।
 
+```text
+Unicode issue:
+
+"é" can be represented as:
+1. composed:   U+00E9
+2. decomposed: U+0065 + U+0301
+
+দেখতে একই, কিন্তু raw bytes/code points আলাদা হতে পারে।
+Normalization না করলে anagram/palindrome result ভুল হতে পারে।
+```
+
 ---
 
 ## 🪞 14. What is a palindrome, and how do you efficiently check for one?
+
+**Palindrome** হলো এমন string যা সামনে থেকে এবং পেছন থেকে একই পড়া যায়।
+
+```text
+madam
+
+m a d a m
+^       ^
+|       |
+same   same
+
+left/right pointer ভিতরের দিকে এগোয়।
+```
 
 **Two-pointer technique** ব্যবহার করে:
 ```cpp
@@ -284,6 +438,21 @@ int main() {
 ### How would you check if a string can be rearranged to form a palindrome?
 
 একটা string কে rearrange করে palindrome বানানো সম্ভব হবে যদি **সর্বোচ্চ একটা character এর frequency odd** হয়:
+
+**Why odd frequency rule works:**
+
+```text
+Palindrome: "civic"
+
+c i v i c
+| |   | |
+c pair
+i pair
+v single middle
+
+Even length palindrome: all frequencies even
+Odd length palindrome: exactly one odd frequency allowed
+```
 
 ```cpp
 #include <bits/stdc++.h>
@@ -324,6 +493,31 @@ int main() {
 
 ## 🔎 15. What are common string-matching algorithms?
 
+String matching মানে text এর মধ্যে pattern আছে কিনা বা কোথায় আছে সেটা খোঁজা।
+
+```text
+text    = A A B A A C A A D A A B A A B A
+pattern = A A B A
+
+Matches start at index 0, 9, 12
+```
+
+**Naive matching idea:**
+
+```text
+Try pattern at every index:
+
+text:    A A B A A C ...
+pattern: A A B A
+         match at 0
+
+text:    A A B A A C ...
+pattern:   A A B A
+           mismatch, shift by 1
+
+Worst case এ একই character বারবার compare হতে পারে।
+```
+
 ```cpp
 #include <bits/stdc++.h>
 using namespace std;
@@ -363,6 +557,36 @@ Pattern found at index 12
 ### How does the KMP (Knuth-Morris-Pratt) algorithm improve on the naive approach?
 
 KMP pattern সম্পর্কে preprocessing করে **LPS array** (Longest Proper Prefix which is also Suffix) তৈরি করে, যা mismatch হলে pattern pointer কে smartly reposition করতে সাহায্য করে (text pointer কখনো backtrack করে না)।
+
+**LPS example:**
+
+```text
+pattern = "AABA"
+
+Index:   0 1 2 3
+Char:    A A B A
+LPS:     0 1 0 1
+
+LPS[i] মানে pattern[0..i] এর longest proper prefix
+যেটা suffix-ও।
+
+At i=3, substring "AABA"
+proper prefix/suffix match = "A"
+so LPS[3] = 1
+```
+
+**KMP mismatch jump:**
+
+```text
+text:    A A B A A C
+pattern: A A B A B
+                 ^
+             mismatch at B vs C
+
+Naive হলে pattern আবার শুরুতে নিয়ে যেত।
+KMP LPS ব্যবহার করে j কে smartly পিছায়,
+text pointer i পিছায় না।
+```
 
 ```cpp
 #include <bits/stdc++.h>
@@ -431,6 +655,29 @@ Pattern found at index 12
 
 **মূল ধারণা:** pattern এর hash এবং text এর প্রতিটি window এর hash **rolling hash** technique দিয়ে দ্রুত calculate ও compare করা হয়।
 
+**Rolling hash window:**
+
+```text
+text = "ABCDE"
+pattern length = 3
+
+Window 1: "ABC"
+Window 2: "BCD"
+
+Naive hash:
+ABC এর hash calculate O(3)
+BCD এর hash calculate O(3)
+
+Rolling hash:
+ABC থেকে A remove, D add
+BCD hash O(1) এ update
+```
+
+```text
+Hash match হলেই final answer না।
+Hash collision হতে পারে, তাই actual substring compare করে confirm করা হয়।
+```
+
 ```cpp
 #include <bits/stdc++.h>
 using namespace std;
@@ -487,6 +734,31 @@ Pattern found at index 12
 ### What is the Z-algorithm used for?
 
 **Z-algorithm** একটা `Z-array` তৈরি করে, যেখানে `Z[i]` হলো position `i` থেকে শুরু হওয়া substring এবং পুরো string এর prefix এর মধ্যে সবচেয়ে বড় common length।
+
+**Z-array example:**
+
+```text
+s = "aabxaab"
+
+Index: 0 1 2 3 4 5 6
+Char:  a a b x a a b
+Z:     0 1 0 0 3 1 0
+
+Z[4] = 3, কারণ s[4..] = "aab"
+এটা prefix "aab" এর সাথে 3 character match করে।
+```
+
+**Pattern search with Z:**
+
+```text
+pattern = "AABA"
+text    = "AABAACAADAABAABA"
+
+combined = pattern + "$" + text
+
+যেখানে Z[i] == pattern.length(),
+সেখানে text এ pattern match আছে।
+```
 
 ```cpp
 #include <bits/stdc++.h>

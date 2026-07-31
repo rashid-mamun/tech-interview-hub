@@ -13,11 +13,58 @@ title: 'Stack & Queue'
 - **top()/peek()**: top element দেখা, remove না করে — `O(1)`
 - **isEmpty()**: stack খালি কিনা check করা — `O(1)`
 
+**Stack diagram:**
+
+```text
+push(10), push(20), push(30)
+
+        top
+         |
+         v
+      +-----+
+      |  30 |  <- last pushed, first popped
+      +-----+
+      |  20 |
+      +-----+
+      |  10 |
+      +-----+
+      bottom
+
+pop() করলে 30 বের হবে।
+```
+
+**Operation walkthrough:**
+
+```text
+Start:     []
+push(10):  [10]
+push(20):  [10, 20]
+push(30):  [10, 20, 30]
+top():     30
+pop():     [10, 20]
+top():     20
+```
+
 ---
 
 ### What does LIFO (Last In, First Out) mean?
 
 LIFO মানে হলো — সর্বশেষ যে element push করা হয়েছে, সেটাই সবার আগে pop হবে। এটাকে একটা **প্লেটের স্তূপ (stack of plates)** এর সাথে তুলনা করা যায় — সবার উপরে যে প্লেটটা রাখা হয়, সেটাই সবার আগে তুলে নেওয়া হয়।
+
+```text
+Plate stack:
+
+Push order:
+Plate 1 -> Plate 2 -> Plate 3
+
+Current stack:
+   Plate 3  <- first remove
+   Plate 2
+   Plate 1
+
+Pop order:
+Plate 3 -> Plate 2 -> Plate 1
+```
 
 ```cpp
 #include <bits/stdc++.h>
@@ -55,11 +102,69 @@ Popping order (LIFO): 3 2 1
 
 4. **Browser History (back button)**, **DFS (Depth-First Search)** traversal এও stack (explicit বা implicit recursion এর মাধ্যমে) ব্যবহৃত হয়।
 
+**Call stack example:**
+
+```text
+main() calls A()
+A() calls B()
+B() calls C()
+
+Call Stack:
+      +-----+
+top ->| C() |
+      +-----+
+      | B() |
+      +-----+
+      | A() |
+      +-----+
+      |main |
+      +-----+
+
+C() return করলে C() frame pop হবে।
+তারপর B(), তারপর A(), তারপর main()।
+```
+
+**Undo stack example:**
+
+```text
+Actions:
+type "A" -> type "B" -> delete "B"
+
+Undo stack:
+top -> delete "B"
+       type "B"
+       type "A"
+
+Undo চাপলে সবার আগে "delete B" reverse হবে।
+```
+
 ---
 
 ## 🏗️ 28. How would you implement a stack using an array vs. a linked list?
 
 **Array-based Stack:**
+
+```text
+Array / vector stack:
+
+Index:  0   1   2
+Value: 10  20  30
+                 ^
+                top
+
+push(40):
+Index:  0   1   2   3
+Value: 10  20  30  40
+                     ^
+                    top
+
+pop():
+Index:  0   1   2
+Value: 10  20  30
+                 ^
+                top
+```
+
 ```cpp
 #include <bits/stdc++.h>
 using namespace std;
@@ -100,6 +205,29 @@ Top after pop: 20
 ```
 
 **Linked List-based Stack:**
+
+```text
+Linked list stack:
+
+head/top
+   |
+   v
++------+      +------+      +------+
+|  30  | ---> |  20  | ---> |  10  | ---> NULL
++------+      +------+      +------+
+
+push(40):
+
+head/top
+   |
+   v
++------+      +------+      +------+      +------+
+|  40  | ---> |  30  | ---> |  20  | ---> |  10  | ---> NULL
++------+      +------+      +------+      +------+
+
+pop() করলে head node remove হয়।
+```
+
 ```cpp
 #include <bits/stdc++.h>
 using namespace std;
@@ -170,6 +298,26 @@ Practical ব্যবহারে array-based stack (যেমন `std::vector`
 
 ###  How would you implement a stack using two queues?
 
+Stack needs LIFO, but queue gives FIFO. তাই trick হলো `push` করার সময় queue reorder করা, যাতে newest element always front এ থাকে।
+
+```text
+push(1):
+q2: [1]
+swap -> q1: [1]
+
+push(2):
+q2: [2]
+move q1 into q2: [2, 1]
+swap -> q1: [2, 1]
+
+push(3):
+q2: [3]
+move q1 into q2: [3, 2, 1]
+swap -> q1: [3, 2, 1]
+
+front of q1 = stack top = 3
+```
+
 ```cpp
 #include <bits/stdc++.h>
 using namespace std;
@@ -222,6 +370,21 @@ Top after pop: 2
 
 **Postfix Evaluation:** operand আসলে stack এ push করা হয়, operator আসলে stack থেকে দুইটা operand pop করে operation করে আবার push করা হয়।
 
+**Postfix example walkthrough:**
+
+```text
+Expression: 2 3 4 * +
+
+Token  Stack
+2      [2]
+3      [2, 3]
+4      [2, 3, 4]
+*      pop 4 and 3 -> 3*4 = 12 -> [2, 12]
++      pop 12 and 2 -> 2+12 = 14 -> [14]
+
+Answer = 14
+```
+
 ```cpp
 #include <bits/stdc++.h>
 using namespace std;
@@ -265,6 +428,26 @@ Result: 14
 **Infix থেকে postfix expression এ কীভাবে convert করবেন (Shunting Yard algorithm)?**
 
 **Shunting Yard Algorithm** (Edsger Dijkstra এর তৈরি) ব্যবহার করে infix expression কে postfix এ convert করা হয়। এখানে দুইটা মূল কাঠামো লাগে: একটা **output** (result) এবং একটা **operator stack**।
+
+**Infix to postfix walkthrough:**
+
+```text
+Infix: a + b * (c - d)
+
+Read   Output     Operator Stack
+a      a          []
++      a          [+]
+b      ab         [+]
+*      ab         [+, *]
+(      ab         [+, *, (]
+c      abc        [+, *, (]
+-      abc        [+, *, (, -]
+d      abcd       [+, *, (, -]
+)      abcd-      [+, *]
+end    abcd-*+    []
+
+Postfix: abcd-*+
+```
 
 ```cpp
 #include <bits/stdc++.h>
@@ -343,6 +526,36 @@ Postfix: abcd-*+
 
 **Approach: Monotonic Stack** — এমন একটা stack maintain করা হয় যেটাতে সবসময় elements একটা **decreasing order** এ থাকে (top থেকে bottom পর্যন্ত)।
 
+**Example walkthrough:**
+
+```text
+arr = [4, 5, 2, 10, 8]
+
+i=0, x=4
+stack indices: [0]        values: [4]
+
+i=1, x=5
+5 > 4, so NGE of 4 = 5
+stack: [1]                values: [5]
+
+i=2, x=2
+2 < 5, push
+stack: [1, 2]             values: [5, 2]
+
+i=3, x=10
+10 > 2, so NGE of 2 = 10
+10 > 5, so NGE of 5 = 10
+stack: [3]                values: [10]
+
+i=4, x=8
+8 < 10, push
+stack: [3, 4]             values: [10, 8]
+
+Remaining elements 10 and 8 have no greater element -> -1
+
+Answer: [5, 10, 10, -1, -1]
+```
+
 ```cpp
 #include <bits/stdc++.h>
 using namespace std;
@@ -399,6 +612,29 @@ Naive approach এ প্রতিটি element এর জন্য ডান�
 
 **মূল ধারণা:** প্রতিটি bar এর জন্য, সেই bar কে **height** ধরে সবচেয়ে বড় সম্ভাব্য rectangle বের করতে হয় — অর্থাৎ বামদিকে এবং ডানদিকে কতদূর পর্যন্ত এই height (বা তার বেশি) বজায় থাকে সেটা জানতে হয়। এখানে monotonic (increasing) stack ব্যবহার করে প্রতিটি bar এর জন্য তার **immediate smaller element** (বামে এবং ডানে) `O(n)` এ বের করা হয়।
 
+**Histogram diagram:**
+
+```text
+heights = [2, 1, 5, 6, 2, 3]
+
+Index:     0  1  2  3  4  5
+Height:    2  1  5  6  2  3
+
+Bars:
+        |
+      | |
+      | |
+      | |   |
+|     | | | |
+| |   | | | |
+0 1 2 3 4 5
+
+Largest rectangle:
+height = 5
+width = 2  (bars 5 and 6)
+area = 5 * 2 = 10
+```
+
 ```cpp
 #include <bits/stdc++.h>
 using namespace std;
@@ -445,6 +681,31 @@ Largest rectangle area: 10
 ## ⬇️⬆️ 31. How would you design a stack that supports retrieving the minimum/maximum element in O(1)?
 
 **Approach: দুইটা stack ব্যবহার করা** — একটা normal stack (মূল element গুলো রাখে), এবং একটা **auxiliary "min stack"** যেটা প্রতিটি পর্যায়ে **current minimum** track করে।
+
+**MinStack state diagram:**
+
+```text
+Operations: push(5), push(3), push(7), push(1)
+
+mainStack:      minStack:
+top -> 1        top -> 1
+       7               3
+       3               3
+       5               5
+
+getMin() = minStack.top() = 1
+
+pop():
+mainStack pops 1
+minStack also pops 1
+
+mainStack:      minStack:
+top -> 7        top -> 3
+       3               3
+       5               5
+
+getMin() = 3
+```
 
 ```cpp
 #include <bits/stdc++.h>
@@ -534,6 +795,33 @@ void pop() {
 - **front()**: front element দেখা — `O(1)`
 - **isEmpty()**: queue খালি কিনা check করা — `O(1)`
 
+**Queue diagram:**
+
+```text
+enqueue(10), enqueue(20), enqueue(30)
+
+front                         rear
+  |                            |
+  v                            v
++-----+     +-----+     +-----+
+| 10  | --> | 20  | --> | 30  |
++-----+     +-----+     +-----+
+
+dequeue() করলে 10 বের হবে।
+```
+
+**Operation walkthrough:**
+
+```text
+Start:       []
+enqueue(10): [10]
+enqueue(20): [10, 20]
+enqueue(30): [10, 20, 30]
+front():     10
+dequeue():   [20, 30]
+front():     20
+```
+
 ```cpp
 #include <bits/stdc++.h>
 using namespace std;
@@ -564,6 +852,18 @@ Dequeuing order (FIFO): 1 2 3
 
 FIFO মানে হলো — যে element সবার আগে যোগ (enqueue) করা হয়েছে, সেটাই সবার আগে বের (dequeue) হবে। এটাকে একটা **লাইনে দাঁড়ানো মানুষ** এর সাথে তুলনা করা যায় — যে আগে লাইনে দাঁড়িয়েছে, সে-ই আগে service পাবে।
 
+```text
+Queue line:
+
+front                                      rear
+  |                                         |
+  v                                         v
+Rahim  ->  Karim  ->  Asha  ->  Nila
+
+Service order:
+Rahim -> Karim -> Asha -> Nila
+```
+
 ---
 
 ### What is the difference between a queue, a deque (double-ended queue), and a circular queue?
@@ -571,6 +871,19 @@ FIFO মানে হলো — যে element সবার আগে যোগ 
 - **Regular Queue**: শুধু **rear** এ enqueue এবং **front** থেকে dequeue করা যায় — এক-দিকের operation।
 
 - **Deque (Double-Ended Queue)**: **উভয় প্রান্ত** (front এবং rear) থেকেই insert এবং delete করা যায় — অনেক বেশি flexible।
+
+```text
+Deque:
+
+push_front(10)      push_back(30)
+     |                   |
+     v                   v
+front [10, 20, 30] rear
+
+pop_front() removes 10
+pop_back() removes 30
+```
+
 ```cpp
 deque<int> dq;
 dq.push_front(1);   // সামনে insert
@@ -581,8 +894,46 @@ dq.pop_back();       // পেছন থেকে remove
 
 - **Circular Queue**: এটা একটা fixed-size array দিয়ে implement করা হয়, কিন্তু যখন rear array এর শেষে পৌঁছায়, তখন এটা আবার **শুরুতে wrap around** করে (যদি সেখানে জায়গা খালি থাকে)। এতে regular array-based queue এর একটা সমস্যা সমাধান হয় — dequeue হওয়ার পর array এর শুরুতে যে জায়গা খালি হয়, সেটা পুনরায় ব্যবহার করা যায় (memory waste হয় না)।
 
+```text
+Circular Queue with capacity 5:
+
+Index:  0   1   2   3   4
+Value: [ ] [ ] [30][40][50]
+             ^       ^
+           front    rear
+
+enqueue(60):
+rear wraps around to index 0
+
+Index:  0   1   2   3   4
+Value: [60][ ] [30][40][50]
+        ^       ^
+       rear   front
+```
+
 ---
 ## 🔁 33. How would you implement a queue using two stacks?
+
+Queue needs FIFO, but stack gives LIFO. দুইটা stack ব্যবহার করলে order দুইবার reverse হয়ে FIFO ফিরে আসে।
+
+```text
+enqueue(1), enqueue(2), enqueue(3)
+
+s1:
+top -> 3
+       2
+       1
+
+dequeue() দরকার, s2 empty:
+s1 থেকে s2 তে transfer
+
+s2:
+top -> 1
+       2
+       3
+
+এখন s2.top() = 1, অর্থাৎ earliest inserted element.
+```
 
 ```cpp
 #include <bits/stdc++.h>
@@ -652,6 +1003,21 @@ Worst case এ একটা single `dequeue` call এ `O(n)` লাগতে প
 
 **মূল পার্থক্য:** Regular queue FIFO অনুসরণ করে, কিন্তু priority queue কোনো নির্দিষ্ট order অনুসরণ করে না — শুধু **সবচেয়ে বেশি (বা কম) priority** যুক্ত element কেই আগে বের করে দেয়, insertion time নির্বিশেষে।
 
+**Regular queue vs priority queue:**
+
+```text
+Insert order: 3, 1, 4, 5
+
+Regular queue output:
+3 -> 1 -> 4 -> 5
+
+Max priority queue output:
+5 -> 4 -> 3 -> 1
+
+Min priority queue output:
+1 -> 3 -> 4 -> 5
+```
+
 ```cpp
 #include <bits/stdc++.h>
 using namespace std;
@@ -697,6 +1063,25 @@ Min-heap priority queue order: 1 3 4
 
 Priority queue সবচেয়ে বেশি ব্যবহৃত internal implementation হলো **Binary Heap** (min-heap বা max-heap), যেটা একটা **array-based complete binary tree** হিসেবে represent করা হয়।
 
+**Max-heap diagram:**
+
+```text
+Priority queue values: 50, 30, 40, 10, 20
+
+Heap tree:
+        50
+       /  \
+      30   40
+     / \
+    10 20
+
+Array representation:
+Index:  0   1   2   3   4
+Value: 50  30  40  10  20
+
+top() = 50
+```
+
 - **insert**: `O(log n)` — নতুন element শেষে যোগ করে "heapify up" করা হয়
 - **extract-min/max**: `O(log n)` — root remove করে শেষ element কে root এ এনে "heapify down" করা হয়
 - **peek (top)**: `O(1)` — root সরাসরি accessible
@@ -722,11 +1107,45 @@ Priority queue সবচেয়ে বেশি ব্যবহৃত internal
 
 এটা এমন সব সমস্যায় ব্যবহৃত হয় যেখানে একটা **sliding window** এর মধ্যে maximum/minimum efficiently track করতে হয় — যেমন "Sliding Window Maximum" problem।
 
+**Monotonic decreasing deque idea:**
+
+```text
+Window values processed: 1, 3, -1
+
+Read 1:
+deque values: [1]
+
+Read 3:
+3 is bigger than 1, so 1 can never be maximum while 3 is in window
+deque values: [3]
+
+Read -1:
+-1 smaller than 3, keep it
+deque values: [3, -1]
+
+front always holds current maximum.
+```
+
 ---
 
 ### How would you solve the "sliding window maximum" problem using a monotonic deque?
 
 **সমস্যা:** একটা array এবং একটা window size `k` দেওয়া আছে। প্রতিটি `k`-size sliding window এর maximum element বের করতে হবে।
+
+**Sliding window walkthrough:**
+
+```text
+arr = [1, 3, -1, -3, 5, 3, 6, 7], k = 3
+
+Window [1, 3, -1]     max = 3
+Window [3, -1, -3]    max = 3
+Window [-1, -3, 5]    max = 5
+Window [-3, 5, 3]     max = 5
+Window [5, 3, 6]      max = 6
+Window [3, 6, 7]      max = 7
+
+Answer = [3, 3, 5, 5, 6, 7]
+```
 
 ```cpp
 #include <bits/stdc++.h>

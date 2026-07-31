@@ -15,6 +15,30 @@ title: 'Hash Table'
 
 যদি hash function ভালো হয় (uniform distribution দেয়) এবং **load factor** নিয়ন্ত্রণে রাখা হয়, তাহলে প্রতিটি bucket এ গড়ে খুব কম সংখ্যক element থাকে, ফলে **average case** এ lookup প্রায় constant time এ হয়ে যায়।
 
+**Example diagram:**
+
+```text
+Keys:
+"apple", "banana", "cherry"
+
+Hash function:
+index = hash(key) % 5
+
+Bucket array:
+
+Index   Data
+0       -
+1       ("banana", 20)
+2       -
+3       ("apple", 10)
+4       ("cherry", 30)
+
+Lookup "banana":
+"banana" -> hash -> index 1 -> direct bucket access -> value 20
+```
+
+এখানে key directly array index না। Hash function key কে index এ convert করছে। এই কারণেই hash table average case এ array এর মতো দ্রুত access দিতে পারে।
+
 ```cpp
 #include <bits/stdc++.h>
 using namespace std;
@@ -78,6 +102,33 @@ int main() {
 load_factor = number_of_elements / number_of_buckets
 ```
 
+**Example:**
+
+```text
+number_of_elements = 6
+number_of_buckets  = 8
+
+load_factor = 6 / 8 = 0.75
+```
+
+Bucket view:
+
+```text
+Index   Bucket
+0       keyA
+1       keyB -> keyC
+2       -
+3       keyD
+4       -
+5       keyE
+6       keyF
+7       -
+
+Elements = 6
+Buckets  = 8
+Load factor = 0.75
+```
+
 **Performance এর উপর প্রভাব:**
 - Load factor **কম** থাকলে (যেমন 0.5), প্রতিটি bucket এ average খুব কম element থাকে, তাই collision কম হয় এবং lookup প্রায় `O(1)` এ থাকে
 - Load factor **বেশি** হয়ে গেলে (যেমন 1.0 বা তার বেশি), অনেক collision হতে শুরু করে, ফলে প্রতিটি bucket এর মধ্যে অনেক element জমা হয়ে যায় এবং lookup time `O(n)` এর কাছাকাছি চলে যেতে পারে (worst case এ)
@@ -90,15 +141,65 @@ load_factor = number_of_elements / number_of_buckets
 
 **Collision** ঘটে যখন দুইটা ভিন্ন key একই hash index এ map হয়ে যায় (`hash(key1) == hash(key2)` কিন্তু `key1 ≠ key2`)। এই collision handle করার প্রধান দুইটা পদ্ধতি: **Chaining** এবং **Open Addressing**।
 
+**Collision example:**
+
+```text
+table_size = 5
+
+hash("cat") % 5 = 2
+hash("dog") % 5 = 2
+
+দুইটা আলাদা key একই bucket index 2 এ চলে গেল।
+```
+
+```text
+Index   Bucket
+0       -
+1       -
+2       ("cat", 7)  and  ("dog", 11)   <- collision
+3       -
+4       -
+```
+
 
 ### What is the difference between open addressing and chaining?
 
 **Chaining (Separate Chaining):**
 প্রতিটি bucket একটা **linked list** (বা অন্য কোনো data structure, যেমন balanced tree) ধরে রাখে। যখন collision হয়, নতুন element সেই bucket এর linked list এ **যোগ** হয়ে যায়, existing data replace হয় না।
 
+```text
+Chaining:
+
+Index   Bucket
+0       -
+1       ("apple", 10)
+2       ("cat", 7) -> ("dog", 11) -> ("cow", 4)
+3       -
+4       ("banana", 20)
+
+Lookup "dog":
+hash("dog") -> index 2
+bucket 2 এর chain traverse করে "dog" খুঁজে বের করা
+```
+
 
 **Open Addressing:**
 যখন collision হয়, তখন **একই array এর মধ্যেই** অন্য একটা খালি slot খোঁজা হয় (linked list বা extra structure ছাড়াই)। সব element মূল array এর মধ্যেই থাকে।
+
+```text
+Open Addressing with linear probing:
+
+Insert "cat" -> index 2
+Insert "dog" -> index 2 occupied, try index 3
+Insert "cow" -> index 2 occupied, index 3 occupied, try index 4
+
+Index   Slot
+0       -
+1       -
+2       "cat"
+3       "dog"
+4       "cow"
+```
 
 **পার্থক্য টেবিল আকারে:**
 
@@ -121,17 +222,52 @@ index, index+1, index+2, index+3, ...
 ```
 **সমস্যা:** **Clustering** — একবার কোনো এলাকায় অনেক element জমা হয়ে গেলে, সেই এলাকা আরও বড় হতে থাকে (কারণ নতুন collision গুলোও সেখানেই গিয়ে জমা হয়), যা performance কমিয়ে দেয়।
 
+```text
+Linear probing clustering:
+
+Index:  0   1   2   3   4   5   6
+Slot:   -   -   A   B   C   D   -
+
+নতুন key index 2 এ hash হলে:
+2 occupied -> 3 occupied -> 4 occupied -> 5 occupied -> 6 empty
+
+Cluster আরও বড় হয়ে গেল।
+```
+
 **2. Quadratic Probing:** collision হলে quadratic (বর্গ) distance অনুযায়ী পরবর্তী slot check করা হয়।
 ```
 index, index+1², index+2², index+3², ...
 ```
 এটা clustering কিছুটা কমায়, কিন্তু সম্পূর্ণ eliminate করে না (**secondary clustering** সমস্যা থেকে যায়)।
 
+```text
+Quadratic probing:
+
+initial index = 2
+try sequence:
+2, 2 + 1^2 = 3, 2 + 2^2 = 6, 2 + 3^2 = 11 ...
+
+mod table_size দিয়ে final index বের করা হয়।
+```
+
 **3. Double Hashing:** একটা **দ্বিতীয় hash function** ব্যবহার করে step size নির্ধারণ করা হয়, যা প্রতিটি key এর জন্য আলাদা হয়।
 ```
 index = (hash1(key) + i × hash2(key)) % table_size
 ```
 এটা clustering সবচেয়ে ভালোভাবে এড়ায়, কারণ প্রতিটি key এর জন্য probing sequence আলাদা (unlike linear/quadratic probing, যেখানে সবার probing pattern একই)।
+
+```text
+Double hashing:
+
+hash1(key) = 2
+hash2(key) = 3
+table_size = 10
+
+i = 0 -> (2 + 0*3) % 10 = 2
+i = 1 -> (2 + 1*3) % 10 = 5
+i = 2 -> (2 + 2*3) % 10 = 8
+i = 3 -> (2 + 3*3) % 10 = 1
+```
 
 
 **Summary:**
@@ -147,6 +283,47 @@ index = (hash1(key) + i × hash2(key)) % table_size
 ## 🗺️ 38. What is the difference between HashMap, TreeMap, and LinkedHashMap (or their equivalents)?
 
 C++ এ এই তিনটার সবচেয়ে কাছাকাছি equivalent হলো: `unordered_map` (HashMap), `map` (TreeMap), এবং একটা custom implementation (LinkedHashMap এর জন্য কোনো direct STL equivalent নেই, তবে concept বোঝানো যাবে)।
+
+**Internal structure diagram:**
+
+```text
+HashMap / unordered_map:
+
+key -> hash -> bucket index
+
+Bucket array:
+0: -
+1: ("id-7", userA)
+2: ("id-3", userB) -> ("id-9", userC)
+3: -
+
+Order predictable না।
+```
+
+```text
+TreeMap / map:
+
+          "Karim"
+          /     \
+      "Asha"   "Rahim"
+
+Keys sorted order এ traverse করা যায়:
+Asha -> Karim -> Rahim
+```
+
+```text
+LinkedHashMap concept:
+
+Hash table for O(1) lookup:
+"a" -> nodeA
+"b" -> nodeB
+"c" -> nodeC
+
+Doubly linked list for order:
+nodeA <-> nodeB <-> nodeC
+
+Iteration order preserved থাকে।
+```
 
 | বৈশিষ্ট্য | HashMap (`unordered_map`) | TreeMap (`map`) | LinkedHashMap |
 |---|---|---|---|
@@ -226,6 +403,44 @@ cherry: 3
 **HashSet** হলো এমন data structure যেখানে শুধু **unique keys** store করা হয়, কোনো value থাকে না। Internally এটা সাধারণত hash table দিয়েই implement করা হয়: key hash করে bucket index বের করা হয়, তারপর collision handle করার জন্য chaining বা open addressing ব্যবহার করা হয়।
 
 নিচের implementation-এ **separate chaining** ব্যবহার করা হয়েছে:
+
+**Design diagram:**
+
+```text
+HashSet buckets:
+
+Index   Chain
+0       -
+1       17 -> 33
+2       -
+3       10
+4       20 -> 36
+5       -
+6       -
+7       -
+
+contains(36):
+hash(36) -> index 4
+bucket 4 traverse: 20 -> 36 found
+```
+
+**Add example:**
+
+```text
+Initial bucket size = 8
+add(10) -> 10 % 8 = 2
+add(18) -> 18 % 8 = 2  collision
+
+Index   Chain
+0       -
+1       -
+2       10 -> 18
+3       -
+4       -
+5       -
+6       -
+7       -
+```
 
 ```cpp
 #include <bits/stdc++.h>
@@ -355,6 +570,43 @@ Resize operation নিজে `O(n)`, কারণ সব element rehash কর�
 
 Remove করার সময় target element-এর জায়গায় vector-এর last element বসিয়ে দেওয়া হয়, তারপর last pop করা হয়। এতে shifting লাগে না, তাই remove `O(1)` থাকে।
 
+**Internal state example:**
+
+```text
+values vector:
+Index:  0   1   2
+Value: 10  20  30
+
+indexMap:
+10 -> 0
+20 -> 1
+30 -> 2
+
+getRandom():
+random index 0..2 থেকে একটা index pick করে values[index] return করে।
+```
+
+**remove(20) walkthrough:**
+
+```text
+Before:
+values = [10, 20, 30]
+indexMap = {10:0, 20:1, 30:2}
+
+Remove 20:
+idx = 1
+lastValue = 30
+
+20 এর জায়গায় 30 বসাই:
+values = [10, 30, 30]
+indexMap[30] = 1
+
+last pop:
+values = [10, 30]
+erase 20:
+indexMap = {10:0, 30:1}
+```
+
 ```cpp
 #include <bits/stdc++.h>
 using namespace std;
@@ -418,6 +670,41 @@ Consistent Hashing-এ একটি **logical circular ring** (hash ring) কল
 * যদি clockwise direction-এ আর কোনো server না থাকে, তাহলে ring **wrap around** করে প্রথম server-এ ফিরে আসে।
 
 এভাবে server সংখ্যা পরিবর্তন হলেও পুরো system-এর mapping পরিবর্তন করতে হয় না।
+
+**Hash ring diagram:**
+
+```text
+                 0 / 100
+                    |
+          keyA(8)   |      S1(15)
+                    |
+      S4(90)  ------+------  S2(40)
+                    |
+          keyC(78)  |   keyB(52)
+                    |
+                 S3(70)
+
+Rule:
+প্রতিটি key clockwise direction এ প্রথম server এ যাবে।
+
+keyA(8)  -> S1(15)
+keyB(52) -> S3(70)
+keyC(78) -> S4(90)
+```
+
+**নতুন server add করলে:**
+
+```text
+Before:
+keyB(52) -> S3(70)
+
+Add S5(60):
+
+keyB(52) -> S5(60)
+
+শুধু S5 এবং তার next server S3 এর মাঝের range affected হলো।
+সব key remap হলো না।
+```
 
 ---
 
@@ -507,6 +794,30 @@ server = hash(key) % 5
 * Cache warm-up করতে সময় লাগে
 
 অনেক ক্ষেত্রে এটিকে **cache miss storm** বা **cache stampede**-এর অন্যতম কারণ হিসেবে দেখা হয়।
+
+**Modulo remapping example:**
+
+```text
+hash values:
+keyA = 11
+keyB = 23
+keyC = 37
+keyD = 44
+
+With 4 servers:
+keyA -> 11 % 4 = 3
+keyB -> 23 % 4 = 3
+keyC -> 37 % 4 = 1
+keyD -> 44 % 4 = 0
+
+With 5 servers:
+keyA -> 11 % 5 = 1   changed
+keyB -> 23 % 5 = 3   same
+keyC -> 37 % 5 = 2   changed
+keyD -> 44 % 5 = 4   changed
+
+Server count 4 থেকে 5 হলেই বেশিরভাগ key অন্য server এ চলে গেল।
+```
 
 ---
 

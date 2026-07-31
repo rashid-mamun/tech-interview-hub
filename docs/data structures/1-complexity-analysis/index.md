@@ -15,6 +15,34 @@ Big-O notation হলো একটি mathematical notation যা কোনো 
 - একই সমস্যার different solution এর মধ্যে কোনটা better সেটা decide করতে সাহায্য করে
 - Interview এবং real-world system design এ scalability বোঝার জন্য essential
 
+**Growth rate example:**
+
+```text
+n = 1,000,000 হলে roughly:
+
+O(1)        -> 1 operation
+O(log n)    -> around 20 operations
+O(n)        -> 1,000,000 operations
+O(n log n)  -> around 20,000,000 operations
+O(n^2)      -> 1,000,000,000,000 operations
+
+এই কারণেই বড় input এ complexity difference huge হয়ে যায়।
+```
+
+**Common Big-O order:**
+
+```text
+fastest
+O(1)
+O(log n)
+O(n)
+O(n log n)
+O(n^2)
+O(2^n)
+O(n!)
+slowest
+```
+
 ---
 
 ### What is the difference between Big-O, Big-Theta (Θ), and Big-Omega (Ω)?
@@ -31,37 +59,87 @@ Big-O notation হলো একটি mathematical notation যা কোনো 
 
 Practical world এ আমরা প্রায়ই "Big-O" বলি কিন্তু আসলে "Big-Theta" বোঝাই, কারণ industry তে সাধারণত tight bound নিয়েই আলোচনা হয়।
 
+**Bound diagram:**
+
+```text
+runtime
+  ^
+  |
+  |          upper bound: Big-O
+  |        /
+  |      /     actual runtime
+  |    /      /
+  |  /      /
+  |/______/________________> n
+       lower bound: Big-Omega
+
+যদি upper এবং lower দুটো একই growth rate এ tight হয়,
+তখন সেটাকে Big-Theta বলা হয়।
+```
+
 ---
 
 ### How do you calculate the time complexity of nested loops?
 
 Nested loop এর ক্ষেত্রে সাধারণ rule হলো প্রতিটি loop এর complexity **multiply** করা।
 
-```python
-for i in range(n):        # O(n)
-    for j in range(n):    # O(n)
-        print(i, j)        # O(1)
+```cpp
+for (int i = 0; i < n; i++) {        // O(n)
+    for (int j = 0; j < n; j++) {    // O(n)
+        cout << i << " " << j << endl; // O(1)
+    }
+}
 ```
 এখানে outer loop `n` বার চলে এবং প্রতিটি iteration এ inner loop আবার `n` বার চলে, তাই total complexity = `O(n) × O(n) = O(n²)`।
+
+**Iteration grid:**
+
+```text
+n = 4
+
+        j=0  j=1  j=2  j=3
+i=0     x    x    x    x
+i=1     x    x    x    x
+i=2     x    x    x    x
+i=3     x    x    x    x
+
+Total = 4 * 4 = 16 = n^2
+```
 
 কিছু variation:
 
 1. **Independent nested loops** (উপরের example এর মতো) → `O(n × m)` যদি দুটো loop এর range আলাদা হয় (n এবং m)।
 
 2. **Dependent nested loops** (inner loop এর range outer loop এর উপর depend করে):
-```python
-for i in range(n):
-    for j in range(i):    # j runs from 0 to i
-        print(i, j)
+```cpp
+for (int i = 0; i < n; i++) {
+    for (int j = 0; j < i; j++) {
+        cout << i << " " << j << endl;
+    }
+}
 ```
 এখানে total iterations = `1 + 2 + 3 + ... + n = n(n+1)/2`, যা simplify করলে দাঁড়ায় `O(n²)`।
 
+```text
+n = 5
+
+i=0:
+i=1: x
+i=2: x x
+i=3: x x x
+i=4: x x x x
+
+Total = 0 + 1 + 2 + 3 + 4 = n(n-1)/2 = O(n^2)
+```
+
 3. **Logarithmic nested loop**:
-```python
-for i in range(n):
-    j = 1
-    while j < n:
-        j *= 2         # O(log n)
+```cpp
+for (int i = 0; i < n; i++) {
+    int j = 1;
+    while (j < n) {
+        j *= 2;
+    }
+}
 ```
 এখানে complexity হবে `O(n log n)`।
 
@@ -81,6 +159,25 @@ Amortized time complexity বলতে বোঝায় — কোনো opera
 
 এই কারণে dynamic array এর `append` কে amortized `O(1)` বলা হয়, যদিও worst-case (resize হওয়ার সময়) এ এটা `O(n)`।
 
+**Amortized resize timeline:**
+
+```text
+capacity starts at 1
+
+push 1: [1]                  cost 1
+push 2: resize 1 -> 2        copy 1 + insert
+push 3: resize 2 -> 4        copy 2 + insert
+push 4: no resize            cost 1
+push 5: resize 4 -> 8        copy 4 + insert
+...
+
+Total copy cost:
+1 + 2 + 4 + 8 + ... < 2n
+
+n pushes এর total cost O(n),
+so per push amortized O(1)
+```
+
 ---
 
 ## 💾 2. What is space complexity, and how is it different from time complexity?
@@ -92,6 +189,22 @@ Amortized time complexity বলতে বোঝায় — কোনো opera
 - Space complexity → **memory** (variables, data structures, call stack ইত্যাদির জন্য ব্যবহৃত জায়গা) নিয়ে কথা বলে
 
 কখনো কখনো একটা algorithm এ **time-space tradeoff** থাকে — অর্থাৎ কম time নিতে গেলে বেশি space লাগতে পারে (যেমন memoization/caching), আবার কম space ব্যবহার করলে time বেশি লাগতে পারে।
+
+**Time vs space example:**
+
+```text
+Two Sum problem:
+
+Approach 1: nested loop
+Time: O(n^2)
+Space: O(1)
+
+Approach 2: hash map
+Time: O(n)
+Space: O(n)
+
+আমরা extra memory use করে time কমালাম।
+```
 
 ---
 
@@ -107,6 +220,19 @@ Amortized time complexity বলতে বোঝায় — কোনো opera
 
 Interview এ সাধারণত **auxiliary space** নিয়েই বেশি প্রশ্ন করা হয়, কারণ এটাই algorithm এর প্রকৃত "extra cost" দেখায়।
 
+**Diagram:**
+
+```text
+Input array:
+[5, 2, 4, 1]     -> input space
+
+Merge temp array:
+[ ,  ,  ,  ]     -> auxiliary space
+
+Total space = input + auxiliary
+Auxiliary space = only extra temp memory
+```
+
 ---
 
 ### How does recursion affect space complexity through the call stack?
@@ -114,13 +240,32 @@ Interview এ সাধারণত **auxiliary space** নিয়েই ব�
 যখন কোনো function recursively call হয়, তখন প্রতিটি call এর জন্য একটা নতুন **stack frame** তৈরি হয় যেটা call stack এ push হয়। এই stack frame এ local variables, parameters, এবং return address store থাকে। যতক্ষণ পর্যন্ত function return না করে, ততক্ষণ এই frame stack এ থেকে যায়।
 
 উদাহরণ:
-```python
-def factorial(n):
-    if n == 0:
-        return 1
-    return n * factorial(n - 1)
+```cpp
+int factorial(int n) {
+    if (n == 0) return 1;
+    return n * factorial(n - 1);
+}
 ```
 এখানে `factorial(n)` কল করলে মোট `n` টা recursive call হবে, এবং প্রতিটি call এর জন্য একটা করে stack frame তৈরি হবে। তাই **space complexity = O(n)**, যদিও প্রতিটি individual call এ constant space লাগছে।
+
+**Call stack diagram for `factorial(4)`:**
+
+```text
+factorial(4)
+  -> factorial(3)
+      -> factorial(2)
+          -> factorial(1)
+              -> factorial(0)
+
+Maximum stack depth = 5 calls = O(n)
+
+Call stack at deepest point:
+top -> factorial(0)
+       factorial(1)
+       factorial(2)
+       factorial(3)
+       factorial(4)
+```
 
 তুলনায়, একই কাজ **iterative** ভাবে (loop দিয়ে) করলে space complexity হয় `O(1)`, কারণ কোনো call stack তৈরি হয় না।
 
@@ -135,6 +280,23 @@ def factorial(n):
 - **Average-case complexity**: সব সম্ভাব্য input এর উপর expected (গড়) performance। এটা calculate করতে সাধারণত **probability distribution** বিবেচনা করতে হয়।
 
 - **Worst-case complexity**: সবচেয়ে unfavorable input এর জন্য algorithm এর performance। যেমন — linear search এ target element একদম শেষে থাকা বা না থাকা (`O(n)`)।
+
+**Linear search example:**
+
+```text
+arr = [10, 20, 30, 40, 50]
+
+Best case:
+target = 10
+check first element -> O(1)
+
+Worst case:
+target = 50 or target not present
+check all elements -> O(n)
+
+Average case:
+target random position এ থাকলে average প্রায় n/2 checks -> O(n)
+```
 
 ---
 
@@ -162,6 +324,37 @@ def factorial(n):
 
 এই কারণেই practical implementation এ **randomized pivot selection** বা **median-of-three** technique ব্যবহার করা হয়, যাতে worst-case scenario এড়ানো যায় এবং average case এর কাছাকাছি performance পাওয়া যায়।
 
+**Quicksort partition shape:**
+
+```text
+Good pivots:
+
+          n
+        /   \
+      n/2   n/2
+     / \     / \
+   n/4 n/4 n/4 n/4
+
+height = log n
+each level total work = n
+total = O(n log n)
+```
+
+```text
+Bad pivots:
+
+n
+ \
+ n-1
+   \
+   n-2
+     \
+     n-3
+
+height = n
+total = O(n^2)
+```
+
 (তুলনামূলকভাবে, **Merge Sort** এর best, average, এবং worst — সব ক্ষেত্রেই complexity `O(n log n)`, যেটা এটাকে বেশি predictable করে তোলে, যদিও এর জন্য অতিরিক্ত `O(n)` space লাগে।)
 
 ---
@@ -186,11 +379,44 @@ T(n) = T(n/2) + O(1)
 ```
 এখানে `T(n/2)` মানে হলো recursive call (input কে অর্ধেক করে), এবং `O(1)` মানে হলো প্রতি call এ constant কাজ (comparison)।
 
+**Binary search recursion tree:**
+
+```text
+n
+|
+n/2
+|
+n/4
+|
+n/8
+|
+...
+|
+1
+
+Levels = log n
+cost per level = O(1)
+Total = O(log n)
+```
+
 আরেকটা উদাহরণ — **Merge Sort**:
 ```
 T(n) = 2T(n/2) + O(n)
 ```
 এখানে `2T(n/2)` মানে দুইটা recursive call (array কে দুইভাগে ভাগ করে), এবং `O(n)` হলো merging এর cost।
+
+```text
+Merge sort recursion tree:
+
+Level 0:          n                 cost = n
+                /   \
+Level 1:      n/2   n/2             cost = n
+             / \     / \
+Level 2:   n/4 n/4 n/4 n/4          cost = n
+
+Total levels = log n
+Total cost = n * log n = O(n log n)
+```
 
 ---
 
@@ -215,34 +441,77 @@ Master Theorem এ `f(n)` কে `n^(log_b a)` এর সাথে compare ক�
 
 **Limitation**: Master Theorem সব recurrence তে apply করা যায় না — শুধুমাত্র এই নির্দিষ্ট form এবং condition গুলো satisfy করলেই কাজ করে। যেমন `T(n) = T(n-1) + T(n-2)` (Fibonacci এর মতো recurrence) তে এটা apply করা যায় না, কারণ এটা `a·T(n/b)` form এ নেই।
 
+**Examples:**
+
+```text
+Binary Search:
+T(n) = 1T(n/2) + O(1)
+a = 1, b = 2
+n^(log_b a) = n^(log_2 1) = n^0 = 1
+f(n) = 1
+Case 2 -> T(n) = O(log n)
+```
+
+```text
+Merge Sort:
+T(n) = 2T(n/2) + O(n)
+a = 2, b = 2
+n^(log_b a) = n^(log_2 2) = n
+f(n) = n
+Case 2 -> T(n) = O(n log n)
+```
+
 ---
 
 ### How would you compute the complexity of a recursive Fibonacci function vs. its memoized version?
 
 **Naive Recursive Fibonacci:**
-```python
-def fib(n):
-    if n <= 1:
-        return n
-    return fib(n-1) + fib(n-2)
+```cpp
+int fib(int n) {
+    if (n <= 1) return n;
+    return fib(n - 1) + fib(n - 2);
+}
 ```
 এর recurrence relation: `T(n) = T(n-1) + T(n-2) + O(1)`
 
 এখানে প্রতিটি call দুইটা নতুন call তৈরি করছে, এবং একই subproblem বারবার (redundantly) calculate হচ্ছে (যেমন `fib(3)` কে বহুবার call করা হবে বিভিন্ন branch থেকে)। এই recursion কে tree আকারে দেখলে দেখা যায় এটা exponentially বাড়ে। এর time complexity হলো **`O(2ⁿ)`** (আরো precisely `O(φⁿ)` যেখানে φ = golden ratio ≈ 1.618, কিন্তু সাধারণত `O(2ⁿ)` বলা হয়)।
 
+**Naive Fibonacci recursion tree:**
+
+```text
+fib(5)
+├── fib(4)
+│   ├── fib(3)
+│   │   ├── fib(2)
+│   │   └── fib(1)
+│   └── fib(2)
+└── fib(3)
+    ├── fib(2)
+    └── fib(1)
+
+fib(3), fib(2) বারবার calculate হচ্ছে।
+```
+
 Space complexity এখানে `O(n)`, কারণ call stack এর maximum depth `n`।
 
 **Memoized (Dynamic Programming) Fibonacci:**
-```python
-def fib(n, memo={}):
-    if n <= 1:
-        return n
-    if n in memo:
-        return memo[n]
-    memo[n] = fib(n-1, memo) + fib(n-2, memo)
-    return memo[n]
+```cpp
+int fibMemo(int n, vector<int>& memo) {
+    if (n <= 1) return n;
+    if (memo[n] != -1) return memo[n];
+
+    memo[n] = fibMemo(n - 1, memo) + fibMemo(n - 2, memo);
+    return memo[n];
+}
 ```
 এখানে আমরা প্রতিটি subproblem এর result একবার calculate করে একটা **cache (memo dictionary)** তে store করে রাখি, ফলে একই subproblem দ্বিতীয়বার calculate করার প্রয়োজন হয় না।
+
+```text
+Memo table:
+
+fib(0), fib(1), fib(2), fib(3), fib(4), fib(5)
+প্রতিটা value একবার calculate হয়, তারপর cache থেকে return হয়।
+```
 
 যেহেতু `fib(0)` থেকে `fib(n)` পর্যন্ত প্রতিটি unique value ঠিক একবার করে calculate হয় (constant time এ, cache lookup সহ), তাই time complexity কমে দাঁড়ায় **`O(n)`**।
 

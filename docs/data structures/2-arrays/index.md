@@ -14,6 +14,30 @@ Memory তে array স্টোর হওয়ার mechanism:
 
 এই **contiguous storage** এবং **fixed-size element** থাকার কারণেই array তে **random access (index দিয়ে direct access)** সম্ভব হয় constant time এ, কারণ address সরাসরি calculate করা যায়, কোনো traversal লাগে না।
 
+**Memory layout diagram:**
+
+```text
+int arr[5] = {10, 20, 30, 40, 50}
+ধরি base address = 1000, এবং int size = 4 bytes
+
+Index:      0      1      2      3      4
+Value:     10     20     30     40     50
+Address: 1000   1004   1008   1012   1016
+
+address(arr[3]) = 1000 + (3 * 4) = 1012
+```
+
+```text
+Array memory:
+
++------+------+------+------+------+
+|  10  |  20  |  30  |  40  |  50  |
++------+------+------+------+------+
+  0      1      2      3      4
+
+সব element পাশাপাশি memory block এ থাকে।
+```
+
 ---
 
 ### What is the difference between a static array and a dynamic array (e.g., ArrayList, Python list)?
@@ -28,6 +52,28 @@ Memory তে array স্টোর হওয়ার mechanism:
 - Size runtime এ **grow বা shrink** করতে পারে
 - Internally এটা একটা static array দিয়েই implement করা হয়, কিন্তু capacity ফুরিয়ে গেলে automatically নতুন, বড় array তে resize হয়ে যায়
 - এই flexibility এর জন্য সামান্য extra overhead থাকে (memory এবং সময় উভয় ক্ষেত্রেই)
+
+**Static vs dynamic diagram:**
+
+```text
+Static array:
+capacity = 4, size = 4
+[10][20][30][40]
+
+আর element add করা যাবে না, কারণ size fixed.
+
+Dynamic array/vector:
+capacity = 4, size = 3
+[10][20][30][  ]
+
+push_back(40):
+capacity = 4, size = 4
+[10][20][30][40]
+
+push_back(50), capacity full:
+new capacity = 8
+[10][20][30][40][50][  ][  ][  ]
+```
 
 মূল পার্থক্য টেবিল আকারে:
 
@@ -66,6 +112,25 @@ Dynamic array এর internal mechanism:
 
 (লক্ষণীয়: যদি resize এর সময় capacity শুধু **fixed amount** (যেমন +1) বাড়ানো হতো, তাহলে amortized cost `O(n)` হয়ে যেত, কারণ প্রতি insertion এই পুরো array copy করতে হতো। তাই **doubling (multiplicative growth)** ব্যবহার করাটাই এই efficiency এর মূল কারণ।)
 
+**Resize walkthrough:**
+
+```text
+Before push_back(50):
+size = 4, capacity = 4
+
+Old buffer:
+[10][20][30][40]
+
+Allocate bigger buffer:
+[  ][  ][  ][  ][  ][  ][  ][  ]  capacity = 8
+
+Copy old elements:
+[10][20][30][40][  ][  ][  ][  ]
+
+Insert new element:
+[10][20][30][40][50][  ][  ][  ]
+```
+
 ---
 
 ## ⏱️ 6. What is the time complexity of common array operations (access, search, insertion, deletion)?
@@ -80,6 +145,19 @@ Dynamic array এর internal mechanism:
 | **Deletion (at end)** | `O(1)` | সরাসরি last element remove করা যায় |
 | **Deletion (at beginning/middle)** | `O(n)` | পরের সব element shift করে জায়গা fill করতে হয় |
 
+**Operation visual summary:**
+
+```text
+Access arr[3]:
+[10][20][30][40][50]
+             ^
+          direct formula -> O(1)
+
+Search 50:
+10 -> 20 -> 30 -> 40 -> 50
+সব element check লাগতে পারে -> O(n)
+```
+
 ---
 
 ### Why is insertion/deletion at the beginning of an array O(n)?
@@ -88,7 +166,37 @@ Array যেহেতু **contiguous memory** তে store হয়, তাই
 
 যখন array এর **শুরুতে (index 0)** একটা নতুন element insert করতে হয়, তখন existing সব element কে **এক ঘর করে ডানে shift** করতে হয়, যাতে index 0 এ জায়গা খালি হয়। এই shifting operation এ প্রতিটি element (সর্বোচ্চ `n` টা) move করতে হয়, তাই এটা `O(n)` time নেয়।
 
+**Insertion at beginning:**
+
+```text
+Insert 5 at index 0
+
+Before:
+Index:  0   1   2   3
+Value: 10  20  30  40
+
+Shift right:
+Index:  0   1   2   3   4
+Value: __  10  20  30  40
+
+Insert:
+Index:  0   1   2   3   4
+Value:  5  10  20  30  40
+```
+
 একইভাবে, শুরু থেকে কোনো element **delete** করলে তার পরের সব element কে **এক ঘর করে বামে shift** করতে হয়, যাতে array তে কোনো gap না থাকে — এটাও `O(n)` operation।
+
+**Deletion at beginning:**
+
+```text
+Delete index 0
+
+Before:
+[10][20][30][40]
+
+Shift left:
+[20][30][40][  ]
+```
 
 (মাঝখানে insertion/deletion করলেও একইভাবে `O(n)` হয়, কারণ average case এ প্রায় `n/2` element shift করতে হয়, যেটা asymptotically `O(n)` ই থাকে।)
 
@@ -104,11 +212,35 @@ address(arr[i]) = base_address + (i × size_of_each_element)
 
 যেহেতু এই calculation এ কোনো loop বা traversal লাগে না — শুধু একটা multiplication এবং addition — তাই যত বড় array-ই হোক না কেন (n যত বড়ই হোক), যেকোনো index এ element access করতে **সবসময় constant সংখ্যক operation** লাগে। এই কারণেই array access `O(1)` (constant time)।
 
+**Example:**
+
+```text
+arr[1000000] access করতেও traversal লাগে না।
+CPU শুধু address calculate করে:
+
+base + index * element_size
+
+তাই arr[3] এবং arr[1000000] দুটোই O(1) access।
+```
+
 ---
 
 ## 🧮 7. What is a 2D array, and how is it stored in memory?
 
 **2D array** হলো একটা array of arrays — row এবং column আকারে data organize করা হয় (matrix এর মতো)। যদিও logically এটা একটা **grid/table** হিসেবে দেখা যায়, কিন্তু computer memory তে সবকিছুই **linear (1D)** ভাবে store হয়, তাই 2D array কে internally একটা 1D array হিসেবেই map করা হয়।
+
+**Logical view vs memory view:**
+
+```text
+Logical 2D matrix:
+
+row\col   0   1   2
+0         1   2   3
+1         4   5   6
+
+Actual memory is linear:
+[1][2][3][4][5][6]
+```
 
 এই mapping দুইভাবে করা যায়: **row-major order** অথবা **column-major order**।
 
@@ -134,6 +266,23 @@ Matrix:
 - **Row-major** memory layout: `1, 2, 3, 4, 5, 6`
 - **Column-major** memory layout: `1, 4, 2, 5, 3, 6`
 
+**Diagram:**
+
+```text
+Matrix:
+        col0 col1 col2
+row0     1    2    3
+row1     4    5    6
+
+Row-major:
+row0 first, then row1
+[1][2][3][4][5][6]
+
+Column-major:
+col0 first, then col1, then col2
+[1][4][2][5][3][6]
+```
+
 **কেন এটা গুরুত্বপূর্ণ:** এই order জানা থাকলে **cache locality** optimize করা যায় — row-major language এ row-wise traversal করলে memory access pattern sequential হয় (cache-friendly), কিন্তু column-wise traversal করলে memory access scattered হয়ে যায়, যা performance কমিয়ে দেয়।
 
 ---
@@ -146,20 +295,23 @@ Matrix কে **in-place** (extra matrix ব্যবহার না করে)
 
 **Step 2: প্রতিটি row কে reverse করা**
 
-```python
-def rotate(matrix):
-    n = len(matrix)
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
 
-    # Step 1: Transpose the matrix
-    for i in range(n):
-        for j in range(i + 1, n):
-            matrix[i][j], matrix[j][i] = matrix[j][i], matrix[i][j]
+void rotate90Clockwise(vector<vector<int>>& matrix) {
+    int n = matrix.size();
 
-    # Step 2: Reverse each row
-    for i in range(n):
-        matrix[i].reverse()
+    for (int i = 0; i < n; i++) {
+        for (int j = i + 1; j < n; j++) {
+            swap(matrix[i][j], matrix[j][i]);
+        }
+    }
 
-    return matrix
+    for (int i = 0; i < n; i++) {
+        reverse(matrix[i].begin(), matrix[i].end());
+    }
+}
 ```
 
 **Example:**
@@ -194,6 +346,36 @@ Original:          After Transpose:      After Row Reverse (Final):
 - **Space Complexity**: `O(1)` (fixed-size bit array, hashing এর তুলনায় অনেক কম space)
 - **Trade-off**: শুধুমাত্র non-negative integers এবং known/limited range এর ক্ষেত্রে কাজ করে
 
+**Sorting approach diagram:**
+
+```text
+Original:
+[4, 2, 7, 2, 9]
+
+Sort:
+[2, 2, 4, 7, 9]
+ ^
+ adjacent same -> duplicate found
+```
+
+**Hashing approach diagram:**
+
+```text
+arr = [4, 2, 7, 2, 9]
+
+seen = {}
+read 4 -> not seen, add
+seen = {4}
+
+read 2 -> not seen, add
+seen = {4, 2}
+
+read 7 -> not seen, add
+seen = {4, 2, 7}
+
+read 2 -> already seen -> duplicate
+```
+
 ### What approaches exist (sorting, hashing, bit manipulation) and what are their trade-offs?
 
 | Approach | Time | Space | কখন ব্যবহার করবেন |
@@ -209,6 +391,27 @@ Original:          After Transpose:      After Row Reverse (Final):
 এই একটা classic problem, এবং এর জন্য সবচেয়ে elegant solution হলো **Floyd's Cycle Detection Algorithm** (Tortoise and Hare) — `O(n)` time এবং `O(1)` space এ।
 
 **মূল ধারণা:** array কে একটা **linked list** হিসেবে চিন্তা করা হয়, যেখানে `arr[i]` হলো index `i` থেকে পরবর্তী index এ যাওয়ার "pointer"। যেহেতু একটা duplicate value আছে, তাই এই linked list এ একটা **cycle** তৈরি হবে, এবং সেই cycle এর entry point-ই হলো duplicate number।
+
+**Array as linked list diagram:**
+
+```text
+nums = [1, 3, 4, 2, 2]
+index:  0  1  2  3  4
+
+Pointer relation:
+0 -> nums[0] = 1
+1 -> nums[1] = 3
+3 -> nums[3] = 2
+2 -> nums[2] = 4
+4 -> nums[4] = 2
+
+Graph:
+0 -> 1 -> 3 -> 2 -> 4
+               ^    |
+               |____|
+
+Cycle entry = 2, duplicate = 2
+```
 
 ```cpp
 #include <vector>
@@ -260,6 +463,23 @@ Floyd's algorithm সবচেয়ে ভালো, কারণ এটা arr
 
 **উদাহরণ: Array কে reverse করা**
 
+```text
+Before:
+[1, 2, 3, 4, 5]
+ ^           ^
+left       right
+
+swap 1 and 5:
+[5, 2, 3, 4, 1]
+    ^     ^
+  left  right
+
+swap 2 and 4:
+[5, 4, 3, 2, 1]
+       ^
+     done
+```
+
 ```cpp
 void reverse(std::vector<int>& arr) {
     int left = 0, right = static_cast<int>(arr.size()) - 1;
@@ -302,6 +522,15 @@ Prefix sum:       [3, 4, 8, 9, 14, 23]
 
 এই prefix array একবার (`O(n)` time এ) তৈরি করে ফেললে, এরপর যেকোনো **range sum query** কে `O(1)` time এ answer দেওয়া যায়, যেটা naive approach এ প্রতিবার `O(n)` সময় নিত। এটা বিশেষভাবে কাজে লাগে যখন একই array তে **বহুবার** range sum query করতে হয় (repeated queries এর জন্য preprocessing worth it হয়ে যায়)।
 
+**Prefix sum diagram:**
+
+```text
+arr:     [3, 1, 4, 1, 5, 9]
+prefix:  [3, 4, 8, 9,14,23]
+
+prefix[4] = 3 + 1 + 4 + 1 + 5 = 14
+```
+
 ---
 
 ### How would you use a prefix sum to answer range sum queries efficiently?
@@ -318,6 +547,20 @@ range_sum(l, r) = prefix[r] - prefix[l-1]
 range_sum(2, 4) = prefix[4] - prefix[1] = 14 - 4 = 10 ✓
 ```
 
+```text
+arr:      [3, 1, 4, 1, 5, 9]
+index:     0  1  2  3  4  5
+
+Need sum from 2 to 4:
+          [4, 1, 5]
+
+prefix[4] gives sum 0..4 = 14
+prefix[1] gives sum 0..1 = 4
+
+subtract prefix[1]:
+14 - 4 = 10
+```
+
 এই approach এ প্রতিটি query `O(1)` time এ answer পাওয়া যায় (একবার `O(n)` preprocessing এর পর), যা multiple queries এর ক্ষেত্রে naive `O(n)` per-query approach এর চেয়ে অনেক efficient — বিশেষত যদি `q` টা query থাকে, তাহলে total complexity `O(n + q)` হয়ে যায়, নাহলে `O(n × q)` হতো।
 
 ---
@@ -331,13 +574,32 @@ range_sum(2, 4) = prefix[4] - prefix[1] = 14 - 4 = 10 ✓
 - **Difference Array**: এটা তৈরি করা হয় এভাবে: `diff[i] = arr[i] - arr[i-1]`, এবং এটা ব্যবহৃত হয় যখন array তে **বারবার range update** করতে হয় (যেমন index `l` থেকে `r` পর্যন্ত সব element এ একটা value যোগ করা), সেটা efficiently করার জন্য (update-focused)।
 
 **Difference array দিয়ে range update:**
-```python
-def range_update(diff, l, r, val):
-    diff[l] += val
-    if r + 1 < len(diff):
-        diff[r + 1] -= val
+```cpp
+void rangeUpdate(vector<int>& diff, int l, int r, int val) {
+    diff[l] += val;
+    if (r + 1 < (int)diff.size()) {
+        diff[r + 1] -= val;
+    }
+}
 ```
 এখানে `l` থেকে `r` পর্যন্ত সব element এ `val` যোগ করতে মাত্র **`O(1)`** সময় লাগে (পুরো range traverse করতে হয় না)। এরপর সব update শেষ হলে, difference array এর **prefix sum** নিলেই final updated array পাওয়া যায় — অর্থাৎ **difference array + prefix sum technique একসাথে মিলেই full array update reconstruct করে**।
+
+**Difference array update diagram:**
+
+```text
+Initial arr:
+[0, 0, 0, 0, 0]
+
+Add +5 from index 1 to 3:
+diff[1] += 5
+diff[4] -= 5
+
+diff:
+[0, 5, 0, 0, -5]
+
+Prefix of diff gives final arr:
+[0, 5, 5, 5, 0]
+```
 
 **সংক্ষেপে:**
 

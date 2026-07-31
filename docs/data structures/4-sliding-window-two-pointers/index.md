@@ -12,6 +12,28 @@ title: 'Sliding Window & Two Pointers'
 - যেখানে **brute force** এ প্রতিটি subarray আলাদাভাবে calculate করতে হতো (`O(n²)` বা তার বেশি)
 - সমস্যায় একটা **"window" এর property** (sum, count, distinct elements ইত্যাদি) track করার প্রয়োজন হয়
 
+**Sliding window visual idea:**
+
+```text
+arr = [2, 1, 5, 1, 3, 2], k = 3
+
+Window 1:
+[2, 1, 5] 1  3  2
+sum = 8
+
+Window 2:
+ 2 [1, 5, 1] 3  2
+remove 2, add 1
+sum = 8 - 2 + 1 = 7
+
+Window 3:
+ 2  1 [5, 1, 3] 2
+remove 1, add 3
+sum = 7 - 1 + 3 = 9
+
+প্রতিবার পুরো sum আবার calculate করা লাগছে না।
+```
+
 ---
 
 ### What is the difference between a fixed-size sliding window and a variable-size (dynamic) sliding window?
@@ -19,6 +41,19 @@ title: 'Sliding Window & Two Pointers'
 **Fixed-size Sliding Window**: window এর size **আগে থেকেই নির্দিষ্ট** (constant, যেমন `k`)। window এক ধাপ ডানে সরে গেলে, একটা element যোগ হয় এবং একটা element বাদ যায়, size সবসময় একই থাকে।
 
 **উদাহরণ: Maximum sum of subarray of size k**
+
+```text
+arr = [2, 1, 5, 1, 3, 2], k = 3
+
+Window            Sum
+[2, 1, 5]          8
+   [1, 5, 1]       7
+      [5, 1, 3]    9  <- maximum
+         [1, 3, 2] 6
+
+Answer = 9
+```
+
 ```cpp
 #include <bits/stdc++.h>
 using namespace std;
@@ -58,6 +93,20 @@ Maximum sum of size 3 subarray: 9
 
 **Variable-size (Dynamic) Sliding Window**: window এর size **fixed না**, বরং একটা নির্দিষ্ট condition (যেমন sum ≥ target, বা distinct character এর সংখ্যা) satisfy করার জন্য window কে dynamically **grow বা shrink** করা হয়। এই ধরনের সমস্যায় সাধারণত দুইটা pointer (`left`, `right`) ব্যবহার করা হয় যেগুলো independently move করে।
 
+```text
+Variable-size example:
+target = 7
+arr = [2, 3, 1, 2, 4, 3]
+
+right move করে window grow:
+[2, 3, 1, 2] sum = 8 valid
+
+left move করে shrink:
+remove 2 -> [3, 1, 2] sum = 6 invalid
+
+আবার right grow করবে।
+```
+
 ---
 
 ### How does the sliding window technique reduce time complexity from O(n²) to O(n)?
@@ -65,6 +114,23 @@ Maximum sum of size 3 subarray: 9
 **Brute force approach**: প্রতিটি সম্ভাব্য subarray এর জন্য আলাদা করে sum (বা অন্য কোনো property) calculate করা হয়। এতে outer loop (starting point) এবং inner loop (sum calculate করার জন্য) মিলিয়ে `O(n²)` (বা তার বেশি) সময় লাগে।
 
 **Sliding window এর মূল insight**: যখন window এক ধাপ সরে যায় (যেমন `left` বা `right` boundary এক ঘর move করে), তখন window এর content এ **সামান্য পরিবর্তন** হয় (একটা element add হয়, একটা remove হয়)। তাই পুরো window আবার recalculate না করে, **আগের calculation এর উপর ভিত্তি করে** (incremental update) নতুন window এর result বের করা যায়।
+
+**Complexity comparison diagram:**
+
+```text
+Brute force:
+start=0: check 0..0, 0..1, 0..2, ...
+start=1: check 1..1, 1..2, 1..3, ...
+start=2: check 2..2, 2..3, ...
+
+অনেক subarray বারবার calculate হয় -> O(n^2)
+
+Sliding window:
+left  moves: 0 -> 1 -> 2 -> ...
+right moves: 0 -> 1 -> 2 -> ...
+
+প্রতিটি element at most add once, remove once -> O(n)
+```
 
 এর ফলে প্রতিটি element মাত্র **constant বার** (সাধারণত একবার `right` pointer দিয়ে যোগ হওয়ার সময়, এবং একবার `left` pointer দিয়ে বাদ যাওয়ার সময়) process হয়, ফলে total complexity `O(n)` তে নেমে আসে — যেখানে প্রতিটি element সর্বোচ্চ দুইবার visited হয় (once by each pointer)।
 
@@ -83,11 +149,69 @@ Maximum sum of size 3 subarray: 9
 1. **Opposite direction pointers** (`left` শুরু থেকে, `right` শেষ থেকে) — sorted array তে pair খোঁজার জন্য
 2. **Same direction pointers** (দুইটাই শুরু থেকে, কিন্তু ভিন্ন গতিতে move করে) — in-place array modification এর জন্য
 
+**Opposite direction pointer diagram:**
+
+```text
+sorted arr = [1, 3, 4, 5, 7, 10, 11]
+target = 9
+
+left                           right
+  |                              |
+  v                              v
+[1, 3, 4, 5, 7, 10, 11]
+
+sum = 1 + 11 = 12 > 9
+right-- করে sum কমানো হবে।
+```
+
+**Same direction pointer diagram:**
+
+```text
+Remove duplicates:
+
+arr = [1, 1, 2, 2, 3]
+       ^  ^
+      slow fast
+
+fast নতুন unique value খুঁজে,
+slow next write position manage করে।
+```
+
 ---
 
 ### How would you solve the "two sum" problem on a sorted array using two pointers?
 
 **সমস্যা:** একটা sorted array তে দুইটা element খুঁজে বের করতে হবে যাদের sum একটা নির্দিষ্ট `target` এর সমান।
+
+**Two sum walkthrough:**
+
+```text
+arr = [1, 3, 4, 5, 7, 10, 11], target = 9
+
+Step 1:
+left=0 (1), right=6 (11)
+sum = 12 > 9, so right--
+
+Step 2:
+left=0 (1), right=5 (10)
+sum = 11 > 9, so right--
+
+Step 3:
+left=0 (1), right=4 (7)
+sum = 8 < 9, so left++
+
+Step 4:
+left=1 (3), right=4 (7)
+sum = 10 > 9, so right--
+
+Step 5:
+left=1 (3), right=3 (5)
+sum = 8 < 9, so left++
+
+Step 6:
+left=2 (4), right=3 (5)
+sum = 9 found
+```
 
 ```cpp
 #include <bits/stdc++.h>
@@ -139,6 +263,37 @@ Values: 3 + 7 = 9
 
 ### How is the two-pointer technique used to remove duplicates from a sorted array in place?
 
+**Walkthrough:**
+
+```text
+arr = [1, 1, 2, 2, 2, 3, 4, 4, 5]
+
+slow = 0 points to last unique position
+fast scans the array
+
+Initial:
+[1, 1, 2, 2, 2, 3, 4, 4, 5]
+ ^  ^
+ s  f
+
+fast sees 1, same as arr[slow], skip
+
+fast sees 2:
+slow++ and write 2
+[1, 2, 2, 2, 2, 3, 4, 4, 5]
+    ^  ^
+    s  f
+
+fast sees 3:
+[1, 2, 3, 2, 2, 3, 4, 4, 5]
+       ^
+       s
+
+Final first part:
+[1, 2, 3, 4, 5, ...]
+newLength = 5
+```
+
 ```cpp
 #include <bits/stdc++.h>
 using namespace std;
@@ -184,6 +339,55 @@ Array after removing duplicates: 1 2 3 4 5
 ## 🔤 18. How would you find the longest substring without repeating characters?
 
 এই সমস্যায় **variable-size sliding window** এবং একটা **hash map/set** ব্যবহার করে character এর last-seen position track করা হয়।
+
+**Example walkthrough (`s = "abcabcbb"`):**
+
+```text
+right reads characters one by one.
+
+right=0, char=a
+window: [a]
+maxLength = 1
+
+right=1, char=b
+window: [a b]
+maxLength = 2
+
+right=2, char=c
+window: [a b c]
+maxLength = 3
+
+right=3, char=a
+a already seen at index 0 inside current window
+move left from 0 to 1
+window: [b c a]
+maxLength still 3
+
+right=4, char=b
+b seen at index 1, move left to 2
+window: [c a b]
+
+answer = 3
+```
+
+**Window boundary view:**
+
+```text
+s = a b c a b c b b
+    0 1 2 3 4 5 6 7
+
+Before duplicate a:
+left=0, right=3
+[a b c a]
+ ^     ^
+ L     R
+
+After handling duplicate:
+left=1, right=3
+ a [b c a]
+    ^   ^
+    L   R
+```
 
 ```cpp
 #include <bits/stdc++.h>
@@ -241,6 +445,21 @@ Length of longest substring without repeating characters: 3
 
 এখানেও **variable-size sliding window** ব্যবহার করা হয় — window কে **grow** করা হয় (right বাড়িয়ে) যতক্ষণ না sum target এ পৌঁছায়, এবং **shrink** করা হয় (left বাড়িয়ে) যতক্ষণ sum target এর সমান বা বেশি থাকে (minimum length খোঁজার জন্য)।
 
+**Example diagram:**
+
+```text
+target = 7
+arr = [2, 3, 1, 2, 4, 3]
+
+Valid windows:
+[2, 3, 1, 2] sum = 8, length = 4
+   [3, 1, 2, 4] sum = 10, length = 4
+      [1, 2, 4] sum = 7, length = 3
+            [4, 3] sum = 7, length = 2  <- minimum
+
+Answer = 2
+```
+
 ```cpp
 #include <bits/stdc++.h>
 using namespace std;
@@ -287,6 +506,33 @@ Length of smallest subarray with sum >= 7: 2
 
 **Shrink phase**: যখনই current `sum >= target` হয়ে যায়, তখন আমরা জানি এই window টা condition satisfy করছে। এখন আমরা চেষ্টা করি window কে **যতটা সম্ভব ছোট** করতে — তাই `left` pointer কে এগিয়ে নিয়ে (এবং সংশ্লিষ্ট element `sum` থেকে বাদ দিয়ে) window shrink করতে থাকি, যতক্ষণ পর্যন্ত `sum >= target` condition বজায় থাকে। প্রতিবার shrink করার আগে current window length দিয়ে answer update করা হয়।
 
+**Grow/shrink walkthrough:**
+
+```text
+target = 7
+arr = [2, 3, 1, 2, 4, 3]
+
+right=0: [2] sum=2
+right=1: [2,3] sum=5
+right=2: [2,3,1] sum=6
+right=3: [2,3,1,2] sum=8 valid, length=4
+
+shrink:
+remove 2 -> [3,1,2] sum=6 invalid
+
+right=4: [3,1,2,4] sum=10 valid, length=4
+shrink:
+remove 3 -> [1,2,4] sum=7 valid, length=3
+remove 1 -> [2,4] sum=6 invalid
+
+right=5: [2,4,3] sum=9 valid, length=3
+shrink:
+remove 2 -> [4,3] sum=7 valid, length=2
+remove 4 -> [3] sum=3 invalid
+
+Answer = 2, subarray [4,3]
+```
+
 এই grow-shrink cycle এর মাধ্যমে আমরা প্রতিটি সম্ভাব্য valid window এর মধ্যে **সবচেয়ে ছোট** টা খুঁজে বের করি, বিনা কোনো subarray কে explicitly পুনরায় calculate না করেই।
 
 **Time Complexity**: `O(n)` — যদিও দুইটা nested loop দেখতে মনে হচ্ছে, কিন্তু `left` pointer সব মিলিয়ে সর্বোচ্চ `n` বার move করে (প্রতিটি element সর্বোচ্চ একবার `left` দিয়ে remove হয়), তাই total কাজ `O(n)`।
@@ -299,6 +545,66 @@ Length of smallest subarray with sum >= 7: 2
 **সমস্যা:** একটা string `s` এবং একটা string `t` দেওয়া আছে। `s` এর মধ্যে সবচেয়ে ছোট window (substring) খুঁজে বের করতে হবে যেটাতে `t` এর সব character (তাদের frequency সহ) অন্তর্ভুক্ত আছে।
 
 এখানেও **variable-size sliding window** ব্যবহার করা হয়, কিন্তু এবার দুইটা hashmap (বা একটা array + counter) দিয়ে window এর মধ্যে কোন character "needed" এবং কোনটা "satisfied" সেটা track করা হয়।
+
+**Example target:**
+
+```text
+s = "ADOBECODEBANC"
+t = "ABC"
+
+Need:
+A:1, B:1, C:1
+
+Goal:
+s এর smallest substring যেখানে A, B, C সব আছে।
+Answer: "BANC"
+```
+
+**Window walkthrough (high level):**
+
+```text
+Expand right until window valid:
+
+A D O B E C
+^         ^
+L         R
+
+Window = "ADOBEC", contains A, B, C
+formed == required
+answer candidate = "ADOBEC"
+
+Now shrink left:
+remove A করলে A missing হয়ে যাবে, so stop.
+
+Continue expanding:
+... B A N C
+    ^     ^
+    L     R
+
+Window = "BANC", contains A, B, C
+length = 4, better answer.
+```
+
+**Need vs window table:**
+
+```text
+t = "ABC"
+
+need:
+A -> 1
+B -> 1
+C -> 1
+
+window = "BANC"
+
+window count:
+B -> 1
+A -> 1
+N -> 1
+C -> 1
+
+A, B, C requirement satisfied, N extra থাকলেও problem নেই।
+```
 
 ```cpp
 #include <bits/stdc++.h>
