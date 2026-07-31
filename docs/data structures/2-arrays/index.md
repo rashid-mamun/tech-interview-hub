@@ -62,7 +62,7 @@ Dynamic array এর internal mechanism:
 ```
 1 + 2 + 4 + 8 + ... + n ≈ 2n
 ```
-এই geometric series এর sum `O(n)` এর মধ্যেই থাকে (2n কখনোই n এর অনেক বেশি হয় না)। তাই n টা insertion এর total cost = `O(n)`, ফলে **প্রতিটি insertion এর amortized cost = O(n)/n = O(1)`**।
+এই geometric series এর sum `O(n)` এর মধ্যেই থাকে (2n কখনোই n এর অনেক বেশি হয় না)। তাই n টা insertion এর total cost = `O(n)`, ফলে **প্রতিটি insertion এর amortized cost = `O(n)/n = O(1)`**।
 
 (লক্ষণীয়: যদি resize এর সময় capacity শুধু **fixed amount** (যেমন +1) বাড়ানো হতো, তাহলে amortized cost `O(n)` হয়ে যেত, কারণ প্রতি insertion এই পুরো array copy করতে হতো। তাই **doubling (multiplicative growth)** ব্যবহার করাটাই এই efficiency এর মূল কারণ।)
 
@@ -149,16 +149,16 @@ Matrix কে **in-place** (extra matrix ব্যবহার না করে)
 ```python
 def rotate(matrix):
     n = len(matrix)
-    
+
     # Step 1: Transpose the matrix
     for i in range(n):
         for j in range(i + 1, n):
             matrix[i][j], matrix[j][i] = matrix[j][i], matrix[i][j]
-    
+
     # Step 2: Reverse each row
     for i in range(n):
         matrix[i].reverse()
-    
+
     return matrix
 ```
 
@@ -210,24 +210,30 @@ Original:          After Transpose:      After Row Reverse (Final):
 
 **মূল ধারণা:** array কে একটা **linked list** হিসেবে চিন্তা করা হয়, যেখানে `arr[i]` হলো index `i` থেকে পরবর্তী index এ যাওয়ার "pointer"। যেহেতু একটা duplicate value আছে, তাই এই linked list এ একটা **cycle** তৈরি হবে, এবং সেই cycle এর entry point-ই হলো duplicate number।
 
-```python
-def findDuplicate(nums):
-    # Phase 1: Detect cycle (find intersection point)
-    slow = nums[0]
-    fast = nums[0]
-    while True:
-        slow = nums[slow]
-        fast = nums[nums[fast]]
-        if slow == fast:
-            break
-    
-    # Phase 2: Find entrance to the cycle (the duplicate)
-    slow2 = nums[0]
-    while slow != slow2:
-        slow = nums[slow]
-        slow2 = nums[slow2]
-    
-    return slow
+```cpp
+#include <vector>
+
+int findDuplicate(std::vector<int>& nums) {
+    // Phase 1: Detect cycle (find intersection point)
+    int slow = nums[0];
+    int fast = nums[0];
+    while (true) {
+        slow = nums[slow];
+        fast = nums[nums[fast]];
+        if (slow == fast) {
+            break;
+        }
+    }
+
+    // Phase 2: Find entrance to the cycle (the duplicate)
+    int slow2 = nums[0];
+    while (slow != slow2) {
+        slow = nums[slow];
+        slow2 = nums[slow2];
+    }
+
+    return slow;
+}
 ```
 
 **বিকল্প approaches** (কম optimal কিন্তু simpler):
@@ -254,14 +260,15 @@ Floyd's algorithm সবচেয়ে ভালো, কারণ এটা arr
 
 **উদাহরণ: Array কে reverse করা**
 
-```python
-def reverse(arr):
-    left, right = 0, len(arr) - 1
-    while left < right:
-        arr[left], arr[right] = arr[right], arr[left]
-        left += 1
-        right -= 1
-    return arr
+```cpp
+void reverse(std::vector<int>& arr) {
+    int left = 0, right = static_cast<int>(arr.size()) - 1;
+    while (left < right) {
+        std::swap(arr[left], arr[right]);
+        left++;
+        right--;
+    }
+}
 ```
 এখানে কোনো নতুন array তৈরি না করে, শুধু **two-pointer technique** দিয়ে element গুলো swap করা হচ্ছে মূল array এর মধ্যেই। **Space Complexity = `O(1)`**।
 
