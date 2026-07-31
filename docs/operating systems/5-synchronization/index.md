@@ -5,7 +5,7 @@ title: 'Synchronization'
 
 
 
-## ⚠️ 25. What is a race condition, and how does it occur?
+## ⚠️ 17. What is a race condition, and how does it occur?
 
 **Race Condition** হলো এমন একটি সমস্যা (bug) যেখানে দুই বা ততোধিক **thread** বা **process** একই **shared resource** (যেমন একটি variable, memory location বা shared data structure) একই সময়ে access বা modify করার চেষ্টা করে, এবং তাদের **execution order**-এর উপর নির্ভর করে ভিন্ন ভিন্ন (এবং অনেক ক্ষেত্রে ভুল) ফলাফল আসে।
 
@@ -28,6 +28,8 @@ title: 'Synchronization'
 ---
 
 **কীভাবে Race Condition ঘটে?**
+
+![Race condition counter example](./race_condition_counter_diagram.svg)
 
 ধরো শুরুতে,
 
@@ -95,7 +97,9 @@ Atomic operation-এর বৈশিষ্ট্য হলো—
 
 * Operation-টি একটিমাত্র indivisible step হিসেবে সম্পন্ন হয়।
 * Operation চলাকালীন অন্য thread সেটিকে মাঝপথে পরিবর্তন করতে পারে না।
-* তাই Race Condition হওয়ার সম্ভাবনা থাকে না।
+* তাই ঐ নির্দিষ্ট shared update-এর ক্ষেত্রে interleaving-এর কারণে lost update হয় না।
+
+তবে atomic operation সব synchronization problem solve করে না। একাধিক step, complex invariant, বা একাধিক shared resource একসাথে protect করতে হলে lock/mutex/monitor-এর মতো mechanism দরকার হতে পারে।
 
 ---
 
@@ -110,7 +114,7 @@ Atomic operation-এর বৈশিষ্ট্য হলো—
 
 ---
 
-## 🚪 26. What is a critical section, and what are the requirements for a correct solution to the critical-section problem?
+## 🚪 18. What is a critical section, and what are the requirements for a correct solution to the critical-section problem?
 
 **Critical Section** হলো কোনো program-এর এমন একটি **code block** যেখানে **shared resource** (যেমন: variable, memory, file, database বা shared data structure) access বা modify করা হয়।
 
@@ -118,6 +122,8 @@ Atomic operation-এর বৈশিষ্ট্য হলো—
 
 **একটি Process-এর সাধারণ Structure:**
 প্রতিটি process সাধারণত নিচের চারটি অংশ নিয়ে গঠিত—
+
+![Process structure with critical section](./process_structure_critical_section.svg)
 
 1. **Entry Section** – Critical Section-এ প্রবেশের অনুমতি নেওয়া হয়।
 2. **Critical Section** – Shared Resource access বা modify করা হয়।
@@ -159,11 +165,11 @@ Critical-Section Problem-এর একটি **সঠিক (Correct) Solution**
 
 **Mutex, Semaphore, Peterson's Algorithm, Monitor** ইত্যাদি synchronization mechanism এই লক্ষ্য অর্জনের জন্য ব্যবহৃত হয়। তবে কোনো mechanism বাস্তবে starvation-free হবে কি না বা bounded waiting নিশ্চিত করবে কি না, তা তার **implementation এবং scheduling policy**-এর উপর নির্ভর করে।
 
-----
+---
 
 
-## 🔑 27. What is the difference between a mutex and a semaphore?
-তিনটি synchronization mechanism-ই **Critical Section** রক্ষা করার জন্য ব্যবহৃত হয়। তবে এদের কাজের ধরন, ownership এবং ব্যবহারের ক্ষেত্র একে অপরের থেকে ভিন্ন।
+## 🔑 19. What is the difference between a mutex and a semaphore?
+Mutex, semaphore এবং spinlock—সবই synchronization-এর জন্য ব্যবহৃত হয়। তবে এদের কাজের ধরন, ownership এবং ব্যবহারের ক্ষেত্র একে অপরের থেকে ভিন্ন।
 
 
 **Mutex (Mutual Exclusion)**: Mutex হলো এমন একটি **lock** যা একই সময়ে শুধুমাত্র **একটি thread**-কে Critical Section-এ প্রবেশ করতে দেয়।
@@ -192,6 +198,8 @@ Semaphore সাধারণত দুটি operation ব্যবহার ক
 * **wait() (P operation)** → Counter কমায়
 * **signal() (V operation)** → Counter বাড়ায়
 
+![Mutex vs semaphore](./mutex_vs_semaphore.svg)
+
 ---
 
 ### What is the difference between a binary semaphore and a counting semaphore?
@@ -201,6 +209,8 @@ Semaphore সাধারণত দুটি operation ব্যবহার ক
 এই কারণে এটি **Producer–Consumer**, **Event Notification** বা **Thread Signaling**-এর মতো ক্ষেত্রে বেশি ব্যবহৃত হয়।
 
 **Counting Semaphore**: Counting Semaphore-এর counter **0 থেকে N** পর্যন্ত হতে পারে। এটি তখন ব্যবহার করা হয় যখন একই ধরনের **একাধিক resource** একসাথে ব্যবহার করার সুযোগ দিতে হয়।
+
+![Binary vs counting semaphore](./binary_vs_counting_semaphore.svg)
 
 উদাহরণ—
 
@@ -243,13 +253,15 @@ Spinlock সাধারণত **খুব অল্প সময়ের জ�
 * **Spinlock** waiting-এর সময় sleep না করে **Busy Waiting** করে। তাই এটি খুব স্বল্প সময়ের lock এবং kernel-level programming-এর জন্য উপযুক্ত, যেখানে context switch-এর overhead এড়ানো গুরুত্বপূর্ণ।
 
 
-## 📺 28. What are monitors, and how do they simplify synchronization compared to raw semaphores?
+## 📺 20. What are monitors, and how do they simplify synchronization compared to raw semaphores?
 
 **Monitor** হলো একটি **high-level synchronization construct**, যা shared data, সেই data access করার procedures (methods), এবং synchronization mechanism-কে একটি **একক unit**-এর মধ্যে সংগঠিত করে।
 
 Monitor-এর সবচেয়ে বড় বৈশিষ্ট্য হলো **automatic mutual exclusion**।
 
 অর্থাৎ, কোনো thread monitor-এর একটি procedure-এ প্রবেশ করলে monitor নিজেই lock নিয়ে নেয় এবং procedure শেষ হলে lock স্বয়ংক্রিয়ভাবে ছেড়ে দেয়। ফলে programmer-কে আলাদাভাবে `lock()` বা `unlock()` লিখতে হয় না।
+
+![Monitor structure vs semaphore](./monitor_structure_vs_semaphore.svg)
 
 ---
 
@@ -282,6 +294,8 @@ Condition Variable মূলত একটি **waiting queue**, যেখান�
 
 * **wait()**
 * **signal()** (বা **notify()**)
+
+![Monitor internal queues](./monitor_internal_queues.svg)
 
 ---
 
@@ -334,7 +348,7 @@ Condition Variable মূলত একটি **waiting queue**, যেখান�
 | Synchronization Error | হওয়ার সম্ভাবনা বেশি                                       | তুলনামূলক কম                                                                                                                |
 | Condition Waiting     | Programmer নিজে manage করে                                 | Condition Variable দিয়ে করা হয়                                                                                            |
 | Encapsulation         | Shared data ও synchronization আলাদা                        | Shared data + procedures + synchronization একসাথে থাকে                                                                      |
-| Language Support      | Low-level primitive                                        | Java (`synchronized`), C# (`lock`), C++ (`std::mutex` + `std::condition_variable`) দিয়ে Monitor Pattern implement করা যায় |
+| Language Support      | Low-level primitive                                        | Java (`synchronized`), C# (`lock`), C++ (`std::mutex` + `std::condition_variable`) দিয়ে monitor-style pattern implement করা যায় |
 
 ---
 

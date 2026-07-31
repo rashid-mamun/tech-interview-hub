@@ -4,27 +4,35 @@ title: 'CPU Scheduling'
 ---
 
 
-## 🎯 19. What are the key goals/criteria of a CPU scheduling algorithm?
+## 🎯 14. What are the key goals/criteria of a CPU scheduling algorithm?
 
 একটি ভালো CPU scheduler ডিজাইন করতে গেলে নিচের criteria গুলো maximize বা minimize করার চেষ্টা করা হয়।
 
-#### **Maximize করতে হয়:**
+![CPU scheduling goals](./cpu_scheduling_goals.svg)
+
+#### Maximize করতে হয়
 
 **CPU Utilization** — CPU-কে যত বেশি সম্ভব কার্যকর (busy) রাখা এবং idle time কমিয়ে আনা। CPU utilization যত বেশি হবে, system-এর resource তত ভালোভাবে ব্যবহার হবে।
 
 **Throughput** — প্রতি unit time-এ কতটি process সম্পন্ন হয়েছে। Throughput যত বেশি হবে, system তত বেশি কাজ সম্পন্ন করতে পারবে। এটি বিশেষ করে **batch system**-এ অত্যন্ত গুরুত্বপূর্ণ।
 
-#### **Minimize করতে হয়:**
+#### Minimize করতে হয়
 
 **Turnaround Time, Waiting Time, এবং Response Time** — এই তিনটি যত কম হবে, system-এর performance এবং user experience তত ভালো হবে।
+
+#### Balance করতে হয়
+
+**Fairness** — কোনো process যেন অনির্দিষ্টকাল CPU থেকে বঞ্চিত না হয়।
+
+**Predictability** — real-time বা latency-sensitive workload-এ scheduler-এর behavior predictable হওয়া গুরুত্বপূর্ণ।
 
 ---
 
 ### What is the difference between turnaround time, waiting time, and response time?
 
-উপরের diagram-এ timeline দেখে এটি সহজে বোঝা যায়।
+একটি process-এর scheduling performance বোঝার জন্য তিনটি metric সবচেয়ে common।
 
-#### **Turnaround Time**
+#### Turnaround Time
 
 Process submit (arrival) করার মুহূর্ত থেকে শুরু করে সেটি সম্পূর্ণ শেষ হওয়া পর্যন্ত মোট সময়।
 
@@ -32,7 +40,7 @@ Process submit (arrival) করার মুহূর্ত থেকে শু�
 
 ---
 
-#### **Waiting Time**
+#### Waiting Time
 
 Process টি Ready Queue-তে থেকে CPU পাওয়ার জন্য যত সময় অপেক্ষা করেছে, সেই সময়গুলোর সমষ্টি। CPU execution-এর সময় waiting time-এর মধ্যে গণনা করা হয় না।
 
@@ -40,7 +48,7 @@ Process টি Ready Queue-তে থেকে CPU পাওয়ার জন�
 
 ---
 
-#### **Response Time**
+#### Response Time
 
 Process arrive করার পর প্রথমবার CPU পাওয়া পর্যন্ত সময়। অর্থাৎ process প্রথমবার execution শুরু করতে যত সময় লাগে। Interactive system-এ এটি সবচেয়ে গুরুত্বপূর্ণ, কারণ user কত দ্রুত প্রথম response পাচ্ছে সেটি এটি নির্দেশ করে।
 
@@ -60,24 +68,26 @@ Process arrive করার পর প্রথমবার CPU পাওয়�
 
 ### How do throughput and fairness factor into scheduler design?
 
-**Throughput** বাড়ানোর জন্য সাধারণত **Shortest Job First (SJF)** বা **Shortest Remaining Time First (SRTF)** algorithm ভালো কাজ করে। কারণ এগুলো average waiting time এবং average turnaround time কমিয়ে দেয়। এর ফলে একই সময়ে তুলনামূলক বেশি process সম্পন্ন হতে পারে এবং throughput উন্নত হয়। তবে এর একটি বড় সমস্যা হলো **starvation**—দীর্ঘ burst time-এর বা low-priority process অনেক সময় দীর্ঘক্ষণ CPU না-ও পেতে পারে।
+**Throughput** বাড়ানোর জন্য অনেক workload-এ **Shortest Job First (SJF)** বা **Shortest Remaining Time First (SRTF)** ভালো average waiting/turnaround time দিতে পারে। তবে throughput শুধু algorithm-এর উপর নির্ভর করে না; workload mix, I/O wait, context-switch cost, admission policy এবং hardware resource-ও প্রভাব ফেলে। SJF/SRTF-এর একটি বড় সমস্যা হলো **starvation**—দীর্ঘ burst time-এর process অনেক সময় দীর্ঘক্ষণ CPU না-ও পেতে পারে।
 
 **Fairness** নিশ্চিত করার জন্য **Round Robin (RR)** বা **Aging** ব্যবহার করা হয়। Round Robin-এ প্রতিটি process একটি নির্দিষ্ট **time quantum** পায়, ফলে কোনো process দীর্ঘ সময় CPU থেকে বঞ্চিত হয় না। অন্যদিকে Aging-এ যে process দীর্ঘক্ষণ অপেক্ষা করছে, তার priority ধীরে ধীরে বাড়িয়ে দেওয়া হয়, যাতে starvation না ঘটে।
 
 সবশেষে, scheduler design-এর মূল trade-off হলো **throughput**, **fairness**, এবং **responsiveness**-এর মধ্যে ভারসাম্য (balance) বজায় রাখা। Throughput বাড়াতে গেলে fairness কিছুটা কমতে পারে, আবার সম্পূর্ণ fairness নিশ্চিত করতে গেলে context switching বেড়ে throughput কিছুটা কমে যেতে পারে। তাই modern operating system (যেমন Linux-এর **Completely Fair Scheduler (CFS)**) এই বিষয়গুলোর মধ্যে একটি কার্যকর balance বজায় রেখে কাজ করে।
 
 
-## ⏸️ 20. What is the difference between preemptive and non-preemptive scheduling?
+## ⏸️ 15. What is the difference between preemptive and non-preemptive scheduling?
 
 **Non-preemptive scheduling** — একটি process একবার CPU পেলে, সে নিজে থেকে CPU ছেড়ে না দেওয়া পর্যন্ত (যেমন execution শেষ করা বা I/O wait-এ যাওয়া) Operating System জোর করে CPU কেড়ে নিতে পারে না। অর্থাৎ CPU একবার কোনো process-কে দিলে সেটি স্বেচ্ছায় relinquish না করা পর্যন্ত অন্য কোনো process CPU পায় না।
 
-উপরের diagram-এ দেখো — **P2** t = 2-তে arrive করেছে, কিন্তু **P1** শেষ না হওয়া পর্যন্ত (t = 8) তাকে অপেক্ষা করতে হয়েছে, যদিও **P2**-এর burst time অনেক কম।
+![Preemptive vs non-preemptive scheduling](./preemptive_vs_nonpreemptive_scheduling.svg)
+
+ধরো **P2** `t = 2`-তে arrive করেছে, কিন্তু non-preemptive scheduling-এ **P1** CPU ছাড়ার আগে তাকে অপেক্ষা করতে হতে পারে, যদিও **P2**-এর burst time কম।
 
 ---
 
 **Preemptive scheduling** — Operating System প্রয়োজন হলে একটি running process-কে interrupt করে CPU অন্য process-কে দিতে পারে। সাধারণত **timer interrupt**, **উচ্চতর priority-র process arrive করা**, অথবা **time quantum শেষ হয়ে যাওয়া**-র কারণে preemption ঘটে।
 
-দ্বিতীয় timeline-এ দেখো — **P1** চলতে চলতে **P2** arrive করায় **P1**-কে preempt করা হয়েছে। পরে **P3** arrive করায় **P2**-কেও preempt করা হয়েছে। ফলে ছোট বা বেশি priority-সম্পন্ন process-গুলো অনেক আগে execution শেষ করতে পেরেছে।
+Preemptive scheduling-এ **P1** চলতে চলতে ছোট বা বেশি priority-র process ready হলে OS **P1**-কে pause করে অন্য process চালাতে পারে। ফলে interactive বা urgent কাজ দ্রুত response পেতে পারে।
 
 ---
 
@@ -87,7 +97,9 @@ Process arrive করার পর প্রথমবার CPU পাওয়�
 
 Preemptive scheduling-এ responsiveness অনেক বেশি। কোনো high-priority বা short job এলে সেটি দ্রুত CPU পেতে পারে। এজন্য আধুনিক interactive operating system (যেমন Linux, Windows এবং macOS) preemptive scheduling ব্যবহার করে।
 
-অন্যদিকে, Non-preemptive scheduling-এ একটি বড় process দীর্ঘ সময় CPU দখল করে রাখতে পারে। ফলে ছোট process-গুলোকে অপ্রয়োজনীয়ভাবে অপেক্ষা করতে হয়। এই সমস্যাকে **Convoy Effect** বলা হয়।
+অন্যদিকে, Non-preemptive scheduling-এ একটি বড় CPU-bound process দীর্ঘ সময় CPU দখল করে রাখতে পারে। ফলে ছোট বা I/O-bound process-গুলো অপ্রয়োজনীয়ভাবে অপেক্ষা করতে পারে। FCFS-এর মতো algorithm-এ এই সমস্যাকে **Convoy Effect** বলা হয়।
+
+![Convoy effect](./convoy_effect_road_metaphor.svg)
 
 ---
 
@@ -111,18 +123,20 @@ Preemptive scheduling-এ একটি process যেকোনো সময় i
 
 **Real-time System-এ**
 
-Hard real-time system-এ নির্দিষ্ট **deadline** মেনে চলা অত্যন্ত গুরুত্বপূর্ণ। তাই সেখানে preemptive scheduling অপরিহার্য, যাতে জরুরি process প্রয়োজন হলে সঙ্গে সঙ্গে CPU পেতে পারে।
+Hard real-time system-এ নির্দিষ্ট **deadline** মেনে চলা অত্যন্ত গুরুত্বপূর্ণ। তাই সেখানে preemptive priority scheduling বা EDF-এর মতো deadline-aware scheduling policy দরকার হতে পারে, যাতে জরুরি task সময়মতো CPU পায়।
 
 অন্যদিকে, batch processing system-এ responsiveness-এর তুলনায় throughput বেশি গুরুত্বপূর্ণ। তাই কিছু ক্ষেত্রে non-preemptive scheduling উপযুক্ত হতে পারে, কারণ এতে scheduling overhead কম থাকে।
 
 ---
 
 
-## 📊 21. Can you explain the common CPU scheduling algorithms?
+## 📊 16. Can you explain the common CPU scheduling algorithms?
 
-**FCFS, SJF, Priority, এবং Round Robin**
+**FCFS, SJF/SRTF, Priority, এবং Round Robin**
 
 প্রতিটি algorithm আলাদাভাবে বুঝতে চারটির Gantt chart পাশাপাশি দেখা সবচেয়ে কার্যকর। ধরো তিনটি process: **P1 (Burst = 6), P2 (Burst = 2), P3 (Burst = 4)** — সবাই **t = 0**-তে arrive করেছে।
+
+![Common CPU scheduling algorithms](./four_scheduling_algorithms_gantt.svg)
 
 **FCFS (First-Come, First-Served)**
 
@@ -140,6 +154,8 @@ Queue-তে যে process আগে আসে, সে-ই আগে CPU পা
 
 তবে বাস্তবে একটি বড় সমস্যা হলো ভবিষ্যতের CPU burst time আগে থেকে সঠিকভাবে জানা যায় না। এছাড়া দীর্ঘ burst time-এর process দীর্ঘক্ষণ অপেক্ষা করতে পারে, ফলে **starvation** হতে পারে।
 
+**SRTF (Shortest Remaining Time First)** হলো SJF-এর preemptive version। নতুন process এলে যদি তার remaining time current running process-এর remaining time-এর চেয়ে কম হয়, তাহলে scheduler current process-কে preempt করতে পারে।
+
 ---
 
 **Priority Scheduling**
@@ -147,6 +163,8 @@ Queue-তে যে process আগে আসে, সে-ই আগে CPU পা
 এখানে প্রতিটি process-এর একটি **priority** থাকে। সর্বোচ্চ priority-সম্পন্ন process আগে CPU পায়।
 
 Priority **static** বা **dynamic**—দুই ধরনেরই হতে পারে।
+
+> **Note:** কোনো system-এ ছোট priority number বেশি priority বোঝায়, আবার কোনো system-এ বড় number বেশি priority বোঝাতে পারে। তাই convention পরিষ্কার করা জরুরি।
 
 **SJF-কে Priority Scheduling-এর একটি বিশেষ রূপ হিসেবে ধরা যায়**, যেখানে **ছোট burst time-কে উচ্চ priority হিসেবে বিবেচনা করা হয়।**
 
@@ -165,11 +183,15 @@ Round Robin সবচেয়ে **fair** scheduling algorithm-গুলোর 
 * **Quantum খুব ছোট হলে** responsiveness বাড়ে, কিন্তু context switching overhead বেড়ে যায়।
 * **Quantum খুব বড় হলে** Round Robin ধীরে ধীরে FCFS-এর মতো আচরণ করতে শুরু করে।
 
+সাধারণ rule of thumb: quantum এমন হওয়া উচিত যাতে interactive response ভালো থাকে, কিন্তু context switch overhead অস্বাভাবিকভাবে বেশি না হয়।
+
 ---
 
 ### What are Multilevel Queue and Multilevel Feedback Queue scheduling, and how do they adapt to process behavior?
 
 এবার দেখা যাক **Multilevel Queue** এবং **Multilevel Feedback Queue** scheduling-এর পার্থক্য।
+
+![Multilevel queue and feedback queue](./multilevel_queue_and_feedback_queue.svg)
 
 **Multilevel Queue (MLQ)**
 

@@ -4,7 +4,7 @@ title: 'Memory Management'
 ---
 
 
-## 📍 37. What is the difference between a logical (virtual) address and a physical address?
+## 📍 27. What is the difference between a logical (virtual) address and a physical address?
 
 **Logical Address (Virtual Address)**
 
@@ -52,7 +52,7 @@ MMU-এর কারণেই process কখনোই তার actual physical 
 
 ---
 
-## 🧩 38. What is the difference between internal and external fragmentation?
+## 🧩 28. What is the difference between internal and external fragmentation?
 
 **Internal Fragmentation**
 
@@ -95,7 +95,7 @@ Compaction একটি **ব্যয়বহুল (costly)** operation, ক�
 
 2. **Performance Impact:** Compaction চলাকালীন system-এর performance কমে যেতে পারে। অনেক ক্ষেত্রে সংশ্লিষ্ট process-গুলোকে সাময়িকভাবে pause করতে হয় যাতে relocation নিরাপদভাবে সম্পন্ন হয়।
 
-3. **Relocation Information Update:** Process relocate করার পর OS-কে relocation information (যেমন base register, segment information বা page mapping) update করতে হয়, যাতে process নতুন physical location সঠিকভাবে access করতে পারে।
+3. **Relocation Information Update:** Process relocate করার পর OS-কে relocation information (যেমন base register, segment information বা page mapping) update করতে হয়, যাতে process নতুন physical location সঠিকভাবে access করতে পারে। Compaction practical হতে হলে runtime relocation support দরকার।
 
 4. **Implementation Complexity:** কোন process কীভাবে relocate করা হবে এবং কীভাবে memory safely reorganize করা হবে, সেটিও অতিরিক্ত algorithmic overhead তৈরি করে।
 
@@ -106,7 +106,7 @@ Compaction একটি **ব্যয়বহুল (costly)** operation, ক�
 > * **Internal Fragmentation = Allocated block-এর ভেতরে wasted space।**
 > * **External Fragmentation = Free memory block-গুলোর মাঝে ছড়িয়ে থাকা gaps, যেগুলো contiguous না হওয়ায় বড় allocation সম্ভব হয় না।**
 
-## 📄 39. What is paging, and how does it solve the fragmentation problem?
+## 📄 29. What is paging, and how does it solve the fragmentation problem?
 
 **Paging কী এবং এটা কীভাবে Fragmentation Problem সমাধান করে?**
 
@@ -155,6 +155,8 @@ CPU যখন একটি logical address generate করে, তখন **MMU (
 * **Invalid/Present = 0** → Page RAM-এ নেই (সম্ভবত secondary storage-এ আছে)।
 
 যদি page memory-তে না থাকে এবং process সেটি access করতে চায়, তাহলে **page fault** ঘটে।
+
+> **Note:** Invalid/Not-present bit সবসময় একই অর্থে ব্যবহৃত হয় না। কোনো entry invalid হতে পারে কারণ page disk/swap-এ আছে, আবার invalid হতে পারে কারণ addressটি process-এর valid address space-এর অংশই নয়। OS page fault handler এই দুই case আলাদা করে।
 
 #### 3. Protection Bits
 
@@ -271,7 +273,7 @@ TLB হলো একটি ছোট এবং খুব দ্রুত hardwar
 
 
 
-## ✂️ 40. What is segmentation, and how does it differ from paging?
+## ✂️ 30. What is segmentation, and how does it differ from paging?
 **Segmentation** হলো একটি **memory management technique** যেখানে একটি process-এর logical address space-কে **variable-size**, logically meaningful অংশে ভাগ করা হয়, যেগুলোকে **segment** বলা হয়।
 
 প্রতিটি segment একটি নির্দিষ্ট logical unit represent করে, যেমন—
@@ -304,7 +306,7 @@ Address translation-এর ধাপগুলো—
 1. CPU segment number ব্যবহার করে Segment Table Entry খুঁজে বের করে।
 2. Offset limit-এর মধ্যে আছে কিনা তা যাচাই করা হয়।
 3. Offset বৈধ হলে Base Address-এর সঙ্গে Offset যোগ করে Physical Address তৈরি করা হয়।
-4. Offset যদি limit-এর বাইরে যায়, তাহলে protection fault (segmentation fault) ঘটে।
+4. Offset যদি limit-এর বাইরে যায়, তাহলে protection fault ঘটে। Unix/Linux user program-এ এমন invalid memory access অনেক সময় `SIGSEGV` বা segmentation fault হিসেবে দেখা যায়।
 
 ---
 
@@ -380,7 +382,7 @@ Intel-এর **32-bit x86 architecture**-এ segmentation এবং paging উ�
 * Segmentation logical address space তৈরি করত।
 * Paging সেই logical address-কে physical memory-তে map করত।
 
-আধুনিক **64-bit operating system**-এ (যেমন Linux ও Windows on x86-64) segmentation-এর ব্যবহার খুব সীমিত; অধিকাংশ memory management paging-এর মাধ্যমেই করা হয়।
+আধুনিক **64-bit operating system**-এ (যেমন Linux ও Windows on x86-64) segmentation-এর ব্যবহার খুব সীমিত; অধিকাংশ memory management paging-এর মাধ্যমেই করা হয়। x86-64-এ সাধারণ code/data segmentation প্রায় flat model হিসেবে থাকে, তবে কিছু special register/segment mechanism এখনও TLS বা kernel-related কাজের জন্য ব্যবহৃত হতে পারে।
 
 ---
 
@@ -393,7 +395,7 @@ Intel-এর **32-bit x86 architecture**-এ segmentation এবং paging উ�
 
 ফলে আধুনিক memory management system-এ এই hybrid ধারণাটি অত্যন্ত কার্যকর।
 
-## 💱 41. What is swapping, and how does it relate to memory management?
+## 💱 31. What is swapping, and how does it relate to memory management?
 
 **Swapping** হলো একটি **memory management technique** যেখানে কোনো process-এর memory-কে সাময়িকভাবে **main memory (RAM)** থেকে **secondary storage**-এ (সাধারণত **swap space** বা **backing store**) স্থানান্তর করা হয় এবং পরে প্রয়োজন হলে আবার RAM-এ ফিরিয়ে আনা হয়।
 
@@ -492,11 +494,12 @@ Operating System শুধুমাত্র প্রয়োজনীয় p
 
 
 > **মনে রাখুন:**
-> Classical OS → **Process-level Swapping**
-> Modern OS → **Page-level Swapping (Demand Paging)**
+>
+> * Classical OS → **Process-level Swapping**
+> * Modern OS → **Page-level Swapping / Demand Paging**
 
 
-## 📦 42. What is the difference between contiguous and non-contiguous memory allocation?
+## 📦 32. What is the difference between contiguous and non-contiguous memory allocation?
 
 **Contiguous memory allocation** হলো এমন একটি memory allocation technique যেখানে একটি process-এর জন্য **একটানা (continuous)** physical memory block বরাদ্দ করা হয়।
 

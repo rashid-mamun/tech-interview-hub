@@ -19,14 +19,10 @@ OS বিভিন্ন **process** (running program) তৈরি, terminate, 
 
 **Example:** আপনি যদি একই সাথে Chrome, VS Code এবং Spotify চালান, তাহলে OS CPU time তাদের মধ্যে ভাগ করে দেয়।
 
-
-
 **ii) Memory Management**
 
 OS **RAM**-কে বিভিন্ন process-এর মধ্যে বণ্টন করে এবং কোন process কত memory ব্যবহার করবে তা নিয়ন্ত্রণ করে।
-এটি memory allocation, deallocation এবং **memory protection/isolation** নিশ্চিত করে, যাতে একটি process অন্য process-এর memory-তে অবৈধভাবে access করতে না পারে।
-
-
+এটি memory allocation, deallocation, virtual memory support এবং **memory protection/isolation** নিশ্চিত করে, যাতে একটি process অন্য process-এর memory-তে অবৈধভাবে access করতে না পারে।
 
 **iii) File System Management**
 
@@ -41,8 +37,6 @@ OS file ও folder কীভাবে **store, organize, retrieve এবং mana
 OS বিভিন্ন hardware device যেমন keyboard, mouse, printer, disk, monitor ইত্যাদির সাথে যোগাযোগ পরিচালনা করে।
 এ কাজের জন্য OS সাধারণত **device drivers** ব্যবহার করে।
 
-
-
 **v) Security and Access Control**
 
 OS user authentication, authorization, permission control এবং system resource protection নিশ্চিত করে।
@@ -56,6 +50,10 @@ OS user-এর সাথে interaction করার জন্য interface প�
 
 * **GUI (Graphical User Interface)** → যেমন Windows desktop
 * **CLI (Command Line Interface)** → যেমন Linux terminal
+
+**vii) System Call Interface**
+
+Application program সরাসরি privileged hardware operation করতে পারে না। তাই OS একটি **system call interface** দেয়, যার মাধ্যমে application নিরাপদভাবে file, process, memory, network বা device-related service request করতে পারে।
 
 ---
 
@@ -114,6 +112,8 @@ OS user-এর সাথে interaction করার জন্য interface প�
 * Microsoft Hyper-V
 * Xen
 
+> **Note:** Hyper-V Windows-এর সাথে tightly integrated হলেও architecture অনুযায়ী এটি সাধারণত Type 1 / bare-metal hypervisor হিসেবে ধরা হয়।
+
 
 **ii) Type 2 Hypervisor (Hosted)**
 
@@ -124,6 +124,7 @@ OS user-এর সাথে interaction করার জন্য interface প�
 
 * Oracle VirtualBox
 * VMware Workstation
+* VMware Fusion / Parallels Desktop
 
 ---
 
@@ -254,9 +255,9 @@ OS CPU time slice দিয়ে সবাইকে service দিচ্ছে —
 * distributed computing clusters
 * scientific computing
 * large-scale enterprise systems
-* cloud/distributed resource environments
+* research/educational distributed OS বা single-system-image cluster environments
 
-ধরো ৫টি computer মিলে একটি বড় computation করছে, কিন্তু user-এর কাছে মনে হচ্ছে যেন একটাই system কাজ করছে — এটাই distributed OS-এর idea।
+ধরো ৫টি computer মিলে একটি বড় computation করছে, কিন্তু user-এর কাছে মনে হচ্ছে যেন একটাই system কাজ করছে — এটাই distributed OS-এর idea। তবে মনে রাখতে হবে, **সব distributed system বা cloud platform Distributed OS নয়**; Distributed OS সাধারণত user-এর কাছে single-system image দেওয়ার চেষ্টা করে।
 
 ---
 
@@ -556,6 +557,13 @@ Hybrid kernel-এ সাধারণত microkernel-এর কিছু idea—�
 * কিছু design decision microkernel-inspired
 * কিন্তু implementation অনেক ক্ষেত্রে monolithic-style kernel-space execution ব্যবহার করে
 
+**Examples**
+
+* **Windows NT kernel** — Windows-এর kernel family; সাধারণত hybrid kernel হিসেবে classify করা হয়
+* **XNU kernel** — macOS/iOS-এর kernel; Mach microkernel ideas + BSD components + I/O Kit মিলিয়ে তৈরি
+
+> **Note:** “Hybrid kernel” classification কিছু ক্ষেত্রে debated, কারণ real-world kernels pure textbook category-তে সবসময় perfectly fit করে না।
+
 ---
 
 ### What are the performance and reliability trade-offs between monolithic and microkernel designs?
@@ -660,7 +668,7 @@ Modern operating system-এ CPU সাধারণত **দুই ধরনে�
 ---
 
 **User mode** হলো সেই execution mode যেখানে **সাধারণ application program** চলে।
-যেমন: **Chrome,VS Code,Spotify,Browser tab-এর process.**
+যেমন: **Chrome, VS Code, Spotify, browser tab-এর process**।
 
 এই mode-এ চলা process-গুলোর **ক্ষমতা সীমিত** থাকে।
 এরা সরাসরি critical hardware operation বা sensitive system resource access করতে পারে না।
@@ -748,7 +756,7 @@ CPU নিজে থেকে randomভাবে mode switch করে না।
 
 * file open করা
 * network socket তৈরি করা
-* memory allocate করা
+* OS-এর কাছ থেকে নতুন memory mapping/request করা (`mmap`, `brk`, `VirtualAlloc`-এর মতো system call)
 * process create করা
 * disk থেকে data পড়া
 
@@ -775,7 +783,7 @@ CPU নিজে থেকে randomভাবে mode switch করে না।
 2. interrupt এলে CPU current execution pause করে
 3. kernel mode-এ switch করে
 4. interrupt handler execute করে
-5. কাজ শেষে আগের process-এ ফিরে যায়
+5. কাজ শেষে CPU আগের process-এ ফিরতে পারে, অথবা scheduler প্রয়োজন মনে করলে অন্য ready process/thread চালাতে পারে
 
 ---
 **Exception / Fault-এর মাধ্যমে switch**

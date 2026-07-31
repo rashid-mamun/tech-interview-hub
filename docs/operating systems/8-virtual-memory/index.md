@@ -4,7 +4,7 @@ title: 'Virtual Memory'
 ---
 
 
-## 🪟 43. What is virtual memory, and why is it used?
+## 🪟 33. What is virtual memory, and why is it used?
 
 **Virtual Memory** হলো একটি **memory management technique** যা প্রতিটি process-কে এমন একটি **illusion (বিভ্রম)** দেয় যে তার নিজস্ব একটি বড়, continuous এবং private address space রয়েছে—যদিও বাস্তবে physical RAM সীমিত এবং সেটি একাধিক process-এর মধ্যে share করা হয়।
 
@@ -98,7 +98,7 @@ Kernel service ব্যবহার করতে হলে process-কে **sys
 
 ---
 
-## ⚡ 44. What is a Translation Lookaside Buffer (TLB), and how does it speed up address translation?
+## ⚡ 34. What is a Translation Lookaside Buffer (TLB), and how does it speed up address translation?
 
 **Translation Lookaside Buffer (TLB)** হলো একটি ছোট, অত্যন্ত দ্রুতগতির (**high-speed**) **hardware cache**, যা সাধারণত **MMU (Memory Management Unit)**-এর অংশ হিসেবে বা CPU-এর memory management hardware-এর মধ্যে implement করা হয়।
 
@@ -233,7 +233,7 @@ TLB Flush-এর পরে TLB-তে খুব কম translation থাকে�
 
 ---
 
-## 📥 45. What is demand paging, and how does a page fault work end-to-end?
+## 📥 35. What is demand paging, and how does a page fault work end-to-end?
 
 **Demand Paging** হলো **Virtual Memory** বাস্তবায়নের একটি technique, যেখানে কোনো page **শুধুমাত্র তখনই RAM-এ load করা হয় যখন সেটি প্রথমবার সত্যিই প্রয়োজন হয় (on demand)**।
 
@@ -259,6 +259,8 @@ TLB Flush-এর পরে TLB-তে খুব কম translation থাকে�
 
 **4. Efficient Memory Utilization:** RAM-এ শুধুমাত্র active page-গুলো থাকে।
 অপ্রয়োজনীয় page RAM দখল করে রাখে না।
+
+**Demand Paging-এর trade-off:** প্রথমবার কোনো page access করলে page fault হতে পারে। Page fault handle করতে disk I/O লাগলে delay অনেক বেশি হয়। তাই demand paging memory save করলেও page fault rate বেশি হলে performance কমে যায়।
 
 ### What steps does the OS take when a page fault occurs?
 
@@ -349,22 +351,22 @@ CPU Virtual Address
    │           │
 Terminate   Find Free Frame
                 │
-      Free Frame নেই?
-          │          │
-         No         Yes
-          │          │
- Page Replacement
-          │
- Dirty Page?
-   │        │
- Yes       No
-   │        │
-Write Back  │
-     │       │
-     └───────┘
-        │
-        ▼
-Load Page from Disk
+ Free Frame আছে?
+    │          │
+   Yes         No
+    │          │
+    │     Page Replacement
+    │          │
+    │     Dirty Page?
+    │       │        │
+    │      Yes       No
+    │       │        │
+    │   Write Back   │
+    │       │        │
+    └───────┴────────┘
+            │
+            ▼
+Load Required Page
         │
         ▼
 Update Page Table
@@ -381,49 +383,57 @@ Restart Faulting Instruction
 
 
 
-## 🔄 46. What are the common page replacement algorithms?
+## 🔄 36. What are the common page replacement algorithms?
 
-যখন একটা **page fault** ঘটে এবং physical memory তে কোনো **free frame** না থাকে, তখন OS কে RAM এ থাকা কোনো একটা existing page কে বেছে নিয়ে সরিয়ে ফেলতে হয় (এই page কে বলে **victim page**), যাতে নতুন page টার জন্য জায়গা তৈরি হয়। কোন page টাকে সরানো হবে, সেটা ঠিক করার strategy-ই হলো **page replacement algorithm**। ভালো একটা algorithm এর লক্ষ্য হলো **page fault rate** সর্বনিম্ন রাখা।
+যখন একটি **page fault** ঘটে এবং physical memory-তে কোনো **free frame** না থাকে, তখন OS-কে RAM-এ থাকা কোনো একটি existing page বেছে সরিয়ে ফেলতে হয়। এই page-কে **victim page** বলা হয়। কোন page সরানো হবে, সেটি ঠিক করার strategy-ই হলো **page replacement algorithm**।
+
+ভালো page replacement algorithm-এর লক্ষ্য:
+
+* **page fault rate** কমানো
+* dirty page write-back কমানো
+* frequently used page RAM-এ রাখা
+* implementation overhead reasonable রাখা
 
 ---
 
-## FIFO, LRU, Optimal, এবং LFU/MFU — তুলনামূলক আলোচনা
+### FIFO, LRU, Optimal, এবং LFU/MFU — তুলনামূলক আলোচনা
 
-### 1. FIFO (First-In-First-Out)
+#### 1. FIFO (First-In-First-Out)
 
-- **ধারণা:** যে page টা সবচেয়ে আগে RAM এ এসেছিল (মানে সবচেয়ে বেশিক্ষণ ধরে RAM এ আছে), সেটাকেই সবার আগে সরিয়ে দেওয়া হয় — অনেকটা queue এর মতো।
-- **বাস্তবায়ন:** একটা simple queue maintain করা হয় যেখানে page গুলো তাদের আসার order অনুযায়ী থাকে।
-- **সুবিধা:** implement করা সবচেয়ে সহজ এবং কম overhead।
-- **অসুবিধা:** যে page টা অনেকক্ষণ ধরে RAM এ আছে সেটা হয়তো এখনো ঘন ঘন ব্যবহার হচ্ছে (frequently used), কিন্তু শুধু পুরনো বলে সেটাকে সরিয়ে দেওয়া হবে — এটা কার্যকর decision নাও হতে পারে। এছাড়া এটা **Belady's Anomaly** এ ভোগে।
+* **ধারণা:** যে page সবচেয়ে আগে RAM-এ এসেছিল, সেটিকে আগে সরানো হয়।
+* **বাস্তবায়ন:** একটি simple queue maintain করা হয়।
+* **সুবিধা:** implement করা সহজ এবং overhead কম।
+* **অসুবিধা:** পুরোনো page এখনো frequently used হতে পারে। FIFO usage pattern দেখে না, তাই decision খারাপ হতে পারে। এছাড়া এটি **Belady's Anomaly**-তে ভুগতে পারে।
 
-### 2. LRU (Least Recently Used)
+#### 2. LRU (Least Recently Used)
 
-- **ধারণা:** যে page টা সবচেয়ে বেশিক্ষণ ধরে ব্যবহার হয়নি (মানে সবচেয়ে দীর্ঘ সময় ধরে access হয়নি), সেটাকে সরিয়ে দেওয়া হয়। এটা এই ধারণার উপর ভিত্তি করে যে যদি একটা page সাম্প্রতিক সময়ে ব্যবহার না হয়ে থাকে, তাহলে নিকট ভবিষ্যতেও সেটা প্রয়োজন হওয়ার সম্ভাবনা কম (temporal locality এর ভিত্তিতে)।
-- **সুবিধা:** সাধারণত FIFO এর চেয়ে ভালো performance দেয়, কারণ এটা actual usage pattern বিবেচনা করে।
-- **অসুবিধা:** Implementation costly — প্রতিটা page access এর timestamp track করতে হয়, যেটা extra hardware support (counter বা stack) দরকার করে।
+* **ধারণা:** যে page সবচেয়ে দীর্ঘ সময় ধরে access হয়নি, সেটিকে সরানো হয়।
+* **ভিত্তি:** temporal locality — সম্প্রতি ব্যবহৃত page আবার ব্যবহৃত হওয়ার সম্ভাবনা বেশি।
+* **সুবিধা:** সাধারণত FIFO-এর চেয়ে ভালো performance দেয়।
+* **অসুবিধা:** Exact LRU implement করা costly, কারণ প্রতিটি page access-এর recency track করতে হয়।
 
-### 3. Optimal (OPT / MIN)
+#### 3. Optimal (OPT / MIN)
 
-- **ধারণা:** সেই page টাকে সরানো হয় যেটা ভবিষ্যতে **সবচেয়ে বেশি সময় পর** আবার ব্যবহার হবে (অথবা কখনোই ব্যবহার হবে না)।
-- **বৈশিষ্ট্য:** এটা theoretically সবচেয়ে কম page fault rate দেয় — এটাই সর্বোত্তম (optimal) algorithm, এবং এটাকে benchmark হিসেবে ব্যবহার করা হয় অন্য algorithm গুলোর performance compare করার জন্য।
-- **সীমাবদ্ধতা:** এটা বাস্তবে implement করা **অসম্ভব**, কারণ এর জন্য ভবিষ্যতে কোন page কখন access হবে সেটা আগে থেকে জানা প্রয়োজন — যেটা একটা running system এ জানা যায় না। এটা শুধুমাত্র তাত্ত্বিক তুলনার জন্য ব্যবহৃত হয়।
+* **ধারণা:** যে page ভবিষ্যতে সবচেয়ে দেরিতে ব্যবহৃত হবে, বা আর ব্যবহৃতই হবে না, সেটিকে সরানো হয়।
+* **বৈশিষ্ট্য:** theoretically সবচেয়ে কম page fault rate দেয়।
+* **সীমাবদ্ধতা:** বাস্তবে implement করা যায় না, কারণ future reference string আগে থেকে জানা থাকে না। এটি benchmark হিসেবে ব্যবহৃত হয়।
 
-### 4. LFU (Least Frequently Used)
+#### 4. LFU (Least Frequently Used)
 
-- **ধারণা:** যে page টা সবচেয়ে কম সংখ্যকবার ব্যবহার হয়েছে (সবচেয়ে কম reference count), সেটাকে সরিয়ে দেওয়া হয়।
-- **যুক্তি:** যেই page কম ব্যবহার হচ্ছে, সেটা সম্ভবত ভবিষ্যতেও কম প্রয়োজন হবে।
-- **অসুবিধা:** নতুন load হওয়া কোনো page এর reference count কম থাকবে (যেহেতু সবে এসেছে), কিন্তু হয়তো এটা এখন থেকে ঘন ঘন ব্যবহার হবে — LFU ভুলবশত সেই দরকারী নতুন page কে সরিয়ে ফেলতে পারে।
+* **ধারণা:** যে page সবচেয়ে কমবার ব্যবহৃত হয়েছে, সেটিকে সরানো হয়।
+* **যুক্তি:** কম ব্যবহৃত page ভবিষ্যতেও কম দরকার হতে পারে।
+* **অসুবিধা:** নতুন দরকারি page-এর count কম থাকায় সেটি ভুলভাবে remove হতে পারে। পুরোনো page historically বেশি ব্যবহৃত হলেও এখন useless হতে পারে।
 
-### 5. MFU (Most Frequently Used)
+#### 5. MFU (Most Frequently Used)
 
-- **ধারণা:** LFU এর সম্পূর্ণ বিপরীত — যে page টা সবচেয়ে বেশি ব্যবহার হয়েছে, সেটাকেই সরিয়ে দেওয়া হয়।
-- **যুক্তি:** এই ধারণার ভিত্তিতে যে, যেই page ইতিমধ্যেই অনেকবার ব্যবহার হয়ে গেছে, তার "কাজ শেষ" — এখন সেটার আর প্রয়োজন হবে না।
-- **বাস্তবে ব্যবহার:** LFU এবং MFU দুটোই বাস্তবে খুব কম ব্যবহৃত হয়, কারণ এগুলো actual access pattern কে ঠিকভাবে predict করতে পারে না এবং implement করাও costly (প্রতিটা page এর জন্য counter maintain করতে হয়)।
+* **ধারণা:** LFU-এর বিপরীত — যে page সবচেয়ে বেশি ব্যবহৃত হয়েছে, সেটিকে সরানো হয়।
+* **যুক্তি:** page অনেকবার ব্যবহার হয়ে গেলে তার কাজ শেষ হয়ে থাকতে পারে।
+* **বাস্তবে ব্যবহার:** LFU/MFU সাধারণ-purpose OS page replacement-এ খুব কম ব্যবহৃত হয়, কারণ counter maintain costly এবং access pattern predict করা কঠিন।
 
-### সারসংক্ষেপ তুলনা
+#### সারসংক্ষেপ তুলনা
 
 | Algorithm | ভিত্তি | Performance | Practical Implementation |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | FIFO | Age (কতক্ষণ আগে এসেছে) | সাধারণত খারাপ | সহজ, কম overhead |
 | LRU | Recency (কতক্ষণ আগে ব্যবহার হয়েছে) | ভালো, বাস্তবে widely ব্যবহৃত | Costly, approximate করে implement হয় |
 | Optimal | Future knowledge | সর্বোত্তম (theoretical) | বাস্তবে সম্ভব না |
@@ -432,49 +442,80 @@ Restart Faulting Instruction
 
 ---
 
-## Belady's Anomaly কী, এবং কোন Algorithm এতে ভোগে?
+### Belady's Anomaly কী, এবং কোন Algorithm এতে ভোগে?
 
-**Belady's Anomaly** হলো একটা counter-intuitive (স্বাভাবিক ধারণার বিপরীত) পরিস্থিতি, যেখানে physical memory তে **frame এর সংখ্যা বাড়ানো হলেও page fault এর সংখ্যা কমার বদলে বেড়ে যায়**।
+**Belady's Anomaly** হলো counter-intuitive একটি পরিস্থিতি, যেখানে physical memory-তে **frame-এর সংখ্যা বাড়ানো হলেও page fault-এর সংখ্যা কমার বদলে বেড়ে যায়**।
 
 সাধারণ যুক্তি অনুযায়ী মনে হওয়া উচিত যে বেশি frame দিলে বেশি page RAM এ রাখা যাবে, তাই fault কমবে — কিন্তু কিছু নির্দিষ্ট algorithm এ এবং কিছু নির্দিষ্ট reference string এ, বাস্তবে উল্টোটা ঘটে।
 
 **কোন Algorithm এতে ভোগে:**
 
-**FIFO** algorithm এই anomaly তে ভোগে। এর কারণ হলো FIFO শুধুমাত্র page কতক্ষণ আগে RAM এ এসেছে সেটা বিবেচনা করে, page টা কতটা কার্যকরভাবে/ঘন ঘন ব্যবহার হচ্ছে সেটা বিবেচনা করে না। ফলে frame সংখ্যা বাড়ানোর ফলে queue এর behavior পরিবর্তিত হয়ে এমন একটা pattern তৈরি হতে পারে যেখানে দরকারী page গুলোই আগে সরানো হয়ে যায়।
+**FIFO** algorithm এই anomaly-তে ভুগতে পারে। এর কারণ হলো FIFO শুধুমাত্র page কতক্ষণ আগে RAM-এ এসেছে সেটা বিবেচনা করে, page কতটা useful বা recently used সেটি বিবেচনা করে না।
 
 **গুরুত্বপূর্ণ তথ্য:**
-- **LRU এবং Optimal** algorithm Belady's Anomaly তে ভোগে না — এই দুটো algorithm এর একটা বৈশিষ্ট্য আছে যাকে বলে **stack property** (মানে, N frame এর সাথে যে page গুলো RAM এ থাকে, সেগুলো সবসময় N+1 frame এর সাথে RAM এ থাকা page গুলোর একটা subset হবে)। যেসব algorithm এর এই stack property আছে, সেগুলো কখনো Belady's Anomaly তে ভোগে না।
-- FIFO এর এই stack property নেই, তাই এটা এই সমস্যায় পড়ে।
+
+* **LRU এবং Optimal** algorithm Belady's Anomaly-তে ভোগে না। এদের **stack property** আছে।
+* Stack property মানে, `N` frame-এর সাথে যে pageগুলো RAM-এ থাকে, সেগুলো `N+1` frame-এর সাথে RAM-এ থাকা pageগুলোর subset হবে।
+* FIFO-এর এই stack property নেই, তাই এটি anomaly-তে পড়তে পারে।
 
 ---
 
-## বাস্তবে LRU কীভাবে Approximate করা হয় (Clock / Second-Chance Algorithm)
+### বাস্তবে LRU কীভাবে approximate করা হয়?
 
-Pure LRU implement করতে হলে প্রতিটা page access এর জন্য একটা timestamp বা একটা linked list/stack maintain করতে হয়, যেটা প্রতিটা memory reference এ update করা প্রয়োজন — এটা এতটাই costly (hardware overhead) যে বাস্তবে প্রায় কোনো system এই সরাসরি pure LRU ব্যবহার করে না। এর বদলে LRU এর একটা **approximation** ব্যবহার করা হয়।
+Pure LRU implement করতে হলে প্রতিটি page access-এর জন্য timestamp বা linked list/stack maintain করতে হয়। প্রতিটি memory reference-এ এই structure update করা costly। তাই practical systems সাধারণত LRU approximation ব্যবহার করে।
 
-### Clock Algorithm (Second-Chance Algorithm)
+#### Clock Algorithm (Second-Chance Algorithm)
 
-এটাই সবচেয়ে জনপ্রিয় এবং widely-ব্যবহৃত LRU approximation technique।
+এটি সবচেয়ে common LRU approximation technique-এর একটি।
 
 **কীভাবে কাজ করে:**
 
-1. প্রতিটা page এর জন্য একটা **reference bit** (বা use bit) রাখা হয়, যেটা শুরুতে 0 থাকে।
-2. যখনই কোনো page reference (access) করা হয়, hardware সেই page এর reference bit কে **1** এ set করে দেয়।
-3. সব page গুলোকে একটা **circular queue (গোলাকার তালিকা)** হিসেবে সাজানো হয় — অনেকটা ঘড়ির কাঁটার মতো, তাই একে "Clock Algorithm" বলা হয়। একটা **pointer (hand)** এই circular queue তে ঘুরতে থাকে।
-4. যখন একটা page replace করার প্রয়োজন হয়, pointer টা circular queue তে ঘুরতে ঘুরতে প্রতিটা page চেক করে:
-   - যদি সেই page এর reference bit **0** থাকে — তার মানে সেই page টা সাম্প্রতিককালে ব্যবহার হয়নি, তাই এটাকেই **victim হিসেবে বেছে নেওয়া হয়** এবং সরিয়ে ফেলা হয়।
-   - যদি reference bit **1** থাকে — তার মানে page টা সম্প্রতি ব্যবহার হয়েছে, তাই তাকে সরানো হয় না। বরং তাকে "**second chance**" দেওয়া হয় — তার reference bit **0** এ reset করে দেওয়া হয় (পরের বার যদি এটা আবারো ব্যবহার না হয়, তাহলে তখন সরানো হবে), এবং pointer টা পরের page এ move করে।
+1. প্রতিটি page-এর জন্য একটি **reference bit** বা **use bit** রাখা হয়।
+2. কোনো page access হলে hardware সেই page-এর reference bit `1` করে।
+3. pageগুলো circular list/queue আকারে থাকে, এবং একটি pointer বা clock hand ঘুরতে থাকে।
+4. page replace দরকার হলে pointer pageগুলো check করে:
+   * reference bit `0` হলে pageটি victim হিসেবে বেছে নেওয়া হয়।
+   * reference bit `1` হলে pageটিকে second chance দেওয়া হয়, bit `0` করা হয়, এবং pointer সামনে যায়।
 5. এই প্রক্রিয়া চলতে থাকে যতক্ষণ না reference bit 0 থাকা একটা page খুঁজে পাওয়া যায়।
 
 **কেন এটা LRU এর একটা ভালো Approximation:**
 
-- এটা exact recency track না করলেও, মোটামুটি ভালোভাবে বলে দেয় কোন page গুলো "সাম্প্রতিক সময়ে ব্যবহার হয়নি" (reference bit 0) — এবং সেগুলোকেই প্রাধান্য দিয়ে সরানো হয়। যেগুলো সাম্প্রতিক ব্যবহার হয়েছে (reference bit 1), সেগুলো এড়িয়ে যাওয়া হয়, ঠিক যেমন LRU করত।
-- এটা implement করা **অনেক সহজ এবং সস্তা** — শুধু একটা bit (reference bit) এবং একটা circular pointer দরকার, আলাদা timestamp বা linked-list maintain করার প্রয়োজন নেই।
+* এটি exact recency track না করলেও recent use-এর rough signal দেয়।
+* এটি implement করা সহজ: reference bit এবং circular pointer দরকার, exact timestamp/linked list দরকার হয় না।
 
 **Enhanced Second-Chance Algorithm:**
 
-কিছু system এ শুধু reference bit না, সাথে **dirty (modified) bit**ও বিবেচনা করা হয় — এতে চারটা category তৈরি হয় (reference=0/dirty=0, reference=0/dirty=1, reference=1/dirty=0, reference=1/dirty=1), এবং যে page এর reference=0 এবং dirty=0 (মানে সাম্প্রতিক ব্যবহারও হয়নি, আবার modify ও হয়নি — তাই disk এ write-back করারও দরকার নেই), সেটাকেই সবচেয়ে প্রাধান্য দিয়ে victim হিসেবে বেছে নেওয়া হয়, কারণ এটা সরাতে সবচেয়ে কম cost লাগে।
+কিছু system-এ reference bit-এর সাথে **dirty (modified) bit**-ও বিবেচনা করা হয়। এতে সাধারণত clean এবং recently unused page আগে replace করার চেষ্টা করা হয়, কারণ dirty page remove করলে disk write-back দরকার হয়।
 
-**সংক্ষেপে:** Clock/Second-Chance Algorithm হলো practical system গুলোতে (যেমন Linux, Windows) ব্যবহৃত একটা efficient এবং low-overhead উপায়, যেটা pure LRU এর মতো নিখুঁত না হলেও, তার কার্যকারিতার কাছাকাছি ফলাফল দেয় অনেক কম implementation cost এ।
+**সংক্ষেপে:** Clock/Second-Chance Algorithm pure LRU-এর মতো নিখুঁত না হলেও কম overhead-এ ভালো practical result দেয়।
 
 ---
+
+### Thrashing কী, এবং page replacement-এর সাথে এর সম্পর্ক কী?
+
+**Thrashing** হলো এমন অবস্থা যেখানে system useful work করার চেয়ে page fault handle করা এবং page swap in/out করাতেই বেশি সময় ব্যয় করে।
+
+এটি সাধারণত ঘটে যখন:
+
+* RAM-এর তুলনায় active process/page demand অনেক বেশি
+* process-এর **working set** RAM-এ ধরছে না
+* OS অতিরিক্ত multiprogramming করছে
+* page replacement algorithm বারবার দরকারি page-ই বের করে দিচ্ছে
+
+**Working set** বলতে একটি process সাম্প্রতিক সময়ে যে pageগুলো actively ব্যবহার করছে সেই set বোঝায়। যদি কোনো process-এর working set RAM-এ রাখা না যায়, তাহলে সে বারবার page fault করবে।
+
+Thrashing-এর লক্ষণ:
+
+* CPU utilization কমে যায়
+* disk I/O খুব বেড়ে যায়
+* page fault rate অনেক বেশি হয়
+* system sluggish হয়ে যায়
+
+**সমাধান/Control**
+
+* multiprogramming degree কমানো
+* process-এর resident set/frame allocation বাড়ানো
+* working-set based বা page-fault-frequency based control ব্যবহার করা
+* বেশি RAM যোগ করা
+
+সংক্ষেপে, page replacement algorithm ভালো হলেও RAM যদি active working set ধরে রাখতে না পারে, তাহলে thrashing হতে পারে।

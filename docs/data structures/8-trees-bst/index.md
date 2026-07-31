@@ -1,12 +1,17 @@
 ---
 sidebar_position: 8
-title: 'Trees & BST'
+title: 'Trees'
 ---
 
 
 ## 🌲 41. What is a tree data structure, and what is its terminology (root, leaf, height, depth, degree)?
 
-**Tree** হলো একটা hierarchical data structure, যেখানে data গুলো **node** আকারে থাকে এবং node গুলো parent-child relationship দিয়ে connected থাকে। Tree এ সাধারণত একটা **root** থাকে, এবং root থেকে নিচের দিকে child node গুলো ছড়িয়ে যায়।
+**Tree** হলো একটি non-linear, hierarchical data structure যেখানে data গুলো parent-child সম্পর্কের মাধ্যমে সংযুক্ত থাকে। এটি অনেকটা উল্টানো গাছের মতো দেখতে, যেখানে সবচেয়ে উপরে থাকে **root** এবং নিচের দিকে বিভিন্ন **branch** ছড়িয়ে থাকে।
+
+একটি Tree-এর কিছু বৈশিষ্ট্য হলো:
+- এতে কোনো **cycle** থাকে না
+- N সংখ্যক node থাকলে তাতে ঠিক **N-1টি edge** থাকবে
+- প্রতিটি node-এ একটি মাত্র **parent** থাকে (root ছাড়া)
 
 **Basic terminology:**
 - **Root**: Tree এর top-most node, যার কোনো parent নেই
@@ -39,12 +44,16 @@ Height(A) = 2
 ### What is the difference between height and depth of a node?
 
 **Depth** root থেকে node পর্যন্ত distance measure করে।
+
 **Height** node থেকে নিচের সবচেয়ে দূরের leaf পর্যন্ত distance measure করে।
 
-| Concept | Direction | Example |
+| বিষয় | Height | Depth |
 |---|---|---|
-| Depth | Root থেকে node | `Depth(E) = 2` |
-| Height | Node থেকে deepest leaf | `Height(B) = 1` |
+| **সংজ্ঞা** | কোনো node থেকে নিচের দিকের সবচেয়ে দূরের leaf পর্যন্ত edge সংখ্যা | Root থেকে সেই node পর্যন্ত edge সংখ্যা |
+| **হিসাবের দিক** | নিচ থেকে উপরের দিকে (bottom-up) | উপর থেকে নিচের দিকে (top-down) |
+| **Leaf node-এর জন্য মান** | সবসময় **0** | Root থেকে কতটা দূরে তার উপর নির্ভর করে |
+| **Root node-এর জন্য মান** | পুরো tree-এর height-এর সমান | সবসময় **0** |
+| **সম্পর্ক** | Tree-এর **height** = root-এর height | Node-এর **level** বলতেও depth বোঝানো হয় |
 
 Interview এ confusion কমানোর জন্য মনে রাখা যায়:
 - **Depth starts from root**
@@ -54,13 +63,17 @@ Interview এ confusion কমানোর জন্য মনে রাখা �
 
 Tree আসলে graph এর special case। Tree এ কিছু extra rule থাকে:
 
-| বিষয় | Tree | Graph |
+| বিষয় | Tree | Graph |
 |---|---|---|
-| Cycle | থাকে না | থাকতে পারে |
-| Connected | সব node connected থাকে | connected বা disconnected হতে পারে |
-| Parent-child relation | স্পষ্ট hierarchy থাকে | সাধারণ relation থাকে |
-| Edges | `n` node হলে exactly `n - 1` edge | যেকোনো সংখ্যা হতে পারে |
-| Path | দুই node এর মধ্যে unique path | multiple path থাকতে পারে |
+| **Cycle** | কোনো **cycle** থাকতে পারে না (acyclic) | Cycle থাকতে পারে (cyclic হতে পারে) |
+| **Root** | একটি নির্দিষ্ট **root node** থাকে | Root বলে কিছু নেই, কোনো নির্দিষ্ট starting point বাধ্যতামূলক নয় |
+| **Edge সংখ্যা** | N node-এর জন্য ঠিক **N-1টি edge** থাকে | Edge সংখ্যা নির্দিষ্ট নয়, N node-এর জন্য যেকোনো সংখ্যক edge থাকতে পারে |
+| **Parent-Child সম্পর্ক** | স্পষ্ট **hierarchical** (parent-child) সম্পর্ক আছে | এমন কোনো নির্দিষ্ট hierarchy থাকে না |
+| **Path** | দুটি node-এর মধ্যে ঠিক **একটি মাত্র path** থাকে | দুটি node-এর মধ্যে একাধিক path থাকতে পারে |
+| **Connectivity** | সবসময় **connected** থাকতে হয় | Connected অথবা disconnected দুটোই হতে পারে |
+| **Directed/Undirected** | সাধারণত undirected, তবে কিছু ক্ষেত্রে directed (যেমন: Binary Tree) হতে পারে | Directed অথবা undirected দুটোই হতে পারে |
+| **উদাহরণ** | Binary Tree, BST, AVL Tree, Heap | Social Network, Road Map, Web Page linking |
+
 
 **Tree example:**
 
@@ -86,13 +99,16 @@ Tree আসলে graph এর special case। Tree এ কিছু extra rule 
 
 ## 🔀 42. What is the difference between a binary tree, a binary search tree (BST), and a balanced tree?
 
-**Binary Tree** হলো এমন tree যেখানে প্রতিটি node এর maximum দুইটা child থাকে: **left child** এবং **right child**।
+**Binary Tree** হলো এমন একটি tree data structure যেখানে প্রতিটি node-এর সর্বোচ্চ **দুইটি child** থাকতে পারে — **left child** এবং **right child**। এখানে node গুলোর মধ্যে কোনো নির্দিষ্ট **ordering rule** থাকে না, অর্থাৎ data যেকোনো ক্রমে বসানো যায়।
 
-**Binary Search Tree (BST)** হলো binary tree এর special type, যেখানে প্রতিটি node এর জন্য:
-- left subtree এর সব value `< node value`
-- right subtree এর সব value `> node value`
+**BST** হলো একটি বিশেষ ধরনের Binary Tree যেখানে একটি নির্দিষ্ট **ordering property** মেনে চলতে হয়:
+- প্রতিটি node-এর **left subtree**-এর সব value সেই node-এর value থেকে **ছোট**
+- প্রতিটি node-এর **right subtree**-এর সব value সেই node-এর value থেকে **বড়**
+- এই rule প্রতিটি subtree-তে recursively প্রযোজ্য
 
-**Balanced Tree** হলো এমন tree যেখানে height যতটা সম্ভব কম রাখা হয়, যাতে operation গুলো `O(log n)` এর কাছাকাছি থাকে।
+এই property-এর কারণে BST-তে **search, insert, delete** অপারেশনগুলো efficient হয় (average case-এ **O(log n)**)।
+
+**Balanced Tree** হলো এমন একটি tree (সাধারণত BST) যেখানে প্রতিটি node-এর left ও right subtree-এর **height-এর পার্থক্য** একটি নির্দিষ্ট সীমার মধ্যে রাখা হয় (যেমন AVL Tree-তে এই পার্থক্য সর্বোচ্চ ১)। এর ফলে tree-টি খুব বেশি **skewed** বা একদিকে হেলে পড়ে না।
 
 ```text
 Binary Tree:
@@ -125,7 +141,7 @@ Balanced BST:
 
 ### What is a full binary tree vs. a complete binary tree vs. a perfect binary tree?
 
-**Full Binary Tree**: প্রতিটি node এর হয় `0` child, নয়তো exactly `2` child।
+**Full Binary Tree**: প্রতিটি node-এর হয় **০টি** নাহলে **২টি** child থাকে — কোনো node-এর মাত্র ১টি child থাকতে পারবে না
 
 ```text
         1
@@ -135,7 +151,7 @@ Balanced BST:
     4   5
 ```
 
-**Complete Binary Tree**: শেষ level ছাড়া সব level full, এবং last level left থেকে fill হয়।
+**Complete Binary Tree**: সব **level** সম্পূর্ণ ভরা থাকে, শুধু শেষ level-এর node গুলো **left থেকে right** ক্রমে ভরা থাকে (মাঝে কোনো gap থাকবে না)
 
 ```text
         1
@@ -145,7 +161,7 @@ Balanced BST:
     4  5 6
 ```
 
-**Perfect Binary Tree**: সব internal node এর exactly 2 child এবং সব leaf একই level এ।
+**Perfect Binary Tree**: সব **internal node**-এর ঠিক ২টি করে child থাকে এবং সব **leaf node** একই **depth**-এ থাকে
 
 ```text
         1
@@ -157,7 +173,7 @@ Balanced BST:
 
 ### What is a balanced binary tree, and why does balance matter for performance?
 
-Balanced binary tree এ left subtree এবং right subtree এর height খুব বেশি difference করে না। সাধারণ definition অনুযায়ী, প্রতিটি node এর জন্য:
+**Balanced Binary Tree** হলো এমন একটি tree যেখানে প্রতিটি node-এর জন্য তার **left subtree** এবং **right subtree**-এর height-এর পার্থক্য খুব বেশি হয় না (সাধারণত **1**-এর বেশি না)। সাধারণ definition অনুযায়ী, প্রতিটি node এর জন্য:
 
 ```text
 abs(height(left) - height(right)) <= 1
@@ -352,18 +368,59 @@ vector<int> levelOrder(Node* root) {
 
 ## 📏 44. How do you find the height (or maximum depth) of a binary tree?
 
-Tree এর height/max depth বের করার idea খুব simple: কোনো node এর height হলো তার left subtree এবং right subtree এর maximum height + 1।
+**Height (Maximum Depth)** হলো **root থেকে সবচেয়ে দূরের leaf node পর্যন্ত longest path-এর দৈর্ঘ্য**।
+
+Height দুইভাবে define করা হয়—
+
+- **Edge Count Convention:** path-এ যতগুলো **edge** আছে।
+- **Node Count Convention:** path-এ যতগুলো **node** আছে।
+
+> **Programming Interview (LeetCode, NeetCode, GeeksforGeeks)-এ সাধারণত Node Count Convention ব্যবহার করা হয়।**
+>
 
 ```text
-        10
-       /  \
-      5    20
-          /  \
-         15   30
-
-Max depth = 3 nodes
-Height in edges = 2
+        1
+       / \
+      2   3
+     / \
+    4   5
 ```
+
+**Node Count Convention**: Longest Path:
+
+```
+1 → 2 → 4
+```
+
+এখানে node আছে **3টি**।
+
+অতএব,
+
+**Height (Maximum Depth) = 3**
+
+---
+
+**Edge Count Convention**
+
+একই path:
+
+```
+1 → 2 → 4
+```
+
+এখানে edge আছে **2টি**।
+
+অতএব,
+
+**Height = 2**
+
+---
+
+**Interview-এ কোনটা ব্যবহার হয়?**
+
+Programming Interview-তে (বিশেষ করে **LeetCode**) height বলতে সাধারণত **Maximum Depth (Node Count)** বোঝানো হয়।
+
+অর্থাৎ উপরের tree-এর height হবে **3**।
 
 Interview problem এ "maximum depth" সাধারণত node count হিসেবে ধরা হয়। তাই empty tree এর depth `0`, single node এর depth `1`।
 
@@ -539,24 +596,92 @@ int diameterOfBinaryTree(Node* root) {
 
 ## 🔄 47. How would you serialize and deserialize a binary tree?
 
-**Serialization** মানে tree কে string/list আকারে convert করা, যাতে file/network/database এ store বা transfer করা যায়।
-**Deserialization** মানে সেই string/list থেকে আবার original tree বানানো।
+**Serialization** হলো একটি Binary Tree-কে এমন একটি **String** বা **List**-এ রূপান্তর করা, যাতে সেটিকে সহজে—
+
+- File-এ Store করা যায়
+- Database-এ Save করা যায়
+- Network-এর মাধ্যমে Transfer করা যায়
+- পরে আবার একই Tree Recover করা যায়
+
+**Deserialization** হলো সেই Serialized String বা List থেকে আবার **ঠিক একই Binary Tree** পুনরায় তৈরি করার প্রক্রিয়া।
 
 ### What traversal order is commonly used for serialization, and why?
 
-Commonly **pre-order traversal** ব্যবহার করা হয়, কারণ root আগে থাকলে recursive ভাবে tree reconstruct করা সহজ হয়। তবে null node অবশ্যই store করতে হবে, নাহলে structure হারিয়ে যাবে।
+সবচেয়ে বেশি **Preorder Traversal (Root → Left → Right)** ব্যবহার করা হয়।
+
+কারণ,
+
+- Root প্রথমে পাওয়া যায়।
+- এরপর Recursive ভাবে Left ও Right Subtree সহজে Reconstruct করা যায়।
+- Implementation সহজ এবং Efficient।
+
+> **তবে Inorder Traversal একা ব্যবহার করে Tree Reconstruct করা যায় না**, কারণ একই Inorder Traversal থেকে একাধিক ভিন্ন Tree তৈরি হতে পারে।
+
+---
+
+### Null Node কেন Store করতে হয়?
+
+Serialization-এর সময় **Null Child** অবশ্যই Store করতে হবে।
+
+নাহলে Tree-এর Structure হারিয়ে যাবে এবং Original Tree পুনরায় তৈরি করা সম্ভব হবে না।
+
+সাধারণত Null Node বোঝাতে—
+
+```
+# or null
+```
+
+
+ধরি Tree টি হলো—
 
 ```text
-Tree:
         1
        / \
       2   3
          /
         4
+```
+**Preorder Traversal**
 
-Preorder with null:
+```
+1 2 3 4
+```
+
+এটি যথেষ্ট নয়।
+
+কারণ,
+
+```
+        1
+       /
+      2
+       \
+        3
+         \
+          4
+```
+
+এই Tree থেকেও একই Preorder পাওয়া যেতে পারে।
+
+অতএব Structure হারিয়ে যায়।
+
+---
+
+**Preorder + Null Marker**
+
+```
 1 2 # # 3 4 # # #
 ```
+
+এখানে
+
+```
+#
+```
+
+বোঝাচ্ছে Missing Child।
+
+এখন Tree-টি Uniquely Reconstruct করা সম্ভব।
 
 ### How do you handle null nodes during serialization?
 
@@ -620,642 +745,3 @@ Node* deserialize(string data) {
 
 ---
 
-## 🌳 48. What is a BST, and what property must every node satisfy?
-
-**Binary Search Tree (BST)** হলো binary tree যেখানে প্রতিটি node এর জন্য:
-
-```text
-left subtree এর সব value < node value < right subtree এর সব value
-```
-
-**Example BST:**
-
-```text
-        8
-      /   \
-     3     10
-    / \      \
-   1   6      14
-      / \    /
-     4   7  13
-```
-
-এখানে `8` এর বামে সব value ছোট, ডানে সব value বড়। একই rule প্রতিটি node এর জন্য true।
-
-### Why does an in-order traversal of a BST produce sorted output?
-
-In-order traversal order হলো **Left -> Root -> Right**। BST তে left subtree এর সব value root এর চেয়ে ছোট, এবং right subtree এর সব value root এর চেয়ে বড়। তাই:
-
-```text
-left এর sorted values -> root -> right এর sorted values
-```
-
-Example BST এর in-order:
-
-```text
-1 3 4 6 7 8 10 13 14
-```
-
-### What is the difference between a BST and a balanced BST?
-
-BST শুধু ordering property maintain করে। Balanced BST ordering এর সাথে height balance ও maintain করে।
-
-| বিষয় | BST | Balanced BST |
-|---|---|---|
-| Main property | left ছোট, right বড় | BST property + height controlled |
-| Worst-case height | `O(n)` | `O(log n)` |
-| Search/Insert/Delete | average `O(log n)`, worst `O(n)` | `O(log n)` |
-| Example | normal BST | AVL, Red-Black Tree |
-
----
-
-## 🔍 49. How do you search, insert, and delete a node in a BST?
-
-BST operation গুলো binary search এর মতো। current node এর value এর সাথে compare করে left বা right দিকে যাই।
-
-```cpp
-#include <bits/stdc++.h>
-using namespace std;
-
-struct Node {
-    int val;
-    Node* left;
-    Node* right;
-    Node(int x) : val(x), left(nullptr), right(nullptr) {}
-};
-
-bool searchBST(Node* root, int key) {
-    while (root != nullptr) {
-        if (root->val == key) return true;
-        if (key < root->val) root = root->left;
-        else root = root->right;
-    }
-    return false;
-}
-
-Node* insertBST(Node* root, int key) {
-    if (!root) return new Node(key);
-
-    if (key < root->val) {
-        root->left = insertBST(root->left, key);
-    } else if (key > root->val) {
-        root->right = insertBST(root->right, key);
-    }
-    return root;
-}
-
-Node* findMin(Node* root) {
-    while (root && root->left) {
-        root = root->left;
-    }
-    return root;
-}
-
-Node* deleteBST(Node* root, int key) {
-    if (!root) return nullptr;
-
-    if (key < root->val) {
-        root->left = deleteBST(root->left, key);
-    } else if (key > root->val) {
-        root->right = deleteBST(root->right, key);
-    } else {
-        if (!root->left) {
-            Node* rightChild = root->right;
-            delete root;
-            return rightChild;
-        }
-        if (!root->right) {
-            Node* leftChild = root->left;
-            delete root;
-            return leftChild;
-        }
-
-        Node* successor = findMin(root->right);
-        root->val = successor->val;
-        root->right = deleteBST(root->right, successor->val);
-    }
-    return root;
-}
-```
-
-### What happens when you delete a node that has two children?
-
-দুই child থাকা node delete করতে হলে সাধারণত দুইটা option:
-
-1. **In-order successor**: right subtree এর minimum node
-2. **In-order predecessor**: left subtree এর maximum node
-
-Example:
-
-```text
-Delete 8:
-
-        8
-      /   \
-     3     10
-            \
-             14
-            /
-           13
-
-Successor of 8 = 10
-
-After delete:
-        10
-      /    \
-     3      14
-           /
-          13
-```
-
-Successor/predecessor দিয়ে value replace করে তারপর ঐ successor/predecessor node delete করা হয়।
-
-### What is the time complexity of these operations in a balanced vs. unbalanced BST?
-
-| Operation | Balanced BST | Unbalanced/Skewed BST |
-|---|---|---|
-| Search | `O(log n)` | `O(n)` |
-| Insert | `O(log n)` | `O(n)` |
-| Delete | `O(log n)` | `O(n)` |
-
-কারণ operation গুলো tree height `h` এর উপর depend করে: `O(h)`।
-
----
-
-## ✅ 50. How would you validate whether a given binary tree is a valid BST?
-
-একটা tree valid BST কিনা check করতে শুধু immediate left/right child compare করলেই হবে না। প্রতিটি node কে তার allowed range এর মধ্যে থাকতে হবে।
-
-### What is the common mistake when only comparing a node to its immediate children?
-
-Common ভুল:
-
-```text
-        10
-       /  \
-      5    15
-          /  \
-         6    20
-```
-
-যদি শুধু immediate child check করি:
-- `15` এর left child `6`, তাই `6 < 15` ঠিক
-- কিন্তু `6` আসলে root `10` এর right subtree তে আছে, তাই `6 > 10` হওয়া উচিত ছিল
-
-এই tree valid BST না।
-
-### How would you solve this using bounds (min/max range) passed down recursively?
-
-প্রতিটি node এর জন্য একটা valid range pass করতে হবে:
-- left child এর upper bound হবে current node value
-- right child এর lower bound হবে current node value
-
-```cpp
-#include <bits/stdc++.h>
-using namespace std;
-
-struct Node {
-    int val;
-    Node* left;
-    Node* right;
-    Node(int x) : val(x), left(nullptr), right(nullptr) {}
-};
-
-bool validate(Node* root, long long low, long long high) {
-    if (!root) return true;
-
-    if (root->val <= low || root->val >= high) {
-        return false;
-    }
-
-    return validate(root->left, low, root->val) &&
-           validate(root->right, root->val, high);
-}
-
-bool isValidBST(Node* root) {
-    return validate(root, LLONG_MIN, LLONG_MAX);
-}
-```
-
-**Time Complexity**: `O(n)`
-**Space Complexity**: `O(h)`
-
-Alternative approach: in-order traversal করে values strictly increasing কিনা check করা।
-
----
-
-## 🌀 51. Why can BST operations degrade to O(n) in the worst case, and how is this avoided?
-
-BST operation এর complexity হলো `O(h)`, যেখানে `h` tree height। যদি BST balanced থাকে, `h = log n`; কিন্তু যদি tree skewed হয়ে যায়, `h = n`।
-
-### What input pattern causes a BST to become a "skewed" tree?
-
-Sorted input insert করলে normal BST skewed হয়ে যায়।
-
-```text
-Insert order: 1, 2, 3, 4, 5
-
-1
- \
-  2
-   \
-    3
-     \
-      4
-       \
-        5
-```
-
-এটা linked list এর মতো, তাই search করতে worst case এ সব node traverse করতে হতে পারে।
-
-### How do self-balancing trees prevent this degradation?
-
-Self-balancing BST insert/delete এর পর tree এর height check করে এবং প্রয়োজন হলে **rotation** করে। এতে height `O(log n)` এর মধ্যে থাকে।
-
-```text
-Before rotation:
-1
- \
-  2
-   \
-    3
-
-After left rotation:
-    2
-   / \
-  1   3
-```
-
-Examples:
-- **AVL Tree**
-- **Red-Black Tree**
-- **Treap**
-- **Splay Tree**
-
-C++ STL এর `std::map` এবং `std::set` সাধারণত Red-Black Tree based, তাই এগুলো sorted order maintain করে এবং operation `O(log n)`।
-
-```cpp
-#include <bits/stdc++.h>
-using namespace std;
-
-int main() {
-    set<int> values;
-    values.insert(5);
-    values.insert(1);
-    values.insert(3);
-
-    for (int x : values) {
-        cout << x << " ";
-    }
-    cout << endl;
-    return 0;
-}
-```
-
-**Output:**
-
-```text
-1 3 5
-```
-
----
-
-## 🔄 52. What are self-balancing BSTs, such as AVL trees and Red-Black trees?
-
-**Self-balancing BST** হলো এমন BST যা insert/delete এর পর নিজে নিজে height adjust করে, যাতে tree খুব বেশি skewed না হয়।
-
-### How does an AVL tree maintain balance using rotations (left, right, left-right, right-left)?
-
-AVL tree প্রতিটি node এর জন্য balance factor maintain করে:
-
-```text
-balance_factor = height(left) - height(right)
-```
-
-Allowed value: `-1`, `0`, `1`। এর বাইরে গেলে rotation লাগে।
-
-**1. Left Rotation (Right-Right case):**
-
-```text
-Before:
-10
-  \
-   20
-     \
-      30
-
-After:
-    20
-   /  \
- 10    30
-```
-
-**2. Right Rotation (Left-Left case):**
-
-```text
-Before:
-      30
-     /
-    20
-   /
-  10
-
-After:
-    20
-   /  \
- 10    30
-```
-
-**3. Left-Right Rotation:**
-
-```text
-Before:
-    30
-   /
-  10
-    \
-     20
-
-After:
-    20
-   /  \
- 10    30
-```
-
-**4. Right-Left Rotation:**
-
-```text
-Before:
-  10
-    \
-     30
-    /
-   20
-
-After:
-    20
-   /  \
- 10    30
-```
-
-Simple rotation code idea:
-
-```cpp
-struct AVLNode {
-    int val;
-    int height;
-    AVLNode* left;
-    AVLNode* right;
-    AVLNode(int x) : val(x), height(1), left(nullptr), right(nullptr) {}
-};
-
-int height(AVLNode* node) {
-    return node ? node->height : 0;
-}
-
-void updateHeight(AVLNode* node) {
-    node->height = 1 + max(height(node->left), height(node->right));
-}
-
-AVLNode* rotateRight(AVLNode* y) {
-    AVLNode* x = y->left;
-    AVLNode* t2 = x->right;
-
-    x->right = y;
-    y->left = t2;
-
-    updateHeight(y);
-    updateHeight(x);
-    return x;
-}
-
-AVLNode* rotateLeft(AVLNode* x) {
-    AVLNode* y = x->right;
-    AVLNode* t2 = y->left;
-
-    y->left = x;
-    x->right = t2;
-
-    updateHeight(x);
-    updateHeight(y);
-    return y;
-}
-```
-
-### What is the difference between an AVL tree and a Red-Black tree in terms of balance guarantees and use cases?
-
-| বিষয় | AVL Tree | Red-Black Tree |
-|---|---|---|
-| Balance | বেশি strict | তুলনামূলক relaxed |
-| Search | খুব দ্রুত, কারণ height কম | একটু বেশি height হতে পারে |
-| Insert/Delete | বেশি rotation লাগতে পারে | কম rotation লাগে |
-| Use case | search-heavy workload | mixed insert/delete/search workload |
-
-AVL tree বেশি balanced, তাই lookup-heavy system এ ভালো। Red-Black tree একটু relaxed balance রাখে, তাই frequent insert/delete এ practical performance ভালো হয়।
-
-### Where are Red-Black trees commonly used in real systems (e.g., language standard libraries)?
-
-Red-Black Tree অনেক standard library তে sorted associative container implement করতে ব্যবহৃত হয়।
-
-Examples:
-- C++: `std::map`, `std::set`, `std::multimap`, `std::multiset`
-- Java: `TreeMap`, `TreeSet`
-- Linux kernel এর কিছু ordered data structure
-
-```cpp
-#include <bits/stdc++.h>
-using namespace std;
-
-int main() {
-    map<string, int> score;
-    score["Rahim"] = 80;
-    score["Karim"] = 90;
-    score["Asha"] = 95;
-
-    for (auto [name, marks] : score) {
-        cout << name << " -> " << marks << endl;
-    }
-    return 0;
-}
-```
-
-**Output sorted by key:**
-
-```text
-Asha -> 95
-Karim -> 90
-Rahim -> 80
-```
-
----
-
-## 🥇 53. How do you find the kth smallest or kth largest element in a BST?
-
-BST এর in-order traversal sorted order দেয়। তাই **kth smallest** পেতে in-order traversal করে `k` তম element নিতে হবে। **kth largest** এর জন্য reverse in-order: Right -> Root -> Left।
-
-```text
-BST:
-        5
-       / \
-      3   8
-     / \   \
-    2   4   10
-
-In-order: 2 3 4 5 8 10
-3rd smallest = 4
-2nd largest = 8
-```
-
-```cpp
-#include <bits/stdc++.h>
-using namespace std;
-
-struct Node {
-    int val;
-    Node* left;
-    Node* right;
-    Node(int x) : val(x), left(nullptr), right(nullptr) {}
-};
-
-int kthSmallest(Node* root, int k) {
-    stack<Node*> st;
-    Node* curr = root;
-
-    while (curr != nullptr || !st.empty()) {
-        while (curr != nullptr) {
-            st.push(curr);
-            curr = curr->left;
-        }
-
-        curr = st.top();
-        st.pop();
-        k--;
-
-        if (k == 0) return curr->val;
-        curr = curr->right;
-    }
-
-    return -1; // invalid k
-}
-
-int kthLargest(Node* root, int k) {
-    stack<Node*> st;
-    Node* curr = root;
-
-    while (curr != nullptr || !st.empty()) {
-        while (curr != nullptr) {
-            st.push(curr);
-            curr = curr->right;
-        }
-
-        curr = st.top();
-        st.pop();
-        k--;
-
-        if (k == 0) return curr->val;
-        curr = curr->left;
-    }
-
-    return -1; // invalid k
-}
-```
-
-**Time Complexity**: `O(h + k)`
-**Space Complexity**: `O(h)`
-
-### How would augmenting each node with subtree size help answer this in O(log n)?
-
-যদি প্রতিটি node এ তার subtree এর node count store করা থাকে, তাহলে kth smallest search binary search এর মতো করা যায়।
-
-```text
-        5(size=6)
-       /        \
-   3(size=3)   8(size=2)
-   /   \          \
- 2(1) 4(1)       10(1)
-```
-
-Logic:
-- `leftSize = size(root->left)`
-- যদি `k == leftSize + 1`, তাহলে root answer
-- যদি `k <= leftSize`, তাহলে left subtree তে search
-- না হলে right subtree তে search with `k = k - leftSize - 1`
-
-Balanced BST হলে এই approach `O(log n)`।
-
-```cpp
-struct SizeNode {
-    int val;
-    int size;
-    SizeNode* left;
-    SizeNode* right;
-    SizeNode(int x) : val(x), size(1), left(nullptr), right(nullptr) {}
-};
-
-int getSize(SizeNode* node) {
-    return node ? node->size : 0;
-}
-
-int kthSmallestWithSize(SizeNode* root, int k) {
-    if (!root) return -1;
-
-    int leftSize = getSize(root->left);
-
-    if (k == leftSize + 1) return root->val;
-    if (k <= leftSize) return kthSmallestWithSize(root->left, k);
-
-    return kthSmallestWithSize(root->right, k - leftSize - 1);
-}
-```
-
-### How would you find the in-order predecessor and successor of a given node?
-
-**In-order predecessor** হলো BST sorted order এ target এর ঠিক আগের value।
-**In-order successor** হলো target এর ঠিক পরের value।
-
-```text
-In-order: 2 3 4 5 8 10
-Target = 5
-Predecessor = 4
-Successor = 8
-```
-
-```cpp
-pair<int, int> predecessorSuccessor(Node* root, int key) {
-    Node* pred = nullptr;
-    Node* succ = nullptr;
-    Node* curr = root;
-
-    while (curr != nullptr) {
-        if (key < curr->val) {
-            succ = curr;
-            curr = curr->left;
-        } else if (key > curr->val) {
-            pred = curr;
-            curr = curr->right;
-        } else {
-            Node* leftTree = curr->left;
-            while (leftTree) {
-                pred = leftTree;
-                leftTree = leftTree->right;
-            }
-
-            Node* rightTree = curr->right;
-            while (rightTree) {
-                succ = rightTree;
-                rightTree = rightTree->left;
-            }
-            break;
-        }
-    }
-
-    int predecessor = pred ? pred->val : -1;
-    int successor = succ ? succ->val : -1;
-    return {predecessor, successor};
-}
-```
-
-**Time Complexity**: `O(h)`
-Balanced BST হলে `O(log n)`, skewed হলে `O(n)`।
-
----

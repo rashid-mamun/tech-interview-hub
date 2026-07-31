@@ -57,7 +57,7 @@ Disk-এ থাকা VS Code-এর executable file হলো **program**।
 ### What information is stored in a Process Control Block (PCB)?
 
 **Process Control Block (PCB)** হলো operating system kernel-এর একটি **per-process data structure** যেখানে একটি process-কে manage করার জন্য প্রয়োজনীয় তথ্য রাখা হয়।
-প্রতিটি process-এর জন্য OS একটি PCB (বা equivalent process descriptor) maintain করে। PCB context switching, scheduling, memory management, এবং resource tracking-এর জন্য অত্যন্ত গুরুত্বপূর্ণ। ([Wikipedia][1])
+প্রতিটি process-এর জন্য OS একটি PCB (বা equivalent process descriptor) maintain করে। PCB context switching, scheduling, memory management, এবং resource tracking-এর জন্য অত্যন্ত গুরুত্বপূর্ণ।
 
 PCB-কে process-এর **“identity card”** বা **“kernel-side record”** বলা যায়।
 
@@ -132,7 +132,7 @@ Process বর্তমানে কোন অবস্থায় আছে:
 ### How does the OS keep track of multiple processes?
 
 Operating system kernel সাধারণত সব process-এর জন্য **PCB/process descriptor** maintain করে।
-এই PCB-গুলোকে kernel internally **process table** বা equivalent scheduling/resource-management structures-এ track করে। ([Wikipedia][1])
+এই PCB-গুলোকে kernel internally **process table** বা equivalent scheduling/resource-management structures-এ track করে।
 
 OS process-গুলোকে তাদের state অনুযায়ী বিভিন্ন queue-তেও রাখে, যেমন:
 
@@ -194,6 +194,8 @@ Classic OS model-এ সাধারণত **৫টি মূল process state**
 * **Waiting / Blocked**
 * **Terminated**
 
+কিছু OS/textbook model-এ এর সাথে **Suspended Ready** বা **Suspended Blocked** state-ও দেখানো হয়, বিশেষ করে swapping বা memory pressure বোঝানোর সময়। তবে interview fundamentals-এর জন্য নিচের ৫-state model সবচেয়ে common।
+
 
 **i) New**
 
@@ -237,7 +239,7 @@ Process এখন CPU দিয়ে কিছু করতে পারবে 
 **v) Terminated**
 
 Process execution শেষ করেছে বা OS সেটিকে terminate করেছে।
-এরপর OS process-এর ব্যবহৃত resource release করে। কিছু system-এ exit status সংগ্রহের জন্য process-এর কিছু bookkeeping information সাময়িকভাবে থাকতে পারে, তারপর পুরোপুরি remove হয়।
+এরপর OS process-এর ব্যবহৃত resource release করে। Unix-like system-এ parent process exit status collect না করা পর্যন্ত process-এর ছোট bookkeeping entry **zombie process** হিসেবে সাময়িকভাবে থাকতে পারে, তারপর পুরোপুরি remove হয়।
 
 
 
@@ -261,7 +263,7 @@ Waiting -- event/I/O complete --> Ready
 
 ---
 
-###  What transitions exist between new, ready, running, waiting, and terminated states?
+### What transitions exist between new, ready, running, waiting, and terminated states?
 
 | Transition                         | From → To            | কারণ                                                                               |
 | ---------------------------------- | -------------------- | ---------------------------------------------------------------------------------- |
@@ -274,7 +276,7 @@ Waiting -- event/I/O complete --> Ready
 
 ---
 
-###  What causes a process to move from "running" to "waiting"?
+### What causes a process to move from "running" to "waiting"?
 
 এটি process lifecycle-এর সবচেয়ে গুরুত্বপূর্ণ transition-গুলোর একটি।
 একটি running process নিচের কারণগুলোতে **blocked / waiting** state-এ যেতে পারে:
@@ -431,7 +433,7 @@ Context switch হবে তখনই যদি system call-এর কারণ�
 
 ---
 
-###  What information must be saved and restored during a context switch?
+### What information must be saved and restored during a context switch?
 
 **Save করা হয় (বর্তমান running task-এর জন্য)**
 
@@ -549,7 +551,7 @@ Context switch useful application work নয়; এটি **management overhead**
 
 ---
 
-###  How does the frequency of context switches affect system performance?
+### How does the frequency of context switches affect system performance?
 
 **বেশি context switch হলে**
 
@@ -567,11 +569,13 @@ Context switch useful application work নয়; এটি **management overhead**
 
 ---
 
-## 👶 9. What is the difference between fork() and exec()?
+## 👶 8. What is the difference between fork() and exec()?
 
 `fork()` হলো একটি Unix/Linux **system call** যা calling process-এর ভিত্তিতে একটি নতুন **child process** তৈরি করে।
 
 Child process parent-এর **অনেক state inherit করে** এবং শুরুতে parent-এর execution state-এর খুব কাছাকাছি অবস্থায় থাকে। `fork()` call শেষ হওয়ার পর parent এবং child—দুই process-ই `fork()`-এর পরের instruction থেকে চলতে থাকে।
+
+> **Note:** `fork()` POSIX/Unix-like OS-এর concept। Windows-এ process creation সাধারণত `CreateProcess()` API দিয়ে হয়, যেখানে fork-exec model-এর মতো exact split নেই।
 
 ```c
 pid_t pid = fork();
@@ -666,7 +670,7 @@ perror("execl failed");   // exec fail করলে তবেই এখানে
 
 ---
 
-###  Why are fork() and exec() often used together?
+### Why are fork() and exec() often used together?
 
 Unix shell নতুন program চালাতে সাধারণত এই pattern ব্যবহার করে:
 
@@ -687,9 +691,9 @@ iv. **Parent** চাইলে `wait()` দিয়ে child-এর জন্য �
 ---
 
 
-## 📋 10. What is process scheduling, and what are the roles of the long-term, short-term, and medium-term schedulers?
+## 📋 9. What is process scheduling, and what are the roles of the long-term, short-term, and medium-term schedulers?
 
-Process scheduling হলো OS-এর সেই mechanism যার মাধ্যমে OS সিদ্ধান্ত নেয় **ready অবস্থায় থাকা runnable task/process/thread-গুলোর মধ্যে কে CPU পাবে, কখন পাবে, এবং কতক্ষণ পাবে**।
+Process scheduling হলো OS-এর সেই mechanism যার মাধ্যমে OS সিদ্ধান্ত নেয় **ready অবস্থায় থাকা runnable task/process/thread-গুলোর মধ্যে কে CPU পাবে, কখন পাবে, এবং কতক্ষণ পাবে**। এই chapter-এ scheduler-এর role বোঝানো হচ্ছে; individual CPU scheduling algorithm chapter 4-এ বিস্তারিত আছে।
 
 একটি **CPU core** এক সময়ে একটি runnable thread/process execute করতে পারে, তাই multiple tasks থাকলে scheduler-কে CPU time ভাগ করে দিতে হয়।
 

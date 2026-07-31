@@ -11,7 +11,7 @@ title: 'Threads'
 একটি process-এ **একটি বা একাধিক thread** থাকতে পারে। প্রতিটি thread-এর **নিজস্ব execution flow** থাকে, তবে তারা একই process-এর **code, data, heap, open files** ইত্যাদি resource share করে।
 
 Thread-কে অনেক সময় **lightweight process** বলা হয়, কারণ এটি process-এর মতো execution করে, কিন্তু সাধারণত **নিজস্ব আলাদা address space তৈরি করে না**। বরং একই process-এর resources share করে।
-এই কারণে **thread তৈরি, পরিচালনা এবং context switch** করা process-এর তুলনায় তুলনামূলক **কম খরচসাপেক্ষ**।
+এই কারণে thread তৈরি ও একই process-এর threadগুলোর মধ্যে context switch করা process-এর তুলনায় সাধারণত **কম খরচসাপেক্ষ**।
 
 ---
 
@@ -61,6 +61,7 @@ Thread বোঝার জন্য এটি সবচেয়ে গুরু
 * **Heap** (dynamic memory)
 * **Open files / file descriptors**
 * **Process address space**
+* **Signal handlers / process-level attributes** অনেক system-এ process-wide হিসেবে shared থাকে
 
 ```text
 ┌─────────────────────────────────────────┐
@@ -93,6 +94,7 @@ Thread বোঝার জন্য এটি সবচেয়ে গুরু
 * **CPU Registers**
 * **Stack**
 * **Local variables / function call information**
+* **Thread-local storage (TLS)** এবং কিছু per-thread signal/scheduling state
 
 ```text
 ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
@@ -261,6 +263,7 @@ Process A      Process B          Thread 1    Thread 2
 
 **একটি thread-এর গুরুতর error পুরো process-কে প্রভাবিত করতে পারে**: যেহেতু thread গুলো একই process-এর memory space share করে, তাই memory corruption বা segmentation fault-এর মতো error পুরো process-কে ক্ষতিগ্রস্ত করতে পারে।
 
+---
 
 ## 🏗️ 11. What is the difference between user-level threads and kernel-level threads?
 
@@ -297,7 +300,7 @@ User-level Thread (ULT):          Kernel-level Thread (KLT):
 এখানে thread তৈরি, schedule, block, resume, context switch — সবকিছু **user space-এ** হয়।
 
 Kernel সাধারণত জানে না যে ওই process-এর মধ্যে একাধিক user thread আছে।
-Kernel-এর কাছে পুরো process-টি অনেক ক্ষেত্রে **একটি single schedulable entity** হিসেবে দেখা যায়।
+Many-to-one model-এ kernel-এর কাছে পুরো process-টি **একটি single schedulable entity** হিসেবে দেখা যায়। তবে বাস্তবে ULT/KLT behavior mapping model-এর ওপর নির্ভর করে, যা পরের section-এ এসেছে।
 
 
 
@@ -380,7 +383,7 @@ Kernel প্রতিটি thread আলাদাভাবে schedule কর�
 
 ### What are the advantages and disadvantages of each?
 
-**Advantages:**
+**ULT-এর সুবিধা**
 
 #### i. Thread তৈরি ও switch দ্রুত
 
@@ -410,7 +413,7 @@ Application নিজেই তার দরকারমতো scheduling policy
 
 ---
 
-**Disadvantages:**
+**ULT-এর অসুবিধা**
 
 #### i. একটি blocking operation পুরো process-কে আটকে দিতে পারে
 
@@ -637,7 +640,7 @@ Kernel:        KT1        KT2        KT3
 
 ---
 
-** Many-to-Many Model**
+**Many-to-Many Model**
 
 
 ```text
@@ -660,7 +663,7 @@ Kernel:   KT1    KT2         KT3
 **কীভাবে কাজ করে**
 
 এখানে অনেকগুলো ULT অনেকগুলো KLT-এর সাথে map হয়।
-অর্থাৎ user thread সংখ্যা kernel thread সংখ্যার চেয়ে বেশি হতে পারে, আবার প্রয়োজনে OS/kernel আরও kernel thread ব্যবহার করতে পারে।
+অর্থাৎ user thread সংখ্যা kernel thread সংখ্যার চেয়ে বেশি হতে পারে, আর user-level runtime/library একটি kernel thread pool-এর উপর user threadগুলো multiplex করে। Runtime প্রয়োজন হলে OS-এর কাছে আরও kernel thread চাইতে পারে।
 
 এই model-এর উদ্দেশ্য হলো:
 
@@ -690,7 +693,7 @@ Kernel:   KT1    KT2         KT3
 | **Thread creation cost**      | কম                                   | বেশি                   | মাঝারি             |
 | **Implementation complexity** | কম                                   | কম/মাঝারি              | বেশি               |
 | **Kernel visibility**         | Kernel সাধারণত একটিমাত্র entity দেখে | প্রতিটি thread visible | একাধিক KLT visible |
-| **Modern usage**              | বিরল                                 | খুবই common            | বিরল               |
+| **Modern usage**              | বিরল                                 | খুবই common            | বিরল / specialized |
 
 ---
 
@@ -701,6 +704,8 @@ Kernel:   KT1    KT2         KT3
 * **ULT** মানে thread management user space-এ হচ্ছে
 * **KLT** মানে kernel প্রতিটি thread-কে জানে ও manage করছে
 * **Multithreading model** বলে **ULT আর KLT-এর mapping কেমন হবে**
+
+> **Modern note:** Linux, Windows এবং macOS-এর mainstream application threads সাধারণত one-to-one kernel-managed threading model ব্যবহার করে। Many-to-many model historically গুরুত্বপূর্ণ, কিন্তু today সাধারণ application development-এ তুলনামূলক কম দেখা যায়।
 
 
 

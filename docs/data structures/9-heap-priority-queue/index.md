@@ -219,324 +219,264 @@ Maximum value: 30
 
 ## 📊 56. How is a heap implemented using an array?
 
-Heap complete binary tree হওয়ার কারণে array তে level-order অনুযায়ী store করা হয়।
+**Heap** একটি বিশেষ ধরনের **Complete Binary Tree**, যা সাধারণত **Array**-এর মাধ্যমে খুব efficient ভাবে implement করা যায় — কোনো explicit **pointer** (left/right child pointer) ছাড়াই।
 
-```text
-Tree:
-        90
+যেহেতু Heap সবসময় একটি **Complete Binary Tree** (কোনো gap থাকে না, সব level left থেকে right ক্রমে ভরা থাকে), তাই এর node গুলোকে **index** অনুযায়ী array-তে সাজানো সম্ভব — parent-child সম্পর্ক শুধুমাত্র **index-এর গাণিতিক সম্পর্ক** দিয়েই বের করা যায়।
+
+```
+        10
        /  \
-      60   70
-     / \   / \
-    20 50 65 40
-
-Array:
-Index:  0   1   2   3   4   5   6
-Value: 90  60  70  20  50  65  40
+      8    9
+     / \   /
+    4   7 5
 ```
 
-কোনো pointer দরকার হয় না। শুধু index calculation দিয়েই parent/child access করা যায়।
-
-### How do you calculate the indices of a node's parent, left child, and right child?
-
-0-indexed array হলে:
-
-```text
-parent(i) = (i - 1) / 2
-left(i)   = 2 * i + 1
-right(i)  = 2 * i + 2
-```
-
-Example:
-
-```text
-Index 1 এর value 60
-parent = (1 - 1) / 2 = 0 -> 90
-left   = 2 * 1 + 1 = 3 -> 20
-right  = 2 * 1 + 2 = 4 -> 50
-```
-
-1-indexed array হলে formula একটু আলাদা:
-
-```text
-parent(i) = i / 2
-left(i)   = 2 * i
-right(i)  = 2 * i + 1
-```
-
-### What are the "heapify-up" and "heapify-down" (sift up/down) operations?
-
-**Heapify-up / Sift-up** ব্যবহার হয় insert করার পর। নতুন element array এর শেষে বসে, তারপর parent এর সাথে compare করে উপরে উঠতে থাকে যতক্ষণ heap property ঠিক না হয়।
-
-```text
-Insert 80 in max-heap:
-
-Before:
-        70
-       /  \
-      50   60
-
-After insert at end:
-        70
-       /  \
-      50   60
-     /
-    80
-
-Sift-up:
-        80
-       /  \
-      70   60
-     /
-    50
-```
-
-**Heapify-down / Sift-down** ব্যবহার হয় root remove করার পর। Last element root এ বসে, তারপর child এর সাথে compare করে নিচে নামে।
-
-```text
-Extract max:
-
-Before:
-        90
-       /  \
-      60   70
-     / \
-    20 50
-
-Move last element 50 to root:
-        50
-       /  \
-      60   70
-     /
-    20
-
-Sift-down:
-        70
-       /  \
-      60   50
-     /
-    20
-```
-
-Manual max-heap implementation using `vector`:
+এই Heap-টিকে array-তে represent করলে (0-indexed):
 
 ```cpp
-#include <bits/stdc++.h>
-using namespace std;
-
-class MaxHeap {
-    vector<int> heap;
-
-    void siftUp(int i) {
-        while (i > 0) {
-            int parent = (i - 1) / 2;
-            if (heap[parent] >= heap[i]) break;
-
-            swap(heap[parent], heap[i]);
-            i = parent;
-        }
-    }
-
-    void siftDown(int i) {
-        int n = heap.size();
-
-        while (true) {
-            int left = 2 * i + 1;
-            int right = 2 * i + 2;
-            int largest = i;
-
-            if (left < n && heap[left] > heap[largest]) {
-                largest = left;
-            }
-            if (right < n && heap[right] > heap[largest]) {
-                largest = right;
-            }
-
-            if (largest == i) break;
-
-            swap(heap[i], heap[largest]);
-            i = largest;
-        }
-    }
-
-public:
-    void push(int x) {
-        heap.push_back(x);
-        siftUp(heap.size() - 1);
-    }
-
-    int top() {
-        return heap.front();
-    }
-
-    void pop() {
-        if (heap.empty()) return;
-
-        heap[0] = heap.back();
-        heap.pop_back();
-
-        if (!heap.empty()) {
-            siftDown(0);
-        }
-    }
-
-    bool empty() {
-        return heap.empty();
-    }
-};
-
-int main() {
-    MaxHeap pq;
-    pq.push(10);
-    pq.push(30);
-    pq.push(20);
-
-    cout << pq.top() << endl;
-    pq.pop();
-    cout << pq.top() << endl;
-
-    return 0;
-}
+vector<int> heap = {10, 8, 9, 4, 7, 5};
+// Index:            0   1  2  3  4  5
 ```
 
-**Output:**
-
-```text
-30
-20
-```
+Tree-এর প্রতিটি **level** array-তে **পাশাপাশি (sequentially)** সাজানো থাকে।
 
 ---
 
-## ⏱️ 57. What is the time complexity of heap operations (insert, extract-min/max, build-heap)?
+### How do you calculate the indices of a node's parent, left child, and right child?
 
-Heap operation এর complexity tree height এর উপর depend করে। Complete binary tree এর height `O(log n)`।
+Array-এর indexing **0-indexed** নাকি **1-indexed** তার উপর ভিত্তি করে formula একটু ভিন্ন হয়।
 
-| Operation | Complexity | Explanation |
-|---|---|---|
-| `top()` / peek | `O(1)` | root directly access |
-| Insert / push | `O(log n)` | sift-up করতে হতে পারে |
-| Extract min/max / pop | `O(log n)` | sift-down করতে হতে পারে |
-| Build heap | `O(n)` | bottom-up heapify |
-| Search arbitrary value | `O(n)` | heap sorted না, তাই traversal লাগে |
+#### 🔹 0-Indexed Array (সবচেয়ে বেশি ব্যবহৃত, যেমন C++ vector/STL)
 
-C++ STL priority queue:
+কোনো node-এর index `i` হলে:
+
+| সম্পর্ক | Formula |
+|---|---|
+| **Parent** | `(i - 1) / 2` (integer division) |
+| **Left Child** | `2 * i + 1` |
+| **Right Child** | `2 * i + 2` |
 
 ```cpp
-#include <bits/stdc++.h>
-using namespace std;
+int parent(int i)     { return (i - 1) / 2; }
+int leftChild(int i)  { return 2 * i + 1; }
+int rightChild(int i) { return 2 * i + 2; }
+```
 
-int main() {
-    priority_queue<int> pq;
+#### 🔹 1-Indexed Array (কিছু textbook-এ ব্যবহৃত)
 
-    pq.push(40); // O(log n)
-    pq.push(10);
-    pq.push(60);
+| সম্পর্ক | Formula |
+|---|---|
+| **Parent** | `i / 2` |
+| **Left Child** | `2 * i` |
+| **Right Child** | `2 * i + 1` |
 
-    cout << pq.top() << endl; // O(1), output 60
+> 💡 **কেন এটা কাজ করে:** Complete Binary Tree-এর property অনুযায়ী প্রতিটি level সম্পূর্ণ ভরা থাকে (শেষ level ছাড়া, যা left থেকে right ভরা থাকে) — তাই **level-order** অনুযায়ী array index-এর সাথে একটি নির্দিষ্ট গাণিতিক সম্পর্ক তৈরি হয়ে যায়, আর কোনো explicit pointer রাখার প্রয়োজন পড়ে না।
 
-    pq.pop(); // O(log n)
+#### উদাহরণ দিয়ে যাচাই (0-indexed):
+Index `1` (value `8`)-এর জন্য:
+- **Parent** = `(1-1)/2 = 0` → index `0` (value `10`) ✅
+- **Left Child** = `2*1+1 = 3` → index `3` (value `4`) ✅
+- **Right Child** = `2*1+2 = 4` → index `4` (value `7`) ✅
 
-    cout << pq.top() << endl; // output 40
-    return 0;
+---
+
+### What are the "heapify-up" and "heapify-down" (sift up/down) operations?
+
+**Heapify-Up** ব্যবহার করা হয় **insertion**-এর সময়, যখন নতুন একটি element array-এর **শেষে (end)** যুক্ত করা হয় এবং সেটিকে তার সঠিক জায়গায় **উপরের দিকে** নিয়ে যেতে হয়।
+
+##### মূল Logic (Max-Heap-এর জন্য):
+নতুন element-কে তার **parent**-এর সাথে compare করা হয়। যদি নতুন element parent থেকে **বড়** হয়, তাহলে তাদের **swap** করা হয়, এবং এই প্রক্রিয়া **root** পর্যন্ত অথবা যতক্ষণ না heap property সঠিক হয়, ততক্ষণ চলতে থাকে।
+
+```cpp
+void heapifyUp(vector<int>& heap, int i) {
+    while (i > 0) {
+        int parentIdx = (i - 1) / 2;
+        
+        if (heap[i] > heap[parentIdx]) {  // Max-Heap violation
+            swap(heap[i], heap[parentIdx]);
+            i = parentIdx;  // উপরের দিকে move করা
+        } else {
+            break;  // Heap property ঠিক আছে, থামো
+        }
+    }
+}
+
+void insert(vector<int>& heap, int value) {
+    heap.push_back(value);        // শেষে যুক্ত করা
+    heapifyUp(heap, heap.size() - 1);  // সঠিক জায়গায় "bubble up" করা
 }
 ```
+
+##### Time Complexity: **O(log n)** — কারণ element সর্বোচ্চ tree-এর **height** পরিমাণ ধাপ move করতে পারে।
+
+---
+
+#### Heapify-Down (Sift Down) Operation
+
+**Heapify-Down** ব্যবহার করা হয় **deletion** (সাধারণত root/top element মুছে ফেলার) সময়, যখন root-এ **শেষ element** বসিয়ে দিয়ে সেটিকে তার সঠিক জায়গায় **নিচের দিকে** নিয়ে যেতে হয়।
+
+##### মূল Logic (Max-Heap-এর জন্য):
+Current node-কে তার **left ও right child**-এর সাথে compare করা হয়। যদি কোনো child current node থেকে **বড়** হয়, তাহলে সবচেয়ে **বড় child**-এর সাথে swap করা হয়, এবং এই প্রক্রিয়া **leaf** পর্যন্ত অথবা heap property সঠিক না হওয়া পর্যন্ত চলতে থাকে।
+
+```cpp
+void heapifyDown(vector<int>& heap, int i) {
+    int n = heap.size();
+    
+    while (true) {
+        int largest = i;
+        int left = 2 * i + 1;
+        int right = 2 * i + 2;
+        
+        if (left < n && heap[left] > heap[largest]) {
+            largest = left;
+        }
+        if (right < n && heap[right] > heap[largest]) {
+            largest = right;
+        }
+        
+        if (largest == i) break;  // Heap property ঠিক আছে, থামো
+        
+        swap(heap[i], heap[largest]);
+        i = largest;  // নিচের দিকে move করা
+    }
+}
+
+int extractMax(vector<int>& heap) {
+    int maxVal = heap[0];
+    heap[0] = heap.back();   // শেষ element-কে root-এ বসানো
+    heap.pop_back();
+    heapifyDown(heap, 0);    // সঠিক জায়গায় "bubble down" করা
+    return maxVal;
+}
+```
+
+##### Time Complexity: **O(log n)** — একইভাবে, element সর্বোচ্চ tree-এর **height** পরিমাণ ধাপ move করতে পারে।
+
+
+## ⏱️ 57. What is the time complexity of heap operations (insert, extract-min/max, build-heap)?
+
+
+
+| Operation | Time Complexity | ব্যাখ্যা |
+|---|---|---|
+| **Insert** | **O(log n)** | নতুন element শেষে যুক্ত করে **heapify-up** করতে হয়, যা tree-এর height (log n) পরিমাণ ধাপ নেয় |
+| **Extract-Min/Max** | **O(log n)** | Root element সরিয়ে শেষ element root-এ বসিয়ে **heapify-down** করতে হয়, যা height পরিমাণ ধাপ নেয় |
+| **Peek (Get Min/Max)** | **O(1)** | Min-Heap/Max-Heap-এ root-ই সবসময় সবচেয়ে ছোট/বড় value, তাই সরাসরি access করা যায় |
+| **Build-Heap** | **O(n)** | একসাথে n সংখ্যক element থেকে heap তৈরি করা — এটি **O(n log n)** নয়, নিচে ব্যাখ্যা করা হলো |
+| **Search (নির্দিষ্ট value)** | **O(n)** | Heap-এর কোনো **ordering property** (BST-এর মতো) না থাকায়, নির্দিষ্ট value খুঁজতে পুরো array scan করতে হয় |
+| **Delete (নির্দিষ্ট element)** | **O(log n)** | Element-এর index জানা থাকলে, সেটিকে শেষ element দিয়ে replace করে heapify-up/down করা হয় |
+
+---
 
 ### Why is building a heap from an array O(n) rather than O(n log n)?
 
-যদি আমরা `n` টা element একে একে insert করি, তাহলে প্রতিটি insert `O(log n)`, total `O(n log n)`।
+প্রথম দেখায় মনে হতে পারে যে, যেহেতু **n** সংখ্যক element-এর প্রতিটির জন্য **heapify** করতে **O(log n)** সময় লাগে, তাই মোট সময় হবে **O(n log n)**।
 
-কিন্তু **bottom-up build heap** এ আমরা last non-leaf node থেকে root পর্যন্ত heapify-down করি। নিচের level এর node বেশি, কিন্তু তাদের height কম; root এর height বেশি, কিন্তু root মাত্র একটা।
-
-```text
-Array: 4 10 3 5 1
-
-Initial tree:
-        4
-       / \
-      10  3
-     / \
-    5   1
-
-Build max-heap result:
-        10
-       /  \
-      5    3
-     / \
-    4   1
-```
-
-Mathematical intuition:
-
-```text
-সব node log n distance move করে না।
-অনেক leaf node 0 move করে,
-তার উপর level এর node 1 move করে,
-তার উপর level এর node 2 move করে,
-...
-Total work = O(n)
-```
-
-C++ STL এ `make_heap` bottom-up heap build করে।
+**Build-Heap** সাধারণত **bottom-up** পদ্ধতিতে করা হয় — array-এর **শেষ non-leaf node** থেকে শুরু করে **root** পর্যন্ত প্রতিটি node-এ **heapify-down** apply করা হয়।
 
 ```cpp
-#include <bits/stdc++.h>
-using namespace std;
-
-int main() {
-    vector<int> nums = {4, 10, 3, 5, 1};
-
-    make_heap(nums.begin(), nums.end()); // max-heap, O(n)
-
-    cout << "Max element: " << nums.front() << endl;
-
-    return 0;
+void buildHeap(vector<int>& arr) {
+    int n = arr.size();
+    
+    // শেষ non-leaf node থেকে শুরু করা: index (n/2 - 1)
+    for (int i = n / 2 - 1; i >= 0; i--) {
+        heapifyDown(arr, i, n);
+    }
 }
 ```
 
-**Output:**
+#### মূল কারণ: **প্রতিটি node-এর heapify-down cost, তার height-এর উপর নির্ভর করে, tree-এর overall height-এর উপর নয়**
+
+- যে node গুলো **leaf**-এর কাছাকাছি (tree-এর নিচের দিকে), তাদের height **কম**, তাই heapify-down-এর জন্য **কম কাজ** লাগে
+- মাত্র **root**-এর কাছের কয়েকটি node-এর height বেশি (log n পর্যন্ত), কিন্তু তাদের সংখ্যা **খুবই কম**
+
+#### গাণিতিক প্রমাণ:
+
+একটি **Complete Binary Tree**-তে:
+- **Height 0**-তে (leaf level) থাকে প্রায় `n/2` node — এদের heapify করতে **0** কাজ লাগে
+- **Height 1**-এ থাকে প্রায় `n/4` node — এদের heapify করতে সর্বোচ্চ **1** ধাপ লাগে
+- **Height 2**-এ থাকে প্রায় `n/8` node — সর্বোচ্চ **2** ধাপ লাগে
+- ... এভাবে চলতে থাকে **Height h** (root) পর্যন্ত, যেখানে মাত্র **1**টি node থাকে
+
+মোট কাজের পরিমাণ হবে এই series-এর sum:
 
 ```text
-Max element: 10
+T(n) = sum from h=0 to log n of (n / 2^(h+1)) * h
 ```
+
+এই series-টি গাণিতিকভাবে **converge** করে একটি **constant**-এর দিকে, যার ফলে সামগ্রিক sum হয়:
+
+```text
+T(n) = O(n) * sum from h=0 to infinity of h / 2^h
+     = O(n) * 2
+     = O(n)
+```
+
+> 🔑 **মূল Insight:** বেশিরভাগ node (প্রায় অর্ধেক) tree-এর **নিচের দিকে (leaf-এর কাছে)** থাকে, যাদের heapify করতে প্রায় **কোনো কাজই লাগে না**। শুধুমাত্র **অল্প কিছু node** (root-এর কাছের) বেশি কাজ করে, কিন্তু তাদের সংখ্যা exponentially কম। এই **weighted sum** মিলিয়ে মোট time complexity **O(n)**-এ নেমে আসে — যা **O(n log n)**-এর চেয়ে **tighter (আরও efficient) bound**।
+
+#### তুলনা: Naive Insert-based Build vs Bottom-Up Build
+
+| পদ্ধতি | Time Complexity | কারণ |
+|---|---|---|
+| **Insert একে একে** (প্রতিটি element-এ heapify-up) | **O(n log n)** | প্রতিটি insert-এ worst case O(log n), n বার করা হয় |
+| **Bottom-Up Build (Floyd's Algorithm)** | **O(n)** | নিচের দিকের বেশিরভাগ node-এ সামান্য কাজ লাগে |
+
+---
+
 
 ### What is the time complexity of heap sort, and is it stable?
 
-**Heap Sort** এর idea:
-1. Array থেকে heap build করা: `O(n)`
-2. বারবার max/min বের করে sorted position এ রাখা: প্রতিবার `O(log n)`, মোট `n` বার
+| Case | Time Complexity |
+|---|---|
+| **Best Case** | O(n log n) |
+| **Average Case** | O(n log n) |
+| **Worst Case** | O(n log n) |
 
-Total time complexity:
-
-```text
-O(n) + n * O(log n) = O(n log n)
-```
-
-Heap sort generally **not stable**। কারণ heapify এর সময় দূরের element swap হয়, ফলে same value এর relative order preserve নাও থাকতে পারে।
+Heap Sort-এর সব case-এই complexity একই থাকে, কারণ:
+1. **Build-Heap**: O(n)
+2. **n বার Extract-Max/Min** করা, প্রতিবার **O(log n)** — মোট **O(n log n)**
+3. সামগ্রিক: `O(n) + O(n log n) = O(n log n)`
 
 ```cpp
-#include <bits/stdc++.h>
-using namespace std;
-
-int main() {
-    vector<int> nums = {4, 10, 3, 5, 1};
-
-    make_heap(nums.begin(), nums.end());
-    sort_heap(nums.begin(), nums.end());
-
-    for (int x : nums) {
-        cout << x << " ";
+void heapSort(vector<int>& arr) {
+    int n = arr.size();
+    
+    // Step 1: Max-Heap তৈরি করা - O(n)
+    for (int i = n / 2 - 1; i >= 0; i--) {
+        heapifyDown(arr, i, n);
     }
-    cout << endl;
-
-    return 0;
+    
+    // Step 2: একে একে root (max element) extract করে শেষে বসানো - O(n log n)
+    for (int i = n - 1; i > 0; i--) {
+        swap(arr[0], arr[i]);           // max element-কে শেষে নিয়ে যাওয়া
+        heapifyDown(arr, 0, i);         // বাকি অংশে heapify - O(log n)
+    }
 }
 ```
 
-**Output:**
+#### Space Complexity:
+**O(1)** — Heap Sort একটি **in-place** sorting algorithm, কারণ এটি মূল array-এর মধ্যেই heap তৈরি করে এবং sort করে, কোনো extra array-এর প্রয়োজন হয় না।
 
-```text
-1 3 4 5 10
+---
+
+#### Heap Sort কি Stable?
+
+**না, Heap Sort একটি Stable Sorting Algorithm নয়।** ❌
+
+#### কেন Stable নয়:
+
+**Stable Sort**-এর সংজ্ঞা হলো: যদি দুইটি element-এর **value সমান** থাকে, তাহলে sorting-এর পরেও তাদের **আপেক্ষিক ক্রম (relative order)** অপরিবর্তিত থাকবে।
+
+কিন্তু Heap Sort-এ **swap operation**-এর কারণে সমান value-যুক্ত element-গুলোর মূল ক্রম **নষ্ট (disrupt)** হয়ে যেতে পারে, কারণ heapify-down করার সময় elements দূরবর্তী position-এ চলে যায়, যা তাদের original relative order বজায় রাখে না।
+
 ```
+Input:  [5a, 3, 5b, 1, 5c]  // 5a, 5b, 5c same value কিন্তু ভিন্ন original position বোঝাতে label করা হয়েছে
+
+Heap Sort-এর পর হয়তো output হবে:
+[1, 3, 5c, 5a, 5b]  // 5a, 5b, 5c-এর original order (a, b, c) নষ্ট হয়ে গেছে
+```
+
+> ⚠️ **Practical প্রভাব:** যদি সমান value-যুক্ত element গুলোর original order গুরুত্বপূর্ণ হয় (যেমন, একাধিক field অনুযায়ী sort করার সময়), তাহলে Heap Sort উপযুক্ত নয়। এক্ষেত্রে **Merge Sort** (যা stable) ব্যবহার করা ভালো।
 
 ---
 
@@ -679,165 +619,4 @@ int findKthLargestQuickselect(vector<int> nums, int k) {
     return quickselect(nums, kSmallestIndex);
 }
 ```
-
----
-
-## 🔗 59. How would you merge k sorted arrays or lists efficiently using a heap?
-
-`k` টা sorted array merge করার জন্য min-heap ব্যবহার করা যায়। প্রতিটি array এর current smallest element heap এ রাখা হয়। Heap থেকে smallest বের করে result এ add করি, তারপর সেই element যে array থেকে এসেছে, সেই array এর next element heap এ push করি।
-
-**Example:**
-
-```text
-arrays:
-[1, 4, 7]
-[2, 5, 8]
-[3, 6, 9]
-
-Min-heap initially: 1, 2, 3
-Pop 1 -> push 4
-Pop 2 -> push 5
-Pop 3 -> push 6
-...
-
-Merged: [1, 2, 3, 4, 5, 6, 7, 8, 9]
-```
-
-```cpp
-#include <bits/stdc++.h>
-using namespace std;
-
-struct Item {
-    int value;
-    int arrayIndex;
-    int elementIndex;
-
-    bool operator>(const Item& other) const {
-        return value > other.value;
-    }
-};
-
-vector<int> mergeKSortedArrays(vector<vector<int>>& arrays) {
-    priority_queue<Item, vector<Item>, greater<Item>> minHeap;
-    vector<int> result;
-
-    for (int i = 0; i < (int)arrays.size(); i++) {
-        if (!arrays[i].empty()) {
-            minHeap.push({arrays[i][0], i, 0});
-        }
-    }
-
-    while (!minHeap.empty()) {
-        Item current = minHeap.top();
-        minHeap.pop();
-
-        result.push_back(current.value);
-
-        int nextIndex = current.elementIndex + 1;
-        if (nextIndex < (int)arrays[current.arrayIndex].size()) {
-            minHeap.push({
-                arrays[current.arrayIndex][nextIndex],
-                current.arrayIndex,
-                nextIndex
-            });
-        }
-    }
-
-    return result;
-}
-
-int main() {
-    vector<vector<int>> arrays = {
-        {1, 4, 7},
-        {2, 5, 8},
-        {3, 6, 9}
-    };
-
-    vector<int> merged = mergeKSortedArrays(arrays);
-
-    for (int x : merged) {
-        cout << x << " ";
-    }
-    cout << endl;
-
-    return 0;
-}
-```
-
-**Output:**
-
-```text
-1 2 3 4 5 6 7 8 9
-```
-
-### What is the time complexity of this approach?
-
-ধরা যাক total element সংখ্যা `N`, এবং array/list সংখ্যা `k`।
-
-- Heap এ একসাথে maximum `k` টা element থাকে
-- প্রতিটি element একবার push এবং একবার pop হয়
-- প্রতিটি push/pop এর cost `O(log k)`
-
-তাই:
-
-```text
-Time Complexity = O(N log k)
-Space Complexity = O(k) excluding output
-```
-
-যদি সব array একসাথে concatenate করে sort করি, তাহলে `O(N log N)` লাগবে। Heap approach better, কারণ already sorted structure কাজে লাগানো হচ্ছে।
-
-### How does this relate to the "merge k sorted linked lists" problem?
-
-Merge k sorted linked lists problem একই idea follow করে। পার্থক্য শুধু array index এর বদলে linked list node pointer heap এ রাখা হয়।
-
-```cpp
-#include <bits/stdc++.h>
-using namespace std;
-
-struct ListNode {
-    int val;
-    ListNode* next;
-    ListNode(int x) : val(x), next(nullptr) {}
-};
-
-struct CompareNode {
-    bool operator()(ListNode* a, ListNode* b) {
-        return a->val > b->val; // min-heap
-    }
-};
-
-ListNode* mergeKLists(vector<ListNode*>& lists) {
-    priority_queue<ListNode*, vector<ListNode*>, CompareNode> minHeap;
-
-    for (ListNode* head : lists) {
-        if (head != nullptr) {
-            minHeap.push(head);
-        }
-    }
-
-    ListNode dummy(0);
-    ListNode* tail = &dummy;
-
-    while (!minHeap.empty()) {
-        ListNode* node = minHeap.top();
-        minHeap.pop();
-
-        tail->next = node;
-        tail = tail->next;
-
-        if (node->next != nullptr) {
-            minHeap.push(node->next);
-        }
-    }
-
-    return dummy.next;
-}
-```
-
-**Why heap works here:** প্রতিটি list sorted, তাই প্রতিটি list এর current head হলো ঐ list এর smallest remaining element। সব current head এর মধ্যে globally smallest বের করতে min-heap perfect fit।
-
-**Time Complexity**: `O(N log k)`
-**Space Complexity**: `O(k)`
-
 ---
