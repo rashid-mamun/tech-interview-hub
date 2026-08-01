@@ -6,7 +6,7 @@ title: 'Graphs'
 
 ## 🗺️ 60. What is a graph, and how is it represented in code?
 
-**Graph** হলো nodes/vertices এবং তাদের connection/edges দিয়ে তৈরি একটা data structure। Graph ব্যবহার করা হয় relation model করার জন্য।
+**Graph** হলো একটি **non-linear data structure**, যা একগুচ্ছ **vertices (নোড)** এবং তাদের মধ্যে সংযোগকারী **edges** নিয়ে গঠিত। Tree-এর মতো এখানে কোনো strict **hierarchy** বা **root** থাকে না — যেকোনো vertex, যেকোনো অন্য vertex-এর সাথে সংযুক্ত থাকতে পারে, এমনকি **cycle** তৈরি হতে পারে।
 
 Real-world examples:
 - Social network: user হলো vertex, friendship/follow হলো edge
@@ -21,6 +21,10 @@ Basic terms:
 - **Path**: এক vertex থেকে আরেক vertex এ যাওয়ার sequence
 - **Cycle**: কোনো path আবার starting vertex এ ফিরে আসে
 - **Connected graph**: যেকোনো node থেকে অন্য node এ যাওয়া যায়
+- **Directed Graph**: Edge-গুলোর একটি নির্দিষ্ট **দিক (direction)** থাকে (যেমন `A → B`)
+- **Undirected Graph**: Edge-গুলোর কোনো দিক থাকে না (যেমন `A - B`, দুইদিকেই যাওয়া যায়)
+- **Weighted Graph**: প্রতিটি edge-এর সাথে একটি **weight/cost** যুক্ত থাকে
+- **Unweighted Graph**: সব edge-এর গুরুত্ব সমান ধরা হয়
 
 **Example graph:**
 
@@ -41,7 +45,7 @@ Graph সাধারণত দুইভাবে represent করা হয়:
 
 ### What is the difference between an adjacency matrix and an adjacency list?
 
-**Adjacency Matrix** হলো `V x V` size এর 2D array, যেখানে `matrix[u][v] = 1` মানে `u` থেকে `v` edge আছে।
+একটি **2D matrix** (আকার `V x V`, যেখানে V = vertex সংখ্যা) ব্যবহার করে vertex গুলোর মধ্যে connection represent করা হয়। যদি `i` এবং `j` vertex-এর মধ্যে edge থাকে, তাহলে `matrix[i][j] = 1` (অথবা weight), নাহলে `0`।
 
 ```text
 Graph:
@@ -160,6 +164,10 @@ Meaning:
 0 -> 1
 1 -> 0
 ```
+##### বাস্তব উদাহরণ:
+- **Facebook Friendship**: A, B-এর friend হলে B-ও A-এর friend
+- **Road Network** (two-way road-এর ক্ষেত্রে): দুই দিকেই যাতায়াত সম্ভব
+- **Computer Network**: দুইটি device-এর মধ্যে direct connection
 
 **Directed graph** এ edge এর direction থাকে। `u -> v` থাকলে `u` থেকে `v` যাওয়া যায়, কিন্তু `v` থেকে `u` যাওয়া যাবে এমন guarantee নেই।
 
@@ -170,6 +178,10 @@ Directed:
 Meaning:
 0 -> 1 only
 ```
+##### বাস্তব উদাহরণ:
+- **Twitter/Instagram Follow System**: A, B-কে follow করলেও B, A-কে follow নাও করতে পারে
+- **Web Page Links**: Page A-তে Page B-এর link থাকলেই B-তে A-এর link থাকা বাধ্যতামূলক নয়
+- **Task Dependency (DAG)**: Task A সম্পন্ন হওয়ার পর Task B শুরু হবে
 
 Code difference:
 
@@ -217,18 +229,23 @@ vector<vector<pair<int, int>>> adj(n);
 adj[0].push_back({1, 5}); // 0 -> 1, weight 5
 adj[0].push_back({2, 2}); // 0 -> 2, weight 2
 ```
+#### কীভাবে এটি Traversal Algorithm পাল্টায়:
+
+| বিষয় | Unweighted Graph | Weighted Graph |
+|---|---|---|
+| **Shortest Path Algorithm** | **BFS** যথেষ্ট (কারণ প্রতিটি edge-এর cost সমান, তাই fewest edges = shortest path) | BFS কাজ করে না, বরং **Dijkstra's Algorithm** (non-negative weight) বা **Bellman-Ford** (negative weight থাকলে) লাগে |
+| **Data Structure ব্যবহার** | সাধারণ **Queue** (FIFO) | **Priority Queue (Min-Heap)** ব্যবহার করতে হয়, যাতে সবসময় সবচেয়ে কম cost-এর path আগে explore হয় |
+| **"নিকটতম" node নির্ধারণ** | edge সংখ্যা (level) দিয়ে নির্ধারিত হয় | সঞ্চিত **total weight/cost** দিয়ে নির্ধারিত হয় |
+| **MST (Minimum Spanning Tree)** | প্রযোজ্য নয় (সব edge সমান হলে MST-এর কোনো মানে থাকে না) | **Prim's** বা **Kruskal's Algorithm** ব্যবহার করে ন্যূনতম total weight-এর spanning tree বের করা হয় |
 
 ### What is a multigraph, and where might it appear in real systems?
+**Multigraph** হলো এমন একটি graph, যেখানে **দুইটি নির্দিষ্ট vertex-এর মধ্যে একাধিক (multiple) edge** থাকতে পারে। সাধারণ (simple) graph-এ দুই vertex-এর মধ্যে সর্বোচ্চ **একটি** edge থাকে, কিন্তু multigraph-এ এই নিয়ম শিথিল।
 
-**Multigraph** এ একই দুই vertex এর মধ্যে multiple edges থাকতে পারে।
-
-```text
-A == train == B
-A == road  == B
-A == flight == B
 ```
-
-এখানে `A` এবং `B` এর মধ্যে multiple connection আছে, কিন্তু প্রতিটির type/cost আলাদা।
+A ═══ B     (A ও B-এর মধ্যে ৩টি আলাদা edge)
+  ╲╱
+  ╱╲
+```
 
 Real-world examples:
 - দুই city এর মধ্যে multiple roads/routes
@@ -249,211 +266,197 @@ adj[0].push_back({1, 20}); // route 2 cost 20
 
 ## 🚶🔍 62. What are BFS and DFS, and when would you use each?
 
-**BFS (Breadth-First Search)** graph level by level explore করে। Queue ব্যবহার করা হয়।
+**BFS** হলো একটি graph traversal algorithm, যা **level-by-level** (breadth-wise) ভাবে graph explore করে। এটি প্রথমে source node-এর সব **immediate neighbor** visit করে, তারপর তাদের neighbor-দের visit করে — এভাবে "ঢেউ" (wave) আকারে বাইরের দিকে ছড়িয়ে পড়ে।
+**Data Structure: Queue (FIFO)**
 
-**DFS (Depth-First Search)** এক path ধরে যতদূর সম্ভব যায়, তারপর backtrack করে। Recursion বা stack ব্যবহার করা হয়।
 
-```text
-Graph:
-    0
-   / \
-  1   2
- / \
-3   4
+**DFS** হলো একটি graph traversal algorithm, যা একটি path ধরে যতদূর সম্ভব **গভীরে (depth-wise)** চলে যায়, তারপর **backtrack** করে অন্য path explore করে।
+**Data Structure: Stack (recursive call stack অথবা explicit stack)**
+```cpp
 
-BFS from 0: 0 1 2 3 4
-DFS from 0: 0 1 3 4 2  (neighbor order অনুযায়ী vary করতে পারে)
+// Recursive DFS
+void dfs(int curr, vector<list<int>>& adjList, vector<bool>& visited) {
+    visited[curr] = true;
+    // curr node process করা
+    
+    for (int neighbor : adjList[curr]) {
+        if (!visited[neighbor]) {
+            dfs(neighbor, adjList, visited);
+        }
+    }
+}
+
 ```
 
-Use BFS when:
-- shortest path in unweighted graph দরকার
-- level/order/distance দরকার
-- minimum number of steps দরকার
 
-Use DFS when:
-- connected components বের করতে হবে
-- cycle detect করতে হবে
-- topological sort করতে হবে
-- backtracking/graph traversal দরকার
+#### কখন কোনটি ব্যবহার করবেন
+
+| ব্যবহারের ক্ষেত্র | উপযুক্ত Algorithm | কারণ |
+|---|---|---|
+| **Shortest Path (Unweighted Graph)** | **BFS** | Level-by-level explore করায় প্রথমবার যখন target-এ পৌঁছায়, সেটাই shortest path নিশ্চিত করে |
+| **Connected Components খুঁজে বের করা** | **DFS** (বা BFS, দুটোই সমানভাবে কাজ করে) | পুরো component একবারে explore করার জন্য উপযোগী |
+| **Cycle Detection** | **DFS** | Recursion stack track করে back edge সহজে ধরা যায় |
+| **Topological Sort** | **DFS** | Post-order finish time ব্যবহার করে ordering পাওয়া যায় |
+| **Maze/Puzzle Solving** (একটি path খুঁজে বের করা) | **DFS** | কম memory লাগে, deep path দ্রুত explore করে |
+| **Level-order প্রয়োজন হলে** (যেমন social network-এ "k-degree connection") | **BFS** | স্বাভাবিকভাবেই level ধরে ধরে কাজ করে |
+| **Minimum Spanning Tree, Network Flow-related Problem** | **DFS/BFS উভয়ই ব্যবহৃত হয়** | Algorithm-ভেদে ভিন্ন (Prim's-এ BFS-এর মতো priority queue, Kruskal's-এ Union-Find) |
+
+---
 
 ### What is the time and space complexity of BFS and DFS?
 
-Adjacency list ব্যবহার করলে:
+| বিষয় | BFS | DFS |
+|---|---|---|
+| **Time Complexity** | **O(V + E)** | **O(V + E)** |
+| **Space Complexity (Adjacency List)** | **O(V)** — queue-তে worst case সব vertex থাকতে পারে | **O(V)** — recursion stack (বা explicit stack) worst case সব vertex ধারণ করতে পারে |
+| **Space Complexity (Adjacency Matrix)** | **O(V)** | **O(V)** |
 
-```text
-Time Complexity = O(V + E)
-Space Complexity = O(V)
-```
 
-কারণ প্রতিটি vertex একবার visit হয়, এবং প্রতিটি edge একবার বা দুইবার process হয়।
+- **V** = vertex সংখ্যা, **E** = edge সংখ্যা
+- **Time O(V+E)** কারণ: প্রতিটি vertex ঠিক একবার visit হয় (**O(V)**), এবং প্রতিটি edge-ও একবার (undirected হলে দুইবার, কিন্তু constant factor) explore হয় (**O(E)**)
+- **Space** নির্ভর করে graph-এর **shape**-এর উপর:
+  - BFS-এ worst case space লাগে যখন graph-এর **width** বেশি (যেমন একটি node-এর অনেক neighbor)
+  - DFS-এ worst case space লাগে যখন graph-এর **depth** বেশি (যেমন একটি লম্বা chain)
 
-BFS:
-
-```cpp
-#include <bits/stdc++.h>
-using namespace std;
-
-vector<int> bfs(int start, vector<vector<int>>& adj) {
-    int n = adj.size();
-    vector<int> order;
-    vector<bool> visited(n, false);
-    queue<int> q;
-
-    visited[start] = true;
-    q.push(start);
-
-    while (!q.empty()) {
-        int u = q.front();
-        q.pop();
-        order.push_back(u);
-
-        for (int v : adj[u]) {
-            if (!visited[v]) {
-                visited[v] = true;
-                q.push(v);
-            }
-        }
-    }
-
-    return order;
-}
-```
-
-DFS:
-
-```cpp
-void dfs(int u, vector<vector<int>>& adj, vector<bool>& visited) {
-    visited[u] = true;
-    cout << u << " ";
-
-    for (int v : adj[u]) {
-        if (!visited[v]) {
-            dfs(v, adj, visited);
-        }
-    }
-}
-```
+---
 
 ### How is BFS used to find the shortest path in an unweighted graph?
 
-Unweighted graph এ প্রতিটি edge এর cost `1` ধরা হয়। BFS level by level চলে, তাই কোনো node প্রথমবার যখন visit হয়, তখন shortest distance পাওয়া যায়।
-
-```text
-0 -- 1 -- 3
-|         |
-2 --------
-
-Shortest path from 0 to 3:
-0 -> 2 -> 3, distance = 2
-```
+BFS স্বভাবতই **level-by-level** explore করে, তাই যখন কোনো node প্রথমবার **visit/discover** করা হয়, সেই মুহূর্তেই তার **shortest distance** (source থেকে edge সংখ্যায়) নিশ্চিত হয়ে যায় — কারণ BFS কখনো কোনো node-এ **পরে** কম distance দিয়ে পৌঁছাতে পারে না (unweighted graph-এ)।
 
 ```cpp
-vector<int> shortestPathUnweighted(int source, vector<vector<int>>& adj) {
-    int n = adj.size();
-    vector<int> dist(n, -1);
+vector<int> bfsShortestPath(int source, vector<list<int>>& adjList, int n) {
+    vector<int> dist(n, -1);  // -1 মানে unreachable
     queue<int> q;
-
+    
     dist[source] = 0;
     q.push(source);
-
+    
     while (!q.empty()) {
-        int u = q.front();
+        int curr = q.front();
         q.pop();
-
-        for (int v : adj[u]) {
-            if (dist[v] == -1) {
-                dist[v] = dist[u] + 1;
-                q.push(v);
+        
+        for (int neighbor : adjList[curr]) {
+            if (dist[neighbor] == -1) {  // এখনো visit হয়নি
+                dist[neighbor] = dist[curr] + 1;
+                q.push(neighbor);
             }
         }
     }
-
-    return dist;
+    
+    return dist;  // প্রতিটি node-এর জন্য shortest distance (edge count)
 }
 ```
 
-Path reconstruct করতে parent array রাখা যায়।
+#### কেন এটি সঠিক Shortest Path দেয়:
 
+```
+       A
+      / \
+     B   C
+     |   |
+     D---E
+```
+
+`A` থেকে BFS চালালে:
+- **Level 0**: `A` (distance = 0)
+- **Level 1**: `B, C` (distance = 1) — একই সাথে discover হয়
+- **Level 2**: `D, E` (distance = 2) — `D`, `B` থেকে আসতে পারে অথবা `E`, `C` থেকে, কিন্তু উভয়ই distance 2-তে discover হবে
+
+যেহেতু BFS একটি **queue (FIFO)** ব্যবহার করে সব node একই level-এ **একসাথে** process করে, তাই কোনো node-এ **আগে যে distance দিয়ে পৌঁছানো হয়, সেটিই সবসময় ন্যূনতম (shortest)** — এরপর যদি সেই node-এ আবার পৌঁছানোর চেষ্টা করা হয় (longer path দিয়ে), তা simply **ignore** করা হয় (`dist[neighbor] == -1` check-এর মাধ্যমে)।
+
+#### Path Reconstruction (actual path বের করতে চাইলে):
 ```cpp
-vector<int> shortestPath(int source, int target, vector<vector<int>>& adj) {
-    int n = adj.size();
-    vector<int> parent(n, -1);
-    vector<bool> visited(n, false);
-    queue<int> q;
+vector<int> parent(n, -1);
 
-    visited[source] = true;
-    q.push(source);
+// BFS-এর মধ্যেই parent track করা:
+if (dist[neighbor] == -1) {
+    dist[neighbor] = dist[curr] + 1;
+    parent[neighbor] = curr;
+    q.push(neighbor);
+}
 
-    while (!q.empty()) {
-        int u = q.front();
-        q.pop();
-
-        if (u == target) break;
-
-        for (int v : adj[u]) {
-            if (!visited[v]) {
-                visited[v] = true;
-                parent[v] = u;
-                q.push(v);
-            }
-        }
-    }
-
-    if (!visited[target]) return {};
-
+// Target থেকে backtrack করে path বের করা:
+vector<int> getPath(int target, vector<int>& parent) {
     vector<int> path;
-    for (int node = target; node != -1; node = parent[node]) {
-        path.push_back(node);
+    for (int curr = target; curr != -1; curr = parent[curr]) {
+        path.push_back(curr);
     }
     reverse(path.begin(), path.end());
     return path;
 }
 ```
 
+> ⚠️ **গুরুত্বপূর্ণ Limitation:** BFS শুধুমাত্র **unweighted graph**-এ shortest path দেয়। **Weighted graph**-এ shortest path বের করতে হলে **Dijkstra's Algorithm** (priority queue সহ BFS-এর একটি variant) প্রয়োজন।
+
+---
+
 ### How is DFS used to detect connected components?
 
-Undirected graph এ connected component মানে এমন node group যেখানে group এর যেকোনো node থেকে অন্য node এ যাওয়া যায়।
+**Connected Component** হলো একটি graph-এর এমন একটি **subgraph**, যেখানে যেকোনো দুইটি vertex-এর মধ্যে একটি **path** আছে, কিন্তু সেই subgraph-এর বাইরের কোনো vertex-এর সাথে সংযোগ নেই।
 
-DFS দিয়ে প্রতিবার unvisited node থেকে traversal start করলে একটা component complete হয়।
+#### মূল Logic:
+প্রতিটি **unvisited** vertex থেকে একটি নতুন DFS **শুরু** করা হয়। একটি সম্পূর্ণ DFS call, একটি সম্পূর্ণ **connected component**-কে cover করে (যেহেতু DFS তার reachable সব vertex visit করে ফেলে)। যতবার নতুন DFS শুরু করতে হয়, ততগুলোই connected component।
 
-```text
-Component 1: 0 -- 1 -- 2
+```cpp
+void dfsUtil(int curr, vector<list<int>>& adjList, vector<bool>& visited, vector<int>& component) {
+    visited[curr] = true;
+    component.push_back(curr);
+    
+    for (int neighbor : adjList[curr]) {
+        if (!visited[neighbor]) {
+            dfsUtil(neighbor, adjList, visited, component);
+        }
+    }
+}
 
-Component 2: 3 -- 4
+vector<vector<int>> findConnectedComponents(vector<list<int>>& adjList, int n) {
+    vector<bool> visited(n, false);
+    vector<vector<int>> allComponents;
+    
+    for (int i = 0; i < n; i++) {
+        if (!visited[i]) {
+            vector<int> component;
+            dfsUtil(i, adjList, visited, component);
+            allComponents.push_back(component);
+        }
+    }
+    
+    return allComponents;
+}
+```
 
-Component 3: 5
+```
+Component 1:  0 - 1     Component 2:  3 - 4     Component 3: 5
+              |
+              2
 ```
 
 ```cpp
-void dfsComponent(int u, vector<vector<int>>& adj, vector<bool>& visited, vector<int>& comp) {
-    visited[u] = true;
-    comp.push_back(u);
+// Graph structure:
+// 0-1, 1-2, 0-2 (Component 1: {0,1,2})
+// 3-4              (Component 2: {3,4})
+// 5-এর কোনো edge নেই (Component 3: {5})
 
-    for (int v : adj[u]) {
-        if (!visited[v]) {
-            dfsComponent(v, adj, visited, comp);
-        }
-    }
-}
-
-vector<vector<int>> connectedComponents(vector<vector<int>>& adj) {
-    int n = adj.size();
-    vector<bool> visited(n, false);
-    vector<vector<int>> components;
-
-    for (int i = 0; i < n; i++) {
-        if (!visited[i]) {
-            vector<int> comp;
-            dfsComponent(i, adj, visited, comp);
-            components.push_back(comp);
-        }
-    }
-
-    return components;
-}
+// findConnectedComponents() output:
+// [[0, 1, 2], [3, 4], [5]]
 ```
 
----
+#### কীভাবে কাজ করে ধাপে ধাপে:
+1. `visited = [false, false, false, false, false, false]` দিয়ে শুরু
+2. `i = 0` থেকে unvisited পাওয়ায়, DFS শুরু হয় → `0, 1, 2` সব visit হয়ে যায় (Component 1 তৈরি)
+3. `i = 1, 2` — already visited, skip
+4. `i = 3` unvisited পাওয়ায়, নতুন DFS শুরু → `3, 4` visit হয় (Component 2 তৈরি)
+5. `i = 4` — visited, skip
+6. `i = 5` unvisited, নতুন DFS শুরু → শুধু `5` (Component 3, কারণ এর কোনো edge নেই)
+
+#### Complexity:
+| Complexity | মান |
+|---|---|
+| **Time** | **O(V + E)** — প্রতিটি vertex ও edge ঠিক একবার visit হয়, outer loop-সহ |
+| **Space** | **O(V)** — visited array এবং recursion stack-এর জন্য |
+
+> 🎯 **সারকথা:** **BFS** ব্যবহার করা হয় যখন **shortest path (unweighted)** বা **level-wise processing** প্রয়োজন, এবং এটি **Queue** ব্যবহার করে; **DFS** ব্যবহার করা হয় যখন **path existence, connectivity, cycle detection** ইত্যাদি "গভীরে গিয়ে সম্পূর্ণ explore করা" ধরনের সমস্যা সমাধান করতে হয়, এবং এটি **Stack (recursion)** ব্যবহার করে। উভয়েরই Time complexity **O(V+E)**, কিন্তু ব্যবহারের ধরন এবং internal data structure ভিন্ন — এই পার্থক্যটাই নির্ধারণ করে কোন সমস্যায় কোনটি বেছে নেওয়া উচিত।
 
 ## 🔄 63. How do you detect a cycle in a graph?
 
