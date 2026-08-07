@@ -13,7 +13,7 @@ title: 'OOP Fundamentals'
 
 Real-world চিন্তা করলে:
 
-```text
+```java
 BankAccount object:
 
 State:
@@ -31,7 +31,7 @@ Procedural programming এ সাধারণত data এবং function আল�
 
 **Procedural style problem:**
 
-```text
+```java
 balance variable আলাদা
 deposit() আলাদা
 withdraw() আলাদা
@@ -141,7 +141,7 @@ OOP এর চারটা pillar:
 
 **Pillars diagram:**
 
-```text
+```java
 OOP
 ├── Encapsulation: data protect করা
 ├── Abstraction: complexity hide করা
@@ -206,7 +206,7 @@ public class PaymentDemo {
 }
 ```
 
-```text
+```java
 Output:
 Charging card: 1500.0
 Paid 1500.0 by Nadia
@@ -222,7 +222,7 @@ OOP maintainability improve করে কারণ code responsibility অনু
 
 **Without OOP:**
 
-```text
+```java
 Order data আলাদা
 discount function আলাদা
 tax function আলাদা
@@ -234,7 +234,7 @@ Change করলে অনেক জায়গায় bug হতে পারে�
 
 **With OOP:**
 
-```text
+```java
 Order
 ├── items
 ├── calculateTotal()
@@ -292,7 +292,7 @@ class CheckoutService {
 
 **Object** হলো class থেকে তৈরি actual instance, যার নিজের state থাকে।
 
-```text
+```java
 Class = blueprint
 
           User
@@ -346,7 +346,7 @@ public class Main {
 }
 ```
 
-```text
+```java
 Output:
 Hello, I am Rahim
 Hello, I am Nadia
@@ -367,7 +367,7 @@ false
 
 **Memory reference diagram in Java:**
 
-```text
+```java
 Stack:
 user1 ----+
          |
@@ -451,7 +451,7 @@ public record Point(int x, int y) {
 
 **Class variable** হলো `static` field। এটা class-level shared data, সব object একই copy share করে।
 
-```text
+```java
 User class
 ├── static totalUsers = 2     <- shared class variable
 ├── user1.name = "Rahim"      <- instance variable
@@ -496,7 +496,7 @@ public class Main {
 
 **Memory view:**
 
-```text
+```java
 Class area:
 User.totalUsers = 2
 
@@ -597,7 +597,7 @@ public class Example {
 
 **Thinking difference:**
 
-```text
+```java
 Procedural:
 "কোন function চালাব?"
 borrowBook(books, title)
@@ -737,7 +737,7 @@ OOP version এ `Book` নিজের validity নিজে maintain করে�
 
 **Design diagram:**
 
-```text
+```java
 Library
 ├── books: List<Book>
 ├── addBook()

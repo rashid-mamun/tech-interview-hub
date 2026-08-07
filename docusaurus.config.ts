@@ -100,6 +100,7 @@ const config: Config = {
     prism: {
       theme: prismThemes.oneLight,
       darkTheme: prismThemes.oneDark,
+      additionalLanguages: ['java'],
       magicComments: [
         {
           className: 'code-block-highlighted-line',
