@@ -8,7 +8,7 @@ title: 'Dynamic Memory Allocation'
 
 **Dynamic memory allocation** হলো runtime-এ program-এর প্রয়োজন অনুযায়ী memory allocate এবং release করার process।
 
-Static বা stack allocation compile-time বা function call-এর lifetime অনুযায়ী manage হয়। কিন্তু অনেক data structure-এর size আগে থেকে জানা থাকে না:
+Static storage program lifetime অনুযায়ী এবং stack storage সাধারণত lexical scope/function-call lifetime অনুযায়ী manage হয়। কিন্তু অনেক data structure-এর size বা lifetime runtime behavior-এর ওপর নির্ভর করে:
 
 * dynamic array
 * linked list
@@ -22,7 +22,7 @@ Static বা stack allocation compile-time বা function call-এর lifetime
 
 ### malloc/free কীভাবে কাজ করে?
 
-C/C++ style manual memory management-এ:
+C-style manual memory management-এ (`C++`-এ সাধারণত `new/delete`, containers বা smart pointer prefer করা হয়):
 
 ```c
 int *arr = malloc(10 * sizeof(int));
@@ -46,6 +46,8 @@ free(arr);
 * আগে allocate করা block allocator-এর কাছে ফেরত দেয়
 * এরপর সেই block future allocation-এর জন্য reuse হতে পারে
 * `free()` করার পর pointer use করলে **use-after-free** bug হয়
+* `free(NULL)` safe no-op, কিন্তু একই live allocation দুইবার free করা undefined behavior
+* allocator block reuse-এর জন্য রেখে দিতে পারে; `free()` মানেই সঙ্গে সঙ্গে RSS কমা বা memory OS-এ ফেরত যাওয়া নয়
 
 ---
 
@@ -57,10 +59,12 @@ Important distinction:
 * OS kernel প্রতিটি ছোট `malloc()` call directly handle করে না
 * allocator বড় chunk memory OS থেকে নেয়, তারপর application-এর ছোট ছোট allocation নিজে manage করে
 
-OS থেকে memory নেওয়ার common mechanism:
+OS থেকে virtual memory region নেওয়ার common mechanism:
 
-* Unix/Linux: `brk`, `sbrk`, `mmap`
-* Windows: `VirtualAlloc`, heap APIs
+* Unix/Linux: `mmap`; main arena grow করতে `brk`/legacy `sbrk`-ও allocator implementation অনুযায়ী ব্যবহৃত হতে পারে
+* Windows: `VirtualAlloc` এবং higher-level heap APIs
+
+OS mapping demand-paged হতে পারে। তাই `malloc()` success সাধারণত allocator-visible virtual block দেয়; সব backing physical page তখনই RAM-এ resident হয়েছে—এমন নয়। Overcommit/commit policy অনুযায়ী later page fault-এ memory pressure বা OOM-ও ঘটতে পারে।
 
 Flow:
 
@@ -84,7 +88,7 @@ User-space allocator checks free lists / arenas
 
 **Stack memory**
 
-Function call-এর local variables, return address, parameters ইত্যাদির জন্য stack ব্যবহার হয়।
+ABI ও compiler decision অনুযায়ী function-call frame, saved return state এবং অনেক local variable/parameter-এর জন্য stack ব্যবহৃত হয়। Optimizer কিছু local register-এ রাখতে বা escape analysis-এর মাধ্যমে অন্য storage-এ নিতে পারে।
 
 Example:
 
@@ -113,7 +117,7 @@ free(p);
 
 | বিষয় | Stack | Heap |
 | ---- | ----- | ---- |
-| Lifetime | function call scope | programmer/runtime controlled |
+| Lifetime | সাধারণত block/call lifetime; automatic | programmer/runtime/GC controlled |
 | Allocation speed | খুব দ্রুত | তুলনামূলক slow |
 | Management | automatic | manual বা GC/runtime |
 | Size | সীমিত | তুলনামূলক বড় |
@@ -272,9 +276,12 @@ Request: 8 KB
 
 ```text
 64 KB
- ├─ 32 KB + 32 KB
- ├─ 16 KB + 16 KB
- └─ 8 KB + 8 KB
+├─ 32 KB (free)
+└─ 32 KB
+   ├─ 16 KB (free)
+   └─ 16 KB
+      ├─ 8 KB (allocated)
+      └─ 8 KB (free buddy)
 ```
 
 Allocator বড় block বারবার split করে যতক্ষণ না required size-এর block পাওয়া যায়।
@@ -298,6 +305,12 @@ Allocator বড় block বারবার split করে যতক্ষণ ন
 ### How does the buddy system simplify merging of freed blocks?
 
 Buddy system-এ প্রতিটি block-এর buddy deterministicভাবে বের করা যায়, কারণ block size power-of-two এবং aligned থাকে।
+
+Arena-relative address ব্যবহার করলে conceptual formula:
+
+```text
+buddy_address = block_address XOR block_size
+```
 
 Conceptually:
 
@@ -370,7 +383,7 @@ OS-level tools memory usage observe করতে সাহায্য করে
 * virtual memory usage বাড়ছে কি না
 * process দীর্ঘ সময়ে memory release করছে কি না
 
-তবে OS-level tools সাধারণত exact leak source line বলে না।
+তবে RSS/virtual-size বৃদ্ধি একাই leak-এর proof নয়—allocator cache, file mapping, page cache accounting বা legitimate working-set growth-ও কারণ হতে পারে। OS-level tools সাধারণত exact leak source line বলে না; trend-এর পর heap profiler/sanitizer দিয়ে confirm করতে হয়।
 
 ---
 
@@ -430,7 +443,9 @@ GC reachable object graph trace করে। যেসব object আর reachabl
 **GC কী solve করে**
 
 * forgotten free কমায়
-* use-after-free/double-free avoid করে
+* safe managed reference-এর ক্ষেত্রে manual use-after-free/double-free class-এর bug এড়ায়
+
+Native interop, unsafe pointer বা off-heap resource থাকলে GC language-এও lifetime bug সম্ভব। GC memory ছাড়া file descriptor/socket-এর মতো resource timely close করার guarantee-ও দেয় না।
 
 **GC কী solve করে না**
 
@@ -522,7 +537,7 @@ Frequently allocated object reuse করা, যাতে allocation/free churn 
 
 ### How does slab allocation help reduce fragmentation for frequently allocated object types?
 
-**Slab allocation** হলো kernel memory management technique যেখানে frequently used fixed-size object-এর জন্য preallocated cache রাখা হয়।
+**Slab allocation** হলো kernel-এ commonly used object-caching allocation technique, যেখানে frequently used fixed-size object-এর জন্য cache/slab রাখা হয়। Similar size-class/object-cache idea user-space allocator-এও থাকতে পারে।
 
 Kernel-এ অনেক object বারবার allocate/free হয়:
 
@@ -550,7 +565,7 @@ Cache for inode objects
 **সুবিধা**
 
 * allocation/free দ্রুত
-* internal fragmentation কম
+* object-specific layout-এর কারণে generic allocator fragmentation/metadata overhead কমতে পারে
 * object reuse হয়
 * constructor/init cost কমতে পারে
 * cache locality ভালো হতে পারে

@@ -18,6 +18,8 @@ Traditional HDD-তে disk head-কে platter-এর track-এর উপর mo
 
 > **Note:** Disk scheduling মূলত HDD-এর mechanical seek cost-এর কারণে গুরুত্বপূর্ণ ছিল। SSD/NVMe storage-এ seek time নেই, তাই scheduling goal অনেকটা বদলে যায়।
 
+Modern HDD controller logical block address (LBA)-কে physical geometry-তে map ও internally reorder করতে পারে। তাই FCFS/SSTF/SCAN examples মূলত classical OS model বোঝায়; real device behavior firmware ও queueing stack-এর ওপরও নির্ভর করে।
+
 ---
 
 ### How do FCFS, SSTF, SCAN, C-SCAN, and LOOK differ?
@@ -223,10 +225,11 @@ High load system-এ queue time অনেক বড় হতে পারে।
 
 ### What is seek time, rotational latency, and transfer time, and how do they combine to form access time?
 
-Traditional HDD access time roughly:
+Traditional HDD-এর device service/access time roughly:
 
 ```text
-Disk Access Time = Seek Time + Rotational Latency + Transfer Time + Controller/Queue Overhead
+Device Service Time ≈ Seek Time + Rotational Latency + Transfer Time + Controller Overhead
+Total I/O Response Time ≈ Queue Time + Device Service Time
 ```
 
 **Example**
@@ -236,7 +239,7 @@ Seek time          = 5 ms
 Rotational latency = 4 ms
 Transfer time      = 1 ms
 
-Access time ≈ 10 ms
+Device service time ≈ 10 ms
 ```
 
 Disk scheduling mainly seek time এবং queue behavior optimize করার চেষ্টা করে। Rotational latency কিছু advanced disk/controller level scheduling দিয়ে কমানো যেতে পারে, তবে OS-level classical algorithms সাধারণত seek movement focus করে।
@@ -281,7 +284,7 @@ Minimum disks: `2`
 
 #### RAID 1: Mirroring
 
-একই data দুই বা ততোধিক disk-এ copy রাখা হয়।
+একই data mirror set-এর দুই বা ততোধিক disk-এ copy রাখা হয়।
 
 **সুবিধা**
 
@@ -290,7 +293,7 @@ Minimum disks: `2`
 
 **অসুবিধা**
 
-* usable capacity সাধারণত 50%
+* common two-way mirror-এ usable capacity 50%; `k`-way mirror-এ raw capacity-এর প্রায় `1/k`
 * write একই data mirror-এ লিখতে হয়
 
 Minimum disks: `2`
@@ -358,7 +361,7 @@ Minimum disks: `4`
 | RAID Level | Technique | Minimum disks | Fault tolerance | Usable capacity | Write performance |
 | ---------- | --------- | ------------- | --------------- | --------------- | ----------------- |
 | RAID 0 | Striping | 2 | none | 100% | very good |
-| RAID 1 | Mirroring | 2 | 1 disk per mirror | ~50% | moderate |
+| RAID 1 | Mirroring | 2 | mirror set-এ অন্তত 1 healthy copy থাকলে data available | 2-way-এ ~50% | moderate |
 | RAID 5 | Striping + single parity | 3 | 1 disk | `(N-1)` disks | write penalty |
 | RAID 6 | Striping + double parity | 4 | 2 disks | `(N-2)` disks | higher write penalty |
 | RAID 10 | Stripe of mirrors | 4 | depends on which disks fail | ~50% | very good |
@@ -371,7 +374,7 @@ Minimum disks: `4`
 
 RAID 5 small write করতে গেলে শুধু new data লিখলেই হয় না; parity-ও update করতে হয়।
 
-Classic read-modify-write flow:
+Classic small-write read-modify-write flow:
 
 1. old data read
 2. old parity read
@@ -379,9 +382,9 @@ Classic read-modify-write flow:
 4. new data write
 5. new parity write
 
-তাই একটি small write-এর জন্য multiple I/O লাগে। এটিই **RAID 5 write penalty**।
+অর্থাৎ parity calculation ছাড়াও সাধারণত **4টি backend I/O** লাগে: 2 read + 2 write। এটিই classic **RAID 5 small-write penalty**। Full-stripe write করলে পুরোনো data/parity read এড়ানো যেতে পারে, তাই penalty workload ও controller implementation-এর ওপর নির্ভর করে।
 
-RAID 6-এ double parity থাকায় write penalty আরও বেশি।
+RAID 6-এ দুটি parity update করতে হওয়ায় small-write penalty সাধারণত আরও বেশি।
 
 ---
 
@@ -426,7 +429,7 @@ RAID 6-এ double parity থাকায় write penalty আরও বেশি।
 
 ### What is the TRIM command, and why is it relevant for SSDs?
 
-**TRIM** হলো এমন একটি command/interface যার মাধ্যমে OS SSD-কে জানায় কোন logical blocks আর ব্যবহার হচ্ছে না।
+**TRIM/discard** হলো এমন একটি interface যার মাধ্যমে OS storage device-কে জানায় কোন logical blocks আর ব্যবহার হচ্ছে না। ATA-তে command-টি TRIM, SCSI-তে UNMAP এবং NVMe-তে deallocate semantics দিয়ে একই ধারণা প্রকাশ করা হয়।
 
 যখন user কোনো file delete করে, OS file system metadata update করে। কিন্তু SSD নিজে না-ও জানতে পারে যে সেই old data blocks আর দরকার নেই। TRIM SSD-কে বলে:
 
@@ -453,7 +456,7 @@ SSD scheduling focus করে:
 * latency control
 * queue depth management
 * parallel NAND channels utilize করা
-* write amplification বা garbage collection impact কমানো
+* workload ও discard/write pattern-এর মাধ্যমে device-side write amplification বা garbage-collection pressure পরোক্ষভাবে কমানো
 * priority/class-based I/O control
 
 NVMe SSD-তে multiple hardware queues থাকে। তাই modern OS I/O scheduling অনেক ক্ষেত্রে multi-queue block layer, latency target, and device parallelism-এর সাথে কাজ করে।
@@ -477,9 +480,9 @@ Disk scheduling ঐতিহাসিকভাবে HDD head movement optimize 
 
 ### How do I/O schedulers differ in their goals?
 
-Linux-এর historical schedulers:
+Linux-এর legacy single-queue schedulers:
 
-**NOOP**
+**NOOP (legacy)**
 
 Minimal scheduling। Request mostly FIFO order-এ পাঠায়, কিছু merging করতে পারে।
 
@@ -491,7 +494,7 @@ Useful when:
 
 ---
 
-**Deadline**
+**Deadline (legacy)**
 
 Request starvation avoid করতে read/write request-এর deadline maintain করে। Goal হলো কোনো request যেন খুব বেশি delay না হয়।
 
@@ -502,7 +505,7 @@ Useful when:
 
 ---
 
-**CFQ (Completely Fair Queuing)**
+**CFQ (legacy Completely Fair Queuing)**
 
 Process/thread অনুযায়ী I/O queue ভাগ করে fairness দিতে চেষ্টা করে।
 
@@ -511,7 +514,7 @@ Useful historically for:
 * multi-user desktop/server workloads
 * per-process fairness
 
-> **Modern note:** Linux-এর modern block layer অনেক ক্ষেত্রে multi-queue schedulers ব্যবহার করে, যেমন `mq-deadline`, `kyber`, `bfq`, বা `none`, device/workload অনুযায়ী।
+> **Modern note:** Linux blk-mq block layer-এ available scheduler device/configuration অনুযায়ী `mq-deadline`, `kyber`, `bfq`, বা `none` হতে পারে। Legacy `noop` আর modern `none` conceptually minimal হলেও একই implementation নয়; একইভাবে legacy `deadline` ও `mq-deadline` আলাদা implementation generation।
 
 ---
 
@@ -519,9 +522,9 @@ Useful historically for:
 
 | Scheduler | Main goal | Best fit |
 | --------- | --------- | -------- |
-| NOOP / none | minimal overhead | SSD, virtualized storage, smart controller |
-| Deadline / mq-deadline | bounded latency | general-purpose latency-sensitive I/O |
-| CFQ | per-process fairness | older Linux workloads |
+| none | no elevator / minimal block-layer scheduling | fast device, virtualized storage, smart controller |
+| mq-deadline | starvation control and latency-oriented ordering | general-purpose latency-sensitive I/O |
+| CFQ (legacy) | per-process fairness | older single-queue Linux workloads |
 | BFQ | interactive responsiveness/fairness | desktop/interactive workloads |
 | Kyber | latency control on fast devices | fast SSD/NVMe workloads |
 

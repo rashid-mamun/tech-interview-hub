@@ -6,7 +6,7 @@ title: 'Deadlocks'
 
 ## 🔗 21. What is a deadlock, and what are the four necessary conditions for it to occur (Coffman conditions)?
 
-**Deadlock** হলো এমন একটি অবস্থা যেখানে দুই বা ততোধিক process/thread একে অপরের resource release করার জন্য অপেক্ষা করতে থাকে, ফলে কেউই আর এগোতে পারে না।
+**Deadlock** হলো এমন একটি অবস্থা যেখানে এক বা একাধিক process/thread এমন event বা resource-এর জন্য অপেক্ষা করে যা deadlocked set-এর অন্য সদস্যের action ছাড়া ঘটবে না; ফলে set-এর কেউই আর progress করতে পারে না। সাধারণত একাধিক participant থাকে, তবে non-recursive lock দ্বিতীয়বার acquire করার মতো ক্ষেত্রে একটি thread নিজেকেও deadlock করতে পারে।
 
 সহজ উদাহরণ:
 
@@ -131,11 +131,11 @@ Always acquire: Lock A → Lock B → Lock C
 Never acquire:  Lock C → Lock A
 ```
 
-এতে circular wait হওয়া কঠিন হয়।
+সব participant strict global order মেনে চললে circular wait ভেঙে যায়, ফলে lock-order deadlock ঘটতে পারে না।
 
 **Pros**
 
-* Deadlock হওয়ার chance কম
+* যে Coffman condition-টি eliminate করা হয়, সেই resource model-এ deadlock প্রতিরোধের guarantee দেয়
 * conceptually simple
 
 **Cons**
@@ -202,7 +202,7 @@ Common recovery techniques:
 
 ### Which approach tends to have the highest runtime overhead, and why?
 
-**Deadlock avoidance** সাধারণত বেশি runtime overhead তৈরি করতে পারে, কারণ প্রতিটি resource request grant করার আগে system-কে safety check চালাতে হয়।
+কোন strategy-এর runtime overhead সবচেয়ে বেশি হবে তার universal answer নেই; request rate, detection frequency এবং resource count-এর ওপর এটি নির্ভর করে। তবে **deadlock avoidance** সাধারণত high continuous overhead তৈরি করতে পারে, কারণ প্রতিটি relevant resource request grant করার আগে system-কে safety check চালাতে হয়।
 
 Banker’s Algorithm-এর মতো avoidance technique-এ system-কে maintain করতে হয়:
 
@@ -212,7 +212,7 @@ Banker’s Algorithm-এর মতো avoidance technique-এ system-কে main
 * remaining need
 * safe sequence আছে কি না
 
-Detection-এরও overhead আছে, কিন্তু detection সাধারণত periodic বা on-demand হতে পারে। Avoidance অনেক ক্ষেত্রে every request-এর সময় decision নেয়, তাই runtime cost বেশি হতে পারে।
+Detection-এরও overhead আছে এবং খুব ঘন ঘন full detection চালালে সেটিই বেশি costly হতে পারে। Detection periodic বা on-demand হলে avoidance-এর per-request cost তুলনামূলক বেশি দেখা যায়।
 
 | Strategy | কখন কাজ করে | মূল idea | Trade-off |
 | -------- | ------------ | -------- | --------- |
@@ -290,7 +290,7 @@ System check করে এমন কোনো order আছে কি না য�
 3. Temporarily resource allocate করে দেখা হয়
 4. Safety algorithm চালানো হয়
 5. Safe হলে request grant
-6. Unsafe হলে request wait করতে হয়
+6. Unsafe হলে provisional allocation rollback করে process-কে wait করানো হয়
 
 ---
 
@@ -458,7 +458,7 @@ OS/concurrency example:
 
 ### Starvation
 
-Starvation হলো এমন অবস্থা যেখানে একটি process/thread দীর্ঘ সময় resource বা CPU পায় না, কারণ অন্য process/thread বারবার priority পেয়ে যাচ্ছে।
+Starvation বা indefinite postponement হলো এমন অবস্থা যেখানে একটি process/thread potentially অনির্দিষ্টকাল resource বা CPU পায় না, যদিও system-এর অন্য participant progress করতে থাকে।
 
 Example:
 
@@ -544,15 +544,11 @@ Process victim selection-এ বিবেচনা করা যেতে পা
 
 ### 2. Resource Preemption
 
-System কোনো process-এর কাছ থেকে resource কেড়ে নিয়ে অন্য process-কে দেয়।
+System কোনো process-এর কাছ থেকে safely preemptable resource ফিরিয়ে নিয়ে অন্য process-কে দেয় বা allocation পুনর্বিন্যাস করে।
 
 এটি সব resource-এর ক্ষেত্রে possible নয়।
 
-Example:
-
-* CPU preempt করা যায়
-* memory page reclaim করা যায়
-* কিন্তু mutex lock বা printer job মাঝপথে safely preempt করা কঠিন
+উদাহরণ হিসেবে CPU time preempt করা বা reclaimable memory page সরানো সম্ভব। তবে এগুলো তখনই deadlock recovery-তে সাহায্য করবে যখন সংশ্লিষ্ট deadlocked resource allocation ভাঙে; শুধু CPU preempt করলেই mutex deadlock ভাঙে না। Mutex ownership, printer job বা partially completed I/O মাঝপথে safely preempt করা সাধারণত কঠিন।
 
 Preemption করতে গেলে তিনটি issue আসে:
 

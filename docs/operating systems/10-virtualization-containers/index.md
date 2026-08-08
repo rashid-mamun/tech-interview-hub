@@ -6,7 +6,7 @@ title: 'Virtualization & Containers'
 
 ## 🖥️ 42. What is virtualization, and what problem does it solve?
 
-**Virtualization** হলো এমন একটি technique যেখানে একটি physical computer-এর hardware resources—CPU, memory, storage, network—abstract করে একাধিক isolated **virtual machine (VM)** তৈরি করা হয়।
+এই chapter-এর context-এ **virtualization** হলো physical computer-এর CPU, memory, storage ও network resources abstract করে একাধিক isolated **virtual machine (VM)** তৈরি করার technique। Virtualization আরও broader concept—যেমন storage বা network virtualization—তবে এখানে মূল focus machine virtualization।
 
 প্রতিটি VM নিজেকে আলাদা computer মনে করে এবং নিজের guest operating system চালাতে পারে।
 
@@ -61,7 +61,7 @@ Hypervisor দুই ধরনের:
 
 ### Type 1 Hypervisor
 
-Type 1 hypervisor সরাসরি physical hardware-এর উপর চলে। এর নিচে কোনো general-purpose host OS থাকে না।
+Type 1 hypervisor hardware-এর privileged virtualization layer-এ চলে; এটি ordinary host application হিসেবে execute করে না। তবে real deployment-এ management/root partition বা privileged domain থাকতে পারে—যেমন Hyper-V root partition, Xen dom0, অথবা KVM stack-এ Linux kernel ও user-space management components।
 
 ```text
 Hardware
@@ -128,7 +128,7 @@ Hardware
 | কোথায় চলে | সরাসরি hardware-এর উপর | host OS-এর উপর application হিসেবে |
 | Performance | সাধারণত বেশি | তুলনামূলক কম |
 | Use case | data center, cloud, production | desktop, testing, learning |
-| Isolation | strong | host OS-এর উপর depend করে |
+| Isolation boundary | সাধারণত smaller privileged layer; management components-ও relevant | host OS security ও hypervisor app—দুইটির ওপর depend করে |
 | Examples | ESXi, Hyper-V, Xen | VirtualBox, VMware Workstation |
 
 ---
@@ -177,7 +177,7 @@ Container-এর নিজস্ব full kernel থাকে না। সে ho
 | Startup time | slow, seconds/minutes হতে পারে | fast, milliseconds/seconds |
 | Resource usage | বেশি | কম |
 | Isolation | stronger boundary | lighter boundary |
-| OS flexibility | different OS kernel চালানো যায় | same host kernel family দরকার |
+| OS flexibility | compatible virtual hardware-এ different guest kernel চালানো যায় | host kernel ABI share করতে হয়; অন্য kernel সাধারণত VM layer ছাড়া চলে না |
 | Image size | large | smaller |
 | Use case | strong isolation, multi-OS, legacy apps | microservices, packaging, deployment |
 
@@ -259,7 +259,7 @@ Process নিজের cgroup hierarchy কীভাবে দেখবে ত�
 
 **Time namespace**
 
-কিছু system-এ boot time/monotonic clock offset isolate করা যায়।
+Linux time namespace `CLOCK_MONOTONIC` ও `CLOCK_BOOTTIME` family-এর offsets virtualize করতে পারে। এটি wall-clock `CLOCK_REALTIME` virtualize করে না।
 
 ---
 
@@ -288,7 +288,7 @@ cgroups দিয়ে control করা যায়:
 * memory limit
 * block I/O weight/limit
 * process count
-* device access
+* device access—cgroup v1 devices controller বা cgroup v2-এ cgroup-BPF policy দিয়ে
 * CPU set/NUMA placement
 
 Example:
@@ -323,6 +323,8 @@ Security hardening-এর জন্য often ব্যবহার হয়:
 
 Virtualization implementation-এর কয়েকটি approach আছে।
 
+> এগুলো সবসময় mutually exclusive category নয়। Modern VM প্রায়ই hardware-assisted CPU/memory virtualization-এর সঙ্গে paravirtualized I/O driver (যেমন virtio) ব্যবহার করে; “full virtualization” guest compatibility model-কে বোঝাতে পারে।
+
 ---
 
 ### Full Virtualization
@@ -344,7 +346,7 @@ Hypervisor virtual hardware provide করে এবং privileged operations tr
 
 ### Paravirtualization
 
-Paravirtualization-এ guest OS জানে যে সে virtualized environment-এ চলছে এবং hypervisor-এর সাথে special interface বা **hypercalls** ব্যবহার করে।
+Paravirtualization-এ guest OS বা নির্দিষ্ট guest driver জানে যে সে virtualized environment-এ চলছে এবং hypervisor-এর optimized interface বা **hypercalls** ব্যবহার করে।
 
 **সুবিধা**
 
@@ -353,7 +355,7 @@ Paravirtualization-এ guest OS জানে যে সে virtualized environme
 
 **অসুবিধা**
 
-* guest OS modification বা paravirtual drivers দরকার হতে পারে
+* full guest modification (historical PV mode) অথবা paravirtual-aware drivers/support দরকার হতে পারে
 
 Examples:
 
@@ -379,13 +381,15 @@ CPU আলাদা execution mode/support দেয় যাতে guest OS �
 
 Software-only virtualization-এ hypervisor-কে অনেক privileged instruction trap, translate, বা emulate করতে হতো। এতে overhead বেশি ছিল।
 
-Hardware-assisted virtualization performance improve করে:
+Hardware-assisted virtualization performance ও correctness simplify/improve করে:
 
 * guest privileged code efficiently run করতে দেয়
 * trap/exit handling standardized করে
 * memory virtualization support দেয়, যেমন nested page tables
 * CPU mode transitions safer/cleaner করে
 * hypervisor complexity কমায়
+
+তবে VM exit, nested translation, virtual I/O এবং scheduling overhead পুরোপুরি দূর হয় না; workload অনুযায়ী cost থাকে।
 
 Memory virtualization-এর ক্ষেত্রে:
 
@@ -398,8 +402,8 @@ Guest virtual address → guest physical address → host physical address trans
 
 ### Comparison
 
-| Type | Guest OS modified? | Main idea | Performance |
-| ---- | ------------------ | --------- | ----------- |
+| Approach | Guest OS modified? | Main idea | Performance |
+| -------- | ------------------ | --------- | ----------- |
 | Full virtualization | না | virtual hardware/emulation | hardware assist ছাড়া overhead বেশি হতে পারে |
 | Paravirtualization | হ্যাঁ বা special drivers | guest hypervisor-aware | ভালো, especially I/O |
 | Hardware-assisted | না | CPU virtualization extensions | modern default, efficient |

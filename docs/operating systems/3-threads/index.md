@@ -38,7 +38,7 @@ Single-threaded Process:        Multi-threaded Process:
 | বিষয়              | Process                                                             | Thread                                                                     |
 | ------------------ | ------------------------------------------------------------------- | -------------------------------------------------------------------------- |
 | **সংজ্ঞা**         | একটি চলমান program-এর instance                                      | Process-এর ভেতরে execution unit                                            |
-| **Memory**         | নিজস্ব আলাদা address space থাকে                                     | একই process-এর address space share করে                                     |
+| **Memory**         | নিজস্ব virtual address space থাকে; explicit shared mapping থাকতে পারে | একই process-এর virtual address space share করে                           |
 | **তৈরির খরচ**      | বেশি                                                                | কম                                                                         |
 | **Communication**  | IPC লাগে (pipe, socket, message queue ইত্যাদি)                      | Shared memory-এর মাধ্যমে সহজে data share করা যায়                          |
 | **Isolation**      | এক process অন্য process থেকে আলাদা                                  | একই process-এর thread গুলো একে অপরকে প্রভাবিত করতে পারে                    |
@@ -61,7 +61,7 @@ Thread বোঝার জন্য এটি সবচেয়ে গুরু
 * **Heap** (dynamic memory)
 * **Open files / file descriptors**
 * **Process address space**
-* **Signal handlers / process-level attributes** অনেক system-এ process-wide হিসেবে shared থাকে
+* **Signal disposition/handlers ও process-level attributes** সাধারণত process-wide হিসেবে shared থাকে; তবে signal mask ও কিছু pending-signal state per-thread হতে পারে
 
 ```text
 ┌─────────────────────────────────────────┐
@@ -95,6 +95,8 @@ Thread বোঝার জন্য এটি সবচেয়ে গুরু
 * **Stack**
 * **Local variables / function call information**
 * **Thread-local storage (TLS)** এবং কিছু per-thread signal/scheduling state
+
+> প্রতিটি thread-এর stack আলাদা হলেও সেটি একই process address space-এর অংশ। তাই stack/local data automatically memory-isolated নয়—valid pointer পেলে অন্য thread সেটি access করতে পারে।
 
 ```text
 ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
@@ -175,7 +177,7 @@ Thread-এর ক্ষেত্রে আলাদা পুরো memory space
 * address space switch করতে হয়
 
 কিন্তু **একই process-এর দুই thread-এর মধ্যে context switch** হলে address space একই থাকে।
-তাই process switch-এর তুলনায় **memory-management overhead কম** হয়, ফলে thread switch তুলনামূলক দ্রুত হয়।
+তাই ভিন্ন process-এর thread-এ switch করার তুলনায় **memory-management overhead কম হতে পারে**, ফলে একই process-এর thread switch সাধারণত দ্রুত হয়। এটি absolute guarantee নয়; actual cost OS, architecture ও cache state-এর ওপর নির্ভর করে।
 
 ```text
 Process Context Switch:           Thread Context Switch:
@@ -297,7 +299,7 @@ User-level Thread (ULT):          Kernel-level Thread (KLT):
 **User-Level Threads (ULT)**
 
 **User-level thread** হলো এমন thread যাকে **user space-এর thread library** manage করে।
-এখানে thread তৈরি, schedule, block, resume, context switch — সবকিছু **user space-এ** হয়।
+Pure many-to-one ULT model-এ thread তৈরি, user-thread scheduling, resume এবং user-thread context switch মূলত **user space-এ** হয়। Many-to-many runtime-এ underlying kernel thread management বা blocking operation-এর জন্য kernel interaction লাগতে পারে।
 
 Kernel সাধারণত জানে না যে ওই process-এর মধ্যে একাধিক user thread আছে।
 Many-to-one model-এ kernel-এর কাছে পুরো process-টি **একটি single schedulable entity** হিসেবে দেখা যায়। তবে বাস্তবে ULT/KLT behavior mapping model-এর ওপর নির্ভর করে, যা পরের section-এ এসেছে।
@@ -479,12 +481,15 @@ Priority scheduling, CPU accounting, signals, real-time support ইত্যা�
 কারণ kernel-কে প্রতিটি thread-এর জন্য metadata maintain করতে হয় এবং অনেক ক্ষেত্রে system call involve হয়।
 
 ```text
-KLT context switch:
-User mode → kernel mode
-→ scheduler decision
-→ registers save/restore
-→ আবার user mode
+Possible KLT context switch:
+Interrupt / system call / scheduling event
+→ kernel scheduler decision
+→ current thread state save
+→ next thread state restore
+→ selected thread resume
 ```
+
+Kernel-level thread switch-এ kernel scheduler involvement লাগে। তবে প্রতিবার আলাদা করে `user mode → kernel mode` transition হবেই—এমন নয়; CPU আগে থেকেই kernel mode-এ থাকতে পারে।
 
 #### ii. Kernel resource বেশি লাগে
 
@@ -750,53 +755,6 @@ A ও B দুটোই progress করছে      A ও B literally
 
 ---
 
-**Concurrency — Single Core-এ interleaving**
-
-```text
-CPU Core 1 (একটিমাত্র):
-
-সময়:  1ms  2ms  3ms  4ms  5ms  6ms  7ms  8ms  9ms  10ms
-       ──────────────────────────────────────────────────
-Core: [T1] [T1] [T2] [T2] [T3] [T1] [T2] [T3] [T1] [T2]
-              ↑        ↑        ↑
-          switch   switch   switch
-
-T1 এর অগ্রগতি: ██░░░██░░░██
-T2 এর অগ্রগতি: ░░██░░░██░░█
-T3 এর অগ্রগতি: ░░░░██░░██░░
-```
-
-এখানে **T1, T2, T3** — তিনটিই progress করছে, কিন্তু **একই মুহূর্তে নয়**।
-CPU একবার এক task-কে, আবার আরেকবার আরেক task-কে সময় দিচ্ছে।
-
-এটাই **Concurrency**।
-
----
-
-**Parallelism — Multi Core-এ**
-
-```text
-CPU Core 1:
-সময়:  1ms  2ms  3ms  4ms  5ms  6ms  7ms  8ms
-       ─────────────────────────────────────
-Core1:[T1] [T1] [T1] [T1] [T1] [T1] [T1] [T1]
-
-CPU Core 2:
-       ─────────────────────────────────────
-Core2:[T2] [T2] [T2] [T2] [T2] [T2] [T2] [T2]
-
-CPU Core 3:
-       ─────────────────────────────────────
-Core3:[T3] [T3] [T3] [T3] [T3] [T3] [T3] [T3]
-```
-
-এখানে **T1, T2, T3** সত্যিকার অর্থে **একই সময়ে** চলছে।
-কারণ আলাদা core-এ তারা execute হচ্ছে।
-
-এটাই **Parallelism**।
-
----
-
 ### তিনটি প্রধান execution pattern
 
 ---
@@ -885,18 +843,17 @@ Single-core concurrency সাধারণত নিচের উপায়ে �
 
 ---
 
-**Single-core System-এ Parallelism কি সম্ভব?**
+**Single-core system-এ parallelism কি সম্ভব?**
 
-**না, true task-level parallelism সম্ভব নয়।**
+একটি মাত্র **logical execution context** থাকলে একাধিক independent software thread-এর true task-level parallelism সম্ভব নয়।
 
-কারণ **single-core processor**-এ একটিমাত্র core থাকে।
-তাই একই সময়ে একাধিক independent task-কে **আলাদা core-এ** execute করানোর সুযোগ থাকে না।
+কারণ একই সময়ে একাধিক independent software thread execute করার জন্য একাধিক logical processor/execution context প্রয়োজন। তাই একটি single logical CPU-তে task-গুলো interleave করতে পারে, কিন্তু একই instant-এ একাধিক task instruction execute করতে পারে না।
 
-অর্থাৎ single-core system-এ তুমি একাধিক task-এর **progress overlap** করাতে পারবে (**concurrency**), কিন্তু একাধিক task-কে **সত্যিকার অর্থে একই মুহূর্তে** চালাতে পারবে না (**parallelism**)।
+> **Nuance:** একটি physical core-এ SMT/hardware-threading থাকলে OS সেটিকে একাধিক logical CPU হিসেবে দেখতে পারে। এছাড়া instruction-level parallelism ও SIMD একটি core-এর ভেতরে থাকতে পারে; এখানে আলোচনা হচ্ছে independent software task/thread-এর parallelism নিয়ে।
 
 > **সারকথা:**
 > **Single-core → Concurrency সম্ভব**
-> **Single-core → True Parallelism সম্ভব নয়**
+> **Single logical execution context → True task-level parallelism সম্ভব নয়**
 
 ---
 
@@ -920,7 +877,7 @@ Concurrency
 
 * **Parallelism সাধারণত concurrency-ও তৈরি করে**, কারণ multiple task একই সময়ে progress করছে
 * কিন্তু **Concurrency থাকলেই parallelism হবে না**
-* single-core system concurrency দিতে পারে, কিন্তু true parallelism দিতে পারে না
+* একটি single logical execution context concurrency দিতে পারে, কিন্তু independent software task-এর true parallelism দিতে পারে না
 
 ---
 
@@ -928,9 +885,9 @@ Concurrency
 
 ---
 
-##### উদাহরণ ১ — Web Server
+#### উদাহরণ ১ — Web Server
 
-###### Concurrent Web Server (single core / event-driven model)
+##### Concurrent Web Server (single core / event-driven model)
 
 ধরো একটি web server একসাথে অনেক request handle করছে।
 
@@ -959,7 +916,7 @@ Request 3 → process → DB wait → process → respond
 
 ---
 
-#### Parallel Web Server (multi-core)
+##### Parallel Web Server (multi-core)
 
 যদি server-এর একাধিক core থাকে, তাহলে:
 
@@ -991,7 +948,7 @@ Frame 3: [░██░░░░██░░░]
 
 ---
 
-#### Parallel rendering (multi-core)
+##### Parallel rendering (multi-core)
 
 যদি 4টি core থাকে, তাহলে:
 
@@ -1064,9 +1021,9 @@ Concurrency system-কে responsive ও efficient করতে সাহায�
 
 ---
 
-#### ii) Parallelism সাধারণত speedup দেয়
+#### ii) Parallelism speedup দিতে পারে
 
-যদি কাজটি এমন হয় যা ভাগ করা যায়, তাহলে multiple core ব্যবহার করে কাজ দ্রুত শেষ করা যায়।
+যদি কাজটি এমন হয় যা কার্যকরভাবে ভাগ করা যায়, তাহলে multiple core ব্যবহার করে কাজ দ্রুত শেষ হতে পারে। তবে serial অংশ, contention এবং coordination overhead-এর কারণে speedup নিশ্চিত নয় এবং core সংখ্যার সঙ্গে linearly বাড়ে না।
 
 তবে parallelism-এরও overhead আছে:
 

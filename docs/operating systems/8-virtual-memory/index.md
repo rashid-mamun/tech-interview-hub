@@ -10,14 +10,13 @@ title: 'Virtual Memory'
 
 Virtual Memory-তে process শুধুমাত্র **logical (virtual) address** ব্যবহার করে। এই virtual address সরাসরি physical RAM-এর address নয়। **Memory Management Unit (MMU)** এবং Operating System একসঙ্গে virtual address-কে physical address-এ translate করে।
 
-আধুনিক Operating System-এ Virtual Memory সাধারণত **Demand Paging**-এর মাধ্যমে বাস্তবায়ন করা হয়। এতে process-এর পুরো code, data এবং stack একসঙ্গে RAM-এ load করা হয় না; বরং শুধুমাত্র প্রয়োজনীয় page-গুলো RAM-এ থাকে। বাকি page-গুলো executable file অথবা secondary storage-এ থাকে এবং প্রয়োজন হলে RAM-এ আনা হয়।
+আধুনিক Operating System-এ Virtual Memory সাধারণত **Demand Paging** ব্যবহার করে। Process-এর পুরো code, data এবং stack একসঙ্গে RAM-এ resident থাকে না; প্রয়োজনীয় page-গুলো RAM-এ আনা হয়। Non-resident page file-backed executable/library থেকে load হতে পারে, swap-backed হতে পারে, অথবা anonymous demand-zero/COW page হিসেবে memory-তেই তৈরি হতে পারে।
 
 ---
 
-#### কেন Virtual Memory ব্যবহার করা হয়?
+### কেন Virtual Memory ব্যবহার করা হয়?
 
-**1. Physical RAM-এর চেয়ে বড় Program চালানো যায়:** Program-এর সম্পূর্ণ memory একসঙ্গে RAM-এ রাখার প্রয়োজন হয় না।
-শুধুমাত্র বর্তমানে প্রয়োজনীয় page-গুলো RAM-এ থাকে, ফলে RAM-এর চেয়ে বড় program-ও execute করা সম্ভব হয়।
+**1. Physical RAM-এর চেয়ে বড় Virtual Address Space ব্যবহার করা যায়:** Program-এর সম্পূর্ণ mapped memory একসঙ্গে RAM-এ resident রাখার প্রয়োজন হয় না। তবে actively touched/committed data-এর practical limit RAM, swap/backing store, OS commit policy এবং workload locality-এর ওপর নির্ভর করে; virtual allocation মানেই সমপরিমাণ physical storage reserved নয়।
 
 **2. Higher Degree of Multiprogramming:** যেহেতু প্রতিটি process-এর কেবল active page-গুলো RAM-এ থাকে, তাই একই RAM-এ আরও বেশি process একসঙ্গে manage করা যায়।
 ফলে system resources আরও দক্ষভাবে ব্যবহার করা সম্ভব হয়।
@@ -56,20 +55,20 @@ Execution শুরু করার জন্য যতটুকু page প্�
 
 1. Hardware একটি **Page Fault** exception generate করে।
 2. Operating System page fault handler execute করে।
-3. Page-টি executable file অথবা swap space থেকে খুঁজে বের করা হয়।
+3. Fault-এর type অনুযায়ী page-টি executable/mapped file বা swap থেকে আনা হয়, demand-zero page তৈরি করা হয়, অথবা copy-on-write copy বানানো হয়।
 4. RAM-এ একটি free frame খোঁজা হয়।
 5. Free frame না থাকলে Page Replacement Algorithm (যেমন LRU approximation বা Clock Algorithm) ব্যবহার করে একটি page replace করা হয়।
-6. যদি replaced page dirty হয়ে থাকে, তাহলে সেটি disk-এ write করা হয়।
+6. Victim page dirty এবং contents preserve করা প্রয়োজন হলে সেটি backing store-এ write করা হয়।
 7. নতুন page RAM-এ load করা হয়।
 8. Page Table update করা হয়।
 9. Faulting instruction পুনরায় execute করা হয়।
 
-Process সাধারণত বুঝতেই পারে না যে page fault ঘটেছিল।
+Valid, recoverable page fault application-এর জন্য transparent থাকে, যদিও latency বাড়তে পারে। Invalid access বা unrecoverable I/O error হলে signal/exception দেখা যায়।
 
 
 **4. ফলাফল** যেহেতু যেকোনো সময় process-এর শুধুমাত্র active page-গুলো RAM-এ থাকে, তাই process-এর মোট virtual address space physical RAM-এর চেয়ে অনেক বড় হতে পারে।
 
-উদাহরণস্বরূপ, 2 GB RAM-এর একটি system-এ বিভিন্ন process মিলিয়ে 8 GB বা তারও বেশি virtual memory ব্যবহার করা সম্ভব।
+উদাহরণস্বরূপ, 2 GB RAM-এর system-এ process-গুলোর মোট mapped virtual address space সহজেই 8 GB-এর বেশি হতে পারে। তবে সব mapped page একই সময়ে resident/committed ও actively used হলে পর্যাপ্ত RAM/backing না থাকায় severe paging বা allocation failure হতে পারে।
 
 ---
 
@@ -108,16 +107,16 @@ Kernel service ব্যবহার করতে হলে process-কে **sys
 এখানে পুরো Page Table থাকে না; বরং শুধুমাত্র সাম্প্রতিক বা frequently used কিছু Page Table Entry (PTE)-এর translation সংরক্ষিত থাকে।
 
 
-#### TLB কীভাবে Address Translation Speed Up করে?
+### TLB কীভাবে Address Translation Speed Up করে?
 
 Paging ব্যবস্থায় CPU যখনই কোনো virtual address access করে, তখন সেটিকে physical address-এ translate করতে হয়।
 Page Table সাধারণত main memory (RAM)-এ থাকে।
-তাই TLB না থাকলে প্রতিটি memory access-এর জন্য সাধারণত—
+Single-level page table ধরে নিলে TLB ছাড়া প্রতিটি memory access-এর জন্য সাধারণত—
 
 1. Page Table থেকে Frame Number বের করতে একটি memory access।
 2. এরপর Actual Data বা Instruction access করতে আরেকটি memory access।
 
-অর্থাৎ, প্রতিটি memory reference-এর জন্য অতিরিক্ত memory access প্রয়োজন হয়, যা performance কমিয়ে দেয়।
+Multi-level page table হলে cold page-table walk-এ একাধিক dependent memory access লাগতে পারে, তারপর actual data access হয়। Page-walk cache এই cost কিছুটা কমাতে পারে।
 
 
 #### TLB কীভাবে এই সমস্যা সমাধান করে?
@@ -147,9 +146,7 @@ TLB এই বৈশিষ্ট্যের সুবিধা নিয়ে 
 **TLB Miss** ঘটে যখন চাওয়া page-এর translation TLB-তে পাওয়া যায় না।
 TLB Miss-এর ধাপগুলো
 
-**1. Page Table Walk:** MMU মূল **Page Table** consult করে।
-যদি Multi-level Page Table ব্যবহৃত হয়, তাহলে প্রতিটি level traverse করে Frame Number বের করতে হয়।
-একে **Page Table Walk** বলা হয়।
+**1. Page Table Walk:** x86-এর মতো hardware-managed TLB architecture-এ MMU page table walk করে; multi-level table হলে প্রয়োজনীয় level traverse করে mapping বের করে। কিছু architecture-এ TLB miss software handler refill করে। Exact mechanism architecture-dependent।
 
 
 **2. Translation পাওয়া গেলে:** যদি Page Table-এ বৈধ mapping পাওয়া যায়—
@@ -216,8 +213,7 @@ TLB Miss হলে—
 নইলে stale translation ব্যবহৃত হতে পারে।
 
 
-**3. Process Termination:** Process শেষ হয়ে গেলে তার address space আর valid থাকে না।
-তাই সেই process-এর সঙ্গে সম্পর্কিত TLB entry invalidate করা হয়।
+**3. Address-space destruction/reuse:** Process শেষ হলে তার page table আর valid থাকে না। OS architecture অনুযায়ী targeted invalidation, ASID/PCID generation change বা lazy invalidation ব্যবহার করতে পারে; প্রতিবার synchronous full-TLB flush বাধ্যতামূলক নয়।
 
 **4. Kernel Memory Mapping পরিবর্তন হলে:** Operating System যদি Kernel-এর memory mapping পরিবর্তন করে, তাহলে সংশ্লিষ্ট TLB entry invalidate করতে হতে পারে।
 
@@ -247,7 +243,7 @@ TLB Flush-এর পরে TLB-তে খুব কম translation থাকে�
 * Operating System তখন প্রয়োজনীয় page RAM-এ load করে এবং execution পুনরায় শুরু করে।
 
 
-#### Demand Paging-এর সুবিধা
+### Demand Paging-এর সুবিধা
 
 **1. কম Memory ব্যবহার:** যেসব page কখনো access-ই করা হয় না, সেগুলো RAM-এ load করার প্রয়োজন হয় না।
 ফলে memory সাশ্রয় হয়।
@@ -264,16 +260,13 @@ TLB Flush-এর পরে TLB-তে খুব কম translation থাকে�
 
 ### What steps does the OS take when a page fault occurs?
 
-**Page Fault** হলো একটি **hardware exception (trap)**, যা ঘটে যখন CPU এমন একটি virtual page access করতে চায় যা বর্তমানে physical memory (RAM)-এ উপস্থিত নেই।
-এটি একটি স্বাভাবিক এবং প্রত্যাশিত ঘটনা; Demand Paging-এর কাজই Page Fault-এর মাধ্যমে প্রয়োজনীয় page RAM-এ আনা।
+**Page Fault** হলো একটি **hardware exception**, যা address translation বা permission check সফলভাবে সম্পন্ন না হলে ঘটে—যেমন page non-present, write-protected COW page-এ write, অথবা invalid/protected address access। Demand paging-এর non-present fault স্বাভাবিক ও recoverable হতে পারে; সব page fault স্বাভাবিক বা disk-backed নয়।
 
 
 #### Page Fault End-to-End কীভাবে কাজ করে?
 
 **Step 1: Virtual Address Generate:** CPU একটি instruction execute করার সময় একটি virtual address generate করে।
-MMU প্রথমে **TLB**-তে translation খোঁজে।
-যদি TLB Miss হয়, তাহলে Page Table consult করা হয়।
-যদি Page Table Entry-তে **Present Bit = 0** থাকে, তাহলে Page Fault ঘটে।
+MMU cached translation/permission check করে এবং প্রয়োজন হলে Page Table consult করে। Mapping absent থাকলে বা requested access permission violate করলে hardware Page Fault তোলে।
 
 
 **Step 2: Page Fault Exception** Hardware একটি **Page Fault Exception** generate করে।
@@ -297,9 +290,7 @@ Process-এর execution context (যেমন Program Counter, Registers ইত
 Victim page dirty হলে সেটিকে আগে disk-এ write-back করা হয়।
 
 
-**Step 5: Disk থেকে Page Load করা** Operating System প্রয়োজনীয় page executable file অথবা swap space থেকে RAM-এ load করে।
-এটি একটি disk I/O operation, যা RAM access-এর তুলনায় অনেক ধীর।
-এই সময় Process **Blocked (Waiting)** অবস্থায় থাকে এবং CPU Scheduler অন্য Ready Process execute করে।
+**Step 5: Page Materialize করা** Major fault হলে Operating System page executable/mapped file বা swap থেকে RAM-এ load করে; disk/storage I/O চলার সময় process block করে এবং scheduler অন্য task চালায়। Minor fault-এ demand-zero page allocate বা COW copy তৈরি করা যায়, যেখানে storage I/O ও দীর্ঘ blocking প্রয়োজন নাও হতে পারে।
 
 
 **Step 6: Page Table Update:** Page সফলভাবে RAM-এ আসার পরে—
@@ -310,7 +301,7 @@ Victim page dirty হলে সেটিকে আগে disk-এ write-back ক
 
 নতুন translation পরবর্তীতে TLB-তেও cache হতে পারে।
 
-**Step 7: Process Ready Queue-তে ফিরে আসে:** Disk I/O সম্পন্ন হলে Operating System Process-টিকে আবার Ready Queue-তে পাঠায়।
+**Step 7: Process runnable হয়:** Major fault-এর I/O complete হলে process ready/runnable হয়। Minor fault handler completion-এর পর kernel সরাসরি একই task-এ ফেরতও যেতে পারে।
 
 
 **Step 8: Faulting Instruction পুনরায় Execute:** যখন Process আবার CPU পায়, তখন যে instruction Page Fault ঘটিয়েছিল, সেটি পুনরায় execute করা হয়।
@@ -320,6 +311,8 @@ Victim page dirty হলে সেটিকে আগে disk-এ write-back ক
 ---
 
 **পুরো Flow**
+
+নিচের diagram-টি non-present, storage-backed **major page fault**-এর simplified path দেখায়। Demand-zero/COW minor fault বা protection fault-এর path কিছু ধাপে আলাদা হতে পারে।
 
 ```text
 CPU Virtual Address
@@ -435,7 +428,7 @@ Restart Faulting Instruction
 | Algorithm | ভিত্তি | Performance | Practical Implementation |
 | --- | --- | --- | --- |
 | FIFO | Age (কতক্ষণ আগে এসেছে) | সাধারণত খারাপ | সহজ, কম overhead |
-| LRU | Recency (কতক্ষণ আগে ব্যবহার হয়েছে) | ভালো, বাস্তবে widely ব্যবহৃত | Costly, approximate করে implement হয় |
+| LRU | Recency (কতক্ষণ আগে ব্যবহার হয়েছে) | ভালো; এর approximations widely ব্যবহৃত | Exact implementation costly |
 | Optimal | Future knowledge | সর্বোত্তম (theoretical) | বাস্তবে সম্ভব না |
 | LFU | Frequency (কতবার ব্যবহার হয়েছে) | মাঝারি, কিছু সমস্যা আছে | Costly, কম ব্যবহৃত |
 | MFU | Frequency (উল্টো logic) | সাধারণত খারাপ | কম ব্যবহৃত |

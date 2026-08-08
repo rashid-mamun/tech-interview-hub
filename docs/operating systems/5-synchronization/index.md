@@ -7,9 +7,9 @@ title: 'Synchronization'
 
 ## ⚠️ 17. What is a race condition, and how does it occur?
 
-**Race Condition** হলো এমন একটি সমস্যা (bug) যেখানে দুই বা ততোধিক **thread** বা **process** একই **shared resource** (যেমন একটি variable, memory location বা shared data structure) একই সময়ে access বা modify করার চেষ্টা করে, এবং তাদের **execution order**-এর উপর নির্ভর করে ভিন্ন ভিন্ন (এবং অনেক ক্ষেত্রে ভুল) ফলাফল আসে।
+**Race Condition** হলো এমন একটি correctness problem যেখানে program-এর ফলাফল concurrent operation-গুলোর timing বা execution order-এর ওপর অনাকাঙ্ক্ষিতভাবে নির্ভর করে। Shared memory-এর **data race**-এ দুই বা ততোধিক thread/process synchronization ছাড়া একই memory location access করে এবং অন্তত একটি access write হয়। Access-গুলোকে literally একই instant-এ ঘটতে হবে না; problematic interleaving-ই যথেষ্ট।
 
-এটি ঘটে কারণ thread-গুলো নিজেদের মধ্যে **synchronization** ছাড়া independently execute করে। Operating System scheduler যেকোনো সময় একটি running thread-কে pause (preempt) করে অন্য thread-কে CPU দিতে পারে। ফলে কোন thread কখন execute করবে, সেটি আগে থেকে নির্দিষ্ট থাকে না।
+এটি ঘটে কারণ thread-গুলো প্রয়োজনীয় **synchronization** ছাড়া independently execute করে। Scheduler preemption, multi-core parallel execution, interrupt বা asynchronous event—সবই unpredictable interleaving তৈরি করতে পারে।
 
 ---
 
@@ -51,6 +51,8 @@ Actual Result = **1**
 কারণ দুইটি thread-ই একই পুরোনো মান (**0**) পড়েছিল এবং শেষ পর্যন্ত একজনের update অন্যজন overwrite করে দিয়েছে।
 
 
+**Lock ব্যবহার করা safe version:**
+
 ```python
 import threading
 
@@ -75,7 +77,7 @@ t2.join()
 print(counter)   # সবসময় 200000
 ```
 
-> **নোট:** CPython-এ **Global Interpreter Lock (GIL)** থাকার কারণে ছোট উদাহরণে Race Condition সবসময় দেখা নাও যেতে পারে। তবে shared data নিয়ে synchronization ছাড়া কাজ করা নিরাপদ নয়। তাই Race Condition বোঝানোর জন্য এই উদাহরণটি একটি ধারণাগত (conceptual) উদাহরণ হিসেবে দেখা উচিত।
+> **নোট:** CPython-এর **GIL** Python-level thread-কে একই সময়ে bytecode execute করা সীমিত করলেও compound shared-state operation-কে application-level synchronization guarantee দেয় না। তাই correctness-এর জন্য GIL-এর ওপর নির্ভর না করে lock বা উপযুক্ত thread-safe primitive ব্যবহার করা উচিত। উপরের interleaving table-টি conceptual lost-update scenario দেখায়; code block-টি তার synchronized solution।
 
 ---
 
@@ -118,10 +120,10 @@ Atomic operation-এর বৈশিষ্ট্য হলো—
 
 **Critical Section** হলো কোনো program-এর এমন একটি **code block** যেখানে **shared resource** (যেমন: variable, memory, file, database বা shared data structure) access বা modify করা হয়।
 
-এই অংশে একই সময়ে **শুধুমাত্র একটি** process বা thread প্রবেশ করতে পারে। যদি একাধিক process বা thread একসাথে Critical Section-এ প্রবেশ করে, তাহলে **Race Condition** হতে পারে এবং data inconsistency দেখা দিতে পারে।
+একই protected resource/invariant-এর critical section-এ একই সময়ে **শুধুমাত্র একটি** process বা thread প্রবেশ করতে পারে। ভিন্ন independent resource-এর critical section অবশ্য parallel-এ চলতে পারে। প্রয়োজনীয় mutual exclusion ছাড়া একই critical section execute হলে **Race Condition** ও data inconsistency হতে পারে।
 
-**একটি Process-এর সাধারণ Structure:**
-প্রতিটি process সাধারণত নিচের চারটি অংশ নিয়ে গঠিত—
+**Critical-section solution-এর conceptual structure:**
+Critical-section problem বোঝাতে participating process/thread-এর code সাধারণত নিচের চারটি অংশে দেখানো হয়—
 
 ![Process structure with critical section](./process_structure_critical_section.svg)
 
@@ -141,7 +143,7 @@ Atomic operation-এর বৈশিষ্ট্য হলো—
 এটি নিশ্চিত না করলে **Race Condition** হবে।
 
 
-**2. Progress**: যদি কোনো process Critical Section-এ না থাকে এবং একাধিক process প্রবেশ করতে চায়, তাহলে তাদের মধ্য থেকে **সীমিত সময়ের মধ্যে** কোনো একটি process-কে নির্বাচন করে Critical Section-এ প্রবেশ করতে দিতে হবে।
+**2. Progress**: যদি কোনো process Critical Section-এ না থাকে এবং এক বা একাধিক process প্রবেশ করতে চায়, তাহলে কে পরবর্তী প্রবেশ করবে সেই সিদ্ধান্ত অনির্দিষ্টকাল postpone করা যাবে না। Remainder Section-এ থাকা process এই decision-এ বাধা দিতে পারবে না।
 
 অর্থাৎ, অপ্রয়োজনীয়ভাবে সবাইকে অপেক্ষা করিয়ে রাখা যাবে না।
 এই শর্ত পূরণ না হলে **indefinite postponement** বা **Deadlock-এর মতো blocking পরিস্থিতি** তৈরি হতে পারে।
@@ -229,7 +231,7 @@ Semaphore সাধারণত দুটি operation ব্যবহার ক
 বরং thread বারবার lock available হয়েছে কিনা পরীক্ষা করতে থাকে। একে **Busy Waiting** বা **Spinning** বলা হয়।
 এতে waiting অবস্থায় CPU continuously ব্যবহার হয়।
 
-Spinlock সাধারণত **খুব অল্প সময়ের জন্য lock ধরে রাখার ক্ষেত্রে**, বিশেষ করে **kernel**, **interrupt handler**, বা **low-level system programming**-এ ব্যবহৃত হয়, যেখানে sleep করা সম্ভব নয় বা context switch-এর overhead এড়াতে হয়।
+Spinlock সাধারণত **খুব অল্প সময়ের জন্য lock ধরে রাখার ক্ষেত্রে**, বিশেষ করে **kernel** বা **low-level system programming**-এ ব্যবহৃত হয়, যেখানে sleep করা সম্ভব নয় বা context-switch overhead lock hold-time-এর চেয়ে বেশি হতে পারে। Interrupt context-এ spinlock ব্যবহার করলে interrupt/preemption rules সঠিকভাবে মানতে হয়; interrupted code একই lock ধরে থাকলে ordinary spinlock deadlock করতে পারে।
 
 ---
 **সবকিছু একসাথে তুলনা**
@@ -238,7 +240,7 @@ Spinlock সাধারণত **খুব অল্প সময়ের জ�
 | --------------------------- | ---------------------------------- | ------------------------------------- | ------------------------ | ---------------------------------------------------- |
 | Ownership                   | আছে (Lock করা thread-ই Unlock করে) | নেই                                   | নেই                      | সাধারণত Lock করা thread-ই Unlock করে                 |
 | Counter Range               | 0 / 1                              | 0 / 1                                 | 0 থেকে N                 | 0 / 1                                                |
-| Waiting Method              | Sleep (Block)                      | Sleep (Block)                         | Sleep (Block)            | Busy Waiting (Spin)                                  |
+| Contention behavior         | সাধারণত block/park; adaptive mutex briefly spin করতে পারে | সাধারণত block/park | সাধারণত block/park | Busy Waiting (Spin)                                  |
 | Waiting-এর সময় CPU ব্যবহার | খুব কম                             | খুব কম                                | খুব কম                   | বেশি (Continuous CPU Use)                            |
 | Scheduler-এর সাহায্য        | লাগে                               | লাগে                                  | লাগে                     | Waiting-এর সময় লাগে না                              |
 | মূল ব্যবহার                 | Mutual Exclusion                   | Thread Signaling / Event Notification | Resource Pool Management | Kernel, Interrupt Handler, Low-level Synchronization |
@@ -316,10 +318,11 @@ Condition Variable মূলত একটি **waiting queue**, যেখান�
 
 যখন অন্য কোনো thread `signal()` করে,
 
-* Waiting thread-টিকে জাগিয়ে দেওয়া হয়।
-* তবে সেটি সঙ্গে সঙ্গে execution শুরু করে না।
-* প্রথমে তাকে Monitor-এর lock পুনরায় acquire করতে হয়।
-* Lock পাওয়ার পর সে execution চালিয়ে যায়।
+* Waiting thread-টিকে runnable/eligible করা হয়; waiter না থাকলে signal সাধারণত remembered থাকে না।
+* Java/POSIX-এর মতো common **Mesa-style semantics**-এ জেগে ওঠা thread-কে monitor lock পুনরায় acquire করতে হয়, তাই সেটি সঙ্গে সঙ্গে execution শুরু করে না।
+* Classical **Hoare-style monitor**-এ control সরাসরি signaled thread-এর কাছে transfer হতে পারে।
+
+এই semantic difference এবং spurious wakeup-এর কারণে condition জেগে ওঠার পর predicate আবার check করা জরুরি।
 
 ---
 

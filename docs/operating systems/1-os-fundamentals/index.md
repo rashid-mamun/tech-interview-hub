@@ -10,50 +10,36 @@ title: 'OS Fundamentals'
 
 সহজভাবে বললে, OS ছাড়া computer-এর hardware ব্যবহার করা, program চালানো, file manage করা বা user interaction করা খুব কঠিন হয়ে যেত।
 
-#### Main Functions of an Operating System
+### Main Functions of an Operating System
 
-**i) Process Management**
-
-OS বিভিন্ন **process** (running program) তৈরি, terminate, suspend, resume এবং schedule করে।
+**i) Process Management:** OS বিভিন্ন **process** (running program) তৈরি, terminate, suspend, resume এবং schedule করে।
 এটি নির্ধারণ করে **কোন process কখন CPU পাবে, কতক্ষণ পাবে**, এবং multiple process-এর মধ্যে CPU time ভাগ করে দেয়।
 
 **Example:** আপনি যদি একই সাথে Chrome, VS Code এবং Spotify চালান, তাহলে OS CPU time তাদের মধ্যে ভাগ করে দেয়।
 
-**ii) Memory Management**
-
-OS **RAM**-কে বিভিন্ন process-এর মধ্যে বণ্টন করে এবং কোন process কত memory ব্যবহার করবে তা নিয়ন্ত্রণ করে।
+**ii) Memory Management:** OS **RAM**-কে বিভিন্ন process-এর মধ্যে বণ্টন করে এবং কোন process কত memory ব্যবহার করবে তা নিয়ন্ত্রণ করে।
 এটি memory allocation, deallocation, virtual memory support এবং **memory protection/isolation** নিশ্চিত করে, যাতে একটি process অন্য process-এর memory-তে অবৈধভাবে access করতে না পারে।
 
-**iii) File System Management**
-
-OS file ও folder কীভাবে **store, organize, retrieve এবং manage** হবে তা নিয়ন্ত্রণ করে।
+**iii) File System Management:** OS file ও folder কীভাবে **store, organize, retrieve এবং manage** হবে তা নিয়ন্ত্রণ করে।
 এটি file naming, directory structure, file permissions এবং storage allocation পরিচালনা করে।
 
-**Example:** Windows-এ **NTFS**, Linux-এ **ext4** file system ব্যবহৃত হয়।
+**Example:** Windows-এ **NTFS** এবং Linux-এ **ext4** commonly ব্যবহৃত file system; তবে উভয় platform-ই আরও বিভিন্ন file system support করে।
 
 
-**iv) Device / I/O Management**
-
-OS বিভিন্ন hardware device যেমন keyboard, mouse, printer, disk, monitor ইত্যাদির সাথে যোগাযোগ পরিচালনা করে।
+**iv) Device / I/O Management:** OS বিভিন্ন hardware device যেমন keyboard, mouse, printer, disk, monitor ইত্যাদির সাথে যোগাযোগ পরিচালনা করে।
 এ কাজের জন্য OS সাধারণত **device drivers** ব্যবহার করে।
 
-**v) Security and Access Control**
-
-OS user authentication, authorization, permission control এবং system resource protection নিশ্চিত করে।
+**v) Security and Access Control:** OS user authentication, authorization, permission control এবং system resource protection নিশ্চিত করে।
 এটি নির্ধারণ করে **কে কোন file, folder বা resource access করতে পারবে**।
 
 
-**vi) User Interface**
-
-OS user-এর সাথে interaction করার জন্য interface প্রদান করে।
+**vi) User Interface:** OS user-এর সাথে interaction করার জন্য interface প্রদান করে।
 এটি হতে পারে:
 
 * **GUI (Graphical User Interface)** → যেমন Windows desktop
 * **CLI (Command Line Interface)** → যেমন Linux terminal
 
-**vii) System Call Interface**
-
-Application program সরাসরি privileged hardware operation করতে পারে না। তাই OS একটি **system call interface** দেয়, যার মাধ্যমে application নিরাপদভাবে file, process, memory, network বা device-related service request করতে পারে।
+**vii) System Call Interface:** Application program সরাসরি privileged hardware operation করতে পারে না। তাই OS একটি **system call interface** দেয়, যার মাধ্যমে application নিরাপদভাবে file, process, memory, network বা device-related service request করতে পারে।
 
 ---
 
@@ -101,9 +87,7 @@ Application program সরাসরি privileged hardware operation করত�
 
 #### Types of Hypervisors
 
-**i) Type 1 Hypervisor (Bare-metal)**
-
-এগুলো **সরাসরি hardware-এর উপর** চলে।
+**i) Type 1 Hypervisor (Bare-metal):** এগুলো **সরাসরি hardware-এর উপর** চলে।
 এরা high performance এবং enterprise/data-center environment-এ বেশি ব্যবহৃত হয়।
 
 **Examples:**
@@ -115,9 +99,7 @@ Application program সরাসরি privileged hardware operation করত�
 > **Note:** Hyper-V Windows-এর সাথে tightly integrated হলেও architecture অনুযায়ী এটি সাধারণত Type 1 / bare-metal hypervisor হিসেবে ধরা হয়।
 
 
-**ii) Type 2 Hypervisor (Hosted)**
-
-এগুলো **একটি existing OS-এর উপর application হিসেবে** চলে।
+**ii) Type 2 Hypervisor (Hosted):** এগুলো **একটি existing OS-এর উপর application হিসেবে** চলে।
 সাধারণত development, testing, learning, বা personal virtualization-এর জন্য ব্যবহৃত হয়।
 
 **Examples:**
@@ -147,8 +129,8 @@ Application program সরাসরি privileged hardware operation করত�
 
 অর্থাৎ:
 
-* **OS manages one computing environment**
-* **Hypervisor manages multiple virtual computing environments**
+* **OS একটি OS instance-এর process, memory, device ও অন্যান্য resource manage করে**
+* **Hypervisor একাধিক VM এবং তাদের virtual hardware resource manage করে**
 
 ---
 
@@ -172,16 +154,13 @@ Operating System (OS) বিভিন্ন ধরনের হতে পার�
 এখানে প্রতিটি OS type-এর **purpose, working style, এবং key distinction** বোঝা গুরুত্বপূর্ণ।
 
 
-**i) Batch Operating System**
-
-
-**Batch OS** এমন একটি operating system যেখানে user-এর job বা task-গুলো **একত্রে batch আকারে collect** করা হয়, তারপর **একটার পর একটা automatically execute** করা হয় — সাধারণত **direct user interaction ছাড়াই**।
+**i) Batch Operating System**: **Batch OS** এমন একটি operating system যেখানে user-এর job বা task-গুলো **একত্রে batch আকারে collect** করা হয়, তারপর **একটার পর একটা automatically execute** করা হয় — সাধারণত **direct user interaction ছাড়াই**।
 
 **How it works**
 
 * User job submit করে
 * OS job-গুলোকে group/batch করে
-* তারপর sequentially process করে
+* তারপর scheduler প্রয়োজন অনুযায়ী job-গুলো sequentially বা parallelভাবে process করতে পারে
 * execution চলাকালীন user সাধারণত interact করতে পারে না
 
 **Key Characteristics**
@@ -203,9 +182,7 @@ Operating System (OS) বিভিন্ন ধরনের হতে পার�
 
 ---
 
-**ii) Time-Sharing Operating System**
-
-**Time-sharing OS** এমন একটি OS যেখানে **একাধিক user বা process** একই system ব্যবহার করতে পারে, এবং CPU time-কে ছোট ছোট **time slice**-এ ভাগ করে প্রত্যেক process/user-কে পালাক্রমে দেওয়া হয়।
+**ii) Time-Sharing Operating System**: **Time-sharing OS** এমন একটি OS যেখানে **একাধিক user বা process** একই system ব্যবহার করতে পারে, এবং CPU time-কে ছোট ছোট **time slice**-এ ভাগ করে প্রত্যেক process/user-কে পালাক্রমে দেওয়া হয়।
 
 **How it works**
 
@@ -232,10 +209,7 @@ OS CPU time slice দিয়ে সবাইকে service দিচ্ছে —
 
 ---
 
-**iii) Distributed Operating System**
-
-
-**Distributed OS** এমন একটি OS যেখানে **একাধিক independent computer/machine** একসাথে কাজ করে কিন্তু user-এর কাছে পুরো system-টিকে **একটি single unified system** হিসেবে উপস্থাপন করা হয়।
+**iii) Distributed Operating System**: **Distributed OS** এমন একটি OS যেখানে **একাধিক independent computer/machine** একসাথে কাজ করে কিন্তু user-এর কাছে পুরো system-টিকে **একটি single unified system** হিসেবে উপস্থাপন করা হয়।
 
 **How it works**
 
@@ -250,20 +224,18 @@ OS CPU time slice দিয়ে সবাইকে service দিচ্ছে —
 * load sharing / parallel processing support করতে পারে
 * transparency গুরুত্বপূর্ণ (location transparency, access transparency)
 
-**Example Use Cases**
+**Example Systems / Concepts**
 
-* distributed computing clusters
-* scientific computing
-* large-scale enterprise systems
+* **Amoeba**
+* **Sprite**
+* **LOCUS**
 * research/educational distributed OS বা single-system-image cluster environments
 
 ধরো ৫টি computer মিলে একটি বড় computation করছে, কিন্তু user-এর কাছে মনে হচ্ছে যেন একটাই system কাজ করছে — এটাই distributed OS-এর idea। তবে মনে রাখতে হবে, **সব distributed system বা cloud platform Distributed OS নয়**; Distributed OS সাধারণত user-এর কাছে single-system image দেওয়ার চেষ্টা করে।
 
 ---
 
-**iv) Real-Time Operating System (RTOS)**
-
-**Real-Time Operating System (RTOS)** এমন একটি OS যা **নির্দিষ্ট সময়সীমার মধ্যে (deadline-এর মধ্যে)** response দিতে designed।
+**iv) Real-Time Operating System (RTOS)**: **Real-Time Operating System (RTOS)** এমন একটি OS যা **নির্দিষ্ট সময়সীমার মধ্যে (deadline-এর মধ্যে)** response দিতে designed।
 এখানে শুধু “correct result” দিলেই হবে না — **ঠিক সময়ে result দিতে হবে**।
 
 **Why it is different**
@@ -279,38 +251,37 @@ Normal OS-এ performance গুরুত্বপূর্ণ,
 * deadline-sensitive task execution
 * low latency
 
-**Types of RTOS**
+**Types of Real-Time Requirements**
 
-**a) Hard Real-Time OS**
+**a) Hard Real-Time**
 
 Deadline miss করা **একেবারেই acceptable না**।
 
-**Examples:**
+**Example use cases:**
 
 * aircraft control system
 * pacemaker
 * industrial safety system
 
-**b) Soft Real-Time OS**
+**b) Soft Real-Time**
 
 Deadline miss করা ideally হওয়া উচিত না, কিন্তু মাঝে মাঝে হলে system পুরোপুরি fail করে না।
 
-**Examples:**
+**Example workloads:**
 
-* video streaming
-* online gaming
-* multimedia systems
+* video/audio streaming
+* interactive multimedia
+* কিছু latency-sensitive online gaming workload
+
+> এগুলো soft real-time **workload-এর উদাহরণ**; এগুলো যে operating system-এ চলে, সেটি অবশ্যই RTOS হতে হবে—এমন নয়।
 
 একটি car airbag system crash detect করে milliseconds-এর মধ্যে deploy না করলে result useless।
 এখানে **correctness + timing** দুটোই জরুরি — তাই RTOS দরকার।
 
 ---
 
-**v) Embedded Operating System**
-
-
-**Embedded OS** হলো এমন OS যা **embedded systems / dedicated devices**-এ ব্যবহারের জন্য তৈরি।
-এগুলো সাধারণ-purpose computer-এর জন্য না; বরং **specific device-specific কাজ** করার জন্য optimized।
+**v) Embedded Operating System**: **Embedded OS** হলো এমন OS যা **embedded systems / dedicated devices**-এ ব্যবহারের জন্য তৈরি।
+এগুলো প্রধানত **dedicated device বা নির্দিষ্ট কাজের জন্য optimized**; তবে embedded system-এ Linux-এর মতো general-purpose OS-এর customized version-ও ব্যবহৃত হতে পারে।
 
 * microwave oven
 * smart TV
@@ -531,7 +502,7 @@ Microkernel-এ সাধারণত থাকে:
 | Performance             | সাধারণত দ্রুত                                                | IPC/context-switch overhead-এর কারণে তুলনামূলক ধীর হতে পারে      |
 | Reliability             | একটি faulty kernel component পুরো system-কে affect করতে পারে | একটি user-space service crash হলেও kernel টিকে থাকতে পারে        |
 | Security / isolation    | কম isolation                                                 | বেশি isolation                                                   |
-| Modularity              | তুলনামূলক কম                                                 | বেশি                                                             |
+| Fault isolation         | kernel component-গুলোর মধ্যে তুলনামূলক কম                   | user-space service-গুলোর মধ্যে তুলনামূলক বেশি                    |
 | Debugging / maintenance | kernel-level debugging কঠিন হতে পারে                         | service isolation-এর কারণে কিছু ক্ষেত্রে সহজ                     |
 
 ---
@@ -633,8 +604,8 @@ Microkernel-এ যদি file server, driver, network service ইত্যা�
 | Performance               | সাধারণত দ্রুত                                | IPC/context-switch overhead থাকতে পারে                |
 | Communication             | direct kernel-space calls                    | message passing / IPC                                 |
 | Reliability               | kernel-mode bug পুরো system affect করতে পারে | better isolation; service failure সীমাবদ্ধ রাখা সম্ভব |
-| Security / attack surface | তুলনামূলক বড়                                 | তুলনামূলক ছোট trusted core                            |
-| Modularity                | কম                                           | বেশি                                                  |
+| Privileged TCB / attack surface | তুলনামূলক বড়                            | minimal trusted core-এর কারণে তুলনামূলক ছোট           |
+| Fault isolation           | kernel component-গুলোর মধ্যে কম              | user-space service-গুলোর মধ্যে বেশি                   |
 | Debugging / maintenance   | kernel debugging কঠিন হতে পারে               | user-space services-এর কারণে কিছু ক্ষেত্রে সহজ        |
 
 ---
@@ -656,10 +627,12 @@ Hybrid kernel সাধারণত এই দুই design-এর **মাঝ�
 
 ## 🔐 4. What is the difference between user mode and kernel mode?
 
-Modern operating system-এ CPU সাধারণত **দুই ধরনের execution mode**-এ কাজ করে:
+Modern operating system সাধারণত CPU-এর available privilege level থেকে প্রধানত **দুই ধরনের execution mode** ব্যবহার করে:
 
 * **User Mode**
 * **Kernel Mode**
+
+CPU architecture-এ আরও privilege level থাকতে পারে—যেমন x86-এর rings বা ARM-এর exception levels—তবে সাধারণ application বনাম OS kernel বোঝাতে user mode এবং kernel mode-ই মূল distinction।
 
 এই mode দুটির মূল উদ্দেশ্য হলো **system security, stability, এবং protection** নিশ্চিত করা।
 সব program-কে যদি hardware এবং memory-তে unrestricted access দেওয়া হতো, তাহলে একটি buggy program বা malicious program পুরো system crash করাতে পারত।
@@ -717,7 +690,7 @@ Modern operating system-এ CPU সাধারণত **দুই ধরনে�
 | কে চলে                 | Applications, user programs               | OS kernel, core services, many drivers              |
 | Hardware access        | সরাসরি না                                 | হ্যাঁ                                               |
 | Privileged instruction | execute করতে পারে না                      | পারে                                                |
-| Memory access          | নিজের allowed memory পর্যন্ত সীমাবদ্ধ     | পুরো system memory / kernel memory access করতে পারে |
+| Memory access          | নিজের allowed memory পর্যন্ত সীমাবদ্ধ     | protected kernel resource এবং mapped system memory access করতে পারে |
 | Risk                   | crash হলেও সাধারণত সেই process-এ সীমাবদ্ধ | bug হলে পুরো system crash হতে পারে                  |
 | Purpose                | safety, isolation, app execution          | resource management, hardware control               |
 
@@ -756,7 +729,7 @@ CPU নিজে থেকে randomভাবে mode switch করে না।
 
 * file open করা
 * network socket তৈরি করা
-* OS-এর কাছ থেকে নতুন memory mapping/request করা (`mmap`, `brk`, `VirtualAlloc`-এর মতো system call)
+* OS-এর কাছ থেকে নতুন memory mapping/request করা (`mmap`, `brk`-এর মতো system call বা `VirtualAlloc`-এর মতো OS API)
 * process create করা
 * disk থেকে data পড়া
 

@@ -10,17 +10,19 @@ title: 'CPU Scheduling'
 
 ![CPU scheduling goals](./cpu_scheduling_goals.svg)
 
-#### Maximize করতে হয়
+### Main Scheduling Criteria
+
+**Maximize করতে হয়**
 
 **CPU Utilization** — CPU-কে যত বেশি সম্ভব কার্যকর (busy) রাখা এবং idle time কমিয়ে আনা। CPU utilization যত বেশি হবে, system-এর resource তত ভালোভাবে ব্যবহার হবে।
 
 **Throughput** — প্রতি unit time-এ কতটি process সম্পন্ন হয়েছে। Throughput যত বেশি হবে, system তত বেশি কাজ সম্পন্ন করতে পারবে। এটি বিশেষ করে **batch system**-এ অত্যন্ত গুরুত্বপূর্ণ।
 
-#### Minimize করতে হয়
+**Minimize করতে হয়**
 
 **Turnaround Time, Waiting Time, এবং Response Time** — এই তিনটি যত কম হবে, system-এর performance এবং user experience তত ভালো হবে।
 
-#### Balance করতে হয়
+**Balance করতে হয়**
 
 **Fairness** — কোনো process যেন অনির্দিষ্টকাল CPU থেকে বঞ্চিত না হয়।
 
@@ -44,7 +46,13 @@ Process submit (arrival) করার মুহূর্ত থেকে শু�
 
 Process টি Ready Queue-তে থেকে CPU পাওয়ার জন্য যত সময় অপেক্ষা করেছে, সেই সময়গুলোর সমষ্টি। CPU execution-এর সময় waiting time-এর মধ্যে গণনা করা হয় না।
 
-> **Waiting Time = Turnaround Time − Burst Time**
+> **Waiting Time = Ready Queue-তে কাটানো মোট সময়**
+
+শুধু CPU burst থাকা এবং আলাদা I/O wait না থাকার simplified case-এ:
+
+> **Waiting Time = Turnaround Time − Total CPU Burst Time**
+
+I/O থাকলে turnaround time-এর মধ্যে I/O wait-ও থাকে, তাই তখন শুধু এই subtraction formula ব্যবহার করা যাবে না।
 
 ---
 
@@ -68,11 +76,11 @@ Process arrive করার পর প্রথমবার CPU পাওয়�
 
 ### How do throughput and fairness factor into scheduler design?
 
-**Throughput** বাড়ানোর জন্য অনেক workload-এ **Shortest Job First (SJF)** বা **Shortest Remaining Time First (SRTF)** ভালো average waiting/turnaround time দিতে পারে। তবে throughput শুধু algorithm-এর উপর নির্ভর করে না; workload mix, I/O wait, context-switch cost, admission policy এবং hardware resource-ও প্রভাব ফেলে। SJF/SRTF-এর একটি বড় সমস্যা হলো **starvation**—দীর্ঘ burst time-এর process অনেক সময় দীর্ঘক্ষণ CPU না-ও পেতে পারে।
+**SJF/SRTF** known বা accurately estimated burst time-এর ক্ষেত্রে average waiting/turnaround time কমাতে পারে। তবে এটিকে সরাসরি “throughput maximization” বলা ঠিক নয়; throughput workload mix, I/O wait, context-switch cost, admission policy এবং hardware resource-এর ওপরও নির্ভর করে। SJF/SRTF-এর একটি বড় সমস্যা হলো **starvation**—নতুন short job আসতে থাকলে দীর্ঘ burst time-এর process দীর্ঘক্ষণ CPU না-ও পেতে পারে।
 
 **Fairness** নিশ্চিত করার জন্য **Round Robin (RR)** বা **Aging** ব্যবহার করা হয়। Round Robin-এ প্রতিটি process একটি নির্দিষ্ট **time quantum** পায়, ফলে কোনো process দীর্ঘ সময় CPU থেকে বঞ্চিত হয় না। অন্যদিকে Aging-এ যে process দীর্ঘক্ষণ অপেক্ষা করছে, তার priority ধীরে ধীরে বাড়িয়ে দেওয়া হয়, যাতে starvation না ঘটে।
 
-সবশেষে, scheduler design-এর মূল trade-off হলো **throughput**, **fairness**, এবং **responsiveness**-এর মধ্যে ভারসাম্য (balance) বজায় রাখা। Throughput বাড়াতে গেলে fairness কিছুটা কমতে পারে, আবার সম্পূর্ণ fairness নিশ্চিত করতে গেলে context switching বেড়ে throughput কিছুটা কমে যেতে পারে। তাই modern operating system (যেমন Linux-এর **Completely Fair Scheduler (CFS)**) এই বিষয়গুলোর মধ্যে একটি কার্যকর balance বজায় রেখে কাজ করে।
+সবশেষে, scheduler design-এর মূল trade-off হলো **throughput**, **fairness**, এবং **responsiveness**-এর মধ্যে ভারসাম্য বজায় রাখা। একটি metric optimize করলে অন্যটির cost বাড়তে পারে। Linux-এর fair scheduling class historically **CFS (Completely Fair Scheduler)** ব্যবহার করেছে; Linux 6.6 থেকে kernel ধীরে ধীরে **EEVDF (Earliest Eligible Virtual Deadline First)**-ভিত্তিক task selection-এ transition করেছে। উভয়ের লক্ষ্য runnable task-গুলোর মধ্যে fair CPU-time distribution ও responsiveness বজায় রাখা।
 
 
 ## ⏸️ 15. What is the difference between preemptive and non-preemptive scheduling?
@@ -115,9 +123,9 @@ Preemptive scheduling-এর প্রধান অসুবিধা হলো 
 
 **Race Condition এবং Shared Data**
 
-Preemptive scheduling-এ একটি process যেকোনো সময় interrupt হতে পারে। তাই shared data বা kernel data structure update করার সময় preemption ঘটলে **race condition** বা **data inconsistency** দেখা দিতে পারে।
+Preemptive scheduling execution-এর সম্ভাব্য interleaving বাড়ায়। Shared data বা kernel data structure synchronization ছাড়া update করলে preemption-এর কারণে **race condition** বা **data inconsistency** প্রকাশ পেতে পারে। তবে race condition শুধু preemptive scheduling-এর কারণে হয় না—multi-core parallel execution, interrupts এবং asynchronous events-ও একই সমস্যা তৈরি করতে পারে।
 
-এই সমস্যা এড়ানোর জন্য Operating System-কে **critical section** সুরক্ষিত রাখতে **lock**, **mutex**, **spinlock**, অথবা প্রয়োজন অনুযায়ী **interrupt disable** করার মতো synchronization mechanism ব্যবহার করতে হয়। ফলে kernel design তুলনামূলকভাবে বেশি জটিল হয়ে যায়।
+এই সমস্যা এড়ানোর জন্য Operating System-কে **critical section** সুরক্ষিত রাখতে **lock**, **mutex**, **spinlock**, অথবা নির্দিষ্ট low-level context-এ local interrupt/preemption control-এর মতো mechanism ব্যবহার করতে হয়। শুধু interrupt disable করা multi-core system-এ অন্য core-এর concurrent access বন্ধ করে না।
 
 ---
 
@@ -150,7 +158,7 @@ Queue-তে যে process আগে আসে, সে-ই আগে CPU পা
 
 যে process-এর **CPU Burst Time** সবচেয়ে কম, সেটি আগে execution পায়।
 
-এটি **average waiting time** এবং **average turnaround time** সর্বনিম্ন করে—তাই এটি তাত্ত্বিকভাবে (theoretically) সর্বোত্তম scheduling algorithm-গুলোর একটি।
+সব job একই সময়ে available এবং burst time আগে থেকে জানা থাকলে non-preemptive **SJF average waiting time minimize করে**; corresponding completion order average turnaround time-ও minimize করে। ভিন্ন arrival time ও preemption allowed হলে **SRTF** এই objective-এর relevant optimal form।
 
 তবে বাস্তবে একটি বড় সমস্যা হলো ভবিষ্যতের CPU burst time আগে থেকে সঠিকভাবে জানা যায় না। এছাড়া দীর্ঘ burst time-এর process দীর্ঘক্ষণ অপেক্ষা করতে পারে, ফলে **starvation** হতে পারে।
 
@@ -203,7 +211,7 @@ Processes-দের স্থায়ীভাবে (permanently) বিভি
 
 প্রতিটি queue নিজস্ব scheduling algorithm ব্যবহার করতে পারে (যেমন একটি queue Round Robin, অন্যটি FCFS)।
 
-সাধারণত উচ্চ priority-র queue খালি না হওয়া পর্যন্ত নিচের queue CPU পায় না।
+Inter-queue scheduling fixed-priority হলে উচ্চ priority-র queue খালি না হওয়া পর্যন্ত নিচের queue CPU পায় না। অন্য design-এ queue-গুলোর মধ্যেও time slice ভাগ করা যেতে পারে। Strict priority ব্যবহার করলে lower queue starvation-এর ঝুঁকিতে থাকে।
 
 এর প্রধান অসুবিধা হলো, একটি process একবার যে queue-তে রাখা হয়, পরে সেটি আর অন্য queue-তে যেতে পারে না।
 
@@ -219,6 +227,8 @@ MLFQ আরও উন্নত ও adaptive scheduling algorithm।
 
 * যদি process পুরো time quantum ব্যবহার করে (CPU-bound behavior), তাহলে সেটিকে নিচের priority queue-তে নামিয়ে দেওয়া হয়।
 * যদি process দ্রুত I/O request করে বা quantum শেষ হওয়ার আগেই CPU ছেড়ে দেয় (Interactive/I/O-bound behavior), তাহলে সেটি উচ্চ priority queue-তে থেকেই যায় বা প্রয়োজনে উপরে promote হতে পারে।
+
+Long-running lower-queue task যেন starve না করে, অনেক MLFQ design periodic **priority boost/aging** ব্যবহার করে। Exact promotion/demotion rule implementation-specific।
 
 এভাবে scheduler process-এর behavior অনুযায়ী নিজেকে adapt করে এবং interactive process-কে দ্রুত response দিতে পারে।
 
@@ -236,4 +246,4 @@ MLFQ আরও উন্নত ও adaptive scheduling algorithm।
 
 MLFQ scheduler-এও Aging-এর ধারণা ব্যবহার করা হয়, যাতে দীর্ঘ সময় নিচের queue-তে থাকা process-গুলো প্রয়োজনে উপরের queue-তে promote হতে পারে।
 
-> **নোট:** Linux-এর বর্তমান **Completely Fair Scheduler (CFS)** সরাসরি MLFQ ব্যবহার করে না। তবে CFS-এর মূল লক্ষ্যও fairness বজায় রাখা এবং কোনো process-কে দীর্ঘ সময় CPU থেকে বঞ্চিত না রাখা। অর্থাৎ উদ্দেশ্যের দিক থেকে MLFQ-এর Aging ধারণার সঙ্গে মিল থাকলেও CFS-এর implementation সম্পূর্ণ ভিন্ন।
+> **নোট:** Linux-এর fair scheduler MLFQ নয়। Linux historically CFS ব্যবহার করেছে এবং Linux 6.6 থেকে EEVDF-based selection-এ transition করেছে; এগুলোর fairness mechanism MLFQ-এর queue promotion/aging থেকে আলাদা।

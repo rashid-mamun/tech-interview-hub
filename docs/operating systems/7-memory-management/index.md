@@ -8,13 +8,13 @@ title: 'Memory Management'
 
 **Logical Address (Virtual Address)**
 
-CPU যখন কোনো instruction execute করে, তখন সেটি যে address generate করে সেটাই **logical address**। এটি CPU দ্বারা তৈরি হয় এবং process-এর perspective থেকে একটি address। অর্থাৎ, প্রতিটি process মনে করে তার নিজস্ব একটি independent address space আছে (সাধারণত 0 থেকে শুরু হয়)।
+Normal translated execution-এ CPU instruction যে address ব্যবহার করে সেটি **logical/virtual address**। এটি process-এর perspective-এর address; প্রতিটি process একটি independent virtual address range দেখে। Range conceptually address `0` থেকে শুরু হতে পারে, তবে security ও null-pointer detection-এর জন্য modern OS সাধারণত low/null page mapped রাখে না।
 
 এটিকে **virtual address**-ও বলা হয়, কারণ এটি process-এর **virtual address space**-এর একটি address। এটি সরাসরি RAM-এর address নয়; **Memory Management Unit (MMU)** এই virtual address-কে physical address-এ translate করে।
 
 **Physical Address**
 
-Physical address হলো RAM (main memory)-এর প্রকৃত (actual) address, যেখানে data সত্যিকার অর্থে সংরক্ষিত থাকে।
+Physical address হলো processor/system-এর physical address space-এর address। এটি RAM location নির্দেশ করতে পারে, আবার architecture অনুযায়ী memory-mapped device register বা reserved region-ও নির্দেশ করতে পারে। এই chapter-এর সাধারণ paging example-গুলোতে physical address বলতে RAM frame-এর address বোঝানো হচ্ছে।
 
 CPU যখন একটি logical (virtual) address generate করে, তখন **MMU** সেটিকে একটি physical address-এ translate করে। এরপর memory hardware সেই physical address ব্যবহার করে RAM access করে data read বা write করে।
 
@@ -46,9 +46,9 @@ Logical address থেকে physical address-এ translation করার ক�
 6. এরপর **frame number** এবং **offset** একত্র করে final **physical address** তৈরি করা হয়।
 7. এই translated physical address ব্যবহার করেই RAM-এ actual read/write operation সম্পন্ন হয়।
 
-MMU-এর কারণেই process কখনোই তার actual physical memory location সম্পর্কে জানে না। Operating System প্রয়োজন হলে process-কে memory-তে অন্য স্থানে relocate করতে পারে; শুধু page table বা relocation information update করলেই হয়, process-এর code পরিবর্তন করার দরকার হয় না।
+MMU-এর কারণে ordinary user process তার actual physical memory location সরাসরি ব্যবহার করে না। Operating System প্রয়োজন হলে page-কে অন্য physical frame-এ relocate করতে পারে; page table বা relocation information update করলেই হয়, process code পরিবর্তনের দরকার হয় না।
 
-> **মনে রাখুন:** CPU সবসময় **logical (virtual) address** generate করে, MMU সেটিকে **physical address**-এ translate করে, এবং RAM শুধুমাত্র **physical address**-ই বুঝতে পারে।
+> **মনে রাখুন:** Virtual-memory enabled normal load/store-এ CPU virtual address ব্যবহার করে, MMU সেটিকে physical address-এ translate করে। Boot/physical mode, DMA এবং কিছু privileged/device operation এই simplified path-এর ব্যতিক্রম হতে পারে।
 
 ---
 
@@ -131,7 +131,7 @@ Paging এই সমস্যাটি দূর করে কারণ—
 
 3. **শুধু Internal Fragmentation হতে পারে:** যদি কোনো process-এর শেষ page পুরোপুরি পূর্ণ না হয়, তাহলে সেই page-এর ভেতরে কিছু unused space থেকে যায়। Page size যত ছোট হবে, internal fragmentation তত কম হবে।
 
-অতএব, **Paging external fragmentation সম্পূর্ণ দূর করে**, তবে এর বিনিময়ে সামান্য **internal fragmentation** গ্রহণ করে, যা সাধারণত অনেক কম এবং manageable।
+অতএব, base-page allocation-এর ক্ষেত্রে paging process-level **external fragmentation দূর করে**, তবে **internal fragmentation** ও page-table overhead থাকে। Kernel-এর higher-order contiguous allocation, huge page বা DMA buffer-এর ক্ষেত্রে physical fragmentation এখনও relevant হতে পারে।
 
 ---
 
@@ -179,7 +179,7 @@ Page-টি সম্প্রতি access হয়েছে কিনা ত�
 
 Page-টির data পরিবর্তিত হয়েছে কিনা তা নির্দেশ করে।
 
-যদি dirty bit set থাকে, তাহলে page replace করার আগে disk-এ write-back করতে হবে। Dirty bit set না থাকলে disk write-এর প্রয়োজন হয় না।
+Dirty page-এর contents preserve করতে হলে eviction-এর আগে backing file বা swap-এ write-back করতে হয়; clean file-backed page সাধারণত disk write ছাড়াই discard করা যায়। Process exit বা discardable mapping-এর মতো ক্ষেত্রে dirty page-ও সবসময় write-back করা বাধ্যতামূলক নয়।
 
 #### 6. Cache Control Bits (Architecture-dependent)
 
@@ -380,7 +380,8 @@ Intel-এর **32-bit x86 architecture**-এ segmentation এবং paging উ�
 সেখানে—
 
 * Segmentation logical address space তৈরি করত।
-* Paging সেই logical address-কে physical memory-তে map করত।
+* Segmentation logical address-কে linear address-এ translate করত।
+* Paging সেই linear address-কে physical memory-তে map করত।
 
 আধুনিক **64-bit operating system**-এ (যেমন Linux ও Windows on x86-64) segmentation-এর ব্যবহার খুব সীমিত; অধিকাংশ memory management paging-এর মাধ্যমেই করা হয়। x86-64-এ সাধারণ code/data segmentation প্রায় flat model হিসেবে থাকে, তবে কিছু special register/segment mechanism এখনও TLS বা kernel-related কাজের জন্য ব্যবহৃত হতে পারে।
 
@@ -393,7 +394,7 @@ Intel-এর **32-bit x86 architecture**-এ segmentation এবং paging উ�
 * **Segmentation** প্রদান করে logical organization, সহজ protection এবং sharing।
 * **Paging** প্রদান করে efficient memory allocation এবং external fragmentation থেকে মুক্তি।
 
-ফলে আধুনিক memory management system-এ এই hybrid ধারণাটি অত্যন্ত কার্যকর।
+এই hybrid design ঐতিহাসিক ও কিছু architecture-এ গুরুত্বপূর্ণ। তবে mainstream x86-64 OS সাধারণত flat segmentation-এর সঙ্গে paging-কে মূল isolation/allocation mechanism হিসেবে ব্যবহার করে; textbook segmentation-with-paging model সব modern platform-এর dominant implementation নয়।
 
 ## 💱 31. What is swapping, and how does it relate to memory management?
 
@@ -487,8 +488,8 @@ Operating System শুধুমাত্র প্রয়োজনীয় p
 | Granularity            | সম্পূর্ণ Process                          | Individual Page            |
 | Movement-এর Unit       | পুরো Process                              | শুধুমাত্র প্রয়োজনীয় Page |
 | RAM-এ Partial Presence | সম্ভব নয়                                 | সম্ভব                      |
-| Efficiency             | তুলনামূলক কম                              | বেশি                       |
-| Memory Overhead        | বেশি                                      | কম                         |
+| I/O behavior           | বড় transfer; latency বেশি হতে পারে        | ছোট unit; বেশি flexible    |
+| Metadata Overhead      | তুলনামূলক কম                              | page table/tracking overhead থাকে |
 | সাধারণ Trigger         | Memory pressure বা scheduler-এর সিদ্ধান্ত | Page Fault                 |
 | আধুনিক OS-এ ব্যবহার    | খুবই সীমিত                                | ব্যাপকভাবে ব্যবহৃত         |
 
@@ -516,7 +517,7 @@ Operating System শুধুমাত্র প্রয়োজনীয় p
 
 ---
 
-#### Non-contiguous Memory Allocation কী?
+### Non-contiguous Memory Allocation কী?
 
 **Non-contiguous memory allocation** হলো এমন একটি memory allocation technique যেখানে একটি process-এর memory বিভিন্ন স্থানে (non-contiguousভাবে) ছড়িয়ে থাকা physical memory block-এ সংরক্ষণ করা যায়।
 
@@ -538,7 +539,7 @@ Paging-এর ক্ষেত্রে process-এর page-গুলো বি�
 | Fragmentation           | সাধারণত External Fragmentation হয় | Paging-এ External Fragmentation থাকে না (তবে Internal Fragmentation হতে পারে) |
 | Memory Utilization      | তুলনামূলক কম efficient             | বেশি efficient                                                                |
 | Flexibility             | কম                                 | বেশি                                                                          |
-| আধুনিক Operating System | খুব কম ব্যবহৃত                     | ব্যাপকভাবে ব্যবহৃত                                                            |
+| আধুনিক Operating System | User-process allocation-এ uncommon; kernel/DMA/huge page-এ এখনও দরকার | User virtual memory-র standard approach |
 
 ---
 

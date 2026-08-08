@@ -14,7 +14,7 @@ title: 'Processes'
 
 
 
-একটি **process** হলো **program in execution**—অর্থাৎ, যখন কোনো program memory-তে load হয়ে CPU-তে execute হতে শুরু করে, তখন OS সেটিকে একটি **process** হিসেবে manage করে।
+একটি **process** হলো **program in execution**—আরও নির্ভুলভাবে বললে, এটি কোনো program-এর একটি OS-managed execution instance, যার নিজস্ব execution state, virtual address space এবং associated resources থাকে। Process-টি বর্তমানে CPU-তে চলতে পারে, আবার Ready বা Waiting অবস্থাতেও থাকতে পারে।
 
 সহজভাবে:
 
@@ -41,7 +41,7 @@ title: 'Processes'
 | বৈশিষ্ট্য      | Program                                           | Process                                                |
 | -------------- | ------------------------------------------------- | ------------------------------------------------------ |
 | প্রকৃতি        | Passive / static                                  | Active / dynamic                                       |
-| কোথায় থাকে     | Disk / secondary storage                          | Main memory + CPU execution context                    |
+| কোথায় থাকে     | Disk / secondary storage                          | Virtual address space + kernel metadata; প্রয়োজনীয় page RAM-এ থাকে |
 | কাজ            | শুধু instructions stored থাকে                     | instructions execute হয়                                |
 | Resource usage | execution resource ব্যবহার করে না; storage-এ থাকে | CPU time, RAM, file handles, I/O resources ব্যবহার করে |
 | Lifetime       | file হিসেবে থাকতে পারে যতক্ষণ delete না হয়        | execution চলাকালীন থাকে; terminate হলে শেষ             |
@@ -158,8 +158,8 @@ OS process-গুলোকে তাদের state অনুযায়ী বি
 
 **Single-core vs Multi-core note**
 
-* **Single-core CPU**-তে একসময়ে বাস্তবে একটি process/thread-ই execute হয়; OS rapid switching করে concurrency-এর অনুভূতি তৈরি করে
-* **Multi-core CPU**-তে একাধিক process/thread সত্যিই parallel-এ চলতে পারে
+* একটি **logical CPU**-তে একসময়ে একটি software thread/task execute হয়; OS rapid switching করে concurrency তৈরি করে
+* একাধিক logical CPU/core থাকলে একাধিক thread/task সত্যিই parallel-এ চলতে পারে
 
 
 ```text
@@ -196,6 +196,8 @@ Classic OS model-এ সাধারণত **৫টি মূল process state**
 
 কিছু OS/textbook model-এ এর সাথে **Suspended Ready** বা **Suspended Blocked** state-ও দেখানো হয়, বিশেষ করে swapping বা memory pressure বোঝানোর সময়। তবে interview fundamentals-এর জন্য নিচের ৫-state model সবচেয়ে common।
 
+> **Modern OS note:** এই model-টি process lifecycle বোঝানোর জন্য ব্যবহৃত হয়। বাস্তবে Linux, Windows-এর মতো modern OS scheduling state সাধারণত individual thread/task-এর জন্যও maintain করে।
+
 
 **i) New**
 
@@ -215,8 +217,7 @@ Process **CPU পাওয়ার জন্য প্রস্তুত**, ক
 
 **iii) Running**
 
-Process বর্তমানে CPU-তে instructions execute করছে।
-Single-core CPU-তে একসময়ে একটি process running থাকতে পারে; multi-core system-এ প্রতি core-এ একটি করে process running থাকতে পারে।
+Process-এর অন্তত একটি thread বর্তমানে CPU-তে instructions execute করছে। একটি logical CPU একসময়ে একটি software thread/task execute করতে পারে; multiple logical CPU/core থাকলে একই বা ভিন্ন process-এর একাধিক thread parallel-এ চলতে পারে।
 
 
 
@@ -272,7 +273,10 @@ Waiting -- event/I/O complete --> Ready
 | **Preemption / Time Slice Expiry** | Running → Ready      | CPU অন্য process-কে দেওয়ার জন্য current process-কে ready queue-তে ফেরত পাঠানো হয় |
 | **I/O or Event Wait**              | Running → Waiting    | Process I/O, lock, timer, child completion, বা অন্য event-এর জন্য অপেক্ষা করে      |
 | **I/O / Event Complete**           | Waiting → Ready      | যে event-এর জন্য process blocked ছিল, তা complete হয়েছে                           |
-| **Exit / Kill**                    | Running → Terminated | Process শেষ হয়েছে, crash করেছে, বা OS terminate করেছে                             |
+| **Normal Exit / Crash**            | Running → Terminated | Running process execution শেষ করেছে বা unrecoverable error ঘটেছে                   |
+| **External Termination**           | New/Ready/Running/Waiting → Terminated* | OS বা অন্য authorized process termination initiate করেছে                 |
+
+\* বাস্তব OS-এ cleanup ও signal delivery-এর কারণে intermediate internal state থাকতে পারে; table-টি conceptual lifecycle দেখায়।
 
 ---
 
@@ -462,7 +466,7 @@ Context switch হবে তখনই যদি system call-এর কারণ�
 
 #### ধাপে ধাপে Context Switch
 
-```text id="qclgq3"
+```text
 Process/Thread A running
         │
         ▼
@@ -639,7 +643,7 @@ Child parent-এর file descriptor table-এর copy পায়, কিন্ত
 
 
 
-`exec()` family of system calls বর্তমান process-এর **পুরোনো program image replace** করে সেখানে একটি **নতুন program** load করে।
+`exec()` family of functions বর্তমান process-এর **পুরোনো program image replace** করে সেখানে একটি **নতুন program** load করে। POSIX-এ এই family শেষ পর্যন্ত `execve()`-এর মতো underlying system call invoke করে।
 
 এটি **নতুন process তৈরি করে না**। বরং **same process**, same PID, but **new program image**।
 
@@ -655,6 +659,7 @@ perror("execl failed");   // exec fail করলে তবেই এখানে
 * PID একই থাকে
 * কিছু process attributes বজায় থাকে
 * open file descriptors সাধারণত খোলা থাকে, **যদি close-on-exec flag set না থাকে**
+* multithreaded process-এ successful `exec()`-এর পর calling thread-টিই নতুন program image চালায়; অন্য thread-গুলো আর থাকে না
 
 ---
 
@@ -693,9 +698,9 @@ iv. **Parent** চাইলে `wait()` দিয়ে child-এর জন্য �
 
 ## 📋 9. What is process scheduling, and what are the roles of the long-term, short-term, and medium-term schedulers?
 
-Process scheduling হলো OS-এর সেই mechanism যার মাধ্যমে OS সিদ্ধান্ত নেয় **ready অবস্থায় থাকা runnable task/process/thread-গুলোর মধ্যে কে CPU পাবে, কখন পাবে, এবং কতক্ষণ পাবে**। এই chapter-এ scheduler-এর role বোঝানো হচ্ছে; individual CPU scheduling algorithm chapter 4-এ বিস্তারিত আছে।
+Process scheduling হলো OS-এর সেই mechanism যার মাধ্যমে OS সিদ্ধান্ত নেয় **ready অবস্থায় থাকা runnable task/thread-গুলোর মধ্যে কে CPU পাবে, কখন পাবে, এবং কতক্ষণ পাবে**। Textbook-এ একে process scheduling বলা হলেও mainstream modern OS সাধারণত individual thread/task schedule করে। এই chapter-এ scheduler-এর role বোঝানো হচ্ছে; individual CPU scheduling algorithm chapter 4-এ বিস্তারিত আছে।
 
-একটি **CPU core** এক সময়ে একটি runnable thread/process execute করতে পারে, তাই multiple tasks থাকলে scheduler-কে CPU time ভাগ করে দিতে হয়।
+একটি **logical CPU** এক সময়ে একটি runnable thread/task execute করতে পারে। তাই multiple runnable task থাকলে scheduler CPU time ভাগ করে দেয়; mainstream modern OS-এ scheduling unit সাধারণত thread/task, পুরো process নয়।
 
 
 **Scheduler-এর classic তিন ভাগ**
