@@ -15,3 +15,4 @@ title: Compute
 ### When should you avoid serverless?
 
 ## 10. What is edge computing, and why does it reduce latency?
+### How does edge computing differ from a traditional CDN?
