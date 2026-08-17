@@ -3,352 +3,264 @@ sidebar_position: 3
 title: 'Requirements Engineering'
 ---
 
-## 3. Requirements Engineering
+## 15. What is requirements engineering, and what are its main activities?
 
-অনেক software project code quality-এর জন্য না, বরং **ভুল problem solve করার জন্য** fail করে। Requirements engineering হলো stakeholder-এর need বুঝে সেটিকে clear, testable, manageable software requirement-এ রূপান্তর করার discipline।
+**Requirements Engineering (RE)** হলো একটি systematic process, যার মাধ্যমে একটি software system এর **requirements** identify, analyze, document, validate, এবং manage করা হয়। এটি SDLC এর একদম শুরুর দিকের এবং সবচেয়ে গুরুত্বপূর্ণ activity, কারণ ভুল বা অসম্পূর্ণ requirement পুরো project কে ব্যর্থ করে দিতে পারে।
 
-```text
-Stakeholder need
-       |
-       v
-Elicitation -> Analysis -> Specification -> Validation -> Management
-       ^                                                     |
-       |---------------- change and feedback ----------------|
-```
+**Main Activities:**
 
-Example: restaurant owner বলে, “আমার order যেন দ্রুত আসে।” এটি useful business signal, কিন্তু developer-এর জন্য implementable requirement না। “দ্রুত” কত? কোন user? কোন screen? কোন load-এ? এগুলো বের করাই requirements engineering-এর কাজ।
+1. **Requirements Elicitation** — stakeholder দের কাছ থেকে requirement সংগ্রহ করা
+2. **Requirements Analysis** — সংগৃহীত requirement গুলো বিশ্লেষণ করে conflict, ambiguity, বা gap খুঁজে বের করা
+3. **Requirements Specification** — analyzed requirement গুলোকে formal document আকারে লেখা (যেমন SRS)
+4. **Requirements Validation** — নিশ্চিত করা যে document করা requirement গুলো actual stakeholder need এর সাথে মিলছে
+5. **Requirements Management** — পুরো project জীবনচক্র জুড়ে requirement এর change track এবং control করা
 
 ---
 
-## Main activities
+### What is the difference between requirements elicitation, analysis, specification, validation, and management?
 
-| Activity | প্রশ্ন | Output |
+| Activity | কী করা হয় | মূল Focus |
 |---|---|---|
-| Elicitation | কার কী দরকার? | raw needs, notes, questions |
-| Analysis | conflict/ambiguity আছে? feasible? | refined, prioritized requirements |
-| Specification | team কীভাবে বুঝবে? | SRS, stories, use cases, diagrams |
-| Validation | requirement correct/complete/testable? | reviewed and approved baseline |
-| Management | change হলে কী impact? | versions, traceability, decisions |
+| **Elicitation** | Stakeholder, user, client দের কাছ থেকে **raw information** সংগ্রহ করা (interview, survey, ইত্যাদির মাধ্যমে) | তথ্য **সংগ্রহ** করা |
+| **Analysis** | সংগৃহীত requirement গুলো পরীক্ষা করে **conflict, redundancy, ambiguity, feasibility** যাচাই করা এবং prioritize করা | তথ্য **বিশ্লেষণ ও পরিশোধন** করা |
+| **Specification** | Analyzed requirement গুলোকে একটি **formal, structured document** (যেমন SRS) এ লিপিবদ্ধ করা, যাতে সবাই একই ভাষায় বুঝতে পারে | তথ্য **document** করা |
+| **Validation** | Client/stakeholder দের সাথে document করা requirement গুলো review করা, যাতে নিশ্চিত হওয়া যায় এটাই তারা আসলে চেয়েছিলেন | সঠিকতা **যাচাই** করা |
+| **Management** | Project চলাকালীন requirement এ যে change আসে, তা track, control, এবং version manage করা (Requirements Traceability সহ) | Change **নিয়ন্ত্রণ ও track** করা |
 
-### End-to-end example
-
-```text
-Raw request:
-"Customers should be able to cancel orders."
-
-Analysis questions:
-- payment হওয়ার পর cancel করা যাবে?
-- restaurant accept করার পর?
-- refund কতক্ষণে?
-- rider picked up করলে?
-
-Specified rule:
-Customer may cancel before restaurant accepts.
-For prepaid orders, refund is initiated automatically within 5 minutes.
-
-Validated by:
-Product owner, payment owner, restaurant operations, QA.
-```
+**সহজ ভাষায়:** Elicitation দিয়ে raw তথ্য পাওয়া যায় → Analysis দিয়ে সেটাকে পরিশোধন করা হয় → Specification দিয়ে formal document তৈরি হয় → Validation দিয়ে সেটা সঠিক কিনা যাচাই করা হয় → Management দিয়ে পুরো process টাকে ongoing ভাবে maintain করা হয়।
 
 ---
 
-## Stakeholder analysis
+## 16. What are common techniques for requirements elicitation?
 
-Stakeholder শুধু client বা end-user না। যারা system ব্যবহার করে, operate করে, fund করে, regulate করে, বা impact পায় তারাই stakeholder।
-
-```text
-                 +----------------+
-                 | Food-delivery  |
-                 |    platform    |
-                 +----------------+
-                 /       |        \
-        Customer     Restaurant    Rider
-            |             |          |
-       Support        Finance    Operations
-            \             |          /
-                 Regulator / Security
-```
-
-এক stakeholder-এর need আরেকজনের সঙ্গে conflict করতে পারে। Customer one-tap cancellation চায়; restaurant late cancellation কমাতে চায়; finance auditable refund trail চায়। Requirement workshop-এ এই conflict early surface করা জরুরি।
+- **Interviews** — client/stakeholder দের সাথে সরাসরি (এক-এক করে বা group এ) কথা বলে requirement জানা
+- **Questionnaires/Surveys** — বড় সংখ্যক user এর কাছ থেকে structured প্রশ্নের মাধ্যমে তথ্য সংগ্রহ
+- **Brainstorming Sessions** — team এবং stakeholder একসাথে বসে খোলামেলাভাবে idea শেয়ার করা
+- **Workshops (JAD - Joint Application Development)** — client এবং developer একসাথে বসে দ্রুত requirement finalize করা
+- **Observation** — user রা বর্তমানে কীভাবে কাজ করেন তা সরাসরি পর্যবেক্ষণ করা
+- **Document Analysis** — existing system এর manual, report, বা policy document পর্যালোচনা করা
+- **Prototyping** — একটি sample/mockup তৈরি করে user দের feedback নেওয়া
+- **Use Cases** — user এবং system এর মধ্যে interaction step-by-step বর্ণনা করা
 
 ---
 
-## Requirements elicitation techniques
 
-একটি technique rarely enough। Stakeholder যা বলেন, যা করেন, এবং যা actually need করেন, এই তিনটি সবসময় এক না।
+### How do interviews, questionnaires, brainstorming sessions, and use cases each contribute to gathering requirements?
 
-| Technique | Best for | Example | Limitation |
-|---|---|---|---|
-| Interview | deep context | support agent-এর refund flow বোঝা | small sample bias |
-| Workshop | conflict/decision | cancellation policy agree করা | dominant voice problem |
-| Observation | real workflow | restaurant tablet ব্যবহার দেখা | people may change behavior |
-| Questionnaire | broad input | 1,000 customer survey | shallow answers |
-| Document analysis | rules/history | existing refund policy পড়া | document outdated হতে পারে |
-| Prototype | UX discovery | checkout screen test | not full business rule |
-| Use case | interactions and alternate flow | order cancellation path | detail maintain করতে হয় |
+**Interviews:**
+এটি সবচেয়ে **in-depth এবং personalized** technique। সরাসরি কথোপকথনের মাধ্যমে **follow-up প্রশ্ন** করা যায়, যা deep insight এবং hidden requirement (যা stakeholder নিজেও প্রথমে বলতে ভুলে যান) বের করে আনতে সাহায্য করে। তবে এটি **সময়সাপেক্ষ** এবং কম সংখ্যক মানুষের সাথেই সম্ভব।
 
-### Interview example
+**Questionnaires:**
+এটি **বড় সংখ্যক user** এর কাছ থেকে দ্রুত এবং কম খরচে তথ্য সংগ্রহ করতে সাহায্য করে, বিশেষত যখন user রা geographically ছড়িয়ে থাকেন। এতে **quantitative data** পাওয়া যায় (যেমন কতজন user একটি নির্দিষ্ট feature চান), কিন্তু depth কম থাকে, কারণ follow-up প্রশ্ন করার সুযোগ থাকে না।
 
-Bad question:
+**Brainstorming Sessions:**
+এটি **creative এবং exploratory** requirement বের করে আনতে সাহায্য করে, যেখানে বিভিন্ন stakeholder এবং team member একসাথে idea শেয়ার করেন কোনো judgment বা restriction ছাড়াই। এটি বিশেষভাবে useful যখন project টা নতুন বা innovative, এবং সব সম্ভাবনা explore করা দরকার।
 
-```text
-"আপনার কি refund dashboard দরকার?"
-```
-
-এতে interviewer solution suggest করে ফেলছে। Better questions:
-
-```text
-"সর্বশেষ refund request-এ আপনি কী করেছিলেন?"
-"কোন তথ্য খুঁজতে সবচেয়ে সময় লাগে?"
-"কোন অবস্থায় আপনি refund approve করতে পারেন না?"
-```
-
-এই প্রশ্নগুলো real workflow, exception, pain point বের করে।
+**Use Cases:**
+এটি user এবং system এর মধ্যে **interaction কে concrete, step-by-step scenario** আকারে বর্ণনা করে (Actor, Precondition, Main Flow, Alternative Flow, Postcondition সহ)। এটি **functional requirement কে স্পষ্ট এবং testable** করে তোলে, এবং developer দের বুঝতে সাহায্য করে system টা বাস্তবে কীভাবে ব্যবহার হবে।
 
 ---
 
-## Functional, non-functional, and domain requirements
+### Is there a meaningful difference between "requirements gathering" and "requirements elicitation"?
 
-### Functional requirement (FR)
+হ্যাঁ, technically একটা সূক্ষ্ম কিন্তু গুরুত্বপূর্ণ পার্থক্য আছে, যদিও অনেকে দুটো term কে interchangeably ব্যবহার করেন:
 
-System কী **করে**।
+- **Requirements Gathering** শব্দটি বোঝায় যেন requirement গুলো **already ready অবস্থায় stakeholder দের মাথায় বসে আছে**, এবং শুধু সেগুলো "collect" করলেই হবে — একটি **passive** process
+- **Requirements Elicitation** শব্দটি বেশি accurate, কারণ বাস্তবে stakeholder রা প্রায়ই নিজেরাও ঠিকভাবে জানেন না তারা কী চান। Elicitation একটি **active, collaborative process**, যেখানে skilled techniques (interview, workshop, prototyping) ব্যবহার করে **hidden, implicit, এবং unstated requirement** গুলোকেও বের করে আনতে হয়
 
-```text
-FR-12: A customer shall be able to cancel an order before restaurant acceptance.
-```
+তাই modern software engineering practice এ **"elicitation"** শব্দটাকেই বেশি সঠিক এবং professional মনে করা হয়, কারণ এটি প্রক্রিয়াটির **active এবং investigative** প্রকৃতি কে ভালোভাবে প্রতিফলিত করে।
 
-### Non-functional requirement (NFR)
+---
 
-System কত ভালোভাবে বা কী constraint-এর মধ্যে কাজ করে। Quality attribute এবং constraint সাধারণত NFR।
+## 17. What is the difference between functional requirements, non-functional requirements, and domain requirements?
 
-```text
-NFR-07: The cancellation API shall respond within 2 seconds for 95% of requests
-        under 500 concurrent users.
-```
-
-### Domain requirement
-
-Business domain, law, policy, or industry rule থেকে আসা requirement।
-
-```text
-DR-03: Refund records shall be retained for seven years under company policy.
-```
-
-| Type | Food-delivery example | Test idea |
-|---|---|---|
-| Functional | customer can save address | save then retrieve |
-| Performance NFR | search p95 under 2 sec | load test |
-| Security NFR | payment token never logged | security/log review |
-| Usability NFR | new user can place order without training | usability test |
-| Domain | VAT calculation follows rule | acceptance calculation cases |
-
-### Vague requirement থেকে testable requirement
-
-| Vague | Testable rewrite |
+| Type | সংজ্ঞা |
 |---|---|
-| “System should be fast” | “Search p95 response time shall be under 2 sec at 300 requests/sec” |
-| “App should be secure” | “Passwords shall be salted and hashed; admin actions require MFA” |
-| “Easy to use” | “At least 90% of tested first-time users can complete checkout within 3 minutes” |
+| **Functional Requirements** | System টি **কী কী কাজ করবে** তার বর্ণনা — specific features, functions, বা behaviors |
+| **Non-Functional Requirements (NFR)** | System **কীভাবে কাজ করবে** তার বর্ণনা — quality attributes যেমন performance, security, usability, reliability |
+| **Domain Requirements** | নির্দিষ্ট **business domain বা industry** থেকে আসা requirement, যা সেই domain এর characteristics, regulation, বা standard থেকে উদ্ভূত |
 
-যদি pass/fail objectiveভাবে বলা না যায়, requirement এখনও refine করা দরকার।
+### Can you give examples of each in the context of a real system (e.g., an online banking application)?
 
----
+**Functional Requirements:**
+- User তার username এবং password দিয়ে **login** করতে পারবেন
+- User এক account থেকে অন্য account এ **fund transfer** করতে পারবেন
+- User তার **transaction history** দেখতে পারবেন
+- User **bill payment** করতে পারবেন
+- System **OTP (One-Time Password)** পাঠাবে transaction verify করার জন্য
 
-## SRS: Software Requirements Specification
+**Non-Functional Requirements:**
+- System কে **99.9% uptime/availability** বজায় রাখতে হবে (Reliability)
+- Login page **২ সেকেন্ডের মধ্যে** load হতে হবে (Performance)
+- User data **AES-256 encryption** দিয়ে সুরক্ষিত থাকতে হবে (Security)
+- System একই সময়ে **১০,০০০ concurrent user** handle করতে পারবে (Scalability)
+- Interface টি **সহজে ব্যবহারযোগ্য** এবং visually impaired user দের জন্য accessible হতে হবে (Usability)
 
-**SRS** হলো agreed requirements-এর structured source of truth। এটি one giant document হওয়া বাধ্যতামূলক না; Agile team-এ it can be a combination of backlog, API contract, decision record, wireframe, and acceptance criteria। Important হলো content complete, accessible, and versioned থাকা।
-
-Typical SRS sections:
-
-```text
-1. Purpose and scope
-2. Stakeholders and glossary
-3. Functional requirements / use cases
-4. Non-functional requirements
-5. Data and external interfaces
-6. Assumptions and constraints
-7. Acceptance criteria
-8. Traceability and change history
-```
-
-### Good requirement characteristics
-
-| Characteristic | Meaning |
-|---|---|
-| Correct | actual stakeholder need represents |
-| Complete | important rule/exception missing না |
-| Unambiguous | two people same meaning বুঝবে |
-| Consistent | অন্য requirement-এর সঙ্গে conflict নেই |
-| Feasible | budget, technology, time-এ possible |
-| Prioritized | value/urgency clear |
-| Verifiable | test/review দিয়ে confirm করা যায় |
-| Traceable | source, design, test-এর সঙ্গে link করা যায় |
+**Domain Requirements:**
+- System টি **central bank এর regulation** (যেমন Bangladesh Bank এর নিয়মাবলী) মেনে চলতে হবে
+- **KYC (Know Your Customer)** verification বাধ্যতামূলক হতে হবে
+- **Anti-Money Laundering (AML)** নিয়ম অনুসরণ করতে হবে transaction monitoring এ
+- একটি নির্দিষ্ট amount এর বেশি transaction হলে **regulatory reporting** করতে হবে
+- **Audit trail** বজায় রাখতে হবে সব financial transaction এর জন্য, যা banking industry এর standard practice
 
 ---
 
-## Use case: a concrete interaction model
+## 18. What is a requirements specification document (SRS), and why is it important?
 
-User story value communicate করে; **use case** normal flow ও alternate flow detail করতে পারে।
+**SRS** হলো একটি formal document, যা একটি software system এর সব **functional এবং non-functional requirement** কে বিস্তারিতভাবে, structured আকারে বর্ণনা করে। এটি client, developer, tester, এবং project manager — সবার জন্য একটি **single source of truth** হিসেবে কাজ করে।
 
-```text
-Use case: Cancel prepaid order
-
-Primary actor: Customer
-Precondition: Order is placed and not accepted by restaurant
-
-Main flow:
-1. Customer opens order details.
-2. Customer selects Cancel order.
-3. System displays refund amount and reason options.
-4. Customer confirms cancellation.
-5. System marks order cancelled and initiates refund.
-6. System notifies customer and restaurant.
-
-Alternate flow:
-3a. Restaurant already accepted the order.
-    System shows "Contact support" instead of cancellation.
-```
-
-এই format developer, tester, designer, and product owner-কে same scenario নিয়ে কথা বলতে সাহায্য করে।
+**কেন গুরুত্বপূর্ণ:**
+- Client এবং development team এর মধ্যে **common understanding** তৈরি করে
+- Development, testing, এবং project planning এর জন্য একটি **reliable baseline** প্রদান করে
+- Legal এবং contractual দিক থেকে গুরুত্বপূর্ণ — client এবং vendor এর মধ্যে কী delivered হবে তার প্রমাণ হিসেবে কাজ করে
+- **Cost এবং timeline estimation** সহজ করে
+- ভবিষ্যতে system maintenance বা enhancement এর জন্য reference document হিসেবে কাজ করে
 
 ---
 
-## Acceptance criteria and examples
+### According to standards like IEEE 830, what characteristics should a good SRS have (e.g., unambiguous, complete, consistent, verifiable, traceable)?
 
-Acceptance criteria story-এর boundary set করে। It should cover happy path, important business rules, and key error/edge cases।
-
-```text
-Story: As a customer, I want to cancel an eligible prepaid order,
-so that I can correct an accidental order.
-
-Acceptance criteria:
-1. Cancellation button is visible only before restaurant acceptance.
-2. Customer sees refundable amount before confirming.
-3. On confirmation, order status becomes CANCELLED.
-4. Refund request is created once, even if customer retries due to network failure.
-5. Customer and restaurant receive notification.
-```
-
-Rule 4 হলো hidden but important engineering requirement: retry হলে duplicate refund হওয়া যাবে না। Good refinement often এমন failure scenario বের করে।
+- **Correct** — SRS এ লেখা প্রতিটি requirement actual system need এর সাথে সঠিকভাবে মিলতে হবে
+- **Unambiguous** — প্রতিটি requirement এর **একটিমাত্র interpretation** থাকতে হবে, কোনো দ্বিধা বা confusion থাকা যাবে না
+- **Complete** — সব প্রয়োজনীয় functional এবং non-functional requirement অন্তর্ভুক্ত থাকতে হবে, কোনো gap থাকা যাবে না
+- **Consistent** — কোনো requirement যেন অন্য কোনো requirement এর সাথে **contradict** না করে
+- **Verifiable (Testable)** — প্রতিটি requirement এমনভাবে লেখা উচিত, যাতে সেটা **test করে verify করা যায়** যে সেটা পূরণ হয়েছে কিনা (vague বা subjective ভাষা এড়িয়ে চলতে হবে)
+- **Traceable** — প্রতিটি requirement কে তার **origin (কোন stakeholder need থেকে এসেছে)** এবং forward direction এ (design, code, test case পর্যন্ত) track করা যেতে হবে
+- **Ranked for Importance/Stability** — কোন requirement বেশি critical বা কোনটা পরিবর্তন হওয়ার সম্ভাবনা কম/বেশি, তা priority অনুযায়ী চিহ্নিত থাকা উচিত
+- **Modifiable** — SRS এমনভাবে structured হওয়া উচিত, যাতে প্রয়োজনে সহজে update করা যায় সামগ্রিক consistency নষ্ট না করে
 
 ---
 
-## Requirement prioritization
+### What is the difference between gathering, analyzing, and documenting requirements?
 
-সব requirement একই সময়ে করা যায় না। Priority decide করার সময় value, risk, urgency, dependency, and effort consider করা হয়।
 
-### MoSCoW method
-
-| Category | Meaning | Example |
+| ধাপ | কী হয় | Output |
 |---|---|---|
-| Must have | ছাড়া release invalid | place order, payment safety |
-| Should have | high value, workaround আছে | saved addresses |
-| Could have | nice to have | order animation |
-| Won't have now | explicitly not this release | group order feature |
+| **Gathering (Elicitation)** | Stakeholder দের কাছ থেকে raw requirement সংগ্রহ করা হয় বিভিন্ন technique (interview, survey ইত্যাদি) ব্যবহার করে | Unstructured, raw তথ্য/notes |
+| **Analyzing** | সংগৃহীত তথ্য থেকে **conflict, redundancy, ambiguity** খুঁজে বের করে সমাধান করা হয়, requirement গুলোকে **prioritize এবং categorize** (functional/non-functional) করা হয় | পরিশোধিত, organized, conflict-free requirement list |
+| **Documenting (Specification)** | Analyzed requirement গুলোকে একটি **formal SRS document** এ লেখা হয়, নির্দিষ্ট format এবং standard (যেমন IEEE 830) অনুসরণ করে, যাতে unambiguous, complete, এবং traceable হয় | চূড়ান্ত SRS document |
 
-### Simple value-risk discussion
-
-```text
-High value + high risk: payment gateway integration
--> build/prove early
-
-Low value + high effort: animated delivery map theme
--> defer unless strategy needs it
-```
-
-Priority কোনো permanent truth না। Market condition বা legal deadline change হলে backlog reorder হবে।
+**সংক্ষেপে:** Gathering হলো raw material সংগ্রহ করা, Analyzing হলো সেই material কে পরিশোধন এবং organize করা, আর Documenting হলো সেই পরিশোধিত তথ্যকে একটি formal, standard, এবং ব্যবহারযোগ্য document আকারে রূপান্তর করা — যা পুরো project জুড়ে reference হিসেবে ব্যবহৃত হবে।
 
 ---
 
-## Traceability and RTM
 
-**Requirements Traceability Matrix (RTM)** requirement-এর source থেকে implementation, test, and release পর্যন্ত link রাখে। এটি “কোন test কোন requirement verify করে?” প্রশ্নের answer দেয়।
 
-```text
-Business need -> Requirement -> Design/API -> Code -> Test -> Release
-      |              |              |          |        |
-      +--------------+--------------+----------+--------+
-                    traceability links
-```
+## 19. What is a Requirements Traceability Matrix (RTM), and what purpose does it serve?
 
-| Req ID | Requirement | Design/API | Test ID | Status |
-|---|---|---|---|---|
-| FR-12 | cancel eligible order | `POST /orders/{id}/cancel` | AT-42 | passed |
-| NFR-07 | p95 under 2 sec | cache design | PT-08 | passed |
-| DR-03 | retain refund records | retention job | AT-67 | pending |
+**Requirements Traceability Matrix (RTM)** হলো একটি document (সাধারণত table আকারে), যা প্রতিটি requirement কে তার **origin** থেকে শুরু করে **design, development, এবং testing** পর্যন্ত পুরো journey জুড়ে **link/map** করে রাখে। এটি নিশ্চিত করে যে প্রতিটি requirement সঠিকভাবে implement এবং test হয়েছে, এবং কোনো requirement miss হয়ে যায়নি বা কোনো অপ্রয়োজনীয় feature (যা কোনো requirement থেকে আসেনি) তৈরি হয়নি।
 
-### RTM কেন দরকার?
+**একটি typical RTM এ থাকে:**
 
-- missing test ধরতে সাহায্য করে
-- change impact analysis করা যায়
-- regulated project-এ evidence দেয়
-- obsolete requirement বা orphan feature identify করা যায়
+| Requirement ID | Requirement Description | Design Document Reference | Code/Module | Test Case ID | Status |
+|---|---|---|---|---|---|
+| REQ-001 | User login functionality | HLD Section 3.2 | AuthModule.java | TC-005, TC-006 | Passed |
 
-Example: policy change হয়ে refund retention 7 থেকে 10 বছর হলে RTM থেকে data store, deletion job, legal test, documentation impact দ্রুত বের করা যায়।
+**RTM এর মূল Purpose:**
+- প্রতিটি requirement যে **actually addressed** হয়েছে তা নিশ্চিত করা
+- **Test coverage** verify করা — কোনো requirement test না করেই বাদ পড়েনি
+- **Bidirectional traceability** বজায় রাখা — requirement থেকে code পর্যন্ত (forward) এবং code থেকে requirement পর্যন্ত (backward) track করা যায়
+- Project এর **completeness এবং quality** নিশ্চিত করা
 
 ---
 
-## Requirement change and scope creep
+### How does traceability help during testing, impact analysis, and change management?
 
-**Scope creep** হলো proper evaluation/approval ছাড়া scope ধীরে ধীরে বাড়া। Change খারাপ না; unmanaged change খারাপ।
+**Testing এ সাহায্য:**
+- RTM দেখে tester রা নিশ্চিত হতে পারেন যে **প্রতিটি requirement এর জন্য অন্তত একটি test case** আছে কিনা — কোনো gap থাকলে সহজে ধরা পড়ে
+- Testing এর সময় **coverage report** তৈরি করা সহজ হয় — কতগুলো requirement test করা হয়েছে, কতগুলো বাকি
+- কোনো test fail করলে সেটা সরাসরি কোন requirement এর সাথে related তা দ্রুত identify করা যায়
 
-```text
-Original: "Add order cancellation"
-Then:    "Also add partial refund"
-Then:    "Also auto-approve support cases"
-Then:    "Also redesign order history"
+**Impact Analysis এ সাহায্য:**
+- কোনো requirement change হলে, RTM এর মাধ্যমে দ্রুত দেখা যায় সেটা **কোন কোন design document, code module, এবং test case কে প্রভাবিত করবে**
+- এতে developer এবং QA team রা আগে থেকেই বুঝতে পারেন কতটুকু **rework** লাগবে, এবং কোনো hidden dependency miss হয়ে যাওয়ার সম্ভাবনা কমে
 
-Result: original estimate and release promise no longer meaningful.
-```
-
-Healthy change control:
-
-1. Change request capture করো
-2. Value, cost, risk, dependency impact analyse করো
-3. Stakeholder decision record করো
-4. Backlog/scope baseline update করো
-5. Relevant tests and documents update করো
-
-Agile-এ change control মানে committee approval বাধ্যতামূলক না। Often Product Owner backlog reorder করেন, কিন্তু team impact transparentভাবে জানে।
+**Change Management এ সাহায্য:**
+- নতুন requirement বা change request আসলে, RTM ব্যবহার করে দেখা যায় এটি existing system এর সাথে **conflict** করছে কিনা
+- Change এর **cost এবং effort** আরও নির্ভুলভাবে estimate করা যায়, কারণ affected component গুলো আগে থেকেই জানা থাকে
+- **Audit এবং compliance** এর ক্ষেত্রেও RTM গুরুত্বপূর্ণ প্রমাণ হিসেবে কাজ করে (বিশেষত regulated industry যেমন banking, healthcare তে)
 
 ---
 
-## Technical debt and requirements
+## 20. How are requirements prioritized, and what techniques are commonly used (e.g., MoSCoW)?
 
-**Technical debt** হলো দ্রুত delivery বা incomplete design-এর ফলে future cost বাড়া। এটি শুধু bad code না; undocumented decision, missing automated test, outdated dependency, unclear requirement-ও debt হতে পারে।
+Requirement prioritization প্রয়োজন হয় কারণ সাধারণত **সময়, বাজেট, এবং resource সীমিত থাকে**, তাই সবচেয়ে গুরুত্বপূর্ণ এবং high-value requirement গুলো আগে করা দরকার।
 
-```text
-Today: skip refund idempotency "to ship fast"
-Tomorrow: duplicate refund incidents
-Later: reconciliation, support cost, trust loss
-```
+**Common Techniques:**
 
-Debt manage করার practical way:
+**১. MoSCoW Method**
+এটি সবচেয়ে জনপ্রিয় technique গুলোর একটি, যেখানে requirement গুলোকে চারটি category তে ভাগ করা হয়:
+- **M — Must Have:** এই requirement ছাড়া system কাজই করবে না, absolutely mandatory
+- **S — Should Have:** গুরুত্বপূর্ণ, কিন্তু এখনই না হলেও চলবে (temporary workaround সম্ভব)
+- **C — Could Have:** থাকলে ভালো, কিন্তু না থাকলেও তেমন সমস্যা নেই (nice-to-have)
+- **W — Won't Have (this time):** এই release/iteration এ করা হবে না, ভবিষ্যতে বিবেচনা করা হতে পারে
 
-- backlog-এ debt visible করো
-- interest measure করো: incidents, slow delivery, maintenance cost
-- high-risk debt আগে pay করো
-- DoD-তে tests/review/documentation রাখো
-- new feature-এর সাথে related cleanup include করো
+**২. Kano Model**
+Customer satisfaction এর ভিত্তিতে requirement কে ভাগ করে — **Basic needs** (না থাকলে অসন্তুষ্টি), **Performance needs** (যত বেশি তত ভালো), এবং **Excitement/Delighter needs** (না থাকলে সমস্যা নেই, কিন্তু থাকলে extra খুশি)
 
-সব debt immediately pay করা realistic না। Good judgment হলো risk এবং business value অনুযায়ী balance করা।
+**৩. Weighted Scoring/Value vs. Effort Matrix**
+প্রতিটি requirement কে **business value** এবং **implementation effort/cost** এর ভিত্তিতে score দিয়ে, high-value/low-effort item গুলোকে prioritize করা হয়
+
+**৪. 100-Dollar Method (Cumulative Voting)**
+Stakeholder দের কাল্পনিক ১০০ ডলার দেওয়া হয়, যা তারা বিভিন্ন requirement এর মধ্যে বিতরণ করেন — যেটাতে বেশি "ডলার" পড়ে, সেটা বেশি priority পায়
+
+**৫. Priority Poker/Planning Poker**
+Agile team এ ব্যবহৃত হয়, যেখানে team member রা individually প্রতিটি requirement এর priority/effort নিয়ে vote দেন, তারপর আলোচনা করে consensus এ আসেন
 
 ---
 
-## Common interview questions
+### What is "requirements creep" (scope creep at the requirements level), and how is it controlled?
 
-### Requirements gathering আর elicitation কি একই?
+**Requirements Creep (বা Scope Creep)** বলতে বোঝায় project চলাকালীন **ধীরে ধীরে, অনিয়ন্ত্রিতভাবে নতুন নতুন requirement যোগ হতে থাকা**, যা মূল plan, timeline, এবং budget এ ছিল না। এটি সাধারণত ছোট ছোট "just one more feature" ধরনের request থেকে শুরু হয়, যা আলাদাভাবে ছোট মনে হলেও সম্মিলিতভাবে project কে বিশাল আকারে delay এবং over-budget করে দিতে পারে।
 
-Often interchangeably use হয়। Elicitation একটু broader: stakeholder-এর latent need, conflict, assumption, constraint discover করার active process। শুধু list collect করা নয়।
+**Requirements Creep কীভাবে Control করা হয়:**
 
-### Functional and non-functional requirement-এর difference কী?
+- **Clear, well-documented Scope Statement** শুরুতেই তৈরি করা, যেখানে স্পষ্টভাবে লেখা থাকে কী **in-scope** এবং কী **out-of-scope**
+- **Formal Change Control Process** চালু রাখা — যেকোনো নতুন requirement বা change কে একটি **Change Request (CR)** হিসেবে জমা দিতে হবে, এবং সেটা **impact analysis** এর মধ্য দিয়ে যেতে হবে (cost, timeline, resource এর উপর প্রভাব যাচাই করে)
+- **Change Control Board (CCB)** বা প্রাসঙ্গিক authority থেকে approval নেওয়া বাধ্যতামূলক করা, প্রতিটি change বাস্তবায়নের আগে
+- Product Backlog **regularly prioritize এবং groom** করা (Agile এর ক্ষেত্রে), যাতে নতুন requirement আসলে সেটা existing priority এর সাথে তুলনা করে জায়গা পায় বা বাদ পড়ে
+- Client এবং stakeholder দের সাথে **regular communication** রাখা, যাতে নতুন idea গুলো সঠিক channel দিয়ে আসে, informal ভাবে নয়
+- **MVP (Minimum Viable Product)** approach অনুসরণ করা — প্রথমে শুধু core, essential feature দিয়ে শুরু করা, বাকি সব "nice-to-have" জিনিস future release এ পাঠানো
+- Requirement change এর **cost এবং schedule impact** ক্লায়েন্টকে স্পষ্টভাবে জানানো, যাতে তারা বুঝতে পারেন প্রতিটি change এর একটা price আছে
 
-Functional requirement system behavior বলে, যেমন customer order cancel করতে পারবে। Non-functional requirement quality/constraint বলে, যেমন cancel API p95 2 second-এর মধ্যে response দেবে।
+---
 
-### Good SRS-এর characteristics কী?
+## 21. What is technical debt, and how does it typically accumulate over the SDLC?
 
-Correct, complete, unambiguous, consistent, feasible, prioritized, verifiable, and traceable। সবচেয়ে জরুরি: implementation ও testing-এর জন্য shared understanding তৈরি করা।
+**Technical Debt** হলো একটি metaphor, যা বোঝায় যখন developer রা **দ্রুত, সহজ (কিন্তু সবসময় সেরা নয় এমন)** সমাধান বেছে নেন কোনো কাজ তাড়াতাড়ি শেষ করার জন্য, তার বদলে যদি তারা সময় নিয়ে সঠিক, দীর্ঘমেয়াদী, well-architected সমাধান বেছে নিতেন। ঠিক যেমন আর্থিক ঋণের ক্ষেত্রে **সুদ (interest)** জমতে থাকে, তেমনি Technical Debt ও সময়ের সাথে সাথে **maintenance cost, bug, এবং complexity** আকারে "সুদ" জমাতে থাকে, যদি সেটা পরিশোধ (refactor) না করা হয়।
 
-### Requirement change কীভাবে handle করবে?
+**SDLC জুড়ে Technical Debt কীভাবে জমা হয়:**
 
-Change capture করে value, cost, risk, dependency, test impact analyse করব; right stakeholder-এর decision নেব; তারপর backlog/specification/traceability update করব। Change reject করাই goal না, informed trade-off করা goal।
+**Requirement/Design Phase এ:**
+- তাড়াহুড়ায় বা অসম্পূর্ণ requirement analysis এর কারণে ভুল architecture decision নেওয়া হয়
+- Scalability বা future need বিবেচনা না করে design করা হয়
+
+**Development Phase এ:**
+- **Deadline pressure** এর কারণে developer রা shortcut নেন — যেমন proper error handling না করা, code duplicate করা, বা "TODO: fix later" রেখে দেওয়া
+- **Insufficient code review** এর কারণে poor-quality code merge হয়ে যায়
+- Outdated বা deprecated library/framework ব্যবহার চালিয়ে যাওয়া, upgrade না করে
+
+**Testing Phase এ:**
+- সময় বা budget এর অভাবে **automated test coverage কম রাখা**, যার ফলে ভবিষ্যতে change করলে bug ধরা কঠিন হয়ে যায়
+
+**Deployment/Maintenance Phase এ:**
+- **Documentation আপডেট না করা**, যার ফলে নতুন developer দের বুঝতে সমস্যা হয়
+- Quick hotfix/patch জমা হতে থাকা, যা মূল architecture এর সাথে সামঞ্জস্যপূর্ণ নয়
+- **Legacy code** এর উপর নতুন feature চাপাতে থাকা, refactor না করে
+
+Technical Debt কখনো কখনো **ইচ্ছাকৃতভাবে (deliberate)** নেওয়া হয় — যেমন market এ দ্রুত product আনার জন্য — কিন্তু কখনো কখনো এটি **অনিচ্ছাকৃতভাবে (accidental)** জমা হয়, poor practice বা lack of awareness এর কারণে।
+
+---
+
+### How do you balance paying down technical debt against delivering new features?
+
+- **Technical Debt কে visible এবং trackable করা** — একে Product Backlog এ একটি regular item হিসেবে রাখা (যেমন "Refactor payment module"), শুধু developer দের মাথায় রাখা কোনো informal বিষয় হিসেবে না রেখে
+- **নির্দিষ্ট শতাংশ সময়/capacity বরাদ্দ রাখা** — অনেক team প্রতিটি sprint এর **১০-২০% সময় technical debt payoff** এর জন্য আলাদা রাখে, নিয়মিতভাবে
+- **Debt কে Prioritize করা business impact অনুযায়ী** — সব debt সমান গুরুত্বপূর্ণ নয়; যেসব debt **high-risk এলাকায়** আছে (যেমন security-critical বা frequently-modified code) সেগুলোকে আগে ঠিক করা উচিত
+- **"Boy Scout Rule" অনুসরণ করা** — যখনই কোনো code touch করা হয়, তখন সেটাকে একটু হলেও পরিষ্কার/improve করে রেখে যাওয়া, বড় dedicated refactoring project এর অপেক্ষা না করে
+- **Regular Code Review এবং Static Analysis Tools** ব্যবহার করে debt আগে থেকেই কমানো, যাতে নতুন debt কম জমে
+- **Stakeholder দের সাথে transparent communication রাখা** — Technical Debt এর business impact (যেমন ধীরগতির development, বেশি bug, higher maintenance cost) বুঝিয়ে বলা, যাতে non-technical stakeholder রাও এর গুরুত্ব বোঝেন এবং সময় বরাদ্দ করতে রাজি হন
+- **Dedicated "Refactoring Sprint"** মাঝে মাঝে রাখা, যদি debt অনেক বেশি জমে যায় এবং এটি নতুন feature development কে significantly ধীর করে দিচ্ছে
+- **Cost of Delay বিশ্লেষণ করা** — যদি debt না পরিশোধ করলে ভবিষ্যতে feature development আরও ধীর এবং costly হয়ে যাবে, তাহলে সেই "future cost" কে বর্তমান decision এ বিবেচনায় আনা
+
+**সংক্ষেপে:** Technical Debt সম্পূর্ণভাবে এড়ানো সম্ভব নয়, এবং সবসময় সেটা খারাপও নয় — অনেক সময় business need এ ইচ্ছাকৃত debt নেওয়াটাই যুক্তিসঙ্গত সিদ্ধান্ত। মূল কথা হলো এটিকে **conscious ভাবে manage করা**, যাতে এটি অনিয়ন্ত্রিতভাবে জমে গিয়ে দীর্ঘমেয়াদে পুরো product এর development velocity এবং quality কে নষ্ট করে না দেয়।

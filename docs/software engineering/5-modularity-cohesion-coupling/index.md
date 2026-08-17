@@ -3,300 +3,147 @@ sidebar_position: 5
 title: 'Modularity, Cohesion, and Coupling'
 ---
 
-## 5. Modularity, Cohesion, and Coupling
+## 33. What is modularity in software design, and why is it desirable?
 
-Large software manageable হয় যখন আমরা এটিকে meaningful **module**-এ ভাগ করি। Module হতে পারে package, class, library, service, feature folder, or bounded component। Good module নিজের কাজ clear রাখে এবং অন্য module-এর internal detail কম জানে।
+**Modularity** হলো একটি design approach, যেখানে একটি বড় system কে ছোট ছোট, **স্বাধীন (independent) এবং স্ব-সম্পূর্ণ (self-contained)** অংশ বা **module** এ ভাগ করা হয়। প্রতিটি module একটি নির্দিষ্ট, well-defined functionality handle করে, এবং একটি clear **interface** এর মাধ্যমে অন্য module এর সাথে communicate করে — internal implementation details বাইরে থেকে **hidden** থাকে।
 
-```text
-Online store
-  |- Catalog      : products and prices
-  |- Order        : place/cancel order
-  |- Payment      : charge/refund
-  |- Notification : email/SMS/push
-  |- Identity     : login and permissions
-```
+**Modularity কেন Desirable:**
 
-এই separation-এর quality বুঝতে two key concept:
-
-- **Cohesion:** একটি module-এর ভিতরের জিনিসগুলো কতটা related
-- **Coupling:** module-গুলোর মধ্যে dependency কতটা strong
-
-Target হলো **high cohesion, low coupling**।
+- **Complexity Management** — একটি বিশাল, জটিল system কে একবারে বোঝা কঠিন; module এ ভাগ করলে প্রতিটি অংশ আলাদাভাবে, ছোট আকারে বোঝা এবং handle করা সহজ হয়
+- **Parallel Development** — বিভিন্ন team/developer আলাদা আলাদা module এ একসাথে (parallel) কাজ করতে পারেন, একে অপরের কাজে বাধা না দিয়ে
+- **Better Organization** — Codebase টা logically organized থাকে, যা navigate করা এবং নতুন developer দের onboard করা সহজ করে তোলে
+- **Fault Isolation** — একটি module এ সমস্যা হলে, সেটা সাধারণত অন্য module কে প্রভাবিত করে না (যদি proper boundary বজায় থাকে), ফলে debugging সহজ হয়
 
 ---
 
-## Why modularity matters
+### How does modularity support easier testing, maintenance, and reuse of code?
 
-একটি well-designed module ideally একটি understandable responsibility own করে এবং stable interface দেয়।
+**Testing এ সাহায্য:**
+- প্রতিটি module কে **আলাদাভাবে, isolation এ** unit test করা যায় — পুরো system একসাথে test করার প্রয়োজন হয় না
+- Mock/stub ব্যবহার করে একটি module কে অন্য module এর dependency থেকে আলাদা করে test করা সহজ হয়
+- Bug খুঁজে বের করা সহজ হয়, কারণ সমস্যা কোন নির্দিষ্ট module এ আছে তা দ্রুত চিহ্নিত করা যায়
 
-| Benefit | Real effect |
-|---|---|
-| Easier change | payment rule বদলালেও catalog code touch কম হয় |
-| Easier test | order rule in isolation test করা যায় |
-| Parallel work | team members different module-এ কাজ করতে পারে |
-| Reuse | notification module multiple workflow-এ use হয় |
-| Fault isolation | email failure order creation stop না-ও করতে পারে |
+**Maintenance এ সাহায্য:**
+- একটি module এ change বা bug fix করলে, সেই change এর **impact সীমিত** থাকে (যদি interface অপরিবর্তিত থাকে), তাই side-effect এর ঝুঁকি কম
+- নতুন developer কে পুরো system না বুঝেই শুধু নির্দিষ্ট module বুঝিয়ে কাজ করানো সম্ভব হয়
+- Legacy বা problematic module কে ধীরে ধীরে **replace বা refactor** করা যায়, পুরো system পুনর্লিখন না করেই
 
-### Module boundary example
-
-```text
-Order module public API
-  - placeOrder(customerId, items)
-  - cancelOrder(orderId)
-  - getOrderStatus(orderId)
-
-Order module private details
-  - order database tables
-  - validation helpers
-  - internal status mapping
-```
-
-Another module should call public API, not read Order-এর internal database table directly। Private detail leak হলে later change costly হয়।
+**Reuse এ সাহায্য:**
+- একটি well-designed, self-contained module (যেমন একটি authentication module বা logging library) অন্য project বা অন্য অংশেও পুনরায় ব্যবহার করা যায়
+- এটি development effort এবং সময় বাঁচায়, কারণ একই logic বারবার নতুন করে লিখতে হয় না (এটি DRY principle কেও সমর্থন করে)
 
 ---
 
-## Cohesion: things that belong together
+## 34. What is cohesion, and what are its different types (functional, sequential, communicational, procedural, temporal, logical, coincidental)?
 
-High cohesion মানে module-এর responsibilities একই purpose-এ serve করে।
+**Cohesion** বলতে বোঝায় একটি module এর ভেতরের elements (function, method, বা data) **কতটা closely related এবং একটি single, well-defined purpose এর দিকে কাজ করছে**। High cohesion মানে module এর সব অংশ একসাথে মিলে **একটি নির্দিষ্ট কাজ** ভালোভাবে সম্পন্ন করছে।
 
-```text
-High cohesion: RefundService
-- validate refund eligibility
-- calculate refundable amount
-- create refund request
-- update refund status
+**Cohesion এর Types (সবচেয়ে ভালো থেকে সবচেয়ে খারাপ ক্রমে):**
 
-Low cohesion: UtilityService
-- calculate refund
-- export CSV
-- send SMS
-- hash password
-- parse date
-```
+**১. Functional Cohesion (সর্বোচ্চ)**
+Module এর সব element একসাথে মিলে **একটি single, well-defined task** সম্পন্ন করে। যেমন: একটি `calculateTax()` function শুধু tax calculation এর সাথে সম্পর্কিত কাজই করে।
 
-`UtilityService` নামটি often warning sign: unrelated work এক জায়গায় জমেছে।
+**২. Sequential Cohesion**
+Module এর মধ্যে একাধিক কাজ থাকে, যেখানে **একটি কাজের output পরের কাজের input** হিসেবে ব্যবহৃত হয় — একটি pipeline এর মতো। যেমন: data read করা → validate করা → transform করা → save করা।
 
-### Cohesion types
+**৩. Communicational Cohesion**
+Module এর elements একই **data set বা input/output** নিয়ে কাজ করে, কিন্তু তাদের মধ্যে সরাসরি sequential dependency নাও থাকতে পারে। যেমন: একটি function যা একই customer record থেকে report generate এবং email পাঠানো — উভয় কাজ করে।
 
-| Type | Meaning | Quality |
-|---|---|---|
-| Functional | one well-defined task | best |
-| Sequential | one operation output feeds next | good |
-| Communicational | same data used by related operations | acceptable |
-| Procedural | same execution sequence, but separate purpose | weak |
-| Temporal | same timeে run হয়, like startup tasks | weak |
-| Logical | same category selected by flag | weak |
-| Coincidental | unrelated operations grouped randomly | worst |
+**৪. Procedural Cohesion**
+Module এর elements একটি নির্দিষ্ট **execution order/procedure** অনুসরণ করে group করা হয়েছে, কিন্তু তাদের মধ্যে data সম্পর্ক কম। যেমন: একটি function এ প্রথমে login validation, তারপর logging, তারপর UI update — এগুলো sequence অনুযায়ী একসাথে আছে, কিন্তু logically আলাদা concern।
 
-### Functional cohesion
+**৫. Temporal Cohesion**
+Elements গুলো একসাথে group করা হয়েছে কারণ তারা **একই সময়ে execute হয়**, functionality এর মিল থাকার কারণে নয়। যেমন: একটি `initialize()` function, যা startup এ database connection খোলা, log file তৈরি করা, এবং config load করা — এই সব ভিন্ন কাজ একসাথে করে, শুধু কারণ সেগুলো app startup এ ঘটে।
 
-```text
-TaxCalculator
-Input: invoice
-Output: tax amount
+**৬. Logical Cohesion**
+Elements গুলো **logically similar কাজ** করে বলে একসাথে group করা হয়েছে, কিন্তু আসলে তারা ভিন্ন ভিন্ন কাজ, এবং কোনটা execute হবে তা সাধারণত একটি flag/parameter দিয়ে নির্ধারিত হয়। যেমন: একটি single `handleInput()` function, যেখানে parameter অনুযায়ী keyboard input, mouse input, বা file input — সব ধরনের input handle করা হয়।
 
-All methods support one job: calculate tax correctly.
-```
-
-### Sequential cohesion
-
-```text
-ReportGenerator
-1. Load sales data
-2. Aggregate data
-3. Format report
-
-Output of step 1 feeds step 2; step 2 feeds step 3.
-```
-
-এটি reasonable, তবে reporting logic খুব বড় হলে loading/aggregation/presentation আলাদা module-এ নেয়া better হতে পারে।
-
-### Logical cohesion: a common smell
-
-```text
-NotificationSender.send(type, target, message)
-
-if type == EMAIL -> email logic
-if type == SMS   -> SMS logic
-if type == PUSH  -> push logic
-```
-
-সবই notification category-তে হলেও change reason আলাদা। Email provider change হলে SMS path touch না করা ideally better। Strategy/interface দিয়ে implementations separate করা যায়।
-
-### Coincidental cohesion
-
-```text
-CommonUtils
-- calculateDiscount()
-- validatePassword()
-- convertImage()
-- findRestaurant()
-```
-
-এগুলোর একমাত্র relation হলো “কেউ জানত না কোথায় রাখবে।” এমন module discoverability, testing, ownership সব খারাপ করে।
+**৭. Coincidental Cohesion (সর্বনিম্ন)**
+Module এর elements গুলোর মধ্যে **কোনো অর্থবহ সম্পর্কই নেই** — তারা শুধু কাকতালীয়ভাবে একসাথে রাখা হয়েছে (যেমন কোড organize করার কোনো চেষ্টা ছাড়াই "utility" বা "misc" class এ যা খুশি ফেলে দেওয়া)।
 
 ---
 
-## Coupling: how much modules know about each other
+### Why is functional cohesion considered the most desirable, and coincidental cohesion the least?
 
-সব module completely independent হতে পারে না; communication দরকার। Goal zero coupling না, **appropriate and controlled coupling**।
+**Functional Cohesion সবচেয়ে ভালো কেন:**
+- Module টি **একটি single responsibility** নিয়ে কাজ করে (SOLID এর Single Responsibility Principle এর সাথে সরাসরি সামঞ্জস্যপূর্ণ)
+- এটিকে **সহজে বোঝা, test করা, এবং reuse** করা যায় — কারণ এর কাজ স্পষ্ট এবং সীমিত
+- Change করার প্রয়োজন হলে, শুধু সেই নির্দিষ্ট functionality সংশ্লিষ্ট module এ change করলেই হয় — অন্য কিছু প্রভাবিত হয় না
+- এটি সবচেয়ে বেশি **predictable এবং maintainable**
 
-### Data coupling: generally preferred
-
-One module অন্য module-এ only needed data pass করে।
-
-```text
-PaymentService.charge(orderId, amount, currency)
-```
-
-Payment service Order service-এর database, internal objects, or UI state জানে না।
-
-### Stamp coupling
-
-Whole structure pass করা হয়, কিন্তু receiver কয়েকটি field use করে।
-
-```text
-PaymentService.charge(Order order)
-
-PaymentService only needs order.id and order.total.
-```
-
-This can be convenient, but `Order` object change হলে Payment affected হতে পারে। A smaller `PaymentRequest` contract sometimes clearer।
-
-### Control coupling
-
-Caller flag দিয়ে receiver-এর behavior control করে।
-
-```text
-generateInvoice(invoice, true, false, "PDF")
-```
-
-Boolean/flag বাড়তে বাড়তে API unclear হয়। Separate operations or explicit options often better।
-
-### Common coupling
-
-Multiple modules same global mutable state share করে।
-
-```text
-GlobalConfig.currentDiscountRate = 20
-```
-
-কোন module value change করেছে বোঝা কঠিন; test order-dependent হয়। Immutable configuration and explicit dependency safer।
-
-### Content coupling: worst form
-
-এক module অন্য module-এর internal code/data modify বা depend করে।
-
-```text
-Order module directly updates Payment module's private database table.
-```
-
-Payment module schema change করলেই Order break করতে পারে। Public contract ছাড়া internal access avoid করো।
-
-| Coupling type | Example | Risk |
-|---|---|---|
-| Data | explicit small parameters | low |
-| Stamp | pass whole object | medium |
-| Control | mode flags | medium-high |
-| Common | shared global state | high |
-| Content | reach into internals | very high |
+**Coincidental Cohesion সবচেয়ে খারাপ কেন:**
+- Module এর elements এর মধ্যে **কোনো logical সম্পর্ক না থাকায়**, এটি বোঝা এবং maintain করা অত্যন্ত কঠিন
+- একটি অংশে change করলে, অন্য অংশে **অপ্রত্যাশিত side-effect** হতে পারে, যদিও তাদের মধ্যে কোনো real সম্পর্ক নেই (কারণ তারা শুধু একই file/class এ আছে)
+- Reusability প্রায় শূন্য — কারণ পুরো module ব্যবহার করতে গেলে অপ্রাসঙ্গিক functionality ও সাথে আসে
+- Testing কঠিন হয়ে যায়, কারণ module এর কোনো single, clear purpose নেই যা test করা যায়
 
 ---
 
-## High cohesion + low coupling in practice
 
-```text
-                    +------------------+
-                    | Order Module     |
-                    | - order rules    |
-                    | - status changes |
-                    +--------+---------+
-                             |
-                   OrderPlaced event
-                             |
-             +---------------+---------------+
-             v                               v
-  +-------------------+            +-------------------+
-  | Notification      |            | Loyalty           |
-  | - send message    |            | - award points    |
-  +-------------------+            +-------------------+
-```
+## 35. What is coupling, and what are its different types (content, common, control, stamp, data, message)?
 
-Order module doesn’t need to know email template or points formula। Each consumer owns cohesive concern, and event contract creates loose coupling।
+**Coupling** বলতে বোঝায় দুটি module এর মধ্যে **আন্তঃনির্ভরতার (interdependency) মাত্রা** — অর্থাৎ একটি module কতটা অন্য module এর internal details জানে বা নির্ভর করে। Low coupling মানে module গুলো একে অপরের থেকে যতটা সম্ভব স্বাধীন।
 
-But loose coupling has a cost: asynchronous event delivery may fail, arrive twice, or be delayed। Design must include retry, idempotency, and monitoring. “Loose” does not mean “free.”
+**Coupling এর Types (সবচেয়ে খারাপ থেকে সবচেয়ে ভালো ক্রমে):**
 
----
+**১. Content Coupling (সবচেয়ে খারাপ)**
+একটি module সরাসরি অন্য module এর **internal data বা code modify** করে, encapsulation সম্পূর্ণভাবে ভেঙে। যেমন: একটি module সরাসরি অন্য module এর private variable access করে পরিবর্তন করছে।
 
-## Coupling reduction techniques
+**২. Common Coupling**
+একাধিক module একটি **shared, global data** ব্যবহার করে। যেমন: একাধিক module একটি global variable বা shared database table এ সরাসরি read/write করছে, কোনো controlled interface ছাড়াই।
 
-### Depend on abstractions
+**৩. Control Coupling**
+একটি module অন্য module কে একটি **control flag/parameter** পাঠায়, যা receiving module এর internal logic/behavior নির্ধারণ করে। যেমন: একটি function এ `mode` parameter পাঠানো, যা অনুযায়ী function ভিন্ন ভিন্ন behavior করে।
 
-```text
-Checkout -> PaymentGateway interface <- StripeGateway
-                                     <- BankGateway
-```
+**৪. Stamp (Data-Structure) Coupling**
+Module গুলো একটি **সম্পূর্ণ data structure/object** share করে, যদিও receiving module হয়তো তার শুধু একটি অংশ ব্যবহার করে। যেমন: একটি সম্পূর্ণ `Customer` object পাঠানো, যদিও function এ শুধু customer এর নাম প্রয়োজন।
 
-Checkout knows `charge()` contract, not provider-specific API. This supports testing and provider swap, provided the abstraction represents a real stable need.
+**৫. Data Coupling (সবচেয়ে ভালো)**
+Module গুলো শুধু **প্রয়োজনীয় data (primitive value বা simple parameter)** exchange করে, কোনো internal structure বা control logic শেয়ার না করে। যেমন: `calculateDiscount(price, discountRate)` — শুধু প্রয়োজনীয় value গুলোই pass করা হচ্ছে।
 
-### Dependency injection
-
-Dependency injection gives a module what it needs from outside, instead of constructing hidden dependency internally.
-
-```text
-Hidden dependency:
-OrderService creates its own EmailClient
-
-Explicit dependency:
-OrderService receives a Notifier interface
-```
-
-This makes dependency visible and allows a test double in unit tests। DI alone good architecture guarantee করে না; an injected object can still have a bad boundary.
-
-### Stable contracts
-
-Avoid exposing database schema as an integration contract. Prefer versioned API, message schema, or module interface। Add fields in backward-compatible way; plan deprecation before removal।
+**৬. Message Coupling (সবচেয়ে loose)**
+Module গুলো একে অপরের সাথে সরাসরি কোনো data/reference শেয়ার না করে, শুধু **message/event** এর মাধ্যমে communicate করে (যেমন Event-Driven Architecture এ)। এটি সবচেয়ে কম coupling প্রদান করে।
 
 ---
 
-## Module boundaries and microservices
+### Why is data coupling generally preferred over content or common coupling?
 
-Service boundary should follow business capability and ownership, not just tables or technical layers।
-
-Weak split:
-
-```text
-UserService owns user_table
-AddressService owns address_table
-PhoneService owns phone_table
-```
-
-Every checkout may need three network calls. Better domain boundary may be `Customer Profile` if those data change together. Conversely Payment often deserves clear separate boundary because security, provider integration, and compliance differ.
-
-### A practical boundary test
-
-Ask:
-
-- Do these responsibilities change for the same business reason?
-- Can one team own and deploy this area independently?
-- Does it need its own data consistency rule?
-- Is communication through a small meaningful contract possible?
-- Are we splitting only because “microservices” sounds modern?
+- **Encapsulation বজায় থাকে** — Data Coupling এ module গুলো একে অপরের internal implementation সম্পর্কে কিছুই জানে না, শুধু প্রয়োজনীয় data exchange করে। Content Coupling এ এই encapsulation সম্পূর্ণভাবে ভেঙে যায়, যা design এর সবচেয়ে মৌলিক নীতি লঙ্ঘন করে
+- **Independent Change সম্ভব হয়** — Data Coupling এ একটি module এর internal implementation পরিবর্তন করলে, যতক্ষণ interface (parameter/return type) একই থাকে, অন্য module প্রভাবিত হয় না। Common Coupling এ shared global data এর structure change করলে, যেসব module সেই data ব্যবহার করে, তাদের সবাইকেই প্রভাবিত হতে হয়
+- **Debugging সহজ হয়** — Data Coupling এ কোনো bug এর source খুঁজে বের করা সহজ, কারণ data flow স্পষ্ট এবং explicit (function parameter এর মাধ্যমে)। Common Coupling এ কোন module কখন shared data পরিবর্তন করলো, তা track করা কঠিন — কারণ যেকোনো module যেকোনো সময় সেটা change করতে পারে
+- **Testability বৃদ্ধি পায়** — Data Coupling এ module কে সহজে isolated ভাবে test করা যায় (শুধু input/output নিয়ন্ত্রণ করে), কিন্তু Content/Common Coupling এ পুরো shared state/context ছাড়া test করাই সম্ভব হয় না
+- **Concurrency/Thread-Safety সমস্যা কম হয়** — Common Coupling এ shared global data একাধিক module থেকে access হওয়ার কারণে race condition এর ঝুঁকি বেশি থাকে, যা Data Coupling এ থাকে না
 
 ---
 
-## Common mistakes
+## 36. What is the relationship between "high cohesion, low coupling" and good modular design?
 
-| Mistake | Why it hurts | Better direction |
-|---|---|---|
-| giant `Utils` module | coincidental cohesion | move functions to owning domain |
-| shared database for every service | content coupling | use service-owned data/API |
-| deep object graph passed everywhere | stamp coupling | define focused request/value object |
-| long parameter list of booleans | control coupling | use named options or separate command |
-| duplicate same business rule | drift and bugs | establish one owner for the rule |
+**"High Cohesion, Low Coupling"** হলো একটি foundational design principle, যা বলে একটি ভালো modular design এমন হওয়া উচিত যেখানে:
+- প্রতিটি module এর ভেতরে **High Cohesion** থাকবে — অর্থাৎ module এর সব অংশ একটি single, well-defined purpose এর দিকে কাজ করবে
+- Module গুলোর মধ্যে **Low Coupling** থাকবে — অর্থাৎ module গুলো একে অপরের উপর যতটা সম্ভব কম নির্ভরশীল থাকবে, শুধু প্রয়োজনীয় interface এর মাধ্যমে communicate করবে
 
-## Interview-ready explanation
+**এই দুটো কেন একসাথে গুরুত্বপূর্ণ:**
 
-**High cohesion, low coupling** means each module focuses on a closely related responsibility while exposing minimal, stable dependencies to others. Example: a Payment module owns charging and refunds, while Order module asks it through a clear contract instead of updating payment data directly. This makes changes, tests, and parallel development safer.
+- High Cohesion নিশ্চিত করে যে প্রতিটি module **নিজে নিজে অর্থবহ এবং সুসংগঠিত** — অর্থাৎ একটি module একটি কাজ ভালোভাবে করে
+- Low Coupling নিশ্চিত করে যে সেই module গুলো **একে অপরের থেকে স্বাধীন** — একটি module এ change করলে অন্যগুলো কম প্রভাবিত হয়
+- এই দুটো একসাথে হলে system টি হয়ে ওঠে **সহজে বোধগম্য (understandable), test করার যোগ্য (testable), পরিবর্তনযোগ্য (modifiable), এবং পুনঃব্যবহারযোগ্য (reusable)**
+- যদি শুধু High Cohesion থাকে কিন্তু High Coupling ও থাকে, তাহলে module গুলো individually ভালো হলেও, তাদের মধ্যে dependency বেশি থাকার কারণে system টি overall rigid এবং fragile হয়ে যায়
+- যদি শুধু Low Coupling থাকে কিন্তু Low Cohesion ও থাকে (module গুলো একে অপরের থেকে স্বাধীন, কিন্তু প্রতিটি module নিজেই বিশৃঙ্খল/অসংগঠিত), তাহলে প্রতিটি module কে আলাদাভাবে বোঝা এবং maintain করাই কঠিন হয়ে যায়
 
-Remember: a class with only one tiny method is not automatically high cohesion, and a system with no dependencies is not realistic. Good modularity is about meaningful boundaries and controlled collaboration.
+---
+
+### How does this principle relate to concepts like microservice boundaries or class responsibilities in OOP?
+
+**Microservice Boundaries এর ক্ষেত্রে:**
+
+- একটি ভালো microservice এর **High Cohesion** থাকা উচিত — অর্থাৎ সেই service একটি নির্দিষ্ট **business capability** (যেমন "Order Management" বা "Payment Processing") এর সাথে সম্পর্কিত সব functionality একসাথে রাখবে, ভিন্ন domain এর logic মিশিয়ে ফেলবে না
+- Services গুলোর মধ্যে **Low Coupling** থাকা উচিত — অর্থাৎ একটি service এর internal database schema বা implementation পরিবর্তন করলে, অন্য service কে redeploy করার প্রয়োজন হওয়া উচিত না। এই কারণেই microservices এ services গুলো সাধারণত **well-defined API** এর মাধ্যমে communicate করে, এবং প্রতিটি service তার **নিজস্ব database** রাখে (shared database এড়িয়ে, যা Common Coupling তৈরি করত)
+- Domain-Driven Design (DDD) এর **Bounded Context** concept টা মূলত High Cohesion, Low Coupling কে microservice architecture এ প্রয়োগ করার একটি formal approach — প্রতিটি bounded context একটি সুসংগত (cohesive) business domain represent করে, এবং context গুলোর মধ্যে সীমিত, well-defined interaction থাকে
+
+**OOP এর Class Responsibilities এর ক্ষেত্রে:**
+
+- **Single Responsibility Principle (SRP)** মূলত High Cohesion কেই বোঝায় OOP প্রেক্ষাপটে — একটি class এর শুধু **একটি কারণে change হওয়া উচিত**, অর্থাৎ class টির সব method/attribute একটি single, well-defined responsibility এর দিকে focused থাকবে
+- **Dependency Injection, Interface-based Programming, এবং Design Patterns** (যেমন Strategy, Observer) মূলত Low Coupling অর্জনের কৌশল — class গুলো concrete implementation এর বদলে abstraction/interface এর উপর নির্ভর করে, যাতে একটি class পরিবর্তন করলে অন্য class প্রভাবিত না হয়
+- একটি ভালো OOP design এ, একটি class এর method গুলো একে অপরের সাথে সম্পর্কিত থাকবে এবং class এর attribute গুলো ব্যবহার করবে (High Cohesion), কিন্তু class টি অন্য class এর internal details সম্পর্কে যতটা সম্ভব কম জানবে, শুধু public interface এর মাধ্যমে interact করবে (Low Coupling)
+
+**সংক্ষেপে:** "High Cohesion, Low Coupling" একটি **universal design principle**, যা module, class, function, বা microservice — যেকোনো granularity level এই সমানভাবে প্রযোজ্য। এটি ভালো software architecture এবং design এর একটি **মৌলিক ভিত্তি**, যা system কে maintainable, testable, scalable, এবং understandable রাখতে সাহায্য করে।
