@@ -395,17 +395,33 @@ int evaluatePostfix(string expr) {
     string token;
 
     while (ss >> token) {
-        if (isdigit(token[0])) {
-            st.push(stoi(token));
-        } else {
+        size_t parsed = 0;
+        try {
+            int value = stoi(token, &parsed);
+            if (parsed == token.size()) {
+                st.push(value); // negative এবং multi-digit operand-ও handle হয়
+                continue;
+            }
+        } catch (const exception&) {
+            // Operator হিসেবে নিচে validate হবে।
+        }
+
+        if (token == "+" || token == "-" || token == "*" || token == "/") {
+            if (st.size() < 2) throw invalid_argument("Malformed postfix expression");
             int b = st.top(); st.pop();
             int a = st.top(); st.pop();
             if (token == "+") st.push(a + b);
             else if (token == "-") st.push(a - b);
             else if (token == "*") st.push(a * b);
-            else if (token == "/") st.push(a / b);
+            else {
+                if (b == 0) throw domain_error("Division by zero");
+                st.push(a / b);
+            }
+        } else {
+            throw invalid_argument("Unknown token: " + token);
         }
     }
+    if (st.size() != 1) throw invalid_argument("Malformed postfix expression");
     return st.top();
 }
 
@@ -770,7 +786,7 @@ After another pop, minimum: 3
 
 উপরের implementation এ আমরা প্রতিটি push এ min stack এও একটা value push করছি (হয় নতুন minimum, নাহয় পুরনো minimum এর duplicate) — এতে **push/pop সবসময় synchronized** থাকে, তাই কোনো বিশেষ handling লাগে না।
 
-**Memory-optimized alternative**: যদি min stack এ শুধু strictly নতুন minimum push করা হয় (`x < minStack.top()` হলেই push, `<=` না), তাহলে pop করার সময় check করতে হবে — যদি pop হওয়া element `mainStack` এর top এবং `minStack` এর top একই হয়, তাহলে `minStack` থেকেও pop করতে হবে, নাহলে শুধু `mainStack` থেকে pop করলেই যথেষ্ট:
+**Memory-optimized alternative**: min stack-এ নতুন value বর্তমান minimum-এর চেয়ে **ছোট বা সমান** হলে push করতে হবে (`x <= minStack.top()`)। Pop-এর সময় removed value minimum-এর সমান হলে min stack থেকেও pop করতে হবে:
 
 ```cpp
 void pop() {
@@ -781,7 +797,7 @@ void pop() {
     }
 }
 ```
-এই approach এ duplicate value (একই value একাধিকবার push হলে) সঠিকভাবে handle হয়, কারণ আমরা **value** compare করছি, শুধু presence না।
+`<=` গুরুত্বপূর্ণ: duplicate minimum-ও আলাদাভাবে push না করলে প্রথম duplicate pop করার সময় minimum state ভুল হয়ে যাবে।
 
 ---
 

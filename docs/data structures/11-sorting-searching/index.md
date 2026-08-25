@@ -261,7 +261,7 @@ Good pivot strategies:
 - shuffle array before sorting
 - introsort: recursion depth বেশি হলে heap sort এ switch করে
 
-C++ `std::sort` সাধারণত introsort ব্যবহার করে, তাই practical worst-case protection থাকে।
+C++ `std::sort` implementations সাধারণত introsort ব্যবহার করে; standard algorithm নির্দিষ্ট করে না, তবে C++11 থেকে worst-case `O(n log n)` comparison guarantee করে।
 
 Randomized quicksort:
 

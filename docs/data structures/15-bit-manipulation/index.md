@@ -1,5 +1,5 @@
 ---
-sidebar_position: 15
+sidebar_position: 16
 title: 'Bit Manipulation'
 ---
 
@@ -124,6 +124,8 @@ C++ এ signed integer এর ক্ষেত্রে `~n` negative result দ�
 
 `n << k` roughly means `n * 2^k`।
 `n >> k` roughly means `n / 2^k` for non-negative integers।
+
+> **C++ safety:** Signed negative value shift, type-width-এর সমান/বেশি shift count, অথবা representable range ছাড়িয়ে signed left shift এড়িয়ে চলতে হবে। Bit manipulation-এর জন্য সাধারণত unsigned type (`uint32_t`/`uint64_t`) ব্যবহার করা সবচেয়ে predictable।
 
 ```cpp
 #include <bits/stdc++.h>

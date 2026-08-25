@@ -50,25 +50,27 @@ using namespace std;
 int main() {
     string s = "hello";
 
-    // Memory তে contiguous storage এর প্রমাণ: address গুলো sequential
-    cout << "Characters and their memory addresses:" << endl;
-    for (int i = 0; i < s.length(); i++) {
+    // Absolute address run ভেদে বদলায়, তাই deterministic byte offset দেখানো হচ্ছে।
+    cout << "Characters and byte offsets:" << endl;
+    for (size_t i = 0; i < s.length(); i++) {
         cout << "s[" << i << "] = '" << s[i]
-             << "'  address: " << (void*)&s[i] << endl;
+             << "'  offset: " << (&s[i] - &s[0]) << endl;
     }
     return 0;
 }
 ```
 
 ```
-Characters and their memory addresses:
-s[0] = 'h'  address: 0x55d3a2b1eeb0
-s[1] = 'e'  address: 0x55d3a2b1eeb1
-s[2] = 'l'  address: 0x55d3a2b1eeb2
-s[3] = 'l'  address: 0x55d3a2b1eeb3
-s[4] = 'o'  address: 0x55d3a2b1eeb4
+Characters and byte offsets:
+s[0] = 'h'  offset: 0
+s[1] = 'e'  offset: 1
+s[2] = 'l'  offset: 2
+s[3] = 'l'  offset: 3
+s[4] = 'o'  offset: 4
 ```
 (লক্ষ্য করুন প্রতিটি address আগেরটার থেকে ঠিক 1 বেশি — এটাই **contiguous storage** এর প্রমাণ, ফলে index দিয়ে `O(1)` access সম্ভব হয়)
+
+> **Implementation note:** ছোট `std::string` implementation-এর Small String Optimization (SSO) ব্যবহার করে character object-এর ভেতরেই রাখতে পারে; বড় string সাধারণত dynamic buffer ব্যবহার করে। দুক্ষেত্রেই C++11 থেকে characters contiguous থাকার guarantee আছে।
 
 ---
 
@@ -166,7 +168,6 @@ Immutable string হলে total copy:
 ```cpp
 #include <bits/stdc++.h>
 using namespace std;
-#include <chrono>
 
 int main() {
     int n = 50000;
@@ -211,7 +212,6 @@ With reserve(n):
 ```cpp
 #include <bits/stdc++.h>
 using namespace std;
-#include <chrono>
 
 int main() {
     int n = 1000000;
@@ -614,6 +614,10 @@ vector<int> computeLPS(string pattern) {
 
 void KMPSearch(string text, string pattern) {
     int n = text.length(), m = pattern.length();
+    if (pattern.empty()) {
+        cout << "Empty pattern matches at index 0" << endl;
+        return;
+    }
     vector<int> lps = computeLPS(pattern);
 
     int i = 0, j = 0;
@@ -684,6 +688,11 @@ using namespace std;
 
 void rabinKarp(string text, string pattern) {
     int n = text.length(), m = pattern.length();
+    if (m == 0) {
+        cout << "Empty pattern matches at index 0" << endl;
+        return;
+    }
+    if (m > n) return;
     int base = 256, mod = 101;   // hashing parameters
 
     int patternHash = 0, windowHash = 0, h = 1;
@@ -785,7 +794,12 @@ vector<int> computeZ(string s) {
 }
 
 void zSearch(string text, string pattern) {
-    string combined = pattern + "$" + text;
+    if (pattern.empty()) {
+        cout << "Empty pattern matches at index 0" << endl;
+        return;
+    }
+    char separator = '\1'; // production-এ input-এ নেই এমন delimiter বেছে নিতে হবে
+    string combined = pattern + separator + text;
     vector<int> z = computeZ(combined);
     int patternLen = pattern.length();
 

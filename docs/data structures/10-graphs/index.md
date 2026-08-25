@@ -238,6 +238,8 @@ adj[0].push_back({2, 2}); // 0 -> 2, weight 2
 | **"নিকটতম" node নির্ধারণ** | edge সংখ্যা (level) দিয়ে নির্ধারিত হয় | সঞ্চিত **total weight/cost** দিয়ে নির্ধারিত হয় |
 | **MST (Minimum Spanning Tree)** | প্রযোজ্য নয় (সব edge সমান হলে MST-এর কোনো মানে থাকে না) | **Prim's** বা **Kruskal's Algorithm** ব্যবহার করে ন্যূনতম total weight-এর spanning tree বের করা হয় |
 
+> **MST precision:** Unweighted graph-কেও সব edge-এর weight `1` ধরে MST define করা যায়। তখন connected graph-এর যেকোনো spanning tree-এর total weight `V-1`, তাই optimizationটি trivial হলেও MST “প্রযোজ্য নয়” নয়।
+
 ### What is a multigraph, and where might it appear in real systems?
 **Multigraph** হলো এমন একটি graph, যেখানে **দুইটি নির্দিষ্ট vertex-এর মধ্যে একাধিক (multiple) edge** থাকতে পারে। সাধারণ (simple) graph-এ দুই vertex-এর মধ্যে সর্বোচ্চ **একটি** edge থাকে, কিন্তু multigraph-এ এই নিয়ম শিথিল।
 
@@ -425,6 +427,8 @@ vector<vector<int>> findConnectedComponents(vector<list<int>>& adjList, int n) {
     return allComponents;
 }
 ```
+
+এই implementation undirected graph-এর connected components-এর জন্য। Directed graph-এ direction ignore করে weak components, অথবা Tarjan/Kosaraju দিয়ে strongly connected components আলাদাভাবে বের করতে হয়।
 
 ```
 Component 1:  0 - 1     Component 2:  3 - 4     Component 3: 5
@@ -618,27 +622,26 @@ A -> B -> C
 **DFS-based topological sort:** DFS complete হওয়ার পর node stack/result এ add করি। শেষে reverse করলে topological order পাওয়া যায়।
 
 ```cpp
-void topoDfs(int u, vector<vector<int>>& adj, vector<bool>& visited, vector<int>& order) {
-    visited[u] = true;
+bool topoDfs(int u, vector<vector<int>>& adj, vector<int>& color, vector<int>& order) {
+    color[u] = 1; // gray: current recursion path
 
     for (int v : adj[u]) {
-        if (!visited[v]) {
-            topoDfs(v, adj, visited, order);
-        }
+        if (color[v] == 1) return false;
+        if (color[v] == 0 && !topoDfs(v, adj, color, order)) return false;
     }
 
+    color[u] = 2;
     order.push_back(u);
+    return true;
 }
 
 vector<int> topologicalSortDFS(vector<vector<int>>& adj) {
     int n = adj.size();
-    vector<bool> visited(n, false);
+    vector<int> color(n, 0);
     vector<int> order;
 
     for (int i = 0; i < n; i++) {
-        if (!visited[i]) {
-            topoDfs(i, adj, visited, order);
-        }
+        if (color[i] == 0 && !topoDfs(i, adj, color, order)) return {};
     }
 
     reverse(order.begin(), order.end());
@@ -760,6 +763,8 @@ vector<int> dijkstra(int source, vector<vector<pair<int, int>>>& adj) {
     return dist;
 }
 ```
+
+Production code-এ source/vertex bounds validate করা, negative weight reject করা এবং large path sum-এর জন্য `long long` distance ব্যবহার করা উচিত। উপরের lazy priority-queue variant কোনো node-কে permanent `visited` করে না বলে কিছু negative-edge input-এ distance পুনরায় update করতে পারে, কিন্তু Dijkstra-এর correctness/time guarantee negative weight-এর জন্য প্রযোজ্য নয়; reachable negative cycle-এ এটি terminate-ও নাও করতে পারে।
 
 Dijkstra negative edge এ fail করতে পারে, কারণ একবার কোনো node কে shortest ধরে finalize করলে পরে negative edge দিয়ে তার distance আরও কমে যেতে পারে।
 
@@ -906,11 +911,13 @@ using namespace std;
 
 int primMST(vector<vector<pair<int, int>>>& adj) {
     int n = adj.size();
+    if (n == 0) return 0;
     vector<bool> used(n, false);
     priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
 
     pq.push({0, 0}); // {cost, node}
     int totalCost = 0;
+    int visitedCount = 0;
 
     while (!pq.empty()) {
         auto [cost, u] = pq.top();
@@ -919,6 +926,7 @@ int primMST(vector<vector<pair<int, int>>>& adj) {
         if (used[u]) continue;
 
         used[u] = true;
+        visitedCount++;
         totalCost += cost;
 
         for (auto [v, weight] : adj[u]) {
@@ -928,7 +936,7 @@ int primMST(vector<vector<pair<int, int>>>& adj) {
         }
     }
 
-    return totalCost;
+    return visitedCount == n ? totalCost : -1; // disconnected হলে MST নেই
 }
 ```
 
@@ -1196,6 +1204,10 @@ public:
     vector<vector<int>> findSCC(vector<vector<int>>& graph) {
         adj = graph;
         int n = adj.size();
+
+        components.clear();
+        timer = 0;
+        st = stack<int>();
 
         disc.assign(n, -1);
         low.assign(n, -1);

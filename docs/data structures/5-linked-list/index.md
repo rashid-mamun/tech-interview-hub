@@ -118,6 +118,8 @@ head -> 10 -> 20 -> 30
 - Array এর শুরুতে/মাঝে insert/delete করতে elements shift করতে হয় — `O(n)`
 - Linked list এ যদি position (node reference) জানা থাকে, insert/delete `O(1)` এ হয় (শুধু pointer redirect করলেই হয়)
 
+> **Singly-list precision:** Insert-এর জন্য target position-এর আগের node জানা থাকলে `O(1)`। কিন্তু singly linked list-এ arbitrary node delete করতে সাধারণত তার predecessor দরকার; শুধু node reference থাকলে predecessor খুঁজতে `O(n)` লাগতে পারে। Doubly linked list-এ `prev` pointer থাকায় known node delete সত্যিই `O(1)`।
+
 **Cache Performance:**
 - Array এর contiguous memory এর কারণে **cache locality** ভালো (sequential access দ্রুত হয়)
 - Linked list এর scattered memory এর কারণে cache miss বেশি হয়, যা practical performance এ array কে প্রায়ই দ্রুত করে তোলে, যদিও theoretical complexity ভালো না হতে পারে
@@ -309,6 +311,7 @@ struct Node {
 };
 
 Node* reverseKGroup(Node* head, int k) {
+    if (k <= 1 || head == nullptr) return head;
     // প্রথমে check করা এই group এ k টা node আছে কিনা
     Node* node = head;
     int count = 0;
@@ -886,6 +889,8 @@ Merged k lists: 1 -> 1 -> 2 -> 3 -> 4 -> 4 -> 5 -> 6
 **Space Complexity**: `O(k)` (heap এ সর্বোচ্চ `k` টা node থাকে একসাথে)
 
 (তুলনায়, যদি একটার পর একটা list কে pairwise merge করা হতো (section এর প্রথম approach বারবার ব্যবহার করে), সেটা `O(N × k)` সময় নিত — heap approach অনেক বেশি efficient বড় `k` এর জন্য।)
+
+> **Alternative:** Lists-কে balanced divide-and-conquer pairs-এ merge করলে heap ছাড়াও `O(N log k)` time এবং `O(log k)` recursion space পাওয়া যায়। `O(N × k)` bound মূলত sequentially growing result-এর সঙ্গে একটির পর একটি list merge করার loose worst-case।
 
 ---
 
