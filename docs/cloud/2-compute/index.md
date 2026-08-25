@@ -1,12 +1,18 @@
-﻿---
+---
 sidebar_position: 2
 title: Compute
 ---
 
-
-
-
 ## 7. What is the difference between a virtual machine and a container?
+
+```mermaid
+flowchart TB
+    HW[Physical host] --> Hypervisor --> VM1[VM plus guest OS]
+    Hypervisor --> VM2[VM plus guest OS]
+    HW --> HostOS[Host OS and shared kernel]
+    HostOS --> C1[Container]
+    HostOS --> C2[Container]
+```
 
 **Virtual Machine (VM):** একটি VM হলো একটি ফিজিক্যাল সার্ভারের উপর **hypervisor** ব্যবহার করে তৈরি করা সম্পূর্ণ ভার্চুয়াল কম্পিউটার। প্রতিটি VM-এর নিজস্ব সম্পূর্ণ **guest operating system (OS)** থাকে, যেটা host OS থেকে সম্পূর্ণ আলাদা এবং independent। এর ফলে VM গুলো heavier হয় (কয়েক GB সাইজ), বুট হতে বেশি সময় লাগে (মিনিট), কিন্তু strong isolation দেয় কারণ প্রতিটি VM আলাদা kernel চালায়।
 
@@ -37,15 +43,24 @@ Instance type select করার আগে সাধারণত এই factor 
 
 ## 8. What is the difference between spot/preemptible instances and reserved/savings-plan instances?
 
+```mermaid
+flowchart TD
+    Job[Compute workload] --> Interrupt{Can it tolerate interruption?}
+    Interrupt -->|yes| Spot[Spot or preemptible]
+    Interrupt -->|no| Stable[On-demand capacity]
+    Stable --> Predict{Predictable long-term usage?}
+    Predict -->|yes| Commit[Reserved pricing or savings plan]
+```
+
 **Spot/Preemptible Instance:** এগুলো cloud provider-এর unused/spare capacity থেকে অনেক কম দামে (up to 70-90% discount) পাওয়া যায়। কিন্তু provider-এর যখন সেই capacity দরকার হয়, তখন সেই instance **যেকোনো সময় terminate/preempt** করে দিতে পারে, সাধারণত অল্প নোটিশ (যেমন AWS-এ ২ মিনিট) দিয়ে। এগুলো unpredictable availability-র কারণে **fault-tolerant, stateless, বা interruptible workload**-এর জন্য উপযুক্ত — যেমন batch processing, CI/CD job, big data analytics।
 
-**Reserved Instance / Savings Plan:** এখানে আপনি একটা নির্দিষ্ট সময়ের জন্য (সাধারণত ১ বা ৩ বছর) compute usage-এর commitment দেন, বিনিময়ে on-demand price থেকে discount (২০-৭২%) পান। Instance টা **guaranteed availability** দেয়, কোনো interruption হয় না। এটা **steady-state, predictable, long-running workload**-এর জন্য ভালো — যেমন production database, core backend service।
+**Reserved Instance / Savings Plan:** এখানে আপনি একটা নির্দিষ্ট সময়ের জন্য (সাধারণত ১ বা ৩ বছর) compute usage-এর commitment দেন, বিনিময়ে on-demand price থেকে discount পান। এগুলো মূলত **pricing commitment**; সাধারণত capacity guarantee করে না। Capacity নিশ্চিত করতে provider-এর আলাদা capacity-reservation feature লাগতে পারে। এটা steady-state, predictable workload-এর জন্য ভালো।
 
 **সংক্ষেপে:**
 | বিষয় | Spot Instance | Reserved/Savings Plan |
 |---|---|---|
 | Cost | সবচেয়ে সস্তা | মাঝারি discount |
-| Availability | Unpredictable, interruptible | Guaranteed |
+| Availability | Unpredictable, interruptible | Pricing commitment নিজে capacity guarantee নয় |
 | Commitment | নেই | ১-৩ বছরের commitment |
 | উপযুক্ত workload | Stateless, fault-tolerant, batch | Steady-state, critical, long-term |
 
@@ -62,6 +77,17 @@ Spot interruption handle করার জন্য সাধারণত নি�
 - **Load balancer থেকে drain করা:** Terminate হওয়ার আগে instance-কে load balancer থেকে সরিয়ে নেওয়া (connection draining), যাতে চলমান request গুলো ঠিকভাবে শেষ হয়।
 
 ## 9. What is serverless compute (Lambda, Cloud Functions)?
+
+```mermaid
+sequenceDiagram
+    participant E as Event source
+    participant P as Serverless platform
+    participant F as Function instance
+    E->>P: Event or request
+    P->>F: Create or reuse execution environment
+    F-->>P: Result
+    P-->>E: Response or acknowledgement
+```
 
 **Serverless compute** হলো এমন একটি execution model যেখানে developer কে কোনো server provision, manage, বা scale করতে হয় না — শুধু code লিখে deploy করলেই cloud provider automatically সবকিছু handle করে। এখানে আপনি শুধু আপনার **function/code** লেখেন (যেমন AWS Lambda, Google Cloud Functions, Azure Functions), এবং সেটা কোনো event (HTTP request, database change, file upload, message queue) দ্বারা **trigger** হয়ে execute হয়।
 
@@ -97,6 +123,13 @@ Cold start কমানোর উপায়:
 ---
 
 ## 10. What is edge computing, and why does it reduce latency?
+
+```mermaid
+flowchart LR
+    User --> Edge[Nearby edge location]
+    Edge -->|cached content or local logic| User
+    Edge -->|only necessary request| Origin[Distant origin region]
+```
 
 **Edge computing** হলো এমন একটি computing paradigm যেখানে data processing এবং computation কেন্দ্রীয় (centralized) data center-এর পরিবর্তে **data source-এর কাছাকাছি** — অর্থাৎ "edge"-এ (যেমন local server, IoT device, বা user-এর কাছাকাছি অবস্থিত mini data center) সম্পন্ন করা হয়।
 

@@ -57,6 +57,8 @@ slowest
 
 সহজভাবে বললে: **O = worst case, Ω = best case, Θ = average/exact bound (both upper and lower)।**
 
+> **Precision note:** `O`, `Ω`, এবং `Θ` যথাক্রমে asymptotic upper, lower, এবং tight bound; এগুলো নিজেরা worst, best, বা average case বোঝায় না। Best/average/worst হলো কোন input-case analyze করা হচ্ছে, আর notation হলো সেই case-এর growth bound। যেমন linear search-এর worst-case runtime `Θ(n)`, কিন্তু সেটি একই সঙ্গে `O(n²)`-ও—যদিও `O(n²)` tight নয়।
+
 Practical world এ আমরা প্রায়ই "Big-O" বলি কিন্তু আসলে "Big-Theta" বোঝাই, কারণ industry তে সাধারণত tight bound নিয়েই আলোচনা হয়।
 
 **Bound diagram:**
@@ -144,6 +146,8 @@ for (int i = 0; i < n; i++) {
 এখানে complexity হবে `O(n log n)`।
 
 **মূল কথা:** নেস্টেড লুপে প্রতিটি লেভেলের iteration count বের করে সেগুলো multiply করলেই মূল complexity পাওয়া যায়।
+
+> **Precision note:** শুধু independent loop bound হলে iteration count সরাসরি multiply করা যায়। Inner bound যদি outer variable-এর উপর নির্ভর করে, তাহলে summation দিয়ে মোট iteration হিসাব করতে হয়—যেমন triangular loop-এ `Σi = n(n-1)/2`।
 
 ---
 
@@ -525,3 +529,61 @@ Space complexity এখানে `O(n)` — memo dictionary store করার �
 | Memoized | `O(n)` | `O(n)` |
 
 এটা দেখায় যে **memoization** (একটা classic **time-space tradeoff** technique) কীভাবে exponential time কে linear time এ নামিয়ে আনতে পারে, সামান্য extra space এর বিনিময়ে।
+
+## 🧪 Complete complexity demonstration
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    const int n = 5;
+    int constantOperations = 0, linearOperations = 0, quadraticOperations = 0;
+    ++constantOperations;
+    for (int i = 0; i < n; ++i) ++linearOperations;
+    for (int i = 0; i < n; ++i)
+        for (int j = 0; j < n; ++j) ++quadraticOperations;
+
+    cout << "O(1) operations: " << constantOperations << '\n';
+    cout << "O(n) operations: " << linearOperations << '\n';
+    cout << "O(n^2) operations: " << quadraticOperations << '\n';
+    return 0;
+}
+```
+
+**Sample output**
+
+```text
+O(1) operations: 1
+O(n) operations: 5
+O(n^2) operations: 25
+```
+
+### Growth-rate diagram
+
+```text
+Operations
+   ▲                         O(2ⁿ)
+   │                    O(n²)
+   │                O(n log n)
+   │             O(n)
+   │        O(log n)
+   │  O(1)
+   └──────────────────────────────► input size n
+```
+
+### Recursive-space diagram
+
+```text
+┌──────────────┐
+│ recursive(0) │ ← base case
+├──────────────┤
+│ recursive(1) │
+├──────────────┤
+│ recursive(2) │
+├──────────────┤
+│ recursive(3) │
+└──────────────┘
+
+n active frames → O(n) auxiliary space
+```

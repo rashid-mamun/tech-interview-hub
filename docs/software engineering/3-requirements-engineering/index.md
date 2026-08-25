@@ -5,6 +5,15 @@ title: 'Requirements Engineering'
 
 ## 15. What is requirements engineering, and what are its main activities?
 
+```mermaid
+flowchart LR
+    Elicit[Elicitation] --> Analyze[Analysis and negotiation]
+    Analyze --> Specify[Specification]
+    Specify --> Validate[Validation]
+    Validate --> Manage[Change and traceability management]
+    Manage -. feedback .-> Elicit
+```
+
 **Requirements Engineering (RE)** হলো একটি systematic process, যার মাধ্যমে একটি software system এর **requirements** identify, analyze, document, validate, এবং manage করা হয়। এটি SDLC এর একদম শুরুর দিকের এবং সবচেয়ে গুরুত্বপূর্ণ activity, কারণ ভুল বা অসম্পূর্ণ requirement পুরো project কে ব্যর্থ করে দিতে পারে।
 
 **Main Activities:**
@@ -32,6 +41,16 @@ title: 'Requirements Engineering'
 ---
 
 ## 16. What are common techniques for requirements elicitation?
+
+```mermaid
+flowchart TB
+    Stakeholders --> Interviews
+    Stakeholders --> Workshops
+    Users --> Observation
+    Existing[Existing system and documents] --> Analysis
+    Ideas[Uncertain product idea] --> Prototype
+    Interviews & Workshops & Observation & Analysis & Prototype --> Candidate[Candidate requirements]
+```
 
 - **Interviews** — client/stakeholder দের সাথে সরাসরি (এক-এক করে বা group এ) কথা বলে requirement জানা
 - **Questionnaires/Surveys** — বড় সংখ্যক user এর কাছ থেকে structured প্রশ্নের মাধ্যমে তথ্য সংগ্রহ
@@ -74,6 +93,13 @@ title: 'Requirements Engineering'
 
 ## 17. What is the difference between functional requirements, non-functional requirements, and domain requirements?
 
+```mermaid
+flowchart TD
+    Need[Online order system] --> Functional[Functional: place and cancel order]
+    Need --> Quality[Non-functional: p95 response under 2 seconds]
+    Need --> Domain[Domain: tax and retention rules]
+```
+
 | Type | সংজ্ঞা |
 |---|---|
 | **Functional Requirements** | System টি **কী কী কাজ করবে** তার বর্ণনা — specific features, functions, বা behaviors |
@@ -107,6 +133,15 @@ title: 'Requirements Engineering'
 
 ## 18. What is a requirements specification document (SRS), and why is it important?
 
+```mermaid
+flowchart LR
+    Need[Stakeholder need] --> SRS[SRS: functional, quality and constraint requirements]
+    SRS --> Design
+    SRS --> Development
+    SRS --> Testing
+    SRS --> Acceptance[Customer acceptance]
+```
+
 **SRS** হলো একটি formal document, যা একটি software system এর সব **functional এবং non-functional requirement** কে বিস্তারিতভাবে, structured আকারে বর্ণনা করে। এটি client, developer, tester, এবং project manager — সবার জন্য একটি **single source of truth** হিসেবে কাজ করে।
 
 **কেন গুরুত্বপূর্ণ:**
@@ -118,7 +153,9 @@ title: 'Requirements Engineering'
 
 ---
 
-### According to standards like IEEE 830, what characteristics should a good SRS have (e.g., unambiguous, complete, consistent, verifiable, traceable)?
+### According to requirements standards, what characteristics should a good SRS have?
+
+IEEE 830 ঐতিহাসিকভাবে বহুল উদ্ধৃত হলেও এটি superseded; modern reference হিসেবে ISO/IEC/IEEE 29148 ব্যবহৃত হয়। নিচের quality characteristics এখনও practical review checklist হিসেবে উপযোগী:
 
 - **Correct** — SRS এ লেখা প্রতিটি requirement actual system need এর সাথে সঠিকভাবে মিলতে হবে
 - **Unambiguous** — প্রতিটি requirement এর **একটিমাত্র interpretation** থাকতে হবে, কোনো দ্বিধা বা confusion থাকা যাবে না
@@ -147,6 +184,16 @@ title: 'Requirements Engineering'
 
 
 ## 19. What is a Requirements Traceability Matrix (RTM), and what purpose does it serve?
+
+```mermaid
+flowchart LR
+    Stakeholder[Stakeholder need] --> Req[REQ-001]
+    Req --> Design[Design component]
+    Design --> Code[Implementation]
+    Req --> Test[TC-005 and TC-006]
+    Test --> Evidence[Test result]
+    Evidence --> Release[Release decision]
+```
 
 **Requirements Traceability Matrix (RTM)** হলো একটি document (সাধারণত table আকারে), যা প্রতিটি requirement কে তার **origin** থেকে শুরু করে **design, development, এবং testing** পর্যন্ত পুরো journey জুড়ে **link/map** করে রাখে। এটি নিশ্চিত করে যে প্রতিটি requirement সঠিকভাবে implement এবং test হয়েছে, এবং কোনো requirement miss হয়ে যায়নি বা কোনো অপ্রয়োজনীয় feature (যা কোনো requirement থেকে আসেনি) তৈরি হয়নি।
 
@@ -183,6 +230,14 @@ title: 'Requirements Engineering'
 ---
 
 ## 20. How are requirements prioritized, and what techniques are commonly used (e.g., MoSCoW)?
+
+```mermaid
+flowchart TD
+    Candidates[Candidate requirements] --> Must[Must: release fails without it]
+    Candidates --> Should[Should: important, workaround exists]
+    Candidates --> Could[Could: lower-value option]
+    Candidates --> Wont[Won't this time: explicitly deferred]
+```
 
 Requirement prioritization প্রয়োজন হয় কারণ সাধারণত **সময়, বাজেট, এবং resource সীমিত থাকে**, তাই সবচেয়ে গুরুত্বপূর্ণ এবং high-value requirement গুলো আগে করা দরকার।
 
@@ -226,6 +281,14 @@ Agile team এ ব্যবহৃত হয়, যেখানে team member �
 ---
 
 ## 21. What is technical debt, and how does it typically accumulate over the SDLC?
+
+```mermaid
+flowchart LR
+    Shortcut[Short-term shortcut] --> Speed[Immediate delivery gain]
+    Shortcut --> Debt[Technical debt principal]
+    Debt --> Interest[Slower changes, defects and operational cost]
+    Interest --> Repay[Refactor, automate and redesign]
+```
 
 **Technical Debt** হলো একটি metaphor, যা বোঝায় যখন developer রা **দ্রুত, সহজ (কিন্তু সবসময় সেরা নয় এমন)** সমাধান বেছে নেন কোনো কাজ তাড়াতাড়ি শেষ করার জন্য, তার বদলে যদি তারা সময় নিয়ে সঠিক, দীর্ঘমেয়াদী, well-architected সমাধান বেছে নিতেন। ঠিক যেমন আর্থিক ঋণের ক্ষেত্রে **সুদ (interest)** জমতে থাকে, তেমনি Technical Debt ও সময়ের সাথে সাথে **maintenance cost, bug, এবং complexity** আকারে "সুদ" জমাতে থাকে, যদি সেটা পরিশোধ (refactor) না করা হয়।
 

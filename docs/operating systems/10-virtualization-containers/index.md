@@ -6,6 +6,13 @@ title: 'Virtualization & Containers'
 
 ## 🖥️ 42. What is virtualization, and what problem does it solve?
 
+```mermaid
+flowchart TB
+    HW[Physical hardware] --> H[Hypervisor]
+    H --> VM1[VM 1: guest OS and apps]
+    H --> VM2[VM 2: guest OS and apps]
+```
+
 এই chapter-এর context-এ **virtualization** হলো physical computer-এর CPU, memory, storage ও network resources abstract করে একাধিক isolated **virtual machine (VM)** তৈরি করার technique। Virtualization আরও broader concept—যেমন storage বা network virtualization—তবে এখানে মূল focus machine virtualization।
 
 প্রতিটি VM নিজেকে আলাদা computer মনে করে এবং নিজের guest operating system চালাতে পারে।
@@ -51,6 +58,16 @@ Hypervisor-এর কাজ:
 ---
 
 ## 🧱 43. What is the difference between a Type 1 and a Type 2 hypervisor?
+
+```mermaid
+flowchart TB
+    subgraph Type1
+        HW1[Hardware] --> H1[Bare-metal hypervisor] --> G1[Guest VMs]
+    end
+    subgraph Type2
+        HW2[Hardware] --> Host[Host OS] --> H2[Hosted hypervisor] --> G2[Guest VMs]
+    end
+```
 
 Hypervisor দুই ধরনের:
 
@@ -135,6 +152,16 @@ Hardware
 
 ## 📦 44. What is the difference between a virtual machine and a container?
 
+```mermaid
+flowchart TB
+    subgraph VM
+        VApp[Application] --> Guest[Guest OS] --> Hypervisor
+    end
+    subgraph Container
+        CApp[Application] --> Runtime[Container runtime] --> Kernel[Shared host kernel]
+    end
+```
+
 **Virtual Machine (VM)** hardware-level virtualization ব্যবহার করে। প্রতিটি VM-এর নিজস্ব guest OS kernel থাকে।
 
 **Container** OS-level virtualization ব্যবহার করে। Containers সাধারণত host OS kernel share করে, কিন্তু isolated user-space environment পায়।
@@ -202,6 +229,16 @@ Containers lightweight কারণ:
 ---
 
 ## 🔒 45. How do containers achieve isolation using Linux namespaces and cgroups?
+
+```mermaid
+flowchart LR
+    Process[Container process] --> N[Namespaces: isolated views]
+    Process --> C[cgroups: resource limits and accounting]
+    Process --> S[Capabilities and security controls]
+    N --> Kernel[Shared Linux kernel]
+    C --> Kernel
+    S --> Kernel
+```
 
 Linux container মূলত kernel features ব্যবহার করে:
 
@@ -320,6 +357,13 @@ Security hardening-এর জন্য often ব্যবহার হয়:
 ---
 
 ## ⚙️ 46. What is the difference between full virtualization, paravirtualization, and hardware-assisted virtualization?
+
+```mermaid
+flowchart TB
+    V[Virtualization approach] --> F[Full: unmodified guest, emulated hardware]
+    V --> P[Paravirtualized: guest uses hypercalls]
+    V --> H[Hardware-assisted: CPU virtualization extensions]
+```
 
 Virtualization implementation-এর কয়েকটি approach আছে।
 

@@ -4,6 +4,13 @@ title: 'Docker Basic'
 ---
 
 ## 🆚 2. What is the difference between a Docker Image and a Docker Container?
+
+```mermaid
+flowchart LR
+    F[Dockerfile] -->|docker build| I[Read-only image]
+    I -->|docker run| C1[Container 1 and writable layer]
+    I -->|docker run| C2[Container 2 and writable layer]
+```
 এই দুটি concept Docker-এর সবচেয়ে মৌলিক বিষয়। অনেকেই শুরুতে এই দুটো গুলিয়ে ফেলেন, তাই এটি ভালোভাবে বোঝা জরুরি।
 
 | বাস্তব জীবন | Docker |
@@ -107,7 +114,7 @@ Image Layers (Read-Only)
 |---|---|---|
 | সংজ্ঞা | Read-only blueprint/template | Image-এর running instance |
 | অবস্থা | Static (পরিবর্তন হয় না) | Dynamic (চলে, থামে, পরিবর্তন হয়) |
-| Storage | Disk-এ সংরক্ষিত থাকে | Memory-তে চলে |
+| Storage | Read-only layers disk-এ থাকে | Metadata ও writable layer disk-এ থাকে; process চলার সময় RAM/CPU ব্যবহার করে |
 | Writable | না | হ্যাঁ (নিজস্ব writable layer আছে) |
 | তৈরি হয় | `docker build` দিয়ে | `docker run` দিয়ে |
 | lifecycle | Build → Push → Pull | Create → Start → Stop → Delete |
@@ -397,6 +404,14 @@ spec:
 ---
 
 ## 📄 3. What is a Dockerfile, and how does it define an image?
+
+```mermaid
+flowchart LR
+    D[Dockerfile instructions] --> B[Build engine]
+    C[Build context] --> B
+    B --> L[Cached image layers]
+    L --> I[Immutable image]
+```
 **Dockerfile** হলো একটি plain text file যেখানে step-by-step instruction লেখা থাকে — Docker এই instruction গুলো পড়ে একটি **Image** build করে। এটি essentially একটি **recipe** বা **blueprint** যা Docker-কে বলে দেয়:
 
 - কোন base থেকে শুরু করতে হবে
@@ -599,6 +614,14 @@ Best practice হলো সাধারণ file copy-র জন্য সবস�
 
 ### What is a multi-stage build and when would you use it?
 
+```mermaid
+flowchart LR
+    S[Source code] --> Builder[Builder stage: compiler and dependencies]
+    Builder --> A[Compiled artifact]
+    A --> Runtime[Minimal runtime stage]
+    Runtime --> F[Smaller production image]
+```
+
 Multi-stage build হলো একটি Dockerfile-এ একাধিক `FROM` instruction ব্যবহার করার কৌশল। এতে build environment আলাদা এবং final image ছোট রাখা যায়।
 
 ```dockerfile
@@ -661,6 +684,14 @@ Base image
 > **মূল নিয়ম:** যে layer কম পরিবর্তন হয় তা উপরে রাখুন, বেশি পরিবর্তন হয় তা নিচে রাখুন। Dependencies আগে install করুন, তারপর source code copy করুন।
 
 ## 🏗️ 4. What is the Docker build context, and why does it matter?
+
+```mermaid
+flowchart LR
+    Dir[Context directory] --> Ignore[Apply .dockerignore]
+    Ignore --> Engine[Send remaining files to builder]
+    Dockerfile --> Engine
+    Engine --> Image
+```
 
 Docker build context হলো সেই directory যা `docker build` command চালানোর সময় Docker daemon-এ পাঠানো হয়। সহজ কথায়, এটি হলো সেই সব file এবং folder-এর সমষ্টি যা Docker image build করার সময় available থাকে।
 
@@ -865,6 +896,18 @@ docker build \
 
 
 ## 🔄 5. What is the Docker lifecycle (pull, build, run, stop, remove)?
+
+```mermaid
+stateDiagram-v2
+    [*] --> Image: pull or build
+    Image --> Created: create
+    Created --> Running: start
+    Running --> Paused: pause
+    Paused --> Running: unpause
+    Running --> Stopped: stop or kill
+    Stopped --> Running: start
+    Stopped --> Removed: rm
+```
 Docker-এ একটি application-এর জীবনচক্র কয়েকটি পরিষ্কার ধাপে ভাগ করা যায়:
 
 **ধাপ 1: `docker pull` — Image নামিয়ে আনা:** Registry (যেমন Docker Hub) থেকে local machine-এ Image download করে।

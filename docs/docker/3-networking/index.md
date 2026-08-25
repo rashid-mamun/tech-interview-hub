@@ -43,7 +43,7 @@ docker run -d --network host nginx
 
 **কখন ব্যবহার করবে:** High-performance networking দরকার হলে, যেমন network monitoring tools বা performance-critical applications।
 
-**সতর্কতা:** Port conflicts হতে পারে। Linux-only (Mac/Windows-এ কাজ করে না properly)।
+**সতর্কতা:** Port conflicts হতে পারে। Native Linux-এ behavior সরাসরি; Docker Desktop-এ support ও configuration version/platform অনুযায়ী ভিন্ন হতে পারে।
 
 ---
 
@@ -172,7 +172,7 @@ docker run -d --network none alpine sleep 3600
 
 `overlay` network-এ physically আলাদা আলাদা host-এ থাকা container-গুলো একই virtual network-এ থাকতে পারে। **VXLAN tunneling** ব্যবহার করে দুটি host-এর মধ্যে একটি encrypted tunnel তৈরি হয়।
 
-এই mode টি primarily **Docker Swarm** বা **Kubernetes**-এর জন্য।
+এই Docker network driver-টি primarily **Docker Swarm**-এর জন্য। Kubernetes multi-host networking-এর জন্য Docker overlay driver নয়, CNI plugin ব্যবহার করে।
 
 ```bash
 # Swarm mode initialize করতে হবে আগে
@@ -189,7 +189,7 @@ docker service create --network my-cluster-net --replicas 3 nginx
 
 ---
 
-### `When would you use the `host` network mode?
+### When would you use the `host` network mode?
 
 `host` mode ব্যবহারের সিদ্ধান্ত নেওয়ার আগে মূল প্রশ্ন হলো — **NAT-এর overhead কি সত্যিই সমস্যা করছে?**
 
@@ -394,7 +394,7 @@ iptables -L FORWARD -n
 
 ### How does port mapping (`-p`) work at the kernel level?
 
-`-p 8080:80` দিলে মনে হয় Docker কিছু magic করছে — আসলে এটি সম্পূর্ণভাবে **iptables NAT rules** দিয়ে implement করা।
+`-p 8080:80` দিলে Docker host-এর packet-filter/NAT backend-এ forwarding rules তৈরি করে। Linux setup অনুযায়ী backend `iptables` অথবা `nftables` হতে পারে।
 
 ```bash
 docker run -d -p 8080:80 nginx
@@ -466,7 +466,7 @@ EXPOSE 53/udp
 ```
 
 **`-p` (docker run):**
-এটা **actual action** — host-এ port bind করে এবং `iptables`-এ `DNAT` rule তৈরি করে। এছাড়া `docker-proxy` process-ও start হয়।
+এটা **actual action** — host-এ port publish করে এবং NAT/forwarding rule তৈরি করে। প্রয়োজন ও daemon configuration অনুযায়ী `docker-proxy` ব্যবহার হতে পারে; এটি সব request-এর জন্য বাধ্যতামূলক path নয়।
 
 ```bash
 # Syntax
@@ -538,6 +538,31 @@ networks:
 
 ## 13. How do you disable inter-container communication on a custom bridge network?
 
-    ![docker_icc_control](./docker_icc_control.svg)
+![Docker inter-container communication control](./docker_icc_control.svg)
+
+Custom bridge তৈরির সময় `com.docker.network.bridge.enable_icc=false` driver option দিলে সেই bridge-এ container-to-container forwarding বন্ধ করা যায়:
+
+```bash
+docker network create \
+  --driver bridge \
+  --opt com.docker.network.bridge.enable_icc=false \
+  isolated-net
+
+docker run -d --name app-a --network isolated-net nginx:alpine
+docker run -d --name app-b --network isolated-net alpine sleep 1d
+
+# app-b থেকে app-a-তে direct traffic fail করা উচিত
+docker exec app-b wget -T 3 -qO- http://app-a || echo "ICC blocked"
+```
+
+```mermaid
+flowchart LR
+    A[Container A] --> BA[Bridge isolated-net]
+    B[Container B] --> BA
+    A -. blocked by ICC false .- B
+    BA -->|published ports or allowed host path| H[Host and external network]
+```
+
+`--internal` একটি আলাদা control: এটি network-কে external connectivity থেকে isolate করে, কিন্তু একই network-এর containers-এর পারস্পরিক communication নিজে থেকে বন্ধ করে না। Existing network-এর driver option in-place বদলানো যায় না; নতুন network তৈরি করে containers reconnect করতে হবে। আরও granular policy দরকার হলে host firewall-এর `DOCKER-USER` chain বা একটি orchestration/network-policy solution ব্যবহার করুন।
 
 ---

@@ -2,7 +2,16 @@
 sidebar_position: 1
 title: 'Introduction to the Internet'
 ---
+
 ## 🌐 1. What is the concept of the Internet?
+
+```mermaid
+flowchart LR
+    Device[Phone or laptop] --> LAN[Home or office LAN]
+    LAN --> ISP[Local ISP] --> IXP[IXP or transit]
+    IXP --> Backbone[Global fiber backbone]
+    Backbone --> DC[Destination data center] --> Server[Application server]
+```
 
 ইন্টারনেট মূলত একটি গ্লোবাল **"network of networks"** [cite: 2]। এটি কোনো নির্দিষ্ট একক ফিজিক্যাল সত্তা নয়, বরং এটি একটি বিশাল **decentralized infrastructure** যা বিশ্বের কোটি কোটি প্রাইভেট, পাবলিক, একাডেমিক এবং সরকারি নেটওয়ার্ককে একে অপরের সাথে যুক্ত করে [cite: 3]। 
 
@@ -95,6 +104,15 @@ HTML হলো ওয়েবসাইটের জন্য একটি **Standa
 
 ## 📦 3. How is data transferred across networks?
 
+```mermaid
+flowchart LR
+    Data[Application data] --> Segment[TCP segment or UDP datagram]
+    Segment --> Packet[IP packet]
+    Packet --> Frame[Link-layer frame]
+    Frame --> H1[Router hop 1] --> H2[Router hop 2]
+    H2 --> Decode[Decapsulation at receiver] --> App[Receiving application]
+```
+
 ডাটা এক নেটওয়ার্ক থেকে অন্য নেটওয়ার্কে যাওয়ার পুরো প্রক্রিয়াটি কয়েকটি ধাপে সম্পন্ন হয়:
 
 #### ক. ডাটা এনক্যাপসুলেশন (Data Encapsulation)
@@ -130,6 +148,13 @@ HTML হলো ওয়েবসাইটের জন্য একটি **Standa
 ---
 
 ## 🗺️ 4. What are IP addresses, domain names, and routing?
+
+```mermaid
+flowchart LR
+    Domain[www.example.com] -->|DNS lookup| IP[93.184.216.34]
+    IP -->|routing-table lookup| R1[Local router]
+    R1 --> R2[ISP router] --> R3[Destination router] --> Host[Server]
+```
 
 ইন্টারনেট যদি একটি বিশাল শহর হয়, তবে সেখানে আপনার গন্তব্যে পৌঁছানোর জন্য **IP Address**, **Domain Name**, এবং **Routing** এই তিনটি জিনিস একসাথে কাজ করে। নিচে এদের ভূমিকা টেকনিক্যাল টার্মসহ সহজভাবে ব্যাখ্যা করা হলো:
 
@@ -253,6 +278,14 @@ ISP হলো এমন একটি কোম্পানি বা প্র�
 
 ## 🔗 6. What are the different types of networks (e.g., LAN, WAN) and their role in the Internet?
 
+```mermaid
+flowchart LR
+    PAN[PAN: personal devices] --> LAN[LAN: home or office]
+    LAN --> MAN[MAN: city or metro]
+    MAN --> WAN[WAN: country or global]
+    WAN --> Internet[Internet: interconnected networks]
+```
+
 ইন্টারনেট কোনো একটি নির্দিষ্ট নেটওয়ার্ক নয়, বরং এটি বিভিন্ন আকারের এবং বিভিন্ন কাজের জন্য তৈরি হাজার হাজার নেটওয়ার্কের সমষ্টি। ভৌগোলিক সীমানা বা কতটুকু জায়গা জুড়ে নেটওয়ার্কটি বিস্তৃত, তার ওপর ভিত্তি করে একে কয়েক ভাগে ভাগ করা হয়।
 
 নিচে প্রধান নেটওয়ার্ক টাইপগুলো এবং ইন্টারনেটে তাদের ভূমিকা টেকনিক্যাল টার্মসহ ব্যাখ্যা করা হলো:
@@ -309,6 +342,15 @@ ISP হলো এমন একটি কোম্পানি বা প্র�
 ---
 
 ## 🏗️ 7. How does the physical infrastructure of the Internet (e.g., undersea cables, satellites) work?
+
+```mermaid
+flowchart LR
+    Home[Home or mobile device] --> Access[Wi-Fi, fiber or cellular]
+    Access --> ISP[ISP PoP] --> IXP[IXP or transit]
+    IXP --> Cable[Terrestrial or submarine fiber]
+    Cable --> DC[Data center]
+    Satellite[LEO satellite path] -. remote-area alternative .-> ISP
+```
 
 আমরা যদিও সাধারণত ইন্টারনেটকে "ক্লাউড" বা ওয়্যারলেস কিছু মনে করি, কিন্তু বাস্তব সত্য হলো আধুনিক ইন্টারনেটের ৯৯% এর বেশি ট্রাফিক ফিজিক্যাল ক্যাবল বা তার দিয়ে পরিবাহিত হয়।
 * **🌊 Undersea Cables (সাবমেরিন ক্যাবল):** এক মহাদেশ থেকে অন্য মহাদেশে (যেমন: আমেরিকা থেকে এশিয়া) ডেটা ট্রান্সফার করার জন্য সমুদ্রের তলদেশ দিয়ে বিশাল ফাইবার-অপ্টিক ক্যাবল বিছানো থাকে। এগুলো প্রায় আলোর বেগে বিপুল পরিমাণ ডেটা ট্রান্সফার করতে পারে।

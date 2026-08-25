@@ -3,8 +3,15 @@ sidebar_position: 2
 title: 'Internet Protocols'
 ---
 
-
 ## 🌐 27. What are network protocols, and why are they needed?
+
+```mermaid
+flowchart TB
+    APP[Application: HTTP, DNS, SMTP] --> TRANS[Transport: TCP, UDP, QUIC]
+    TRANS --> NET[Internet: IPv4, IPv6, ICMP]
+    NET --> LINK[Link: Ethernet, Wi-Fi]
+    LINK --> PHY[Physical: radio, copper, fiber]
+```
 **Network Protocols** হলো একগুচ্ছ Rules and Standards, যা নির্ধারণ করে নেটওয়ার্কের ভেতর দিয়ে দুটি ডিভাইসের মধ্যে কীভাবে data ফরম্যাট, সেন্ড এবং রিসিভ হবে। 
 
 👉 এগুলো প্রয়োজন, কারণ দুজন ব্যক্তি যেমন ভিন্ন ভাষায় কথা বললে কেউ কাউকে বুঝতে পারে না, তেমনি কম্পিউটারের ভাষাও যদি ভিন্ন হয়, তবে তারা data আদান প্রদান করতে পারবে না। protocol নিশ্চিত করে যে, সেন্ডার ও রিসিভার উভয়েই একই নিয়ম বা ভাষা ব্যবহার করছে।
@@ -20,6 +27,17 @@ title: 'Internet Protocols'
 ---
 
 ## 🛡️ 28. What is the role of protocols in ensuring data transfer integrity and reliability?
+
+```mermaid
+sequenceDiagram
+    participant S as Sender
+    participant R as Receiver
+    S->>R: Segment seq=1 plus checksum
+    R-->>S: ACK next=2
+    S-xR: Segment seq=2 lost
+    R-->>S: Duplicate ACK next=2
+    S->>R: Retransmit seq=2
+```
 info বা data যখন তারের বা হাওয়ার মাধ্যমে এক জায়গা থেকে অন্য জায়গায় যায়, তখন ফিজিক্যাল কারণে data করাপ্ট বা নষ্ট হতে পারে। নেটওয়ার্ক প্রটোকলগুলো নিশ্চিত করে যে, পাঠানো data ঠিকঠাকমতো গন্তব্যে পৌঁছাচ্ছে কি না (Reliability) এবং মাঝপথে dataর কোনো পরিবর্তন হয়েছে কি না (Integrity)।
 
 Protocol হলো একটি নির্দিষ্ট set of rules যা দুটি device-এর মধ্যে communication কীভাবে হবে তা নির্ধারণ করে। Data transfer-এ integrity ও reliability নিশ্চিত করতে protocol বিভিন্নভাবে কাজ করে:
@@ -144,6 +162,19 @@ File download বা security-তে ব্যবহৃত হয়।
 ---
 
 ## 🔒 30. How do secure protocols like HTTPS ensure encrypted communication?
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant S as HTTPS server
+    C->>S: ClientHello plus key share
+    S-->>C: ServerHello plus key share
+    S-->>C: Certificate and signature
+    Note over C: Validate chain, hostname and validity
+    C->>S: Finished
+    S-->>C: Finished
+    C->>S: Encrypted HTTP request
+```
 **HTTPS (HyperText Transfer Protocol Secure)** হলো HTTP-র secure version। এটা **TLS (Transport Layer Security)** protocol ব্যবহার করে data encrypt করে, যাতে কেউ মাঝপথে data পড়তে বা পরিবর্তন করতে না পারে।
 
 ```text
@@ -196,6 +227,16 @@ OSI মডেলের ৭টি লেয়ারের বিপরীতে ব
 ---
 
 ## 🏛️ 32. What is the OSI model, and how does it relate to Internet protocols?
+
+```mermaid
+flowchart TB
+    L7[7 Application: HTTP, DNS] --> L6[6 Presentation: format, encryption]
+    L6 --> L5[5 Session: dialog management]
+    L5 --> L4[4 Transport: TCP, UDP]
+    L4 --> L3[3 Network: IP, routing]
+    L3 --> L2[2 Data Link: Ethernet, Wi-Fi frames]
+    L2 --> L1[1 Physical: bits and signals]
+```
 **OSI (Open Systems Interconnection) Model** হলো একটি থিওরেটিক্যাল কনসেপ্ট বা রেফারেন্স মডেল। নেটওয়ার্কে একটি ডিভাইস থেকে আরেকটি ডিভাইসে ইন্টারনেট প্রটোকলগুলো কীভাবে data পাঠায়, তা বুঝতে সাহায্য করার জন্য পুরো প্রক্রিয়াটিকে ৭টি ধাপে বা লেয়ারে ভাগ করা হয়েছে। ইন্টারনেট প্রোটোকলগুলো (যেমন HTTP, TCP) মূলত এই লেয়ারগুলোতে অবস্থান করে।
 
 ### 📦 Can you explain each of the 7 OSI layers with a real-world example?
@@ -230,6 +271,17 @@ OSI মডেলের ৭টি লেয়ারের বিপরীতে ব
 ---
 
 ## ⚡ 34. What is WebSocket, and how does it differ from HTTP for real-time communication? 
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant S as Server
+    C->>S: HTTP GET plus Upgrade websocket
+    S-->>C: 101 Switching Protocols
+    C->>S: WebSocket message
+    S-->>C: Server-pushed message
+    S-->>C: More messages without new HTTP requests
+```
 **WebSocket** হলো একটি আধুনিক কমিউনিকেশন protocol, যা ক্লায়েন্ট এবং সার্ভারের মধ্যে একটি বাই-ডিরেকশনাল (Bidirectional), ফুল-ডুপ্লেক্স (Full-duplex) এবং পারসিস্টেন্ট (Persistent) কানেকশন তৈরি করে রাখে।
 - সাধারণ HTTP তে ক্লায়েন্ট রিকোয়েস্ট না করলে সার্ভার নিজ থেকে নিজে কিছু পাঠাতে পারে না। কিন্তু যদি রিয়েল-টাইম ডাটা (যেমন চ্যাটিং, লাইভ স্কোর) দরকার হয়, তবে HTTP তে বারবার রিকোয়েস্ট (Polling) পাঠাতে হয়, যা ব্যান্ডউইথ নষ্ট করে। 
 - WebSocket শুরুতেই একটি কানেকশন ওপেন করে রাখে, ফলে রিকোয়েস্টের দরকার হয় না, সার্ভার তার ইচ্ছামতো রিয়েল-টাইমে যেকোনো মুহূর্তে ক্লায়েন্টকে data পুশ (Push) করতে পারে। 
@@ -252,6 +304,16 @@ WebSocket পোর্ট 80 বা 443 ব্যবহার করেই ক�
 ---
 
 ## 🚀 35. How does gRPC compare to HTTP for backend API communication? 
+
+```mermaid
+flowchart LR
+    Proto[.proto contract] --> Stub[Generated client stub]
+    Stub -->|HTTP/2 plus protobuf| Service[gRPC service]
+    Service --> Unary[Unary]
+    Service --> SS[Server stream]
+    Service --> CS[Client stream]
+    Service --> BI[Bidirectional stream]
+```
 **gRPC (gRPC Remote Procedure Calls)** হলো গুগলের তৈরি করা একটি অত্যাধুনিক এবং হাই-পারফরম্যান্স ওপেন সোর্স RPC ফ্রেমওয়ার্ক।
 - সাধারণ REST API (যা HTTP 1.1 এবং JSON ব্যবহার করে) এর তুলনায় gRPC অনেক ফাস্ট এবং ইফিসিয়েন্ট। 
 - কারণ gRPC নিজে থেকেই **HTTP/2** protocol ব্যবহার করে (যা মাল্টিপ্লেক্সিং সাপোর্ট করে) এবং JSON এর র-টেক্সটের পরিবর্তে **Protocol Buffers** নামক বাইনারি সিরিয়ালাইজেশন ফরম্যাট ব্যবহার করে। এটি মূলত মাইক্রোসার্ভিস আর্কিটেকচারে এক সার্ভার থেকে আরেক সার্ভারে (Server-to-Server) ইন্টারনাল কমিউনিকেশনের জন্য সবচেয়ে বেশি ব্যবহৃত হয়।

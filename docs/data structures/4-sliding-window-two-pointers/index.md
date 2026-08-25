@@ -498,6 +498,8 @@ Length of smallest subarray with sum >= 7: 2
 ```
 (কারণ subarray `[4, 3]` এর sum = 7, এবং এটা এই condition satisfy করা সবচেয়ে ছোট subarray, length = 2)
 
+> **Precondition:** এই grow/shrink logic-এর জন্য array-এর সব value positive (বা অন্তত non-negative, প্রয়োজনমতো zero handlingসহ) হতে হবে। Negative number থাকলে right বাড়ালে sum সবসময় বাড়ে না এবং left বাড়ালে সবসময় কমে না; তখন prefix sum + ordered structure/deque-এর মতো অন্য technique দরকার।
+
 ---
 
 ### How does the sliding window shrink and grow based on the running sum?

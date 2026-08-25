@@ -215,9 +215,20 @@ Maximum value: 30
 
 একইভাবে max-heap দিয়ে min-heap simulate করতে negative value store করা যায়। তবে C++ এ direct comparator (`greater<int>`) ব্যবহার করাই clean।
 
+> **Overflow note:** Signed `int`-এর minimum value (`INT_MIN`) negate করা representable নয় এবং undefined behavior ঘটায়। Arbitrary integer input-এর জন্য negation trick-এর বদলে comparator ব্যবহার করা নিরাপদ।
+
 ---
 
 ## 📊 56. How is a heap implemented using an array?
+
+```mermaid
+flowchart TB
+    A0[0: 10] --> A1[1: 20]
+    A0 --> A2[2: 15]
+    A1 --> A3[3: 30]
+    A1 --> A4[4: 40]
+    Formula[For index i: left=2i+1, right=2i+2, parent=floor((i-1)/2)]
+```
 
 **Heap** একটি বিশেষ ধরনের **Complete Binary Tree**, যা সাধারণত **Array**-এর মাধ্যমে খুব efficient ভাবে implement করা যায় — কোনো explicit **pointer** (left/right child pointer) ছাড়াই।
 
@@ -257,7 +268,10 @@ Array-এর indexing **0-indexed** নাকি **1-indexed** তার উপ�
 | **Right Child** | `2 * i + 2` |
 
 ```cpp
-int parent(int i)     { return (i - 1) / 2; }
+int parent(int i)     {
+    if (i <= 0) throw out_of_range("root has no parent");
+    return (i - 1) / 2;
+}
 int leftChild(int i)  { return 2 * i + 1; }
 int rightChild(int i) { return 2 * i + 2; }
 ```
@@ -319,8 +333,8 @@ void insert(vector<int>& heap, int value) {
 Current node-কে তার **left ও right child**-এর সাথে compare করা হয়। যদি কোনো child current node থেকে **বড়** হয়, তাহলে সবচেয়ে **বড় child**-এর সাথে swap করা হয়, এবং এই প্রক্রিয়া **leaf** পর্যন্ত অথবা heap property সঠিক না হওয়া পর্যন্ত চলতে থাকে।
 
 ```cpp
-void heapifyDown(vector<int>& heap, int i) {
-    int n = heap.size();
+void heapifyDown(vector<int>& heap, int i, int heapSize = -1) {
+    int n = heapSize < 0 ? static_cast<int>(heap.size()) : heapSize;
     
     while (true) {
         int largest = i;
@@ -342,6 +356,7 @@ void heapifyDown(vector<int>& heap, int i) {
 }
 
 int extractMax(vector<int>& heap) {
+    if (heap.empty()) throw underflow_error("Heap is empty");
     int maxVal = heap[0];
     heap[0] = heap.back();   // শেষ element-কে root-এ বসানো
     heap.pop_back();
@@ -505,6 +520,8 @@ Heap approach এ kth largest বের করতে size `k` এর min-heap �
 using namespace std;
 
 int kthLargest(vector<int>& nums, int k) {
+    if (k <= 0 || k > static_cast<int>(nums.size()))
+        throw out_of_range("k must be in [1, n]");
     priority_queue<int, vector<int>, greater<int>> minHeap;
 
     for (int x : nums) {
@@ -537,6 +554,8 @@ kth smallest বের করতে size `k` এর max-heap রাখা যা
 
 ```cpp
 int kthSmallest(vector<int>& nums, int k) {
+    if (k <= 0 || k > static_cast<int>(nums.size()))
+        throw out_of_range("k must be in [1, n]");
     priority_queue<int> maxHeap;
 
     for (int x : nums) {
@@ -577,7 +596,9 @@ Quickselect fast, কিন্তু worst case খারাপ হতে পা
 using namespace std;
 
 int partition(vector<int>& nums, int left, int right) {
-    int pivotIndex = left + rand() % (right - left + 1);
+    static mt19937 generator(random_device{}());
+    uniform_int_distribution<int> distribution(left, right);
+    int pivotIndex = distribution(generator);
     swap(nums[pivotIndex], nums[right]);
 
     int pivot = nums[right];
@@ -615,8 +636,68 @@ int quickselect(vector<int>& nums, int kSmallestIndex) {
 }
 
 int findKthLargestQuickselect(vector<int> nums, int k) {
+    if (k <= 0 || k > static_cast<int>(nums.size()))
+        throw out_of_range("k must be in [1, n]");
     int kSmallestIndex = nums.size() - k;
     return quickselect(nums, kSmallestIndex);
 }
 ```
+
+`quickselect` core input-কে in-place modify করলে iterative version-এর auxiliary space `O(1)`। উপরের public wrapper ইচ্ছাকৃতভাবে `nums` by value নিয়েছে, তাই caller-এর input বাঁচানোর জন্য copy-তে `O(n)` অতিরিক্ত space লাগে।
 ---
+
+## 🔗 59. How would you merge k sorted arrays or lists efficiently using a heap?
+
+প্রতিটি sorted array-এর প্রথম element min-heap-এ রাখা হয়। Minimum pop করার পর একই array-এর পরের element push করা হয়। Heap-এ সর্বোচ্চ `k`টি candidate থাকায় মোট `N` element merge করতে `O(N log k)` time এবং `O(k)` auxiliary space লাগে। Linked-list version-এ heap entry-তে node pointer রাখা হয়; pop করা node-এর `next` push করলেই একই algorithm কাজ করে।
+
+```text
+A: [1, 4, 7]
+B: [2, 5, 8]       Initial heap: 1(A), 2(B), 3(C)
+C: [3, 6, 9]
+
+pop 1(A) → output [1]       → push 4(A)
+pop 2(B) → output [1,2]     → push 5(B)
+pop 3(C) → output [1,2,3]   → push 6(C)
+... final: [1,2,3,4,5,6,7,8,9]
+```
+
+```cpp title="Complete example: merge k sorted arrays"
+#include <bits/stdc++.h>
+using namespace std;
+
+struct Entry {
+    int value, arrayIndex, elementIndex;
+    bool operator>(const Entry& other) const { return value > other.value; }
+};
+
+vector<int> mergeSortedArrays(const vector<vector<int>>& arrays) {
+    priority_queue<Entry, vector<Entry>, greater<Entry>> heap;
+    for (int arrayIndex = 0; arrayIndex < static_cast<int>(arrays.size()); ++arrayIndex)
+        if (!arrays[arrayIndex].empty())
+            heap.push({arrays[arrayIndex][0], arrayIndex, 0});
+
+    vector<int> merged;
+    while (!heap.empty()) {
+        Entry current = heap.top();
+        heap.pop();
+        merged.push_back(current.value);
+        int nextIndex = current.elementIndex + 1;
+        if (nextIndex < static_cast<int>(arrays[current.arrayIndex].size()))
+            heap.push({arrays[current.arrayIndex][nextIndex], current.arrayIndex, nextIndex});
+    }
+    return merged;
+}
+
+int main() {
+    vector<vector<int>> arrays{{1, 4, 7}, {2, 5, 8}, {}, {3, 6, 9}};
+    for (int value : mergeSortedArrays(arrays)) cout << value << ' ';
+    cout << '\n';
+    return 0;
+}
+```
+
+**Sample output**
+
+```text
+1 2 3 4 5 6 7 8 9
+```

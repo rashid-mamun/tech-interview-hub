@@ -3,7 +3,34 @@ sidebar_position: 5
 title: 'Normalization'
 ---
 
+
+### Running example
+
+একটি order row-তে customer বারবার রাখলে update anomaly হয়। 3NF design-এ entity আলাদা করে relationship key দিয়ে রাখা যায়:
+
+```sql
+CREATE TABLE customers (
+    customer_id INT PRIMARY KEY,
+    customer_name VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE orders (
+    order_id INT PRIMARY KEY,
+    customer_id INT NOT NULL,
+    order_date DATE NOT NULL,
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+);
+```
+
 ## **32. What is Database Normalization?**
+
+```mermaid
+flowchart LR
+    U[Unnormalized data] --> F1[First normal form]
+    F1 --> F2[Second normal form]
+    F2 --> F3[Third normal form]
+    F3 --> B[BCNF]
+```
 
 **Normalization** হলো একটি ডাটাবেস ডিজাইন টেকনিক যা একটি বড় টেবিলকে ছোট ছোট টেবিলে বিভক্ত করে এবং তাদের মধ্যে লজিক্যাল রিলেশন তৈরি করে। এর মূল লক্ষ্য হলো ডাটাবেস থেকে অপ্রয়োজনীয় বা duplicate ডেটা (Redundancy) দূর করা এবং ডেটার Integrity নিশ্চিত করা।
 
@@ -90,6 +117,13 @@ Normalization প্রধানত তিনটি বড় সমস্যা
 ---
 
 ## **33. Explain 1NF, 2NF, 3NF?**
+
+```mermaid
+flowchart LR
+    U[Unnormalized table] --> N1[1NF: atomic values]
+    N1 --> N2[2NF: remove partial dependency]
+    N2 --> N3[3NF: remove transitive dependency]
+```
 
 ### Step 1: 1NF Achieving Atomicity
 
@@ -320,7 +354,75 @@ Normalization প্রধানত তিনটি বড় সমস্যা
 
 ---
 
-## **35. What is Denormalization?**
+## **34. What is BCNF (Boyce-Codd Normal Form)?**
+
+BCNF-এ প্রতিটি non-trivial functional dependency `X -> Y`-এর determinant `X` অবশ্যই superkey হবে। 3NF কিছু ক্ষেত্রে non-superkey determinant allow করে যদি dependent attribute prime attribute হয়; BCNF সেই exception রাখে না।
+
+ধরা যাক `class(student, subject, teacher)` relation-এ নিয়ম দুটি:
+
+- `(student, subject) -> teacher`
+- `teacher -> subject`
+
+Candidate key হলো `(student, subject)` এবং `(student, teacher)`। Relationটি 3NF হতে পারে, কিন্তু `teacher -> subject`-এ teacher superkey নয়—তাই BCNF violation।
+
+BCNF decomposition:
+
+```text
+teacher_subject(teacher, subject)
+student_teacher(student, teacher)
+```
+
+```mermaid
+flowchart LR
+    Original[class student subject teacher] --> TS[teacher_subject]
+    Original --> ST[student_teacher]
+    Rule[teacher determines subject] --> TS
+```
+
+এই decomposition redundancy কমায়। তবে decomposition lossless এবং প্রয়োজনীয় dependency preserve করছে কি না আলাদাভাবে যাচাই করতে হয়।
+
+## **35. What are 4NF and 5NF?**
+
+**4NF** multi-valued dependency দূর করে। একজন student-এর skill এবং hobby যদি পরস্পর independent হয়, এক table-এ রাখলে সব combination repeat হয়:
+
+```text
+student | skill | hobby
+--------+-------+--------
+Rafi    | SQL   | Chess
+Rafi    | SQL   | Music
+Rafi    | C++   | Chess
+Rafi    | C++   | Music
+```
+
+4NF decomposition:
+
+```text
+student_skill(student, skill)
+student_hobby(student, hobby)
+```
+
+**5NF** এমন join dependency দূর করে যা তিন বা তার বেশি projection-এ lossless decomposition ছাড়া সরানো যায় না। Supplier–Part–Project-এর মতো ternary relationship-এ pairwise facts দিয়ে valid triple reconstruct করা যায় কি না business rule দেখে 5NF সিদ্ধান্ত নিতে হয়।
+
+```mermaid
+flowchart TD
+    Multi[Independent multi-valued facts] --> Skills[student_skill]
+    Multi --> Hobbies[student_hobby]
+    JoinDep[Ternary join dependency] --> SP[supplier_part]
+    JoinDep --> SJ[supplier_project]
+    JoinDep --> PJ[part_project]
+```
+
+Higher normal form practical যখন independent multi-valued fact বা complex join anomaly সত্যিই আছে। সাধারণ OLTP design প্রায়ই 3NF/BCNF-এ যথেষ্ট; অকারণে decomposition করলে query complexity বাড়ে।
+
+## **36. What is Denormalization?**
+
+```mermaid
+flowchart LR
+    N[Normalized tables] --> J[Frequent joins]
+    J --> D[Duplicate selected data intentionally]
+    D --> R[Faster reads]
+    D --> W[More write and consistency work]
+```
 
 **Denormalization** হলো একটি ডাটাবেস অপ্টিমাইজেশন টেকনিক যেখানে পূর্বে নরমালাইজ করা একটি ডাটাবেসে ইচ্ছাকৃতভাবে কিছু duplicate ডেটা বা রিডান্ডেন্সি (Redundancy) ফিরিয়ে আনা হয়।
 
@@ -374,6 +476,16 @@ The key difference lies in the type of dependency eliminated:
 
 ## **37. What are anomalies in database design?**
 
+```mermaid
+flowchart TB
+    R[Redundant table design] --> I[Insertion anomaly]
+    R --> U[Update anomaly]
+    R --> D[Deletion anomaly]
+    I --> N[Normalize relations]
+    U --> N
+    D --> N
+```
+
 ডাটাবেস ডিজাইনে **Anomalies** হলো এমন কিছু অনাকাঙ্ক্ষিত সমস্যা যা মূলত অগোছালো বা ত্রুটিপূর্ণ টেবিল স্ট্রাকচারের কারণে ঘটে। যখন একটি টেবিলে অপ্রয়োজনীয়ভাবে একই ডেটা বারবার (Redundancy) রাখা হয়, তখন ডেটা ইনসার্ট, আপডেট বা ডিলিট করতে গেলে যে অসামঞ্জস্যতা তৈরি হয়, তাকেই Anomaly বলে।
 
 নিচে তিনটি প্রধান Anomaly উদাহরণের মাধ্যমে ব্যাখ্যা করা হলো:
@@ -414,6 +526,22 @@ The key difference lies in the type of dependency eliminated:
 ---
 
 ## **38. How do you handle many-to-many relationships in database design?**
+
+```mermaid
+erDiagram
+    STUDENT ||--o{ ENROLLMENT : has
+    COURSE ||--o{ ENROLLMENT : has
+    STUDENT {
+        int student_id PK
+    }
+    COURSE {
+        int course_id PK
+    }
+    ENROLLMENT {
+        int student_id FK
+        int course_id FK
+    }
+```
 
 Many-to-many relationships require a Junction/Bridge table:
 
@@ -537,6 +665,13 @@ Several strategies can optimize queries on normalized databases:
 
 ## **41. What is functional dependency?**
 
+```mermaid
+flowchart LR
+    A[Determinant: Student ID] --> B[Student Name]
+    A --> C[Department]
+    D[Student ID + Course ID] --> E[Grade]
+```
+
 Functional Dependency হলো Database Management System এর একটি গুরুত্বপূর্ণ ধারণা, যা রিলেশনাল ডাটাবেসের টেবিলে attributes এর মধ্যে সম্পর্ক বোঝায়। সহজ ভাষায়, যদি একটি attribute বা attribute set `X` এর মান থেকে আরেকটি attribute বা attribute set `Y` এর মান নির্ধারিত হয়, তাহলে বলা হয় যে `Y` হলো `X` এর উপর functionally dependent। এটি সাধারণত `X → Y` হিসেবে প্রকাশ করা হয়।
 
 * **উদাহরণ:** ধরা যাক, একটি টেবিলে আছে `Student_ID` এবং `Student_Name` attributes। যদি প্রতিটি `Student_ID` একটি নির্দিষ্ট `Student_Name` নির্ধারণ করে, তাহলে `Student_Name` হলো `Student_ID` এর উপর functionally dependent। অর্থাৎ, `Student_ID → Student_Name`।
@@ -595,4 +730,3 @@ functionally dependencies চিহ্নিত করতে নিম্নল�
 * Use normalized RDBMS for transactions
 * Use denormalized NoSQL for read-heavy operations
 * Example: Product catalog in MongoDB, orders in PostgreSQL
-

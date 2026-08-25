@@ -70,6 +70,8 @@ int main() {
 4. **Avalanche Effect**: input এ সামান্য পরিবর্তন হলেও output hash code এ বড় পরিবর্তন আসা উচিত (এটা distribution ভালো রাখতে সাহায্য করে)
 5. **Minimizes Collisions**: যদিও collision সম্পূর্ণ এড়ানো সম্ভব না (Pigeonhole principle অনুযায়ী), ভালো hash function collision এর সম্ভাবনা কমিয়ে আনে
 
+> **Complexity precision:** Hash table-এর `O(1)` average operation সাধারণত hash/equality cost-কে constant ধরে। String key-এর hash প্রথমবার compute করতে key length `L` অনুযায়ী `O(L)` লাগে; তাই lookup-এর more precise expected bound `O(L + 1)`।
+
 ```cpp
 #include <bits/stdc++.h>
 using namespace std;
@@ -373,6 +375,8 @@ cherry: 3
 ```
 (লক্ষ্য করুন: `unordered_map` এর order প্রতিবার আলাদা/unpredictable হতে পারে, কিন্তু `map` সবসময় key অনুযায়ী sorted থাকে)
 
+উপরের `unordered_map` অংশটি **possible output**; compiler, standard-library implementation এবং rehash-এর কারণে actual order ভিন্ন হতে পারে।
+
 ---
 
 ### Why does TreeMap guarantee sorted order, and what is the trade-off in complexity?
@@ -384,6 +388,8 @@ cherry: 3
 - **TreeMap**: `O(log n)` lookup (BST height এর কারণে), কিন্তু sorted order এবং range query (যেমন "সব key যেগুলো x থেকে y এর মধ্যে") efficient ভাবে করা যায়
 
 তাই TreeMap ব্যবহার করলে আমরা **speed এর বিনিময়ে order** পাই — যদি sorted access দরকার না হয়, HashMap সবসময় দ্রুত।
+
+> **Practical note:** Hash map-এর expected asymptotic lookup দ্রুত, কিন্তু “সবসময় দ্রুত” নয়। ছোট dataset, adversarial collision, expensive hashing, iteration-heavy workload বা ordered/range query-তে tree map ভালো হতে পারে।
 
 ---
 

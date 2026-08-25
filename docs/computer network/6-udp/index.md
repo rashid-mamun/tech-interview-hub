@@ -4,6 +4,19 @@ title: 'UDP'
 ---
 
 ## 🚀 45. What is UDP, and how does it differ from TCP?
+
+```mermaid
+sequenceDiagram
+    participant S as Sender
+    participant N as Network
+    participant R as Receiver
+    S->>N: Datagram 1
+    S->>N: Datagram 2
+    N--xR: Datagram 1 lost
+    N->>R: Datagram 2 arrives
+    Note over S,R: UDP sends no ACK or retransmission
+    R-->>S: Optional app-level feedback
+```
 UDP হলো একটি **connectionless** transport layer protocol যেটা data পাঠায় কোনো prior connection establish না করেই।
 
 #### 🆚 UDP vs TCP — মূল পার্থক্য
@@ -142,7 +155,7 @@ Query → ← Response   ✅ মাত্র 2টা packet!
 #### 📦 ১. Response বড় হলে (512 bytes এর বেশি)
 ```text
 UDP response limit = 512 bytes (traditional)
-                   = 4096 bytes (EDNS0 দিয়ে extended)
+                   = negotiated larger size (EDNS(0); often about 1232 bytes to avoid fragmentation)
 ```
 যদি response এর size limit ছাড়িয়ে যায়:
 ```text
@@ -585,8 +598,8 @@ TCP-তে এটা সরাসরি সম্ভব না!
 
 ### 📏 What is the maximum size of a UDP datagram?
 ```text
-UDP Maximum Datagram Size = 65,507 bytes (data)
-                          = 65,535 bytes (UDP header সহ)
+IPv4-এ সাধারণ header ধরে maximum UDP payload = 65,507 bytes
+Maximum UDP datagram (header + payload)       = 65,515 bytes
 ```
 কোথা থেকে আসলো এই number?
 
@@ -608,12 +621,12 @@ UDP Header:
 
 তাহলে:
 ```text
-Total UDP size     = 65,535 bytes (length field এর max)
-UDP Header         =      8 bytes
-─────────────────────────────────
-Max Data (payload) = 65,527 bytes
+UDP length field max = 65,535 bytes (header + payload)
+UDP Header           =      8 bytes
+───────────────────────────────────
+Field-এর theoretical payload = 65,527 bytes
 
-কিন্তু আবার IP Header = 20 bytes বাদ দিলে:
+কিন্তু IPv4 packet-এর total-length limit থেকেও 20-byte minimum IP header বাদ যায়:
 65,535 - 8 - 20     = 65,507 bytes ← actual max data
 ```
 
@@ -663,7 +676,7 @@ Receiver এ reassemble হয় → তারপর UDP এ দেয়
 Network Type           MTU
 ─────────────────────────────────
 Ethernet (common)    1500 bytes  ← সবচেয়ে common
-WiFi (802.11)        2304 bytes
+Wi-Fi IP network     সাধারণত 1500 bytes
 PPPoE (DSL)          1492 bytes
 VPN (WireGuard)     ~1420 bytes
 Loopback (localhost) 65535 bytes
@@ -695,8 +708,8 @@ Use Case                   Recommended UDP Payload
 ──────────────────────────────────────────────────
 General / Safe Max         1472 bytes (Ethernet)
 DNS Query/Response          512 bytes (traditional)
-DNS with EDNS0             4096 bytes
-QUIC packets               1200 bytes (IPv6 safe)
+DNS with EDNS(0)         প্রায় 1232 bytes fragmentation এড়ানোর common target
+QUIC Initial datagram      কমপক্ষে 1200 bytes (এটি maximum নয়)
 Game packets            < 1400 bytes
 VPN tunneled data        < 1350 bytes (extra headers)
 ```
@@ -706,7 +719,7 @@ VPN tunneled data        < 1350 bytes (extra headers)
 #### 📊 Size Limits — Full Picture
 ```text
 ┌─────────────────────────────────────────┐
-│  Theoretical Max: 65,535 bytes          │
+│  UDP length-field max: 65,535 bytes     │
 │  ┌───────────────────────────────────┐  │
 │  │  Practical IP Max: 65,507 bytes   │  │
 │  │  ┌─────────────────────────────┐  │  │
@@ -749,6 +762,17 @@ Latency-sensitive কাজগুলোর বাইরেও কিছু গ�
 ---
 
 ## 📉 50. How does UDP handle packet loss in real-world scenarios?
+
+```mermaid
+flowchart LR
+    Packets[Media packets] --> Network
+    Network -->|most arrive| Buffer[Jitter buffer]
+    Network -. packet lost .-> Loss{Application policy}
+    Loss --> FEC[FEC reconstruction]
+    Loss --> Skip[Skip obsolete update]
+    Loss --> Key[Request keyframe]
+    FEC & Skip & Key --> Playback[Continue playback]
+```
 শর্টকাট কথা হলো, **UDP নিজে নিজে কোনো packet loss handle করে না।**
 
 Packet হারিয়ে গেলে সেটি হারিয়েই গেছে — UDP তা recover করতে যায় না বা পুনরায় পাঠানোর কোনো চেষ্টাই করে না। যদি packet loss deal করতে হয়, তবে তা application layer-এর কোড বা software-এর নিজস্ব logic দিয়ে নিয়ন্ত্রণ করতে হয়।
@@ -773,6 +797,15 @@ Application layer-এ packet loss handle করার আধুনিক techniq
 ---
 
 ## 👨‍💻 51. How do backend developers implement UDP for custom real-time applications?
+
+```mermaid
+flowchart LR
+    Socket[UDP socket] --> Parse[Validate and parse datagram]
+    Parse --> Seq[Sequence and duplicate check]
+    Seq --> Logic[Real-time application logic]
+    Logic --> Send[Send response datagram]
+    Seq -. optional reliability .-> Retry[ACK, timeout, retransmit]
+```
 Backend developers সাধারণত Node.js (যেমন `dgram` module), Go, বা C++ ব্যবহার করে custom UDP server তৈরি করেন। এতে খুব basic level-এ socket তৈরি করে ডেটা read এবং write করতে হয়।
 
 ---

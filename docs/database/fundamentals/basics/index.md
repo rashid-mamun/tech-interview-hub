@@ -3,9 +3,17 @@ sidebar_position: 1
 title: 'Basics'
 ---
 
+
 # Database Fundamentals
 
 ## ১. What is a database?
+
+```mermaid
+flowchart LR
+    App[Application] --> DBMS[DBMS]
+    DBMS --> Data[(Stored data)]
+    DBMS --> Log[(Transaction log)]
+```
 
 **Database** হলো একটি structured collection of data যেটা systematically store, manage এবং retrieve করা যায়। অর্থাৎ, data যাতে সহজে **insert, update, delete, query** করা যায়, সেজন্য database ব্যবহৃত হয়।
 
@@ -122,14 +130,16 @@ RETURN friend.name, friend.age
 
 | **বিষয়** | **DBMS** | **RDBMS** |
 |-----------|----------|------------|
-| **Data Structure** | File-based storage | Table-based storage with rows and columns |
-| **Relationships** | Data এর মধ্যে কোনো relationship নেই | Table গুলোর মধ্যে relationship support করে |
-| **Normalization** | Support করে না | Full normalization support |
-| **ACID Properties** | Limited বা কোনো ACID support নেই | Complete ACID compliance |
-| **SQL Support** | Basic বা limited SQL | Full SQL support with advanced features |
-| **Data Integrity** | Basic integrity constraint | Advanced integrity এবং validation rule |
-| **Scalability** | Limited scalability | High scalability option |
-| **Examples** | File system, XML database | MySQL, Oracle, PostgreSQL, SQL Server |
+| **Data Structure** | Relational হওয়া বাধ্যতামূলক নয়; hierarchical, graph, document ইত্যাদি model হতে পারে | Table-based relational model (row ও column) |
+| **Relationships** | Model/product অনুযায়ী relationship support ভিন্ন | Key ও relational constraint দিয়ে relationship model করে |
+| **Normalization** | Non-relational model-এ relational normalization প্রযোজ্য নাও হতে পারে | Relational schema-তে normalization ব্যবহার করা যায় |
+| **ACID Properties** | Engine ও configuration অনুযায়ী support ভিন্ন | Transactional engine সাধারণত ACID transaction দেয় |
+| **SQL Support** | SQL থাকা বাধ্যতামূলক নয় | SQL হলো standard interface; dialect ভিন্ন হতে পারে |
+| **Data Integrity** | Product/model অনুযায়ী validation ও constraint থাকে | Declarative keys, constraints ও transaction support থাকে |
+| **Scalability** | Architecture/product অনুযায়ী | Architecture/product অনুযায়ী; vertical ও horizontal দুটোই সম্ভব |
+| **Examples** | MongoDB, Neo4j, IBM IMS, Microsoft Access | MySQL, Oracle, PostgreSQL, SQL Server |
+
+> **নোট:** File system নিজে DBMS নয়। DBMS data define, query, update, security ও concurrency manage করে; RDBMS হলো তার relational উপশ্রেণি।
 
 **RDBMS** হলো DBMS এর একটি advanced version যেখানে data table এ store করা হয় established relationship সহ, যা better data integrity এবং sophisticated querying capability প্রদান করে।
 

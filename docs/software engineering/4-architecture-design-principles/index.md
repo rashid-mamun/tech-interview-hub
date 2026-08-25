@@ -5,6 +5,13 @@ title: 'Architecture and Design Principles'
 
 ## 22. What is software architecture, and how does it differ from software design?
 
+```mermaid
+flowchart TB
+    Goals[Business goals and quality attributes] --> Architecture[Architecture: systems, boundaries and major decisions]
+    Architecture --> Design[Design: classes, APIs and algorithms]
+    Design --> Code[Implementation]
+```
+
 **Software Architecture** হলো একটি system এর **high-level structure** — অর্থাৎ system টি কোন কোন major component/module নিয়ে গঠিত, সেগুলো একে অপরের সাথে কীভাবে **interact** করে, এবং overall system কীভাবে সংগঠিত। এটি মূলত **"big picture" decisions** নিয়ে কাজ করে, যা পরবর্তীতে পরিবর্তন করা কঠিন এবং costly।
 
 **Software Design** এর তুলনায় Architecture বেশি abstract এবং **strategic**, যেখানে Design বেশি concrete এবং **tactical**। 
@@ -43,6 +50,13 @@ title: 'Architecture and Design Principles'
 
 ## 23. What is the difference between high-level design (HLD) and low-level design (LLD)?
 
+```mermaid
+flowchart TB
+    HLD[HLD: services, data stores, integrations, deployment] --> Service[Selected service]
+    Service --> LLD[LLD: classes, methods, schemas and error handling]
+    LLD --> Code
+```
+
 | বিষয় | **HLD** | **LLD** |
 |---|---|---|
 | **Level** | System-wide, architectural view | Module/component-level, detailed |
@@ -72,6 +86,21 @@ title: 'Architecture and Design Principles'
 ---
 
 ## 24. What is the difference between a monolithic architecture and a microservices architecture?
+
+```mermaid
+flowchart LR
+    subgraph Monolith
+      MUI[UI] --> MOrder[Order module]
+      MOrder --> MPayment[Payment module]
+      MPayment --> MDB[(Shared database)]
+    end
+    subgraph Services
+      Gateway[API gateway] --> Order[Order service]
+      Gateway --> Payment[Payment service]
+      Order --> ODB[(Order data)]
+      Payment --> PDB[(Payment data)]
+    end
+```
 
 **Monolithic Architecture:**
 পুরো application টি **একটি single, unified codebase এবং deployment unit** হিসেবে তৈরি হয়। সব feature/module (UI, business logic, database access) একসাথে একটি process এ চলে এবং একসাথেই deploy হয়।
@@ -112,7 +141,15 @@ Monolith এর তুলনায় Microservices এ সাধারণত **
 
 ---
 
-## 25. What is layered (n-tier) architecture, and what are its common layers?s
+## 25. What is layered (n-tier) architecture, and what are its common layers?
+
+```mermaid
+flowchart TD
+    Presentation[Presentation layer] --> Application[Application layer]
+    Application --> Business[Business or domain layer]
+    Business --> Persistence[Persistence layer]
+    Persistence --> Database[(Database)]
+```
 
 **Layered Architecture** হলো একটি architectural pattern, যেখানে system কে বিভিন্ন **horizontal layer** এ ভাগ করা হয়, এবং প্রতিটি layer এর একটি নির্দিষ্ট responsibility থাকে। প্রতিটি layer শুধুমাত্র তার **ঠিক নিচের layer** এর সাথে interact করে (strict layering এ), যা **separation of concerns** নিশ্চিত করে।
 
@@ -147,6 +184,15 @@ Monolith এর তুলনায় Microservices এ সাধারণত **
 
 ## 26. What is MVC (Model-View-Controller), and how does it separate concerns?
 
+```mermaid
+flowchart LR
+    User[User] --> Controller[Controller]
+    Controller --> Model[Model]
+    Model --> View[View]
+    Controller --> View
+    View --> User
+```
+
 **MVC** হলো একটি architectural pattern, যা একটি application কে তিনটি আলাদা, interconnected component এ ভাগ করে:
 
 - **Model** — application এর **data এবং business logic** handle করে। Database এর সাথে interact করে, data validate করে, এবং business rule implement করে। এটি View বা Controller সম্পর্কে কিছুই জানে না
@@ -154,7 +200,7 @@ Monolith এর তুলনায় Microservices এ সাধারণত **
 - **Controller** — User এর **input গ্রহণ** করে (যেমন button click, form submit), Model কে প্রয়োজনীয় data update করতে বলে, এবং তারপর সঠিক View render করার নির্দেশ দেয়। এটি Model এবং View এর মধ্যে **middleman** হিসেবে কাজ করে
 
 **Separation of Concerns কীভাবে হয়:**
-- Data logic (Model), presentation logic (View), এবং control flow logic (Controller) — সম্পূর্ণভাবে আলাদা থাকার কারণে, একটি অংশে change করলে অন্য অংশ প্রভাবিত হয় না
+- Data/domain, presentation এবং request/control responsibility আলাদা রাখায় change impact কমানো যায়। বাস্তবে shared contract ও framework dependency থাকায় একটি অংশের change অন্যটিকে প্রভাবিত করতেই পারে।
 - একাধিক developer **parallel-ভাবে** কাজ করতে পারেন (একজন UI নিয়ে, একজন business logic নিয়ে)
 - একই Model এর জন্য একাধিক View তৈরি করা সহজ হয় (যেমন web view, mobile view)
 - Testing সহজ হয়, কারণ business logic (Model) কে UI থেকে আলাদাভাবে test করা যায়
@@ -168,7 +214,7 @@ Monolith এর তুলনায় Microservices এ সাধারণত **
 | **Middle Component** | Controller | Presenter | ViewModel |
 | **View এর Role** | তুলনামূলক active — user input Controller এ পাঠায় | সম্পূর্ণ passive — সব logic Presenter এ থাকে | Passive, কিন্তু **data binding** এর মাধ্যমে ViewModel এর সাথে automatically sync থাকে |
 | **View-Middle Communication** | Controller View select করে render করার জন্য বলে (এক-মুখী নির্দেশ) | Presenter এবং View এর মধ্যে **সরাসরি reference** থাকে (interface এর মাধ্যমে) | View এবং ViewModel এর মধ্যে **data binding** (two-way binding সম্ভব), সরাসরি reference লাগে না |
-| **Testability** | মাঝারি — Controller প্রায়ই View এর সাথে জড়িয়ে থাকে | ভালো — Presenter কে View থেকে আলাদা করে test করা যায় (interface mock করে) | সবচেয়ে ভালো — ViewModel সম্পূর্ণভাবে View থেকে independent, easily unit-testable |
+| **Testability** | Framework ও controller boundary অনুযায়ী | Presenter interface isolate করলে ভালো | ViewModel UI framework থেকে আলাদা থাকলে ভালো; data-binding code-ও test দরকার |
 | **সাধারণ ব্যবহার** | Web application (Ruby on Rails, ASP.NET MVC, Django) | Android (পুরনো ধরনে), Desktop application | WPF, Angular, এবং modern frontend framework যেখানে data binding সমর্থিত |
 
 **মূল পার্থক্য সংক্ষেপে:** MVC তে Controller View নির্বাচন করে, MVP তে Presenter এবং View interface এর মাধ্যমে সরাসরি যোগাযোগ করে, আর MVVM তে ViewModel এবং View এর মধ্যে **automatic data binding** থাকে, যা explicit update code লেখার প্রয়োজন কমিয়ে দেয়।
@@ -176,6 +222,13 @@ Monolith এর তুলনায় Microservices এ সাধারণত **
 ---
 
 ## 27. What is the difference between synchronous and asynchronous communication between services?
+
+```mermaid
+flowchart TD
+    Caller[Caller service] -->|request and wait| Sync[Called service]
+    Producer[Producer] -->|publish event| Broker[(Message broker)]
+    Broker -->|deliver later| Consumer[Consumer]
+```
 
 **Synchronous Communication:**
 এক service যখন অন্য service কে call করে, তখন caller **অপেক্ষা করে (blocked থাকে)** যতক্ষণ না response পাওয়া যায়। যেমন সাধারণ **REST API call (HTTP request-response)**।
@@ -198,18 +251,25 @@ Caller request পাঠিয়ে **response এর জন্য অপেক
 **Asynchronous Communication এর সাথে সম্পর্ক:**
 - Event-Driven Architecture মূলত **asynchronous communication এর একটি বাস্তবায়ন (implementation)** — Event publish করার পর producer আর অপেক্ষা করে না, consumer রা নিজেদের সময়মতো event process করে
 - এটি সাধারণত **Message Broker/Event Bus** (Kafka, RabbitMQ, AWS SNS/SQS) ব্যবহার করে বাস্তবায়িত হয়
-- Producer এবং Consumer একে অপরকে **চেনে না** (know করে না) — শুধু event এর format জানে, যা extreme level এর **loose coupling** নিশ্চিত করে
+- Producer এবং Consumer সরাসরি runtime reference নাও রাখতে পারে, কিন্তু event schema, semantics, ordering এবং delivery contract-এর মাধ্যমে এখনও coupled থাকে। Coupling কমে, শূন্য হয় না।
 - একটি event এ একাধিক consumer subscribe থাকতে পারে, যা **scalability এবং extensibility** বাড়ায় (নতুন consumer যোগ করলে producer এ কোনো change লাগে না)
 
 ---
 
 ## 28. What is the difference between tightly coupled and loosely coupled systems?
 
+```mermaid
+flowchart TB
+    A[Tightly coupled A] -->|direct internal dependency| B[Tightly coupled B]
+    P[Producer] --> Contract[Stable API or event contract]
+    Contract --> C[Loosely coupled consumer]
+```
+
 **Tightly Coupled System:**
 এখানে একটি component/module **সরাসরি এবং গভীরভাবে** অন্য component এর উপর নির্ভরশীল — এদের implementation details একে অপরের সাথে জড়িয়ে থাকে। একটি অংশে change করলে অন্য অংশেও change করতে হয়।
 
 **Loosely Coupled System:**
-এখানে component গুলো একে অপরের সাথে **minimal, well-defined interface/contract** এর মাধ্যমে যুক্ত থাকে, এবং একে অপরের **internal implementation সম্পর্কে জানে না**। একটি component পরিবর্তন করলে, interface অপরিবর্তিত থাকলে অন্য component প্রভাবিত হয় না।
+এখানে component গুলো **well-defined contract** দিয়ে যুক্ত থাকে এবং internal implementation কম জানে। Contract syntactically unchanged থাকলেও behavior, latency বা failure semantics বদলালে consumer প্রভাবিত হতে পারে—compatibility test প্রয়োজন।
 
 | বিষয় | Tightly Coupled | Loosely Coupled |
 |---|---|---|
@@ -234,7 +294,7 @@ Caller request পাঠিয়ে **response এর জন্য অপেক
 - **Single Responsibility** বজায় থাকে — একটি class শুধু তার নিজের কাজে মনোযোগ দেয়, dependency তৈরি বা manage করার দায়িত্ব তার উপর থাকে না
 
 **উদাহরণ:**
-```
+```java
 // Tightly Coupled (Dependency নিজে তৈরি করছে)
 class OrderService {
     private PaymentGateway gateway = new StripeGateway(); // hardcoded
@@ -253,6 +313,14 @@ class OrderService {
 ---
 
 ## 29. What is "separation of concerns," and why is it a foundational design principle?
+
+```mermaid
+flowchart LR
+    UI[Presentation concern] --> API[Application concern]
+    API --> Domain[Business concern]
+    Domain --> Data[Persistence concern]
+    Change[UI change] -. limited impact .-> UI
+```
 
 **Separation of Concerns (SoC)** হলো একটি design principle, যেখানে একটি system কে এমনভাবে ভাগ করা হয় যাতে **প্রতিটি অংশ (module/component/class) শুধুমাত্র একটি নির্দিষ্ট, well-defined responsibility বা "concern"** নিয়ে কাজ করে, এবং একে অপরের কাজের সাথে যতটা সম্ভব কম জড়িয়ে থাকে।
 
@@ -303,6 +371,15 @@ class UserController {
 সঠিক approach হবে এই কাজ গুলোকে আলাদা আলাদা class/layer এ ভাগ করা: `UserValidator` (validation), `UserRepository` (database access), `EmailService` (notification), এবং `UserController` শুধু এই সবগুলোকে coordinate করবে।
 
 ## 30. What does DRY (Don't Repeat Yourself) mean, and what problems can violating it cause?
+
+```mermaid
+flowchart LR
+    Rule[Business rule] --> Copy1[Duplicate implementation A]
+    Rule --> Copy2[Duplicate implementation B]
+    Copy1 & Copy2 --> Drift[Inconsistent future changes]
+    Rule --> Single[Single authoritative abstraction]
+    Single --> Reuse[Reuse without knowledge duplication]
+```
 
 **DRY (Don't Repeat Yourself)** হলো একটি software design principle, যা বলে — **"প্রতিটি knowledge বা logic এর একটি single, unambiguous, authoritative representation থাকা উচিত"** একটি system এর মধ্যে। অর্থাৎ একই business logic, algorithm, বা information কে একাধিক জায়গায় copy-paste না করে, একটি **single, reusable জায়গায়** রাখা উচিত এবং প্রয়োজনে সেখান থেকে reference করা উচিত।
 
@@ -372,6 +449,14 @@ Unit test এ প্রায়ই কিছুটা duplication (setup code, 
 
 ## 31. What does KISS (Keep It Simple, Stupid) mean in the context of software design?
 
+```mermaid
+flowchart TD
+    Problem --> Simple{Simplest design meeting current constraints}
+    Simple --> Clear[Clear behavior and fewer failure modes]
+    Problem --> Clever[Unnecessary abstraction or indirection]
+    Clever --> Cost[More testing, debugging and maintenance cost]
+```
+
 **KISS (Keep It Simple, Stupid)** হলো একটি design principle, যা বলে — সমাধান যতটা সম্ভব **সহজ (simple) এবং straightforward** রাখা উচিত, অপ্রয়োজনীয় complexity এড়িয়ে। এই নীতির মূল কথা হলো, একটি সমস্যার জন্য যদি একটি সহজ সমাধান কাজ করে, তাহলে অহেতুক জটিল, "clever," বা over-engineered সমাধান বেছে নেওয়া উচিত নয়।
 
 **KISS এর মূল ভাবনা:**
@@ -410,7 +495,16 @@ Extensibility যোগ করার একটি cost আছে (development ti
 **সংক্ষেপে:** সবচেয়ে ভালো approach হলো — **"as simple as possible, but not simpler"** (Einstein এর একটি বিখ্যাত উক্তির অনুপ্রেরণায়)। অর্থাৎ simplicity কে default হিসেবে ধরে নেওয়া, এবং extensibility শুধুমাত্র তখনই যোগ করা, যখন এর জন্য **concrete, justified প্রয়োজন** থাকে — speculative future-proofing না করে।
 
 
-## ৩২. SOLID Principles কী এবং প্রতিটি Letter কী বোঝায়
+## 32. SOLID Principles কী এবং প্রতিটি Letter কী বোঝায়
+
+```mermaid
+flowchart TD
+    SOLID[SOLID] --> S[SRP: one reason to change]
+    SOLID --> O[OCP: extend through stable abstractions]
+    SOLID --> L[LSP: preserve substitutability]
+    SOLID --> I[ISP: focused client contracts]
+    SOLID --> D[DIP: depend on abstractions]
+```
 
 **SOLID** হলো object-oriented software design এর পাঁচটি core principle এর একটি **acronym**, যা Robert C. Martin (Uncle Bob) প্রস্তাব করেছিলেন এবং পরে Michael Feathers সংক্ষেপে "SOLID" নামে পরিচিত করেন। এই পাঁচটি principle একসাথে মেনে চললে code **maintainable, extensible, এবং testable** হয় — অর্থাৎ এগুলো মূলত আগে আলোচনা করা **Separation of Concerns এবং loose coupling** এর ধারণাকে concrete, actionable rule এ রূপান্তরিত করে।
 
@@ -574,7 +668,7 @@ class OrderService {
 }
 ```
 
-**কেন গুরুত্বপূর্ণ:** DIP মেনে চললে high-level business logic, low-level implementation detail (যেমন কোন database ব্যবহার হচ্ছে) থেকে সম্পূর্ণ স্বাধীন থাকে — database পরিবর্তন করলেও (MySQL থেকে PostgreSQL) `OrderService` এর কোনো code change লাগে না, শুধু `Database` interface এর একটি নতুন implementation দিলেই হয়।
+**কেন গুরুত্বপূর্ণ:** DIP high-level business logic-কে low-level implementation detail থেকে isolate করে। MySQL থেকে PostgreSQL বদলালে `OrderService` অপরিবর্তিত থাকতে পারে, তবে adapter/query, transaction semantics, migration এবং configuration বদলাতে হতে পারে—abstraction migration cost শূন্য করে না।
 
 ---
 
@@ -592,7 +686,7 @@ SOLID এর পাঁচটি principle আলাদা হলেও, এর�
 
 
 
-## 33. What does YAGNI (You Aren't Gonna Need It) mean?
+## Supplemental: What does YAGNI (You Aren't Gonna Need It) mean?
 
 **YAGNI (You Aren't Gonna Need It)** হলো একটি software design principle, যা **Extreme Programming (XP)** থেকে উদ্ভূত। এর মূল কথা হলো — **"শুধুমাত্র সেই functionality/feature implement করা উচিত, যা বর্তমানে actually প্রয়োজন, ভবিষ্যতে হয়তো লাগতে পারে এমন কিছু আগে থেকে তৈরি করা উচিত নয়"**।
 
@@ -633,6 +727,6 @@ SOLID এর পাঁচটি principle আলাদা হলেও, এর�
 | **Over-engineering (anti-pattern)** | অনুমানিক future flexibility এর জন্য অতিরিক্ত জটিল architecture/design তৈরি করা |
 | **Premature Optimization (anti-pattern)** | অনুমানিক performance issue এর জন্য আগে থেকে জটিল optimization করা |
 
-YAGNI মূলত এই দুই anti-pattern এর বিরুদ্ধে একটি **guiding principle** হিসেবে কাজ করে — এটি developer দের মনে করিয়ে দেয় যে, **"simple, working solution now"** সবসময় **"complex, speculative solution for hypothetical future"** এর চেয়ে ভালো। যখন actual প্রয়োজন দেখা দেবে (নতুন requirement আসবে, বা actual performance measurement এ bottleneck ধরা পড়বে), তখনই সেই সমস্যার সমাধান করা উচিত — আগে থেকে অনুমান করে নয়।
+YAGNI speculative complexity-এর বিরুদ্ধে guiding principle। বর্তমান evidence মেটানো simple solution default হওয়া ভালো, তবে known regulatory, safety, migration বা irreversible architecture constraint আগেই design করা লাগতে পারে। এটি foreseeable risk উপেক্ষা করার অজুহাত নয়।
 
 এটি সরাসরি **Agile philosophy** এর সাথেও সামঞ্জস্যপূর্ণ, যেখানে emphasis দেওয়া হয় **working software** এবং **responding to change** এর উপর, বিস্তারিত upfront planning এবং speculative design এর বদলে — কারণ Agile মনে করে, ভবিষ্যতের সঠিক প্রয়োজন আসলে **iteration এর মাধ্যমেই** best বোঝা যায়, আগে থেকে অনুমান করে নয়।

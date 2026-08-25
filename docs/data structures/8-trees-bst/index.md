@@ -194,6 +194,8 @@ Balanced BST:                 Skewed BST:
 
 Balanced tree এর height `log n`, তাই search/insert/delete `O(log n)`। Skewed tree linked list এর মতো হয়ে গেলে height `n`, তাই operation `O(n)` হয়ে যায়।
 
+> **Terminology note:** প্রতিটি node-এর height difference সর্বোচ্চ 1 হওয়া বিশেষভাবে **height-balanced/AVL-style** condition। Red-Black Tree-এর মতো অন্য balanced BST একই local rule মানে না, কিন্তু overall height `O(log n)` guarantee করে।
+
 ---
 
 ## 🚶 43. What are the different tree traversal methods?
@@ -716,6 +718,7 @@ string serialize(Node* root) {
 }
 
 Node* deserializeHelper(queue<string>& tokens) {
+    if (tokens.empty()) throw invalid_argument("Malformed serialized tree");
     string token = tokens.front();
     tokens.pop();
 
@@ -736,7 +739,11 @@ Node* deserialize(string data) {
         tokens.push(token);
     }
 
-    return deserializeHelper(tokens);
+    if (tokens.empty()) return nullptr;
+
+    Node* root = deserializeHelper(tokens);
+    if (!tokens.empty()) throw invalid_argument("Extra serialization tokens");
+    return root;
 }
 ```
 
@@ -745,3 +752,95 @@ Node* deserialize(string data) {
 
 ---
 
+## 🧪 Complete binary-tree example
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+struct Node {
+    int value;
+    Node* left;
+    Node* right;
+    explicit Node(int value) : value(value), left(nullptr), right(nullptr) {}
+};
+
+void preorder(Node* root) {
+    if (root == nullptr) return;
+    cout << root->value << ' ';
+    preorder(root->left);
+    preorder(root->right);
+}
+
+void inorder(Node* root) {
+    if (root == nullptr) return;
+    inorder(root->left);
+    cout << root->value << ' ';
+    inorder(root->right);
+}
+
+void postorder(Node* root) {
+    if (root == nullptr) return;
+    postorder(root->left);
+    postorder(root->right);
+    cout << root->value << ' ';
+}
+
+int height(Node* root) {
+    if (root == nullptr) return 0;
+    return 1 + max(height(root->left), height(root->right));
+}
+
+void levelOrder(Node* root) {
+    if (root == nullptr) return;
+    queue<Node*> pending;
+    pending.push(root);
+    while (!pending.empty()) {
+        Node* current = pending.front();
+        pending.pop();
+        cout << current->value << ' ';
+        if (current->left) pending.push(current->left);
+        if (current->right) pending.push(current->right);
+    }
+}
+
+int main() {
+    Node* root = new Node(1);
+    root->left = new Node(2);
+    root->right = new Node(3);
+    root->left->left = new Node(4);
+    root->left->right = new Node(5);
+
+    cout << "Pre-order: "; preorder(root);
+    cout << "\nIn-order: "; inorder(root);
+    cout << "\nPost-order: "; postorder(root);
+    cout << "\nLevel-order: "; levelOrder(root);
+    cout << "\nHeight: " << height(root) << '\n';
+    return 0;
+}
+```
+
+**Sample output**
+
+```text
+Pre-order: 1 2 4 5 3
+In-order: 4 2 5 1 3
+Post-order: 4 5 2 3 1
+Level-order: 1 2 3 4 5
+Height: 3
+```
+
+### Traversal diagram
+
+```text
+          1
+        /   \
+       2     3
+      / \
+     4   5
+
+Pre-order   Root → Left → Right   1 2 4 5 3
+In-order    Left → Root → Right   4 2 5 1 3
+Post-order  Left → Right → Root   4 5 2 3 1
+Level-order level by level        1 2 3 4 5
+```

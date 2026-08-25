@@ -5,6 +5,12 @@ title: 'SDLC Models and Methodologies'
 
 ## 1. What is the SDLC, and what are its typical phases?
 
+```mermaid
+flowchart LR
+    Plan --> Requirements --> Design --> Build --> Test --> Deploy --> Operate
+    Operate -. feedback and change .-> Plan
+```
+
 **SDLC** হলো একটি structured process বা framework, যা কোনো software তৈরি করার সময় অনুসরণ করা হয়। এটি একটি software কে idea থেকে শুরু করে সম্পূর্ণ deployment এবং maintenance পর্যন্ত পুরো journey কে systematic ভাবে পরিচালনা করার জন্য ব্যবহৃত হয়। SDLC অনুসরণ করলে software এর quality ভালো হয়, cost এবং time কমে যায়, এবং team members দের মধ্যে coordination সহজ হয়।
 
 ```text
@@ -29,10 +35,10 @@ Requirements -> Design -> Development -> Testing -> Release -> Maintenance
 Requirement gathering শেষ হওয়ার পর system এর architecture তৈরি করা হয়। এখানে database design, UI/UX design, system architecture, এবং technical specifications ঠিক করা হয়।
 
 **iii. Implementation (Coding/Development)**
-এই phase-এ developer রা actual code লেখা শুরু করেন, design অনুযায়ী। এটাই SDLC এর সবচেয়ে বেশি সময় নেওয়া phase।
+এই phase-এ team design ও acceptance criteria অনুযায়ী code/configuration তৈরি করে। কোন phase সবচেয়ে বেশি সময় নেবে তা product, domain, reuse এবং operational context-এর ওপর নির্ভর করে।
 
 **iv. Testing**
-Code লেখার পর সেটাকে বিভিন্ন ধরনের testing এর মধ্য দিয়ে যেতে হয় — যেমন unit testing, integration testing, system testing, এবং user acceptance testing (UAT) — যাতে bugs বা errors খুঁজে বের করে ঠিক করা যায়।
+Verification পুরো lifecycle জুড়েই হওয়া উচিত: developer code-এর সঙ্গে unit test লেখে, integration/system test increment যাচাই করে এবং acceptance activity stakeholder need validate করে। Sequential model-এ dedicated test phase পরে হতে পারে, কিন্তু testing শুধু coding শেষের কাজ নয়।
 
 **v. Deployment**
 Testing সফলভাবে সম্পন্ন হওয়ার পর software টি production environment-এ release করা হয়, যেখানে actual end-user রা এটি ব্যবহার করতে পারবেন।
@@ -95,6 +101,15 @@ Result:         clearer requirement before production bug.
 
 ## 2. What is the Waterfall model, and what are its sequential phases?
 
+```mermaid
+flowchart LR
+    R[Requirements baseline] --> D[System design]
+    D --> I[Implementation]
+    I --> T[System testing]
+    T --> Deploy[Deployment]
+    Deploy --> M[Maintenance]
+```
+
 **Waterfall Model** হলো SDLC এর সবচেয়ে পুরনো এবং সবচেয়ে traditional model। এটি একটি **linear এবং sequential approach**, যেখানে একটি phase সম্পূর্ণভাবে শেষ না হওয়া পর্যন্ত পরের phase শুরু হয় না — অনেকটা ঝর্ণা (waterfall) থেকে পানি নিচের দিকে একটি নির্দিষ্ট ধারায় পড়ার মতো, তাই এই নাম।
 
 **Sequential Phases:**
@@ -145,6 +160,22 @@ Waterfall মডেল এখনও নিচের ক্ষেত্রে ভ
 
 **V-Model** (Verification and Validation Model) হলো Waterfall model এর একটি extension, যেখানে প্রতিটি **development phase এর সাথে একটি corresponding testing phase** যুক্ত করা হয়। এই কারণে diagram টি "V" আকৃতির হয় — বাম দিকে development phases নিচের দিকে নামে, আর ডান দিকে testing phases উপরের দিকে ওঠে।
 
+```mermaid
+flowchart TD
+    Requirements[Requirements] --> SystemDesign[System design]
+    SystemDesign --> Architecture[Architecture design]
+    Architecture --> Module[Module design]
+    Module --> Code[Code]
+    Code --> Unit[Unit test]
+    Unit --> Integration[Integration test]
+    Integration --> System[System test]
+    System --> Acceptance[Acceptance test]
+    Module -. plans .-> Unit
+    Architecture -. plans .-> Integration
+    SystemDesign -. plans .-> System
+    Requirements -. plans .-> Acceptance
+```
+
 **V-Model এ প্রতিটি Development Phase এর সাথে Testing Phase এর Pairing:**
 
 | Development Phase (বাম পাশ) | Corresponding Testing Phase (ডান পাশ) |
@@ -164,6 +195,14 @@ Waterfall মডেল এখনও নিচের ক্ষেত্রে ভ
 
 ---
 ## 3. What is the Iterative and Incremental model, and how does it differ from Waterfall?
+
+```mermaid
+flowchart LR
+    Core[Increment 1: core workflow] --> Feedback1[User feedback]
+    Feedback1 --> Next[Increment 2: payment]
+    Next --> Feedback2[User feedback]
+    Feedback2 --> More[Increment 3: reporting]
+```
 
 **Iterative and Incremental Model** হলো এমন একটি SDLC approach, যেখানে পুরো software টি একবারে সম্পূর্ণভাবে তৈরি না করে, ছোট ছোট অংশে ভাগ করে **repeated cycles বা iterations** এর মাধ্যমে ধীরে ধীরে তৈরি করা হয়। প্রতিটি iteration-এ requirement analysis, design, coding, এবং testing — এই সবগুলো mini-phase পার হয়ে একটি **working version** তৈরি হয়, যা আগের version এর উপর নতুন feature যোগ করে।
 
@@ -212,6 +251,15 @@ Waterfall-এ পুরো project এর success নির্ভর করে �
 
 ## 4. What is the Spiral model, and how does it incorporate risk management into the SDLC?
 
+```mermaid
+flowchart LR
+    Objectives[Set objectives] --> Risks[Identify and reduce risks]
+    Risks --> Engineer[Build and verify increment]
+    Engineer --> Evaluate[Stakeholder evaluation]
+    Evaluate --> Plan[Plan next loop]
+    Plan --> Objectives
+```
+
 **Spiral Model** হলো Barry Boehm প্রস্তাবিত একটি SDLC model, যা **Waterfall model এর systematic, controlled approach** এবং **Iterative model এর flexibility** — এই দুটোকে একসাথে combine করে, সাথে যোগ করে একটি শক্তিশালী **risk analysis এবং risk management** component। এটিকে "spiral" বলা হয় কারণ এর diagram টা দেখতে একটি ঘূর্ণায়মান spiral বা কুণ্ডলীর মতো, যেখানে প্রতিটি loop project এর একটি phase কে represent করে এবং কেন্দ্র থেকে বাইরের দিকে যত যাওয়া হয়, project তত বেশি matured এবং complete হতে থাকে।
 
 Spiral Model-এ risk management টা কোনো আলাদা বা optional activity নয় — এটি **প্রতিটি loop এর একটি core, mandatory অংশ**। প্রতিটি iteration শুরু করার আগে সম্ভাব্য risk গুলো (technical risk, cost risk, schedule risk, ইত্যাদি) চিহ্নিত করা হয়, সেগুলোর impact analyze করা হয়, এবং সেই risk কমানোর জন্য **prototype তৈরি, simulation, বা feasibility study** করা হয়। যদি কোনো risk অত্যধিক বেশি মনে হয়, তাহলে সেই পর্যায়েই project বন্ধ করে দেওয়ার সিদ্ধান্তও নেওয়া যেতে পারে — এতে বড় ধরনের ক্ষতি এড়ানো যায়।
@@ -254,6 +302,15 @@ Spiral Model-এ কোনো fixed সংখ্যক loop নির্ধা�
 
 ---
 ## 5. What is the Prototype model, and when is it useful?
+
+```mermaid
+flowchart LR
+    Unclear[Unclear requirement] --> Prototype[Build prototype]
+    Prototype --> Evaluate[User evaluation]
+    Evaluate --> Refine[Refine requirement]
+    Refine -->|another experiment| Prototype
+    Refine --> Baseline[Approved requirement baseline]
+```
 
 **Prototype Model** হলো এমন একটি SDLC approach, যেখানে সম্পূর্ণ software তৈরি করার আগে একটি **working sample বা prototype** তৈরি করা হয়, যা মূল system এর সীমিত কিন্তু functional একটি version। এই prototype টি client বা end-user দের দেখানো হয়, তাদের কাছ থেকে **feedback** নেওয়া হয়, এবং সেই feedback এর ভিত্তিতে prototype টি refine করা হয় — যতক্ষণ না requirement গুলো পুরোপুরি clear এবং accurate হয়ে যায়। এরপর সেই finalized requirement অনুযায়ী actual, full-fledged system develop করা হয়।
 
@@ -298,6 +355,14 @@ Spiral Model-এ কোনো fixed সংখ্যক loop নির্ধা�
 ---
 
 ## 6. What is the Rapid Application Development (RAD) model?
+
+```mermaid
+flowchart LR
+    Scope[Requirements planning] --> Workshops[User design workshops]
+    Workshops --> Construction[Time-boxed construction]
+    Construction --> Cutover[Test data conversion and release]
+    Cutover -->|feedback for next release| Workshops
+```
 
 **Rapid Application Development (RAD)** হলো একটি SDLC model, যেখানে মূল লক্ষ্য থাকে **দ্রুততম সময়ে high-quality software develop করা**, traditional Waterfall এর মতো দীর্ঘ planning এবং rigid documentation এর উপর জোর না দিয়ে। এই model টি James Martin প্রস্তাব করেছিলেন। RAD-এ **minimal planning** এবং **maximum prototyping** এর মাধ্যমে দ্রুত development করা হয়, এবং heavy emphasis দেওয়া হয় **user feedback** এবং **iterative refinement** এর উপর।
 
@@ -348,13 +413,21 @@ RAD Model সাধারণত নিচের ধরনের project-এ ভ�
 
 ## 7. How would you compare Waterfall, Spiral, Iterative, and Agile models in terms of flexibility, risk handling, and customer involvement?
 
+```mermaid
+flowchart TB
+    Need{Project characteristic} -->|stable scope| Waterfall
+    Need -->|high technical risk| Spiral
+    Need -->|deliver in evolving increments| Iterative
+    Need -->|frequent customer feedback| Agile
+```
+
 | বিষয় | **Waterfall** | **Spiral** | **Iterative** | **Agile** |
 |---|---|---|---|---|
-| **Flexibility** | সবচেয়ে কম — requirement fix হয়ে গেলে change করা কঠিন এবং costly | মাঝারি — প্রতিটি loop এ নতুন direction নেওয়া সম্ভব, কিন্তু process টা heavy | ভালো — প্রতিটি increment এ change accommodate করা যায় | সবচেয়ে বেশি — প্রতিটি sprint এ requirement পরিবর্তন স্বাভাবিক বিষয় হিসেবে ধরা হয় |
+| **Flexibility** | Baseline change formal ও costly হতে পারে | প্রতি loop-এ direction বদলানো যায়, governance heavy হতে পারে | Increment-এর মাঝে priority/refinement বদলানো যায় | Framework অনুযায়ী short feedback cycle-এ backlog adapt করা যায় |
 | **Risk Handling** | দুর্বল — risk সাধারণত দেরিতে (testing phase এ) ধরা পড়ে | সবচেয়ে শক্তিশালী — **formal risk analysis** প্রতিটি loop এর mandatory অংশ | মোটামুটি ভালো — প্রতিটি iteration test হওয়ায় risk তুলনামূলক আগে ধরা পড়ে | ভালো — ছোট sprint এবং continuous testing এর কারণে risk দ্রুত identify হয়, তবে Spiral এর মতো formal নয় |
-| **Customer Involvement** | সবচেয়ে কম — মূলত শুরুতে (requirement gathering) এবং শেষে (delivery) | মাঝারি — প্রতিটি loop এর review phase এ client feedback নেওয়া হয় | ভালো — প্রতিটি increment এর পর client feedback পাওয়া যায় | সবচেয়ে বেশি — client/product owner প্রায় প্রতিদিন বা প্রতি sprint এ সরাসরি involved থাকেন |
+| **Customer Involvement** | Formal milestone-কেন্দ্রিক হতে পারে | Loop review-এ stakeholder evaluation থাকে | Increment review-এ feedback নেওয়া যায় | Frequent stakeholder collaboration উৎসাহিত; exact cadence framework/team-নির্ভর |
 | **Documentation** | সবচেয়ে বেশি এবং heavy | বেশি (risk analysis, prototype documentation সহ) | মাঝারি | তুলনামূলক কম, working software কেই বেশি গুরুত্ব দেওয়া হয় |
-| **Delivery Speed** | ধীর — একবারে শেষে পুরো product deliver হয় | ধীর থেকে মাঝারি — বেশ কয়েকটি loop এর পর product সম্পূর্ণ হয় | মাঝারি — increment ভিত্তিতে delivery হয় | দ্রুত — প্রতিটি sprint (সাধারণত ২-৪ সপ্তাহ) শেষে working feature deliver হয় |
+| **Delivery Cadence** | সাধারণত বড় release শেষে | Risk-reduction loop অনুযায়ী | Usable increment অনুযায়ী | ছোট batch ঘন ঘন; Scrum ব্যবহার করলে Sprint এক মাস বা কম |
 | **সবচেয়ে উপযুক্ত** | Fixed, well-understood requirement সহ project | Large, high-risk, high-cost project | Medium complexity project, যেখানে requirement ধীরে ধীরে স্পষ্ট হয় | Rapidly changing requirement এবং competitive market এর project |
 
 **সংক্ষেপে বলতে গেলে:**
@@ -370,13 +443,13 @@ RAD Model সাধারণত নিচের ধরনের project-এ ভ�
 এই ধরনের project এর জন্য আমি **Agile Model** recommend করবো। এর কারণগুলো হলো:
 
 **১. Built-in Flexibility for Change**
-Agile এর মূল philosophy-ই হলো "responding to change over following a plan" (Agile Manifesto অনুযায়ী)। প্রতিটি **sprint** (সাধারণত ২-৪ সপ্তাহের cycle) শেষে requirement re-evaluate করার সুযোগ থাকে, তাই নতুন বা পরিবর্তিত requirement সহজেই পরবর্তী sprint এ যোগ করা যায় — কোনো বড় ধরনের rework ছাড়াই।
+Agile Manifesto “responding to change over following a plan” value করে। Scrum ব্যবহার করলে Sprint boundary-তে backlog re-evaluate করা যায়; অন্য Agile approach continuous flow ব্যবহার করতে পারে। Change-এর rework/cost থাকতে পারে, তবে early feedback সেটি ছোট রাখতে সাহায্য করে।
 
 **২. Continuous Customer Feedback**
-Agile এ **Product Owner** বা client প্রায় প্রতিনিয়ত process এর সাথে জড়িত থাকেন। প্রতিটি sprint শেষে **sprint review** এর মাধ্যমে client দেখতে পান actual কী তৈরি হচ্ছে, এবং সাথে সাথেই feedback দিতে পারেন — যা requirement rapidly change হওয়া প্রজেক্টের জন্য অপরিহার্য।
+Scrum-এ Product Owner accountable থাকেন এবং Sprint Review stakeholder feedback-এর formal opportunity। অন্য Agile framework-এ role ও feedback event আলাদা হতে পারে; গুরুত্বপূর্ণ হলো নিয়মিত বাস্তব feedback।
 
 **৩. Frequent, Incremental Delivery**
-প্রতি sprint শেষে একটি **potentially shippable product increment** তৈরি হয়। এর মানে হলো, requirement change হলেও এতদিনের কাজ নষ্ট হয় না — শুধু পরবর্তী sprint এর **backlog** re-prioritize করলেই চলে।
+Scrum Sprint-এ Definition of Done পূরণ করা usable increment তৈরি হয়। Requirement change হলে backlog reprioritize করা যায়, তবে architecture/data migration বা discarded behavior-এর rework এখনও হতে পারে।
 
 **৪. Reduced Risk of Building the Wrong Thing**
 যেহেতু Waterfall বা Spiral এর মতো শুরুতেই সব requirement lock করে ফেলার প্রয়োজন হয় না, তাই "wrong product" তৈরি হয়ে যাওয়ার risk অনেক কম থাকে — কারণ ভুল দিক ধরা পড়লে সাথে সাথেই course-correct করা যায়।

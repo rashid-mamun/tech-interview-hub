@@ -25,7 +25,11 @@ const config: Config = {
     locales: ['en']
   },
   scripts: [{ src: '/js/docs-layout-toggle.js', defer: true }],
+  markdown: {
+    mermaid: true
+  },
   plugins: ['docusaurus-plugin-sass', require.resolve('docusaurus-lunr-search')],
+  themes: ['@docusaurus/theme-mermaid'],
   presets: [
     [
       'classic',
@@ -46,6 +50,9 @@ const config: Config = {
   ],
 
   themeConfig: {
+    mermaid: {
+      theme: { light: 'neutral', dark: 'dark' }
+    },
     image: 'img/social-card.svg',
     navbar: {
       logo: {

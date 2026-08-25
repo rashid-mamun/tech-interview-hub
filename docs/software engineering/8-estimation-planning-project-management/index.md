@@ -3,7 +3,7 @@ sidebar_position: 8
 title: 'Estimation, Planning, and Project Management'
 ---
 
-## 8. Estimation, Planning, and Project Management
+## Overview
 
 Software project management হলো people, scope, schedule, risk, budget, and quality coordinate করে useful outcome deliver করা। Plan কোনো promise carved in stone না; it is current knowledge-এর উপর best forecast। Good planning uncertainty hide করে না, visible করে।
 
@@ -19,7 +19,14 @@ Example: Eid-এর আগে scheduled delivery launch করতে হবে�
 
 ---
 
-## Core project management activities
+## 59. What are the main activities involved in software project management?
+
+```mermaid
+flowchart LR
+    Initiate --> Plan --> Execute --> Monitor[Monitor and control] --> Close
+    Monitor -. corrective action .-> Plan
+    Monitor -. adjustment .-> Execute
+```
 
 | Activity | Main question | Example output |
 |---|---|---|
@@ -36,7 +43,39 @@ Project manager alone সব কাজ করেন এমন না। Product,
 
 ---
 
-## Estimation is a forecast, not a guarantee
+## 60. What is the COCOMO model, and how is it used for estimation?
+
+```mermaid
+flowchart LR
+    Size[Estimated software size] --> Mode[Project mode and coefficients]
+    Drivers[Cost drivers] --> Adjust[Effort adjustment]
+    Mode --> Effort[Person-month estimate]
+    Adjust --> Effort
+    Effort --> Schedule[Schedule and staffing estimate]
+```
+
+**COCOMO (Constructive Cost Model)** software size এবং project factors ব্যবহার করে effort/cost estimate করার family of models। Classic basic form roughly:
+
+```text
+Effort = a * (KLOC)^b
+```
+
+Where KLOC হলো estimated thousand lines of code and constants project type অনুযায়ী vary করে। Intermediate/detailed versions team capability, tool support, reliability need, schedule, platform complexity-এর মতো cost drivers include করে।
+
+### Practical caution
+
+Modern product work-এ code reuse, cloud services, AI tooling, configuration, integration, and changing scope থাকায় line count early estimate weak signal হতে পারে। COCOMO historical planning model হিসেবে important, কিন্তু current team-এর empirical delivery data often more useful।
+
+## 61. How do you estimate the time required for a software development task?
+
+```mermaid
+flowchart TD
+    Scope[Clarify scope and acceptance criteria] --> Break[Break into small tasks]
+    Break --> Estimate[Estimate optimistic, likely and pessimistic]
+    Estimate --> Dependencies[Account for dependencies and risk]
+    Dependencies --> Capacity[Map effort to team capacity]
+    Capacity --> Reforecast[Track actuals and reforecast]
+```
 
 Estimate uncertaintyসহ future effort predict করে। Unknown থাকলে single exact number misleading হয়।
 
@@ -89,7 +128,18 @@ Most likely outcome বেশি weight পায়, কিন্তু risk range
 
 ---
 
-## Story points and planning poker
+## 62. What is story point estimation, and how does planning poker help?
+
+```mermaid
+sequenceDiagram
+    participant P as Product owner
+    participant T as Team members
+    P->>T: Explain story and acceptance criteria
+    T->>T: Select estimates privately
+    T-->>P: Reveal simultaneously
+    P->>T: Discuss high and low assumptions
+    T-->>P: Re-estimate toward shared understanding
+```
 
 **Story point** time নয়; team-এর relative complexity, effort, and uncertainty measure।
 
@@ -120,23 +170,15 @@ The value is not the card number; it is assumption discovery and shared understa
 
 ---
 
-## COCOMO: algorithmic cost estimation
+## 63. What is scope creep, and how do you manage it?
 
-**COCOMO (Constructive Cost Model)** software size এবং project factors ব্যবহার করে effort/cost estimate করার family of models। Classic basic form roughly:
-
-```text
-Effort = a * (KLOC)^b
+```mermaid
+flowchart TD
+    Request[New scope request] --> Impact[Analyze value, cost, risk and schedule]
+    Impact --> Decision{Approve through change control?}
+    Decision -->|yes| Rebaseline[Update scope, backlog, budget and date]
+    Decision -->|no| Later[Reject or defer]
 ```
-
-Where KLOC হলো estimated thousand lines of code and constants project type অনুযায়ী vary করে। Intermediate/detailed versions team capability, tool support, reliability need, schedule, platform complexity-এর মতো cost drivers include করে।
-
-### Practical caution
-
-Modern product work-এ code reuse, cloud services, AI tooling, configuration, integration, and changing scope থাকায় line count early estimate weak signal হতে পারে। COCOMO historical planning model হিসেবে important, কিন্তু current team-এর empirical delivery data often more useful।
-
----
-
-## Scope creep and change control
 
 **Scope creep** হলো evaluated trade-off ছাড়া scope ধীরে ধীরে বাড়া। Change itself normal; invisible change dangerous।
 
@@ -166,7 +208,14 @@ Agile backlog reprioritization is lightweight change control. It still needs tra
 
 ---
 
-## Risk management
+## 64. What is risk management in software projects?
+
+```mermaid
+flowchart LR
+    Identify --> Assess[Probability times impact] --> Prioritize --> Respond[Avoid, mitigate, transfer or accept]
+    Respond --> Monitor
+    Monitor -. new evidence .-> Assess
+```
 
 **Risk** হলো uncertain future event যা outcome impact করতে পারে। Issue হলো risk ইতিমধ্যে ঘটেছে।
 
@@ -192,7 +241,17 @@ Risk score may be probability x impact, but discussion and ownership matters mor
 
 ---
 
-## Scheduling: Gantt, PERT, and critical path
+## 65. What are Gantt charts, PERT charts, and the critical path?
+
+```mermaid
+flowchart LR
+    A[A: Requirements, 2d] --> B[B: Design, 3d]
+    B --> C[C: Backend, 5d]
+    B --> D[D: Frontend, 4d]
+    C --> E[E: Integration, 2d]
+    D --> E
+    E --> F[F: Release, 1d]
+```
 
 ### Gantt chart
 
@@ -221,7 +280,16 @@ Requirements (2d) -> API design (3d) -> Build (5d) -> Test (3d) -> Release
 
 ---
 
-## Software Configuration Management (SCM)
+## 66. What is Software Configuration Management (SCM)?
+
+```mermaid
+flowchart LR
+    Change[Source or configuration change] --> Version[Version control]
+    Version --> Review[Review and approval]
+    Review --> Build[Reproducible build]
+    Build --> Artifact[Versioned artifact]
+    Artifact --> Deploy[Controlled deployment]
+```
 
 **SCM** হলো source code, configuration, documentation, build artifact, and release state controlledভাবে manage করা। Goal: any released version কী ছিল, কী change হলো, এবং rollback কীভাবে হবে তা জানা।
 
@@ -244,7 +312,17 @@ Commit -> CI build/test -> versioned artifact -> staging -> approved production 
 
 ---
 
-## Deadline at risk: what to do
+## 67. How do you handle a deadline at risk?
+
+```mermaid
+flowchart TD
+    Signal[Forecast shows deadline risk] --> Cause[Identify critical cause and evidence]
+    Cause --> Options{Choose explicit trade-off}
+    Options --> Scope[Reduce or phase scope]
+    Options --> Date[Renegotiate date]
+    Options --> Capacity[Add suitable capacity carefully]
+    Scope & Date & Capacity --> Communicate[Communicate decision, owner and new forecast]
+```
 
 Bad response হলো bad news hide করা। Risk দেখা দিলে early evidenceসহ communicate করো।
 

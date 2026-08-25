@@ -1,15 +1,23 @@
-﻿---
+---
 sidebar_position: 5
 title: Databases
 ---
 
 ## 25. What are the benefits of a managed database service, and what do you still have to manage yourself?
 
+```mermaid
+flowchart LR
+    Provider[Provider] --> Ops[Hardware, engine operation, patching and managed backups]
+    Customer[Customer] --> Work[Schema, queries, identities, data and recovery policy]
+    Ops --> DB[(Managed database)]
+    Work --> DB
+```
+
 **Managed Database Service** (যেমন AWS RDS, Aurora, Google Cloud SQL, Azure SQL Database, MongoDB Atlas) হলো এমন একটা service যেখানে cloud provider database software-এর **infrastructure এবং routine operational task**-গুলো handle করে দেয়, আর user শুধু database ব্যবহার এবং data নিয়েই focus করতে পারে।
 
 #### Managed Database Service-এর মূল সুবিধা:
 
-- **Automated backup ও point-in-time recovery:** নিয়মিত automatic backup নেওয়া হয়, এবং সাধারণত একটা নির্দিষ্ট সময়ের মধ্যে যেকোনো মুহূর্তে (point-in-time) database restore করার সুবিধা থাকে — manually backup script লেখা বা schedule করার দরকার নেই।
+- **Automated backup ও point-in-time recovery:** নিয়মিত backup ও transaction log রাখা হয়; configured retention window এবং latest-restorable-time সীমার মধ্যে point-in-time restore করা যায়। Exact granularity ও recovery lag provider/engine অনুযায়ী ভিন্ন। Restore drill এখনও customer-এর দায়িত্ব।
 
 - **Automatic patching ও version upgrade:** Database engine-এর security patch, minor version update automatically (বা নির্দিষ্ট maintenance window-এ) apply হয়ে যায়, যা manual patch management-এর ঝামেলা এবং vulnerability risk কমায়।
 
@@ -57,6 +65,18 @@ Self-hosted database-এ (নিজের VM/on-premises server-এ database চ
 
 ## 26. What is a read replica, and what is replication lag?
 
+```mermaid
+sequenceDiagram
+    participant A as Application
+    participant P as Primary
+    participant R as Read replica
+    A->>P: UPDATE profile
+    P-->>A: Commit success
+    A->>R: Immediate SELECT
+    R-->>A: Old value during lag
+    P-->>R: Async change arrives
+```
+
 **Read Replica:** এটা একটা primary/master database-এর একটা **copy**, যেটা primary থেকে data automatically replicate করে নিজেকে সবসময় update রাখে। Read replica সাধারণত শুধুমাত্র **read query** (SELECT) handle করার জন্য ব্যবহৃত হয়, write operation (INSERT/UPDATE/DELETE) primary database-এই করতে হয়। এর মূল উদ্দেশ্য হলো **read traffic-কে distribute করা** — একটা single primary database-এর উপর সব load না দিয়ে, একাধিক replica-তে read query ছড়িয়ে দিয়ে overall throughput বাড়ানো এবং primary database-এর load কমানো।
 
 **Replication Lag:** Primary database-এ কোনো write operation হওয়ার পর, সেই change replica-তে **propagate/sync** হতে যে সময় লাগে, সেটাই replication lag। যেহেতু বেশিরভাগ read replica **asynchronous replication** ব্যবহার করে (performance-এর কারণে), তাই primary-তে write হওয়া এবং replica-তে সেটা reflect হওয়ার মধ্যে একটা সময়ের **gap (কয়েক মিলিসেকেন্ড থেকে সেকেন্ড, কখনো কখনো বেশি)** থাকে।
@@ -86,6 +106,15 @@ Self-hosted database-এ (নিজের VM/on-premises server-এ database চ
 ---
 
 ## 27. When would you choose a relational database over NoSQL, or vice versa?
+
+```mermaid
+flowchart TD
+    Need[Data access pattern] --> Tx{Complex joins or multi-row ACID?}
+    Tx -->|yes| SQL[Relational database]
+    Tx -->|no| Model{Specialized model or massive partitioned access?}
+    Model -->|key-value, document, graph, wide-column| NoSQL[Suitable NoSQL database]
+    Model -->|mixed needs| Poly[Polyglot persistence]
+```
 
 #### Relational Database (RDBMS) বেছে নেওয়া উচিত যখন:
 
@@ -125,6 +154,20 @@ NoSQL database-এ (বিশেষত DynamoDB, Cassandra-এর মতো dist
 
 ## 28. How does database high availability (multi-AZ, failover) work?
 
+```mermaid
+sequenceDiagram
+    participant App
+    participant Endpoint as Stable DB endpoint
+    participant P as Primary AZ-A
+    participant S as Standby AZ-B
+    App->>Endpoint: Database connection
+    Endpoint->>P: Route traffic
+    P--xEndpoint: Primary fails
+    S->>S: Promote standby
+    Endpoint->>S: Route new connections
+    Note over App: Existing connections usually retry
+```
+
 **Multi-AZ deployment** হলো database high availability achieve করার একটা common architecture, যেখানে একটা **primary database instance** একটা Availability Zone (AZ)-এ থাকে, এবং একটা **standby replica** ভিন্ন একটা AZ-এ (একই region-এর মধ্যে, কিন্তু আলাদা physical data center)-এ রাখা হয়।
 
 এটা কীভাবে কাজ করে:
@@ -163,6 +206,15 @@ Failover ঘটার সময় open connection-গুলোর সাথে 
 
 ## 29. What is the difference between snapshot backup and continuous backup? What is point-in-time recovery?
 
+```mermaid
+flowchart LR
+    Snap[Base snapshot] --> T1[Transaction logs]
+    T1 --> T2[More logs] --> T3[Target timestamp]
+    Snap --> Restore[Restore snapshot]
+    T1 & T2 --> Replay[Replay logs]
+    Restore --> Replay --> PITR[Database at target time]
+```
+
 **Snapshot Backup:** এটা database/storage-এর একটা **নির্দিষ্ট মুহূর্তের (point-in-time) সম্পূর্ণ copy**, যা নির্দিষ্ট **interval**-এ (যেমন প্রতিদিন একবার, বা প্রতি ৬ ঘণ্টায়) নেওয়া হয়। দুটো snapshot-এর মধ্যবর্তী সময়ের কোনো change যদি data loss ঘটে, সেটা recover করা যায় না — শুধুমাত্র সর্বশেষ snapshot পর্যন্ত data restore করা সম্ভব।
 
 **Continuous Backup:** এখানে শুধু periodic snapshot না নিয়ে, database-এর **transaction log/write-ahead log (WAL)** ক্রমাগতভাবে (continuously) capture এবং store করা হয় — প্রতিটা write operation-ই effectively backup-এ record হয়ে যায়, real-time-এর কাছাকাছি একটা granularity-তে।
@@ -193,6 +245,14 @@ Failover ঘটার সময় open connection-গুলোর সাথে 
 মূলত, continuous backup একটা base snapshot এবং তারপর অবিচ্ছিন্ন transaction log-এর সমন্বয়ে কাজ করে বলেই এটা **granular, near-continuous recovery point** দিতে পারে — যেখানে শুধু periodic snapshot-এ recovery point গুলোর মধ্যে বড় বড় "gap" থেকে যায়, যেটার মধ্যে ঘটা যেকোনো change permanently হারিয়ে যাওয়ার ঝুঁকিতে থাকে।
 
 ## 30. Why is connection pooling important, especially with serverless functions? How do managed poolers help?
+
+```mermaid
+flowchart LR
+    F1[Function instance 1] --> Pool[Managed connection pooler]
+    F2[Function instance 2] --> Pool
+    F3[Function instance N] --> Pool
+    Pool -->|bounded reusable connections| DB[(Database)]
+```
 
 **Connection Pooling** হলো একটা technique যেখানে database-এর সাথে একবার connection তৈরি করে সেটাকে একটা **pool**-এ রেখে দেওয়া হয়, এবং নতুন query আসলে প্রতিবার নতুন connection তৈরি না করে সেই pool থেকে একটা **reusable connection** ব্যবহার করা হয়, কাজ শেষে সেটা আবার pool-এ ফেরত যায়।
 
@@ -231,6 +291,15 @@ Serverless architecture-এ (যেমন AWS Lambda, Google Cloud Functions) co
 ---
 
 ## 31. What is a data warehouse, and how is it different from an OLTP database?
+
+```mermaid
+flowchart LR
+    Apps[Operational applications] --> OLTP[(OLTP database)]
+    OLTP --> ETL[ETL or ELT pipeline]
+    Logs[Events and files] --> ETL
+    ETL --> WH[(Data warehouse)]
+    BI[BI and analytical queries] --> WH
+```
 
 **Data Warehouse** হলো একটা centralized repository যেখানে বিভিন্ন উৎস (multiple source system) থেকে আসা বড় পরিমাণ **historical, structured data** একত্রিত করে রাখা হয়, মূলত **analytical query, reporting, এবং business intelligence (BI)**-এর উদ্দেশ্যে। উদাহরণ: **Amazon Redshift, Google BigQuery, Snowflake, Azure Synapse**।
 

@@ -5,6 +5,18 @@ title: 'Docker Images & Registry'
 
 
 ## 6. What is Docker Hub, and how do image registries work?
+
+```mermaid
+sequenceDiagram
+    participant C as Docker client
+    participant R as Registry
+    participant S as Blob storage
+    C->>R: authenticate and request manifest
+    R-->>C: image manifest and layer digests
+    C->>S: download missing layers
+    S-->>C: content-addressed layers
+    C->>C: verify digests and assemble image
+```
 **Docker Hub** হলো Docker-এর official **public container registry** — মূলত এটি Docker Image-এর জন্য একটি cloud-based repository। GitHub যেমন source code store এবং share করার জায়গা, Docker Hub তেমনি Docker Image store এবং share করার জায়গা।
 
 ```
@@ -51,6 +63,15 @@ docker pull mycompany.registry.io/backend-api:v2.1
 ---
 
 ### How do you push and pull images from Docker Hub?
+
+```mermaid
+flowchart LR
+    L[Local image] --> T[Tag with registry and repository]
+    T --> P[docker push]
+    P --> R[Registry]
+    R --> Pull[docker pull]
+    Pull --> H[Another host]
+```
 
 **ধাপ ১ — Docker Hub-এ Login করো**
 
@@ -175,6 +196,14 @@ docker run johndoe/myapp:2.5.1
 ---
 
 ## 🏷️ 7. What is image tagging and versioning in Docker?
+
+```mermaid
+flowchart TB
+    I[One image digest] --> V1[myapp:1.4.2]
+    I --> Stable[myapp:stable]
+    I --> Commit[myapp:git-a1b2c3]
+    Tag[Mutable tag] -. can later point to .-> I2[Different image digest]
+```
 Docker-এ **tag** হলো একটি image-এর human-readable **label**, যা দিয়ে একই image-এর বিভিন্ন version আলাদা করা যায়।
 
 একটি Docker image-এর পূর্ণ নামের গঠন এরকম:
@@ -209,6 +238,13 @@ Tagging ছাড়া তুমি জানতে পারবে না ক�
 ---
 
 ### What is a digest (SHA256) in Docker images and how is it used?
+
+```mermaid
+flowchart LR
+    Content[Image content] --> Hash[SHA256 digest]
+    Hash --> Ref[repository@sha256:digest]
+    Ref --> Verify[Pull exact immutable content]
+```
 
 **Digest** হলো একটি Docker image-এর **cryptographic fingerprint** — SHA256 hash দিয়ে তৈরি। এটি image-এর content থেকে generate হয়, তাই image একটুও বদলালে digest সম্পূর্ণ আলাদা হয়ে যায়।
 
@@ -390,7 +426,16 @@ docker push myapp:new            # এখন registry-তে গেল ✓
 
 ---
 
-**🧹 8. How do you manage and optimize Docker image sizes?**
+## 🧹 8. How do you manage and optimize Docker image sizes?
+
+```mermaid
+flowchart LR
+    A[Large build image] --> M[Multi-stage build]
+    M --> B[Copy only runtime artifacts]
+    B --> S[Small base image]
+    S --> C[Remove caches and development dependencies]
+    C --> F[Smaller production image]
+```
 বড় Docker image মানে:
 - **Slow deployment** — pull করতে বেশি সময়
 - **বেশি bandwidth** খরচ — CI/CD pipeline ধীর হয়
@@ -482,6 +527,14 @@ COPY . .
 ---
 
 ### How does multi-stage build reduce final image size?
+
+```mermaid
+flowchart LR
+    Build[Builder: SDK, compiler, source] --> Artifact[Application artifact]
+    Artifact --> Runtime[Runtime: artifact and minimal dependencies]
+    Build -. excluded from final image .-> Small[Smaller attack surface]
+    Runtime --> Small
+```
 
 App build করতে অনেক tool লাগে (compiler, test framework, build tools) — কিন্তু production-এ এগুলো দরকার নেই। Multi-stage build ছাড়া সব tool final image-এ থেকে যায়।
 

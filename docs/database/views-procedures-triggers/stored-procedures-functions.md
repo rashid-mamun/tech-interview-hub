@@ -3,15 +3,24 @@ sidebar_position: 2
 title: "Stored Procedures & Functions"
 ---
 
+
 # Stored Procedures & Functions
 
 ## **64. What is a stored procedure?**
 
+```mermaid
+flowchart LR
+    Caller[Caller] --> Routine[Stored routine]
+    Routine --> Statements[SQL statements]
+    Statements --> Database[(Database)]
+    Routine --> Result[Return value or result set]
+```
+
 **Stored Procedure** হলো একগুচ্ছ SQL স্টেটমেন্টের একটি কালেকশন বা গ্রুপ, যা ডাটাবেজে একটি নির্দিষ্ট নামে সেভ করে রাখা হয়। সহজ কথায়, এটি ডাটাবেজের ভেতর তৈরি করা একটি **Function**-এর মতো, যা আপনি একবার লিখে রাখলে বারবার কল করে ব্যবহার করতে পারেন।
 
-**Technical Definition:** Stored Procedure হলো এক ধরনের SQL কোড যা আপনি পুনরায় ব্যবহার (reuse) করতে পারেন। এটি ইনপুট প্যারামিটার গ্রহণ করতে পারে এবং প্রয়োজনে রেজাল্ট বা আউটপুট প্রদান করতে পারে। এটি ডাটাবেজ লেভেলে কম্পাইল হয়ে থাকে, তাই এটি রান করা সাধারণ কুয়েরির চেয়ে দ্রুত হয়।
+**Technical Definition:** Stored Procedure হলো database-এ সংরক্ষিত reusable routine। এটি parameter নিতে এবং result/output দিতে পারে। Engine execution plan cache করতে পারে, কিন্তু procedure হওয়াই ad-hoc query-এর চেয়ে দ্রুত হওয়ার guarantee নয়।
 
-### Basic Stored Procedure Syntax:
+### Basic Stored Procedure Syntax (MySQL):
 
 #### **No parameter:**
 
@@ -99,12 +108,12 @@ SELECT @employee_total;
 
 | Aspect | Stored Procedure  | Function  |
 | --- | --- | --- |
-| **Return Value** | ভ্যালু রিটার্ন করা ঐচ্ছিক। এটি শূন্য, একটি বা একাধিক ভ্যালু রিটার্ন করতে পারে। | অবশ্যই একটি (এবং কেবলমাত্র একটি) সিঙ্গেল ভ্যালু রিটার্ন করতে হবে। |
-| **Parameter** | `IN`, `OUT`, এবং `INOUT` প্যারামিটার ব্যবহার করা যায়। | শুধু ইনপুট (`IN`) প্যারামিটার ব্যবহার করা যায়। |
+| **Return Value** | Result set, OUT parameter বা status দিতে পারে—DBMS-ভেদে syntax ভিন্ন | Scalar বা table/set return করতে পারে—DBMS-ভেদে capability ভিন্ন |
+| **Parameter** | `IN`, `OUT`, এবং `INOUT` support DBMS-ভেদে ভিন্ন | অনেক DBMS-এ input parameter; PostgreSQL-সহ কিছু system-এ richer modes আছে |
 | **DML অপারেশন** | procedure ভেতর `INSERT`, `UPDATE`, `DELETE` করা যায়। | সাধারণত শুধু ডেটা ক্যালকুলেট বা রিড করার জন্য ব্যবহৃত হয়। (DML এলাউড না অনেক DB-তে)। |
 | **Use case** | `CALL` কমান্ড দিয়ে আলাদাভাবে রান করতে হয়। | `SELECT`, `WHERE`, বা `HAVING` ক্লজের ভেতরে ব্যবহার করা যায়। |
 | **Calling** | procedure থেকে অন্য procedure বা function কল করা যায়। | function থেকে অন্য function কল করা গেলেও procedure কল করা যায় না। |
-| **Transaction** | এর ভেতরে `COMMIT` বা `ROLLBACK` ব্যবহার করা যায়। | এর ভেতরে transaction কন্ট্রোল করা যায় না। |
+| **Transaction** | Routine কোথা থেকে call হয়েছে ও DBMS rule অনুযায়ী transaction control সীমিত বা allowed হতে পারে | Query-called function-এ transaction control সাধারণত allowed নয় |
 
 ### When to Use Each:
 
@@ -118,11 +127,11 @@ SELECT @employee_total;
 * সেই ক্যালকুলেশনটি সরাসরি আপনার SQL `SELECT` স্টেটমেন্টের ভেতরে দরকার।
 * আপনার কোডটি ছোট এবং ইনপুট নিয়ে একটি রেজাল্ট দেওয়াই এর প্রধান কাজ।
 
-**Summary:** Functions should be **pure** (no side effects) এবং শুধুমাত্র calculations এর জন্য ব্যবহার করা উচিত। Database state modification এর জন্য stored procedures ব্যবহার করা best practice।
+**Summary:** Query-এর ভেতরে ব্যবহৃত function side-effect-free রাখলে reasoning ও optimization সহজ হয়। তবে function/procedure capability vendor-specific—target DBMS-এর rule যাচাই করতে হবে।
 
 ---
 
-## **69. What are User-Defined Functions (UDFs)?**
+## **70. What are User-Defined Functions (UDFs)?**
 
 **User-Defined Functions (UDFs)** হলো এমন কিছু ফাংশন যা ইউজার বা ডেভেলপাররা তাদের নিজস্ব প্রয়োজন অনুযায়ী ডাটাবেজে তৈরি করে নেয়। ডাটাবেজে আগে থেকে কিছু built-in ফাংশন থাকে (যেমন: `SUM()`, `AVG()`, `UPPER()`), কিন্তু যখন আপনার বিশেষ কোনো ক্যালকুলেশনের প্রয়োজন হয় যা এই built-in ফাংশন দিয়ে সম্ভব নয়, তখনই আপনি **UDF** তৈরি করেন।
 

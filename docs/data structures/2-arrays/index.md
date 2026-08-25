@@ -285,6 +285,8 @@ col0 first, then col1, then col2
 
 **কেন এটা গুরুত্বপূর্ণ:** এই order জানা থাকলে **cache locality** optimize করা যায় — row-major language এ row-wise traversal করলে memory access pattern sequential হয় (cache-friendly), কিন্তু column-wise traversal করলে memory access scattered হয়ে যায়, যা performance কমিয়ে দেয়।
 
+> **C++/language precision:** C/C++-এর built-in rectangular array row-major contiguous। Java-এর `int[][]` এবং Python-এর সাধারণ nested list মূলত row/list object-এর reference রাখে; পুরো matrix একটি single contiguous numeric buffer—এমন guarantee নেই। Python-এ NumPy array ব্যবহার করলে contiguous C-order বা Fortran-order layout explicitly পাওয়া যায়।
+
 ---
 
 ### How would you rotate a matrix in place by 90 degrees?
@@ -384,6 +386,8 @@ read 2 -> already seen -> duplicate
 | Hashing | `O(n)` | `O(n)` | Time priority হলে, space available থাকলে |
 | Bit Manipulation | `O(n)` | `O(1)` | Range জানা এবং limited থাকলে |
 
+এখানে bit-vector-এর space `O(1)` বলা যায় কেবল value universe আগে থেকে fixed constant হলে। Range `0..U-1` input-এর সঙ্গে বাড়লে space `O(U)` bits।
+
 ---
 
 ### How would you find the only duplicate in an array of n+1 integers ranging from 1 to n?
@@ -414,7 +418,8 @@ Cycle entry = 2, duplicate = 2
 ```
 
 ```cpp
-#include <vector>
+#include <bits/stdc++.h>
+using namespace std;
 
 int findDuplicate(std::vector<int>& nums) {
     // Phase 1: Detect cycle (find intersection point)
@@ -443,6 +448,8 @@ int findDuplicate(std::vector<int>& nums) {
 - **Sorting**: sort করে adjacent duplicate খুঁজা — `O(n log n)` time, কিন্তু array কে modify করতে হয়
 - **HashSet**: `O(n)` time, `O(n)` space — সহজ কিন্তু extra space লাগে
 - **Sum/Math trick**: expected sum (1 to n) এর সাথে actual sum এর পার্থক্য বের করে duplicate পাওয়া যায় — `O(n)` time, `O(1)` space (তবে শুধুমাত্র একটা duplicate এবং সেটা exactly একবার extra থাকলেই কাজ করে)
+
+> **Constraint note:** Sum trick কেবল তখনই valid যখন `1..n`-এর প্রতিটি value অন্তত একবার আছে এবং duplicate value-টি ঠিক একবার অতিরিক্ত এসেছে। Standard Floyd problem-এ একই duplicate একাধিকবার থাকতে পারে; সেখানে sum trick reliable নয়।
 
 Floyd's algorithm সবচেয়ে ভালো, কারণ এটা array কে **modify করে না** এবং `O(1)` extra space ব্যবহার করে।
 
@@ -608,3 +615,68 @@ Prefix of diff gives final arr:
 | Purpose | Range **query** (sum) efficient করা | Range **update** efficient করা |
 | Build from | Original array | Original array এর adjacent difference |
 | Best for | Static array, বহু query | বহু range update, শেষে একবার query |
+
+## 🧪 Complete array example
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+void print(const vector<int>& numbers) {
+    for (int number : numbers) cout << number << ' ';
+    cout << '\n';
+}
+
+int main() {
+    vector<int> numbers{10, 20, 30, 40};
+    cout << "Index 2: " << numbers[2] << '\n';
+    auto position = find(numbers.begin(), numbers.end(), 30);
+    cout << "30 found at: " << distance(numbers.begin(), position) << '\n';
+
+    numbers.insert(numbers.begin() + 1, 15);
+    cout << "After insert: "; print(numbers);
+    numbers.erase(numbers.begin() + 3);
+    cout << "After delete: "; print(numbers);
+
+    vector<long long> prefix(numbers.size() + 1, 0);
+    for (int i = 0; i < (int)numbers.size(); ++i)
+        prefix[i + 1] = prefix[i] + numbers[i];
+    cout << "Range sum [1,3]: " << prefix[4] - prefix[1] << '\n';
+
+    reverse(numbers.begin(), numbers.end());
+    cout << "Reversed: "; print(numbers);
+    return 0;
+}
+```
+
+**Sample output**
+
+```text
+Index 2: 30
+30 found at: 2
+After insert: 10 15 20 30 40
+After delete: 10 15 20 40
+Range sum [1,3]: 75
+Reversed: 40 20 15 10
+```
+
+### Array memory diagram
+
+```text
+Index:       0          1          2          3
+         ┌────────┬────────┬────────┬────────┐
+Value:   │   10   │   20   │   30   │   40   │
+         └────────┴────────┴────────┴────────┘
+Address:   1000       1004       1008       1012
+
+address(i) = base + i × sizeof(int)
+```
+
+### Prefix-sum query diagram
+
+```text
+Array :     10   15   20   40
+Prefix:  0  10   25   45   85
+
+sum(1..3) = prefix[4] - prefix[1] = 85 - 10 = 75
+```

@@ -43,16 +43,43 @@ BST-এর সংজ্ঞা অনুযায়ী, প্রতিটি no
 
 এই ক্রম **recursively** প্রতিটি subtree-তেও একইভাবে প্রযোজ্য হয়, ফলে প্রতিটি ধাপে **ছোট → মাঝারি → বড়** ক্রম বজায় থাকে, এবং সামগ্রিকভাবে পুরো traversal-এর ফলাফল **ascending sorted order**-এ পাওয়া যায়।
 
-```python
-def inorder(root, result=[]):
-    if root:
-        inorder(root.left, result)
-        result.append(root.val)
-        inorder(root.right, result)
-    return result
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
 
-# উপরের tree-এর জন্য output:
-# [1, 3, 4, 6, 7, 8, 10, 13, 14]  → sorted!
+struct Node {
+    int value;
+    Node* left;
+    Node* right;
+    explicit Node(int value) : value(value), left(nullptr), right(nullptr) {}
+};
+
+void inorder(Node* root, vector<int>& result) {
+    if (root == nullptr) return;
+    inorder(root->left, result);
+    result.push_back(root->value);
+    inorder(root->right, result);
+}
+
+int main() {
+    Node* root = new Node(8);
+    root->left = new Node(3);
+    root->right = new Node(10);
+    root->left->left = new Node(1);
+    root->left->right = new Node(6);
+
+    vector<int> result;
+    inorder(root, result);
+    for (int value : result) cout << value << ' ';
+    cout << '\n';
+    return 0;
+}
+```
+
+**Sample output**
+
+```text
+1 3 6 8 10
 ```
 
 > 💡 **মূল কারণ:** BST-এর ordering property (`left < node < right`) এবং in-order traversal-এর ক্রম (`Left → Root → Right`) মূলত **একই logic** অনুসরণ করে — তাই এই দুটি মিলে গেলে স্বাভাবিকভাবেই sorted sequence তৈরি হয়।
@@ -75,6 +102,19 @@ BST শুধু ordering property maintain করে। Balanced BST ordering �
 ---
 
 ## 🔍 49. How do you search, insert, and delete a node in a BST?
+
+```mermaid
+flowchart TD
+    N{Compare key with node}
+    N -->|smaller| L[Move to left child]
+    N -->|larger| R[Move to right child]
+    N -->|equal| Found[Found]
+    L & R --> N
+    Del{Delete case}
+    Del --> Leaf[Leaf: remove]
+    Del --> One[One child: promote child]
+    Del --> Two[Two children: replace with successor or predecessor]
+```
 
 BST-এর তিনটি মূল operation-ই তার **ordering property** (`left < node < right`) ব্যবহার করে কাজ করে, যার কারণে প্রতিটি ধাপে **half of the tree** ignore করা যায় (অনেকটা Binary Search-এর মতো)।
 
@@ -121,6 +161,13 @@ Node* insertBST(Node* root, int key) {
 
 Delete করা সবচেয়ে **জটিল (tricky)** operation, কারণ node মুছে ফেলার পরেও BST-এর **ordering property** বজায় রাখতে হয়। এখানে **৩টি case** হতে পারে:
 
+```cpp
+Node* findMin(Node* root) {
+    while (root && root->left) root = root->left;
+    return root;
+}
+```
+
 **Case 1: Node-এর কোনো Child নেই (Leaf Node)**: সহজভাবে node-টি মুছে ফেলে তার parent-এর সাথে সংযোগ **None** করে দেওয়া হয়।
 
 **Case 2: Node-এর একটি Child আছে**: Node-টি মুছে ফেলে তার **single child**-কে সরাসরি তার parent-এর সাথে যুক্ত করে দেওয়া হয় (node-টিকে তার child দিয়ে replace করা হয়)।
@@ -150,12 +197,6 @@ Node* deleteBST(Node* root, int key) {
         Node* successor = findMin(root->right);
         root->val = successor->val;
         root->right = deleteBST(root->right, successor->val);
-    }
-    return root;
-}
-Node* findMin(Node* root) {
-    while (root && root->left) {
-        root = root->left;
     }
     return root;
 }
@@ -207,6 +248,15 @@ Delete করার আগে:              Delete করার পরে (10 de
 ---
 
 ## ✅ 50. How would you validate whether a given binary tree is a valid BST?
+
+```mermaid
+flowchart TD
+    Root[Validate node with range -infinity to +infinity] --> Check{min less than value less than max?}
+    Check -->|no| Invalid[Invalid BST]
+    Check -->|yes| Left[Validate left with upper bound = value]
+    Check -->|yes| Right[Validate right with lower bound = value]
+    Left & Right --> Valid[Valid only if both subtrees pass]
+```
 একটি Binary Tree কে **valid BST** বলা যাবে তখনই, যখন তার **প্রতিটি node**-এর জন্য পুরো **left subtree**-এর সব value তার চেয়ে ছোট এবং পুরো **right subtree**-এর সব value তার চেয়ে বড় হয় — এই rule শুধু immediate children-এর জন্য নয়, বরং পুরো subtree-এর **প্রতিটি node**-এর জন্য সত্য হতে হবে।
 
 
@@ -249,8 +299,8 @@ bool isValidBST_Wrong(TreeNode* root) {
 প্রতিটি node-এর জন্য একটি বৈধ **range** (valid_min, valid_max) পাস করা হয় recursively। যখন **left subtree**-এ যাওয়া হয়, তখন **upper bound** (max) আপডেট হয়ে current node-এর value হয়ে যায়। যখন **right subtree**-এ যাওয়া হয়, তখন **lower bound** (min) আপডেট হয়ে current node-এর value হয়ে যায়।
 
 ```cpp
-#include <climits>
-#include <optional>
+#include <bits/stdc++.h>
+using namespace std;
 
 bool isValidBST(TreeNode* root, long minVal = LONG_MIN, long maxVal = LONG_MAX) {
     // Base case: empty tree সবসময় valid
@@ -293,6 +343,14 @@ bool isValidBST(TreeNode* root, long minVal = LONG_MIN, long maxVal = LONG_MAX) 
 ---
 
 ## 🌀 51. Why can BST operations degrade to O(n) in the worst case, and how is this avoided?
+
+```mermaid
+flowchart LR
+    Sorted[Insert 1, 2, 3, 4] --> Skewed[Skewed BST height n]
+    Skewed --> Linear[Search O(n)]
+    Sorted --> Balanced[AVL or Red-Black rotations]
+    Balanced --> Log[Height O(log n), operations O(log n)]
+```
 
 সাধারণ **BST**-এর **search, insert, delete** operation-গুলোর efficiency সম্পূর্ণভাবে নির্ভর করে tree-এর **height**-এর উপর। প্রতিটি operation-এ root থেকে শুরু করে একটি **single path** ধরে নিচের দিকে নামতে হয়, এবং worst case-এ এই path-এর length-ই হলো সেই operation-এর **time complexity**।
 
@@ -379,7 +437,113 @@ tree.insert(5);
 
 > 🎯 **সারকথা:** সাধারণ BST-এর performance সম্পূর্ণভাবে **insertion order**-এর উপর নির্ভরশীল — sorted বা প্রায়-sorted data দিলে এটি skewed হয়ে **O(n)** performance-এ নেমে যায়। এই সমস্যার সমাধান হলো **Self-Balancing Tree**, যা প্রতিটি insert/delete-এর পর **rotation** ব্যবহার করে tree-এর height সবসময় **O(log n)**-এ বজায় রাখে, ফলে input pattern যাই হোক না কেন, performance সবসময় **guaranteed এবং predictable** থাকে।
 
-## 🥇 52. How do you find the kth smallest or kth largest element in a BST?
+## 🔄 52. What are self-balancing BSTs, such as AVL trees and Red-Black trees?
+
+Self-balancing BST insert/delete-এর পরে structure adjust করে height `O(log n)` রাখে। AVL tree প্রতিটি node-এর balance factor `-1..1` রাখে; Red-Black Tree coloring rules দিয়ে তুলনামূলক relaxed balance রাখে। AVL search-heavy workload-এ ভালো, আর Red-Black Tree কম rotation-এর কারণে update-heavy general-purpose ordered map/set-এ common। C++ `std::map`/`std::set` সাধারণত Red-Black Tree-ভিত্তিক implementation ব্যবহার করে, যদিও standard নির্দিষ্ট tree বাধ্যতামূলক করে না।
+
+```text
+AVL imbalance and right rotation:
+
+        30              20
+       /               /  \
+      20       →      10  30
+     /
+    10
+
+LL case → right rotation
+RR case → left rotation
+LR case → left child left-rotate, then node right-rotate
+RL case → right child right-rotate, then node left-rotate
+```
+
+```cpp title="Complete example: AVL insertion"
+#include <bits/stdc++.h>
+using namespace std;
+
+struct AvlNode {
+    int value, height;
+    AvlNode* left;
+    AvlNode* right;
+    explicit AvlNode(int value) : value(value), height(1), left(nullptr), right(nullptr) {}
+};
+
+int nodeHeight(AvlNode* node) { return node ? node->height : 0; }
+
+void updateHeight(AvlNode* node) {
+    node->height = 1 + max(nodeHeight(node->left), nodeHeight(node->right));
+}
+
+AvlNode* rotateRight(AvlNode* root) {
+    AvlNode* nextRoot = root->left;
+    root->left = nextRoot->right;
+    nextRoot->right = root;
+    updateHeight(root);
+    updateHeight(nextRoot);
+    return nextRoot;
+}
+
+AvlNode* rotateLeft(AvlNode* root) {
+    AvlNode* nextRoot = root->right;
+    root->right = nextRoot->left;
+    nextRoot->left = root;
+    updateHeight(root);
+    updateHeight(nextRoot);
+    return nextRoot;
+}
+
+AvlNode* insertAvl(AvlNode* root, int value) {
+    if (!root) return new AvlNode(value);
+    if (value < root->value) root->left = insertAvl(root->left, value);
+    else if (value > root->value) root->right = insertAvl(root->right, value);
+    else return root;
+
+    updateHeight(root);
+    int balance = nodeHeight(root->left) - nodeHeight(root->right);
+    if (balance > 1 && value < root->left->value) return rotateRight(root);
+    if (balance < -1 && value > root->right->value) return rotateLeft(root);
+    if (balance > 1) {
+        root->left = rotateLeft(root->left);
+        return rotateRight(root);
+    }
+    if (balance < -1) {
+        root->right = rotateRight(root->right);
+        return rotateLeft(root);
+    }
+    return root;
+}
+
+void printPreorder(AvlNode* root) {
+    if (!root) return;
+    cout << root->value << ' ';
+    printPreorder(root->left);
+    printPreorder(root->right);
+}
+
+int main() {
+    AvlNode* root = nullptr;
+    for (int value : {30, 20, 10, 25, 28}) root = insertAvl(root, value);
+    cout << "AVL pre-order: ";
+    printPreorder(root);
+    cout << "\nHeight: " << nodeHeight(root) << '\n';
+    return 0;
+}
+```
+
+**Sample output**
+
+```text
+AVL pre-order: 20 10 28 25 30
+Height: 3
+```
+
+| Property | AVL Tree | Red-Black Tree |
+|---|---|---|
+| Balance | stricter (`|balance factor| ≤ 1`) | relaxed color/black-height rules |
+| Search | often slightly faster | guaranteed `O(log n)` |
+| Updates | rotations বেশি হতে পারে | সাধারণত rotations কম |
+| Common use | lookup-heavy indexes | ordered maps/sets, kernels, runtimes |
+
+## 🥇 53. How do you find the kth smallest or kth largest element in a BST?
 
 BST এর in-order traversal sorted order দেয়। তাই **kth smallest** পেতে in-order traversal করে `k` তম element নিতে হবে। **kth largest** এর জন্য reverse in-order: Right -> Root -> Left।
 
@@ -456,5 +620,230 @@ int kthLargest(TreeNode* root, int k) {
 | **Space** | **O(h)** — stack-এর জন্য |
 
 **সমস্যা:** যদি বারবার (multiple queries) kth smallest/largest বের করতে হয়, তাহলে প্রতিবার **O(n)** সময় লাগবে, যা inefficient।
+
+### How does subtree size support O(log n) order-statistic queries?
+
+প্রতি node-এ `subtreeSize = 1 + size(left) + size(right)` রাখলে left subtree-এর size দেখে kth position কোন দিকে তা নির্ধারণ করা যায়। Balanced tree-তে প্রতিটি query `O(log n)`; insert/delete/rotation-এর সময় size update করতে হয়।
+
+```text
+             8(size=7)
+           /           \
+      4(size=3)      12(size=3)
+      /     \         /      \
+     2       6       10      14
+
+Find 5th smallest at root 8:
+left size = 3, root rank = 4
+k=5 > 4 → right subtree-তে (5-4)=1st smallest → 10
+```
+
+```cpp
+struct SizedNode {
+    int value, subtreeSize = 1;
+    SizedNode* left = nullptr;
+    SizedNode* right = nullptr;
+    explicit SizedNode(int value) : value(value) {}
+};
+
+int sizeOf(SizedNode* node) { return node ? node->subtreeSize : 0; }
+
+int kthBySize(SizedNode* root, int k) {
+    while (root) {
+        int rootRank = sizeOf(root->left) + 1;
+        if (k == rootRank) return root->value;
+        if (k < rootRank) root = root->left;
+        else { k -= rootRank; root = root->right; }
+    }
+    throw out_of_range("k is larger than the tree size");
+}
+```
+
+### How do you find the in-order predecessor and successor?
+
+Predecessor হলো target-এর ঠিক আগের smaller value; successor ঠিক পরের larger value। Search path-এ target-এর চেয়ে ছোট সর্বশেষ ancestor predecessor candidate এবং বড় সর্বশেষ ancestor successor candidate। Target-এর left/right subtree থাকলে যথাক্রমে rightmost/leftmost node final answer।
+
+```cpp
+struct SearchNode {
+    int value;
+    SearchNode* left = nullptr;
+    SearchNode* right = nullptr;
+};
+
+pair<SearchNode*, SearchNode*> predecessorSuccessor(SearchNode* root, int target) {
+    SearchNode *predecessor = nullptr, *successor = nullptr, *current = root;
+    while (current && current->value != target) {
+        if (target < current->value) {
+            successor = current;
+            current = current->left;
+        } else {
+            predecessor = current;
+            current = current->right;
+        }
+    }
+    if (!current) return {predecessor, successor};
+    for (SearchNode* node = current->left; node; node = node->right) predecessor = node;
+    for (SearchNode* node = current->right; node; node = node->left) successor = node;
+    return {predecessor, successor};
+}
+```
+
+## 🧪 Complete BST operations example
+
+নিচের standalone program-এ insert, search, delete, validation এবং kth-smallest একই tree-তে দেখানো হয়েছে।
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+struct Node {
+    int value;
+    Node* left;
+    Node* right;
+    explicit Node(int value) : value(value), left(nullptr), right(nullptr) {}
+};
+
+Node* insertNode(Node* root, int value) {
+    if (root == nullptr) return new Node(value);
+    if (value < root->value) root->left = insertNode(root->left, value);
+    else if (value > root->value) root->right = insertNode(root->right, value);
+    return root;
+}
+
+bool contains(Node* root, int target) {
+    while (root != nullptr) {
+        if (target == root->value) return true;
+        root = target < root->value ? root->left : root->right;
+    }
+    return false;
+}
+
+Node* minimumNode(Node* root) {
+    while (root->left != nullptr) root = root->left;
+    return root;
+}
+
+Node* deleteNode(Node* root, int target) {
+    if (root == nullptr) return nullptr;
+    if (target < root->value) root->left = deleteNode(root->left, target);
+    else if (target > root->value) root->right = deleteNode(root->right, target);
+    else {
+        if (root->left == nullptr) {
+            Node* next = root->right;
+            delete root;
+            return next;
+        }
+        if (root->right == nullptr) {
+            Node* next = root->left;
+            delete root;
+            return next;
+        }
+        Node* successor = minimumNode(root->right);
+        root->value = successor->value;
+        root->right = deleteNode(root->right, successor->value);
+    }
+    return root;
+}
+
+bool valid(Node* root, long long low, long long high) {
+    if (root == nullptr) return true;
+    if (root->value <= low || root->value >= high) return false;
+    return valid(root->left, low, root->value) &&
+           valid(root->right, root->value, high);
+}
+
+int kthSmallestValue(Node* root, int k) {
+    stack<Node*> pending;
+    while (root != nullptr || !pending.empty()) {
+        while (root != nullptr) {
+            pending.push(root);
+            root = root->left;
+        }
+        root = pending.top();
+        pending.pop();
+        if (--k == 0) return root->value;
+        root = root->right;
+    }
+    throw out_of_range("k is larger than the tree size");
+}
+
+void printInorder(Node* root) {
+    if (root == nullptr) return;
+    printInorder(root->left);
+    cout << root->value << ' ';
+    printInorder(root->right);
+}
+
+int main() {
+    Node* root = nullptr;
+    for (int value : {8, 3, 10, 1, 6, 14, 4, 7, 13})
+        root = insertNode(root, value);
+
+    cout << boolalpha;
+    cout << "In-order: ";
+    printInorder(root);
+    cout << "\nContains 7: " << contains(root, 7) << '\n';
+    cout << "Valid BST: " << valid(root, LLONG_MIN, LLONG_MAX) << '\n';
+    cout << "4th smallest: " << kthSmallestValue(root, 4) << '\n';
+
+    root = deleteNode(root, 3);
+    cout << "After deleting 3: ";
+    printInorder(root);
+    cout << '\n';
+    return 0;
+}
+```
+
+**Sample output**
+
+```text
+In-order: 1 3 4 6 7 8 10 13 14
+Contains 7: true
+Valid BST: true
+4th smallest: 6
+After deleting 3: 1 4 6 7 8 10 13 14
+```
+
+### BST operation flow
+
+```text
+Search/Insert/Delete target 7
+
+             8
+           /   \
+          3     10
+           \      \
+            6      14
+             \    /
+             [7] 13
+
+7 < 8  → left
+7 > 3  → right
+7 > 6  → right → found
+```
+
+### Delete cases
+
+```text
+Delete node
+   │
+   ├── 0 child → remove leaf
+   ├── 1 child → connect parent directly to child
+   └── 2 children
+          ├── copy in-order successor
+          └── delete successor from right subtree
+```
+
+### Balanced vs skewed height
+
+```text
+Balanced BST             Skewed BST
+       4                 1
+     /   \                \
+    2     6                2
+   / \   / \                \
+  1   3 5   7                3
+                                \
+height = O(log n)                4   height = O(n)
+```
 
 ---

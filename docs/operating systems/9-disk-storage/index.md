@@ -6,6 +6,15 @@ title: 'Disk & Storage'
 
 ## 💿 37. What are the common disk scheduling algorithms?
 
+```mermaid
+flowchart TB
+    Q[Pending cylinder requests] --> A{Scheduling policy}
+    A --> FCFS[FCFS: arrival order]
+    A --> SSTF[SSTF: nearest request]
+    A --> SCAN[SCAN or LOOK: sweep both ways]
+    A --> CSCAN[C-SCAN or C-LOOK: one-way sweep]
+```
+
 **Disk scheduling** হলো OS-এর সেই policy যার মাধ্যমে pending disk I/O request-গুলোর মধ্যে কোন request আগে service হবে তা ঠিক করা হয়।
 
 Traditional HDD-তে disk head-কে platter-এর track-এর উপর move করতে হয়। তাই request order ভালো না হলে seek time অনেক বেড়ে যায়। Disk scheduling-এর লক্ষ্য হলো:
@@ -172,6 +181,15 @@ C-LOOK হলো C-SCAN-এর optimized version। Head physical end পর্�
 
 ## 📏 38. What metrics are used to evaluate disk scheduling algorithms?
 
+```mermaid
+flowchart LR
+    R[Disk request] --> Queue[Queueing time]
+    Queue --> Seek[Seek time]
+    Seek --> Rotate[Rotational latency]
+    Rotate --> Transfer[Transfer time]
+    Transfer --> Done[Completion]
+```
+
 Disk scheduling evaluate করার জন্য কয়েকটি common metric ব্যবহার করা হয়।
 
 **1. Seek Time**
@@ -249,6 +267,15 @@ Disk scheduling mainly seek time এবং queue behavior optimize করার 
 ---
 
 ## 🗃️ 39. What is RAID, and how do the common levels differ?
+
+```mermaid
+flowchart TB
+    RAID --> R0[RAID 0: striping]
+    RAID --> R1[RAID 1: mirroring]
+    RAID --> R5[RAID 5: distributed parity]
+    RAID --> R6[RAID 6: dual parity]
+    RAID --> R10[RAID 10: mirrored stripes]
+```
 
 **RAID (Redundant Array of Independent Disks)** হলো একাধিক physical disk-কে একসাথে ব্যবহার করে performance, redundancy, capacity বা availability improve করার technique।
 
@@ -390,6 +417,14 @@ RAID 6-এ দুটি parity update করতে হওয়ায় small-write p
 
 ## 💽 40. What is the difference between an HDD and an SSD, and how does it affect OS-level design decisions?
 
+```mermaid
+flowchart TB
+    Storage --> HDD[HDD: mechanical seek and rotation]
+    Storage --> SSD[SSD: flash pages and erase blocks]
+    HDD --> HS[Seek-aware scheduling]
+    SSD --> SS[TRIM, wear, queue parallelism]
+```
+
 **HDD (Hard Disk Drive)** mechanical storage device। এর মধ্যে spinning platter এবং moving head থাকে।
 
 **SSD (Solid State Drive)** flash memory-based storage। এতে moving mechanical part নেই।
@@ -464,6 +499,15 @@ NVMe SSD-তে multiple hardware queues থাকে। তাই modern OS I/O
 ---
 
 ## 📤 41. What is I/O scheduling, and how does it relate to disk scheduling at the OS level?
+
+```mermaid
+flowchart LR
+    Apps[Application I/O] --> VFS[VFS and file system]
+    VFS --> Block[Block layer queues]
+    Block --> Sched[I/O scheduler]
+    Sched --> Driver[Device driver]
+    Driver --> Device[Storage device]
+```
 
 **I/O scheduling** হলো OS block layer-এর policy, যা storage device-এ যাওয়ার আগে pending I/O requests organize করে।
 

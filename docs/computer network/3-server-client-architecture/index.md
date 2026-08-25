@@ -5,6 +5,22 @@ title: 'Server-Client Architecture'
 
 ## 17. What is the Client-Server model?
 
+```mermaid
+sequenceDiagram
+    participant B as Browser
+    participant D as DNS resolver
+    participant L as Load balancer
+    participant A as App server
+    participant DB as Database
+    B->>D: Resolve domain
+    D-->>B: Server IP
+    B->>L: HTTPS request
+    L->>A: Forward request
+    A->>DB: Query or update
+    DB-->>A: Result
+    A-->>B: HTTP response
+```
+
 **Client-Server model** হলো একটি distributed application structure যেখানে tasks বা workloads দুইটা party এর মধ্যে ভাগ করা হয়:
 
 - **Client** — যে service বা resource **request** করে
@@ -166,6 +182,19 @@ Next.js বা Nuxt.js এর মতো ফ্রেমওয়ার্কে প
 ---
 
 ## 19. What is the HTTP request-response cycle?
+
+```mermaid
+sequenceDiagram
+    participant B as Browser
+    participant D as DNS
+    participant S as Server
+    B->>D: Resolve hostname
+    D-->>B: IP address
+    B->>S: Establish TCP and TLS
+    B->>S: HTTP request
+    S-->>B: HTTP response
+    Note over B: Parse HTML, fetch dependencies, render
+```
 
 **HTTP Request-Response Cycle** হলো সেই process যার মাধ্যমে তোমার **browser** (client) এবং **web server** এর মধ্যে communication হয়। তুমি যখনই কোনো website visit করো, এই cycle টা ঘটে।
 
@@ -422,6 +451,15 @@ Browser সব request একসাথে পাঠায় না — priority
 
 ## 22. What is a Content Delivery Network (CDN), and how does it improve website performance?
 
+```mermaid
+flowchart LR
+    U[User] --> E[Nearby CDN edge]
+    E -->|cache hit| U
+    E -->|cache miss| O[Origin server]
+    O --> E
+    E -->|cache object by policy and TTL| U
+```
+
 **CDN (Content Delivery Network)** হলো বিশ্বব্যাপী ছড়িয়ে থাকা প্রক্সি সার্ভার বা ডেটা সেন্টারের একটি সিস্টেম।
 
 - যদি আপনার মূল সার্ভার আমেরিকায় থাকে, তবে বাংলাদেশ বা সার্ভার থেকে দূরে অবস্থান করা কোনো ইউজারের সাইট লোড হতে অনেক সময় লাগবে। 
@@ -450,11 +488,19 @@ CDN-এ একবার ফাইল রেখে দিলে সেটি ন�
 
 সাধারণত সব ধরনের প্রসেসিং বা কোড রান করানো হয় মূল সার্ভারে (Origin Server)। কিন্তু **Edge Computing** হলো সেই কনসেপ্ট যেখানে কাস্টম ফাংশন বা কিছু ব্যাকএন্ড লজিক (যেমন ইউজারের অথেন্টিকেশন বা রিডাইরেক্ট) ইউজারদের একদম কাছের বা "Edge" এ থাকা CDN সার্ভারে রান করা হয়। 
 
-- Cloudflare Workers, AWS Lambda@Edge হলো এর উদাহরণ। এটি সার্ভারের চাপ একেবারেই কমিয়ে দেয় এবং ইউজারকে ন্যানোসেকেন্ডে রেসপন্স দিতে পারে।
+- Cloudflare Workers, AWS Lambda@Edge হলো এর উদাহরণ। এটি origin server-এর চাপ ও network round-trip কমিয়ে user-এর response latency অনেক ক্ষেত্রে milliseconds পর্যায়ে নামাতে পারে; actual latency workload ও network path-এর ওপর নির্ভর করে।
 
 ---
 
 ## 23. What is the role of load balancers in managing server traffic?
+
+```mermaid
+flowchart TB
+    C[Clients] --> LB[Load balancer]
+    LB -->|health check passed| A[App server A]
+    LB -->|health check passed| B[App server B]
+    LB -. no new traffic .-> X[Unhealthy server]
+```
 
 **Load Balancer (লোড ব্যালেন্সার)** হলো এমন একটি ডিভাইস বা সফটওয়্যার যা ইউজারের রিকোয়েস্ট এবং সার্ভারগুলোর মাঝখানে ট্রাফিক পুলিশের মতো দাঁড়িয়ে থাকে। 
 
@@ -495,6 +541,15 @@ CDN-এ একবার ফাইল রেখে দিলে সেটি ন�
 ---
 
 ## 24. What are reverse proxies, and how do they enhance backend server performance?
+
+```mermaid
+flowchart LR
+    Client --> RP[Reverse proxy]
+    RP -->|TLS termination| API[API servers]
+    RP -->|cached response| Client
+    RP -->|static file| Static[Static origin]
+    API --> DB[(Database)]
+```
 
 **Reverse Proxy** হলো এমন একটি সার্ভার, যা মূল ব্যাকএন্ড সার্ভারের সামনে বসে ক্লায়েন্ট থেকে আসা রিকোয়েস্টগুলোকে গ্রহণ করে। ক্লায়েন্ট কখনো ডিরেক্ট ব্যাকএন্ড সার্ভারের আইপি জানতে পারে না, তারা মনে করে রিভার্স প্রক্সিটিই মূল সার্ভার।
 
