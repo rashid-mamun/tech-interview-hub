@@ -3,6 +3,15 @@ sidebar_position: 10
 title: 'Troubleshooting and Performance'
 ---
 
+```mermaid
+flowchart LR
+    Symptom[Slow request] --> Measure[Measure latency and load]
+    Measure --> Plan[Inspect query plan]
+    Plan --> Cause[Find bottleneck]
+    Cause --> Fix[Apply one change]
+    Fix --> Verify[Measure again]
+```
+
 
 
 ## 🛑 151. Database suddenly became slow after deployment. How do you debug?
@@ -115,7 +124,7 @@ Connection Leak হয় যখন অ্যাপ্লিকেশন ডা�
 ### 🏊‍♂️ What is connection pooling and how does it help?
 ডাটাবেসের সাথে কানেকশন ওপেন করা (TCP Handshake, Authentication) অত্যন্ত সময়সাপেক্ষ এবং খরুচে। 
 * **Connection Pooling:** (যেমন: PgBouncer, HikariCP) হলো অ্যাপ্লিকেশন এবং ডাটাবেসের মাঝখানে থাকা একটি লেয়ার। এটি ডাটাবেসের সাথে অল্প কিছু (ধরি ৫০টি) পার্মানেন্ট কানেকশন খুলে রাখে (Pool)।
-* অ্যাপ্লিকেশন থেকে ৫ হাজার ইউজার রিকোয়েস্ট আসলেও, পোলিং ওই ৫০টি কানেকশনের মধ্যেই সবাইকে রাউন্ড-রবিন করে সার্ভ করে। কেউ কাজ শেষ করলে ওই রেডিমেড কানেকশনটি অন্য একজনকে ধরিয়ে দেয়। এতে `Too many connections` এরর কখনোই আসে না।
+* অ্যাপ্লিকেশন থেকে ৫ হাজার ইউজার রিকোয়েস্ট এলেও pool সীমিত connection reuse করে। তবে pool size, queue limit, timeout বা leaked connection ভুল হলে `Too many connections` এখনও হতে পারে—pooling ঝুঁকি কমায়, guarantee নয়।
 
 ### ⚙️ How do you tune max_connections parameter?
 ডাটাবেসের `max_connections` ভ্যালুটি হুট করে অনেক বাড়িয়ে দেয়া একটি মারাত্মক ভুল। 
@@ -243,7 +252,7 @@ SHOW ENGINE INNODB STATUS;
 ব্যাকআপ নেয়ার সময় ডাটাবেস ইঞ্জিন ডিস্ক পারফরম্যান্সে (I/O) প্রেশার দেয় এবং টেবিলও লক (Table Locking) করতে পারে। 
 
 * **Solution 1 (Physical Snapshot):** AWS (EBS Snapshot) বা LVM (Logical Volume Manager) এর মাধ্যমে হার্ডডিস্কের স্ন্যাপশট নেওয়া, যা ফ্র্যাকশন অফ সেকেন্ডে হয়ে যায়। সিস্টেম কোনো ইফেক্টই অনুভব করে না।
-* **Solution 2 (Slave Backup):** কখনোই মাস্টার (Primary) ডাটাবেস থেকে ব্যাকআপ না নেওয়া। একটি রিড-রেপ্লিকা বা স্লেভ (Secondary) ডাটাবেস থেকে ব্যাকআপ রান করা, যাতে প্রোডাকশনের রাইড/রিড পারফরম্যান্সে বিন্দুমাত্র কোনো ইমপ্যাক্ট না পড়ে। 
+* **Solution 2 (Replica Backup):** উপযুক্ত replica থেকে backup নিলে primary-এর load কমে। তবে replication lag, consistency point এবং replica I/O impact যাচাই করতে হবে; critical backup restore-test ছাড়া নির্ভরযোগ্য ধরা যাবে না।
 ��় Connection Pool ব্যবহার করা উচিত।
 
 ---

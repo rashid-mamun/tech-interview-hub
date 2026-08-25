@@ -3,6 +3,15 @@ sidebar_position: 5
 title: 'Transactions'
 ---
 
+```mermaid
+stateDiagram-v2
+    [*] --> Active: BEGIN
+    Active --> Committed: COMMIT
+    Active --> Aborted: error or ROLLBACK
+    Committed --> [*]
+    Aborted --> [*]
+```
+
 ## **51. What is a transaction?**
 
 Transaction হল database operations এর একটি logical unit যা complete হতে হবে as a whole অথবা একেবারেই হবে না। এটি database consistency এবং integrity maintain করার জন্য অত্যন্ত গুরুত্বপূর্ণ।
@@ -246,7 +255,7 @@ COMMIT;
 
 **Important Notes about Nested Savepoints:**
 - Savepoint names must be unique within same transaction
-- Rolling back to outer savepoint automatically releases inner savepoints
+- Outer savepoint-এ rollback করলে পরের savepoint-এর lifecycle DBMS-ভেদে ভিন্ন; একই নাম reuse-এর behavior-ও যাচাই করতে হবে
 - Memory usage increases with nested savepoints
 - Performance impact grows with nesting depth
 
@@ -273,7 +282,7 @@ COMMIT;
 
 #### **3. REPEATABLE READ (Level 2):**
 
-এই লেভেলে নিশ্চিত করা হয় যে, একটি transaction চলাকালীন আপনি যতবারই কোনো রো (row) পড়বেন, তার ভ্যালু একই থাকবে। transaction শেষ না হওয়া পর্যন্ত অন্য কেউ ওই ডেটা পরিবর্তন করতে পারে না।
+এই লেভেলে একই transaction থেকে একই row পুনরায় পড়লে পরিবর্তিত committed value দেখা ঠেকানো হয়। এটি lock বা MVCC দিয়ে হতে পারে; অন্য transaction update করতে পারবে কি না implementation-নির্ভর।
 
 * **সুবিধা:** Non-repeatable Read প্রতিরোধ করে।
 * **সমস্যা:** এতে **Phantom Read** হতে পারে (নতুন রো ইনসার্ট হলে তা আগের কুয়েরিতে ধরা পড়ে না কিন্তু পরেরবার পড়ে)।
@@ -282,7 +291,7 @@ COMMIT;
 
 #### **4. SERIALIZABLE (Level 3):**
 
-এটি সর্বোচ্চ স্তরের আইসোলেশন। এটি ট্রানজেকশনগুলোকে এমনভাবে চালায় যেন তারা একে অপরের পেছনে সিরিয়ালি (একটির পর একটি) কাজ করছে।
+এটি সর্বোচ্চ standard isolation level। Concurrent transaction-এর ফল কোনো serial order-এর সমতুল্য হয়; transaction বাস্তবে একটির পর একটি চলতেই হবে এমন নয় এবং serialization failure হলে retry লাগতে পারে।
 
 * **সুবিধা:** সকল কনকারেন্সি সমস্যা (Dirty, Non-repeatable, Phantom Read) সমাধান করে।
 * **অসুবিধা:** এটি সিস্টেমকে ধীর করে দেয় কারণ ট্রানজেকশনগুলোকে একে অপরের জন্য অপেক্ষা করতে হয়।
@@ -294,7 +303,7 @@ COMMIT;
 
 | Database | Default Level | Can be Changed |
 |----------|--------------|----------------|
-| **MySQL InnoDB** | READ COMMITTED | ✅ Yes |
+| **MySQL InnoDB** | REPEATABLE READ | ✅ Yes |
 | **PostgreSQL** | READ COMMITTED | ✅ Yes |
 | **SQL Server** | READ COMMITTED | ✅ Yes |
 | **Oracle** | READ COMMITTED | ✅ Yes |

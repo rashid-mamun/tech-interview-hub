@@ -3,6 +3,13 @@ sidebar_position: 6
 title: 'Redundancy'
 ---
 
+```mermaid
+flowchart LR
+    Duplicate[Repeated customer data] --> Anomaly[Update anomaly]
+    Duplicate --> Waste[Extra storage]
+    Normalize[Normalize shared facts] --> Reference[Store customer_id]
+```
+
 # Data Redundancy
 
 **Data Redundancy** হলো database-এ একই তথ্য multiple জায়গায় unnecessarily store করা, যা:

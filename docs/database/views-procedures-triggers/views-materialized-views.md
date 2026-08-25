@@ -3,6 +3,13 @@ sidebar_position: 1
 title: "Views & Materialized Views"
 ---
 
+```mermaid
+flowchart LR
+    Tables[(Base tables)] --> View[View query]
+    Tables --> Snapshot[(Materialized result)]
+    Refresh[Refresh] --> Snapshot
+```
+
 # Views & Materialized Views
 
 ## **62. What is a view in database?**

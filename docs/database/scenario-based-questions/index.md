@@ -3,6 +3,14 @@ sidebar_position: 10
 title: 'Scenario Based Questions'
 ---
 
+```mermaid
+flowchart LR
+    Need[Business need] --> Model[Data model]
+    Model --> Consistency[Consistency choice]
+    Consistency --> Scale[Scale plan]
+    Scale --> Recovery[Backup and recovery]
+```
+
 ## 🛠️ **16. Scenario-Based Questions (System Design)**
 
 ## **143. Design a chat application database (WhatsApp/Messenger)**
@@ -165,7 +173,7 @@ COMMIT;
 ```
 
 ### How do you handle transaction history and auditing?
-ব্যাংকিং সিস্টেমে ডেটা কখনোই মুছে ফেলা (DELETE) বা পরিবর্তন (UPDATE) করা যায় না। 
+Banking ledger entry সাধারণত append-only এবং correction reversal entry দিয়ে করা হয়। অন্য operational/PII table-এর update বা delete retention, audit এবং privacy policy অনুযায়ী হতে পারে।
 * এর জন্য **Event Sourcing Pattern** ব্যবহার করা হয়। আপনার বর্তমান ব্যালেন্স মূলত অগণিত জমা এবং খচর হিসেবের (Ledgers) যোগফল। 
 * প্রতিটি ট্রানজেকশনে Immutable, Append-only (শুধু মাত্র নিচে লেখা হবে) ডাটাবেস স্ট্রাকচার ব্যবহার করা হয়, যাতে কেউ ডেটা টেম্পার করলে তা সাথে সাথে ধরা পড়ে। 
 

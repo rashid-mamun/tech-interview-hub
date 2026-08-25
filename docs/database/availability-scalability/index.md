@@ -3,6 +3,23 @@ sidebar_position: 9
 title: 'Availability and Scalability'
 ---
 
+```mermaid
+flowchart LR
+    App[Application] --> Primary[(Primary)]
+    Primary -->|replication| Replica1[(Replica)]
+    Primary -->|replication| Replica2[(Replica)]
+    App -->|read traffic| Replica1
+    App -->|read traffic| Replica2
+```
+
+### Practical routing example
+
+```text
+POST /orders  -> primary database
+GET /catalog  -> read replica
+GET /orders/42 immediately after write -> primary or session-consistent replica
+```
+
 ## 🏢 **9. High Availability & Scalability**
 
 ## **101. What is database clustering?**
@@ -17,10 +34,10 @@ title: 'Availability and Scalability'
 
 | Feature | Active-Active Clustering | Active-Passive Clustering |
 |---------|-------------------------|---------------------------|
-| **ওয়ার্কিং মডেল** | ক্লাস্টারের **সবগুলো নোড একসাথে সচল** থাকে এবং সবগুলিতে রিড/রাইট করা যায়। | শুধুমাত্র **একটি নোড (Primary) প্রধান হিসেবে কাজ করে**, বাকিগুলো ব্যাকআপ (Standby) হিসেবে বসে থাকে। |
-| **লোড ব্যালেন্সিং** | ইউজারের রিকোয়েস্ট সব নোডের মধ্যে সমানভাবে ভাগ হয়ে যায়, ফলে পারফরম্যান্স অনেক বাড়ে। | কোনো লোড ব্যালেন্সিং হয় না, কারণ রিকোয়েস্ট শুধু একটি নোডেই আসে। |
-| **ফেইলওভার (Failover)**| একটি ডাউন হলে অন্যগুলো স্বাভাবিকভাবেই কাজ চালিয়ে যায়, ব্যবহারকারী টেরই পায় না। | প্রাইমারি ডাউন হলে স্ট্যান্ডবাই নোড চালু হতে একটু সময় নেয় (downtime হতে পারে)। |
-| **রিসোর্স ব্যবহার** | সব সময় সব সার্ভারের প্রসেসর ও র‍্যাম কাজে লাগে বলে ১০০% রিসোর্স এর সদ্ব্যবহার হয়। | ব্যাকআপ নোড অলস বসে থাকায় রিসোর্সের অপচয় হয়। |
+| **ওয়ার্কিং মডেল** | একাধিক active node traffic নেয়; সব node-এ write করা যাবে কি না product/topology-নির্ভর | একটি active primary traffic নেয়, standby promotion-এর জন্য প্রস্তুত থাকে |
+| **লোড ব্যালেন্সিং** | Eligible traffic node-গুলোর মধ্যে ভাগ হয়; write conflict/coordination cost থাকতে পারে | Write primary-তে যায়; standby/read replica read traffic নিতে পারে |
+| **ফেইলওভার (Failover)**| surviving node traffic নিতে পারে, তবে detection, routing ও retry-তে brief disruption হতে পারে | standby promotion ও client rerouting-এর সময় downtime হতে পারে |
+| **রিসোর্স ব্যবহার** | বেশি node serve করে, কিন্তু replication/coordination overhead থাকে | standby health check, WAL replay, backup বা read workload-এ ব্যবহৃত হতে পারে |
 | **কমপ্লেক্সিটি** | কনফ্লিক্ট ম্যানেজমেন্ট (data conflict) সামলানো বেশ জটিল ও ব্যয়বহুল। | ইমপ্লিমেন্ট করা অনেক সহজ এবং কম ব্যয়বহুল। |
 
 ### How does failover work in clusters?
@@ -44,7 +61,7 @@ title: 'Availability and Scalability'
 
 **১. Synchronous Replication (সিনক্রোনাস):**
 * **কীভাবে কাজ করে:** যখন ইউজার মূল ডাটাবেসে (Master) কোনো ডেটা সেভ করে, তখন মাস্টার ডাটাবেস সেই ডেটা সাথে সাথে স্লেভ (Slave) ডাটাবেসগুলোতে পাঠায়। যতক্ষণ না অন্য স্লেভগুলো কনফার্ম করে যে "হ্যাঁ, আমরা আপডেট পেয়েছি", ততক্ষণ মাস্টার ইউজারকে 'Success' মেসেজ দেয় না।
-* **সুবিধা:** ডেটার ১০০% গ্যারান্টি (Zero Data Loss)।
+* **সুবিধা:** Commit acknowledgement যথেষ্ট synchronous replica-এর durable write-এর জন্য অপেক্ষা করলে acknowledged data-loss window কমে। Quorum, failure mode ও configuration না দেখে “zero data loss” guarantee করা যায় না।
 * **অসুবিধা:** সিস্টেম অনেক স্লো হয়ে যায়, কারণ একটি ডাটাবেস আপডেট করার জন্য অন্যগুলোর উত্তরের অপেক্ষায় থাকতে হয়।
 
 **২. Asynchronous Replication (অ্যাসিনক্রোনাস):**
@@ -77,7 +94,7 @@ title: 'Availability and Scalability'
 | **কীভাবে ভাগ করে?** | টেবিলকে **কলাম (Column)** অনুযায়ী ভাগ করা হয়। | টেবিলকে **রো (Row)** অনুযায়ী ভাগ করা হয়। |
 | **উদাহরণ** | একটি ইউজার টেবিলে ২০০ কলাম থাকলে, "Login Info" ఒక সার্ভারে এবং "Profile Info" আরেক সার্ভারে রাখা। | ইউজারের লোকেশন অনুযায়ী—বাংলাদেশের ইউজার সার্ভার ১ এ এবং ইন্ডিয়ার ইউজার সার্ভার ২ এ রাখা। |
 | **ব্যবহারের কারণ** | সিকিউরিটি (যেমন পাসওয়ার্ড আলাদা রাখা) বা যেসব কলাম মানুষ খুব কম পড়ে সেগুলো সরিয়ে নেয়া। | বিশাল ডেটাসেট এবং হাই ট্রাফিক লোড ম্যানেজ করার জন্য। |
-| **স্কেলিং** | সীমিত। একসময় কলাম আর ভাগ করা যায় না। | আনলিমিটেড। নতুন নতুন সার্ভার যোগ করা সহজ। |
+| **স্কেলিং** | একটি node-এর CPU/RAM/storage limit পর্যন্ত; operationally সহজ | বড় scale সম্ভব, কিন্তু rebalance, cross-shard query ও hot-key limit থাকে—unlimited নয় |
 
 ### How do you handle cross-shard queries?
 **Cross-shard Query** হলো এমন একটি কোয়ারি যা সম্পূর্ণ করার জন্য একাধিক সার্ভার বা Shard থেকে ডেটা আনতে হয়। (যেমন: "বিশ্বের সব দেশের ইউজারদের গড় বয়স কত?")। এগুলো সাধারণত খুব স্লো এবং ব্যয়বহুল হয়। 
@@ -93,7 +110,7 @@ title: 'Availability and Scalability'
 
 **Read Replica** হলো মূল ডাটাবেসের (Master) একটি কপি বা ক্লোন, যা শুধুমাত্র রিড অপারেশন (SELECT queries) করার জন্য তৈরি করা হয়। এখানে ডেটা শুধু মাস্টার থেকে আসে; কেউ এই রেপ্লিকাতে নতুন ডেটা Insert বা Update করতে পারে গঠনমূলক কাজ করতে পারে না।
 
-**Technical definition:** A read replica is a secondary instance of a database that is maintained as an exact, read-only copy of the primary database through asynchronous replication. It is used to offload read-heavy traffic from the master database.
+**Technical definition:** Read replica হলো primary থেকে replication পাওয়া secondary instance, যা read-heavy traffic offload করে। Replication synchronous বা asynchronous হতে পারে; asynchronous replica lag-এর কারণে মুহূর্তে exact copy নাও হতে পারে।
 
 ### How does it improve read performance?
 সাধারণত ওয়েব অ্যাপ্লিকেশনগুলোতে লেখার চেয়ে পড়ার (Read) পরিমাণ অনেক বেশি থাকে (যেমন: নিউজ ওয়েবসাইট বা ই-কমার্সে ১ জন পোস্ট করে আর ১০ হাজার জন তা পড়ে)। 

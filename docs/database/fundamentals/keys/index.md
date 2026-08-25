@@ -3,6 +3,13 @@ sidebar_position: 5
 title: 'Keys'
 ---
 
+```mermaid
+erDiagram
+    CUSTOMERS ||--o{ ORDERS : customer_id
+    ORDERS ||--|{ ORDER_ITEMS : order_id
+    PRODUCTS ||--o{ ORDER_ITEMS : product_id
+```
+
 # Database Keys
 
 Database key হলো table এর row গুলোকে uniquely identify করার mechanism এবং table গুলোর মধ্যে relationship establish করার fundamental component।
@@ -67,9 +74,9 @@ Table-এর যেকোনো column বা column combination যা uniquely
 ```sql
 -- Multiple columns can serve as candidate keys
 CREATE TABLE employees (
-    emp_id INT,           -- Candidate key 1
-    email VARCHAR(100),   -- Candidate key 2  
-    ssn VARCHAR(11),      -- Candidate key 3
+    emp_id INT UNIQUE NOT NULL,           -- Candidate key 1
+    email VARCHAR(100) UNIQUE NOT NULL,   -- Candidate key 2
+    ssn VARCHAR(11) UNIQUE NOT NULL,      -- Candidate key 3
     name VARCHAR(100),
     department VARCHAR(50)
 );
@@ -81,9 +88,9 @@ Primary key এবং unique key দুটোই uniqueness ensure করে, �
 
 | **বিষয়** | **Primary Key** | **Unique Key** |
 |-----------|-----------------|----------------|
-| **NULL Value** | NULL value allow করে না | NULL value allow করে (একটি) |
+| **NULL Value** | NULL value allow করে না | NULL handling DBMS-ভেদে ভিন্ন; PostgreSQL/MySQL সাধারণত একাধিক NULL allow করে, SQL Server সাধারণ unique constraint সাধারণত একটি NULL allow করে |
 | **Quantity per Table** | একটি table এ শুধুমাত্র একটি | একটি table এ multiple unique key থাকতে পারে |
-| **Index Creation** | Automatically clustered index তৈরি হয় | Non-clustered index তৈরি হয় |
+| **Index Creation** | Supporting unique index সাধারণত তৈরি হয়; clustered হওয়া DBMS/storage engine-নির্ভর | Supporting unique index সাধারণত তৈরি হয়; index type DBMS-নির্ভর |
 | **Purpose** | Table এর main identifier | Additional uniqueness constraint |
 | **Modification** | Generally immutable | Can be modified |
 | **Performance** | Faster query performance | Good performance but not primary identifier |
@@ -185,7 +192,7 @@ ALTER TABLE employees ADD UNIQUE KEY uk_passport (passport);
 ```sql
 -- Good primary key characteristics
 CREATE TABLE products (
-    -- ✅ Good: Simple, stable, meaningful
+    -- ✅ Good: Simple, stable, meaningless surrogate identifier
     product_id INT PRIMARY KEY AUTO_INCREMENT,
     
     -- Alternative candidates

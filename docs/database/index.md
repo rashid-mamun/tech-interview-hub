@@ -1,6 +1,16 @@
 # 🚀 Complete Database Interview Questions Guide
 *Master Database Interviews with 200+ Questions & Follow-ups*
 
+```mermaid
+flowchart TD
+    Fundamentals[Fundamentals] --> SQL[SQL and joins]
+    SQL --> Design[Normalization and indexing]
+    Design --> Concurrency[Transactions and concurrency]
+    Concurrency --> Scale[NoSQL availability and scale]
+    Scale --> Operations[Security recovery and troubleshooting]
+    Operations --> Scenarios[Architecture scenarios]
+```
+
 ---
 
 ## 📚 **1. Database Fundamentals**
@@ -319,10 +329,6 @@
 ### **67. What is an INSTEAD OF trigger?**
 - **Follow-up**: When would you use it?
 - **Follow-up**: How is it different from BEFORE/AFTER triggers?
-
-### **68. What are advantages and disadvantages of triggers?**
-- **Follow-up**: Why should triggers be used carefully?
-- **Follow-up**: How do triggers affect performance?
 
 ### **69. What is a cursor in SQL?**
 - **Follow-up**: When would you use cursors instead of set-based operations?

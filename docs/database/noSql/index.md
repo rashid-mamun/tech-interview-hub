@@ -3,6 +3,14 @@ sidebar_position: 8
 title: 'NoSQL'
 ---
 
+```mermaid
+flowchart TD
+    N[NoSQL models] --> D[Document]
+    N --> K[Key value]
+    N --> W[Wide column]
+    N --> G[Graph]
+```
+
 ## 🌐 **8. NoSQL Databases**
 
 ## **79. What is NoSQL?**
@@ -20,10 +28,10 @@ NoSQL এবং SQL এর মধ্যে বেশ কিছু মৌলি�
 | Feature | SQL Databases (RDBMS) | NoSQL Databases |
 |---------|-----------------------|-----------------|
 | **Data Storage Model** | টেবিল-ভিত্তিক (Rows and Columns)। ডেটা রিলেশনাল মডেলে থাকে। | Document, Key-Value, Graph, বা Wide-column স্টোরেজ ব্যবহার করে। |
-| **Schema** | Rigid/Fixed Schema। ডেটা সেভ করার আগেই স্ট্রাকচার ঠিক করতে হয় (Schema-on-write)। | Dynamic/Flexible Schema। যেকোনো সময় নতুন ফিল্ড যোগ করা যায় (Schema-on-read)। |
-| **Scaling Strategy** | Vertical Scaling (Scale-up) - সার্ভারের RAM, CPU বাড়াতে হয়। | Horizontal Scaling (Scale-out) - সস্তা অনেকগুলো সার্ভার যোগ করে ক্যাপাসিটি বাড়ানো যায়। |
-| **ACID vs BASE** | ACID (Atomicity, Consistency, Isolation, Durability) গ্যারান্টি দেয়। | BASE (Basically Available, Soft state, Eventual consistency) মডেল মেনে চলে। |
-| **Relationships/Joins** | Foreign key এবং Complex JOINs সাপোর্ট করে। | ডেটা ডিনর্মালাইজড (Denormalized) থাকে, তাই সাধারণত JOIN সাপোর্ট করে না বা করলেও খুব সীমিত। |
+| **Schema** | Declared schema ও constraints সাধারণত write-এর সময় enforce হয় | Flexible record shape common; তবে validation/schema rule-ও enforce করা যায় |
+| **Scaling Strategy** | Vertical ও horizontal—দুটিই সম্ভব; sharding complexity product-ভেদে ভিন্ন | অনেক product শুরু থেকেই partitioning/scale-out-এর জন্য designed |
+| **Transactions/Consistency** | সাধারণত multi-row ACID transaction শক্তিশালী | Product-ভেদে single-record বা multi-record ACID, tunable/eventual consistency—সবই পাওয়া যায় |
+| **Relationships/Joins** | Foreign key এবং JOIN first-class feature | সাধারণত embedding/application-side lookup; কিছু product join/lookup/traversal support করে |
 
 ### When should you choose NoSQL over SQL?
 
@@ -75,7 +83,7 @@ NoSQL কোনো একক প্রযুক্তির নাম নয়;
 
 **Key-value store** হলো NoSQL ডাটাবেসের সবচেয়ে সরল এবং ফাস্টেস্ট টাইপ। এটি মূলত একটি বিশাল হ্যাশ টেবিল (Hash Table) বা ডিকশনারি (Dictionary) হিসেবে কাজ করে। প্রতিটি রেকর্ড একটি ইউনিক **Key** (যেমন আইডি বা নাম) এবং তার সাথে সম্পর্কিত একটি **Value** দিয়ে গঠিত হয়।
 
-ডাটাবেস ইঞ্জিনের কাছে 'Value' অংশটি একটি ব্ল্যাক-বক্স (Black Box)। ইঞ্জিন শুধু 'Key' এর মাধ্যমে ডেটা তুলে আনে, 'Value' এর ভেতরের ডেটা নিয়ে সে কোনো ফিল্টারিং করতে পারে না।
+Pure key-value model-এ value সাধারণত opaque এবং primary access key দিয়ে হয়। তবে Redis-এর hashes/search module বা DynamoDB secondary index-এর মতো product-specific feature থাকায় capability যাচাই করে সিদ্ধান্ত নিতে হয়।
 
 **Technical definition:** A Key-Value store is a simple database model designed for storing, retrieving, and managing associative arrays where each record is securely identified by a unique key. It optimizes specifically for highly concurrent and extremely fast read/write operations by retrieving data directly via primary keys.
 
@@ -110,12 +118,12 @@ NoSQL কোনো একক প্রযুক্তির নাম নয়;
 
 ### Why is MongoDB considered schema-less?
 
-**MongoDB** কে schema-less (লুজলি "Dynamic Schema") বলা হয় কারণ, RDBMS এর মতো ডেটা ঢোকানোর আগে আপনাকে কোনো টেবিল ডিজাইন বা কলাম ডিক্লেয়ার করতে হয় না। একই "Collection" (যা টেবিলের সমতুল্য) এর মধ্যে থাকা ভিন্ন ভিন্ন ডকুমেন্টের স্ট্রাকচার সম্পূর্ণ আলাদা হতে পারে। 
+**MongoDB**-কে schema-flexible বলা বেশি নির্ভুল: collection-এর document shape এক হতে বাধ্য নয়, কিন্তু application schema এবং MongoDB JSON Schema validation দিয়ে required field/type enforce করা যায়।
 
 **উদাহরণস্বরূপ:**
 ধরা যাক একটি `users` কালেকশনে আপনি নিচের দুটি ভিন্ন স্ট্রাকচারের ডকুমেন্ট রাখতে পারবেন কোনো এরর ছাড়াই:
 
-```json
+```javascript
 // User 1 (Minimal data)
 {
   "_id": ObjectId("64a1b2c3d4..."),
@@ -145,7 +153,7 @@ NoSQL কোনো একক প্রযুক্তির নাম নয়;
 #### **১. Embedding (Denormalization - "One-to-Few"):** 
 যখন একটি এন্টিটির সাথে সম্পর্কিত ডেটা খুব বেশি বড় হয় না, তখন রিলেটেড ডেটাকে মূল ডকুমেন্টের ভেতরেই (Embedded array বা sub-document হিসেবে) ঢুকিয়ে দেওয়া হয়। 
 * **উদাহরণ:** একটি ব্লগের পোস্ট এবং তার ১০-২০টি কমেন্ট।
-```json
+```javascript
 {
   "_id": 101,
   "title": "NoSQL Guide",
@@ -161,7 +169,7 @@ NoSQL কোনো একক প্রযুক্তির নাম নয়;
 #### **২. Referencing (Normalization - "One-to-Many" or "Many-to-Many"):** 
 যখন রিলেটেড ডেটা অনেক বড় হতে পারে বা বারবার পরিবর্তন হয়, তখন ডেটাকে আলাদা কালেকশনে রাখা হয় এবং শুধুমাত্র তার `_id` (রেফারেন্স) সেভ করে রাখা হয় (Foreign Key এর মতো)।
 * **উদাহরণ:** একটি পাবলিশার এবং তার হাজার হাজার বই।
-```json
+```javascript
 // Publisher Document
 { 
   "_id": "pub_1", 
@@ -181,7 +189,7 @@ NoSQL কোনো একক প্রযুক্তির নাম নয়;
 
 ## **83. What is a column-family database?**
 
-**Column-family database** গুলো ডেটাকে সারি (Row) এর বদলে কলাম (Column) হিসেবে স্টোর করে। এখানে কলামগুলোকে "Column Families" নামক গ্রুপে ভাগ করা হয়। এটি এমনভাবে ডিজাইন করা হয়েছে যেন একই ধরনের ডেটা ফিজিক্যালি হার্ডডিস্কের একই জায়গায় থাকে, যা বিশাল পরিমাণ ডেটার ওপর অত্যন্ত দ্রুত রিডিং এবং রাইটিং নিশ্চিত করে।
+**Wide-column/column-family database** row key, partition এবং column family-কেন্দ্রিক sparse data model ব্যবহার করে। এটি analytical columnar database-এর সমার্থক নয়। Cassandra/HBase-এর physical layout আলাদা হলেও query আগে থেকে access pattern ও partition key ধরে design করা হয়।
 
 **Technical definition:** A wide-column store (or column-family database) is a two-dimensional key-value store where rows and columns form the keys, and the resulting multi-dimensional map is partitioned across multiple nodes for extreme scalability and write-throughput.
 
@@ -191,10 +199,10 @@ Apache Cassandra একটি বিখ্যাত কলাম ফ্যাম
 
 | Feature | Traditional RDBMS (e.g., MySQL) | Apache Cassandra |
 |---------|--------------------------------|------------------|
-| **Architecture** | Master-Slave (একটি সার্ভার মূল, বাকিগুলো কপি)। | **Peer-to-Peer** (সব নোড সমান)। কোনো Single Point of Failure নেই। মাস্টার ক্র্যাশ করার ভয় নেই। |
+| **Architecture** | Primary/replica, shared storage বা distributed—product/configuration অনুযায়ী | Cassandra-তে peer-to-peer; অন্য NoSQL product-এ primary/replica-ও common |
 | **Storage Engine** | B-Tree (ভালো Read পারফরম্যান্স এর জন্য)। | **LSM-Tree** (Log-Structured Merge-Tree)। এটি মূলত বিশাল পরিমাণ Write অপারেশনের জন্য অপ্টিমাইজড। |
-| **Scaling** | Vertical (RAM/CPU বাড়াও), Horizontal স্কেলিং কঠিন। | **Linear Horizontal Scaling**। যতগুলো নতুন নোড/সার্ভার যোগ করবেন, পারফরম্যান্স তত গুণ বাড়বে। |
-| **Querying** | Complex `JOIN`, `GROUP BY`, `ORDER BY` সাপোর্ট করে। | **No Joins**। কুয়েরি শুধুমাত্র `Partition Key` এর ওপর ভিত্তি করে হয়। |
+| **Scaling** | Scale-up ও scale-out দুটোই সম্ভব; distributed SQL/sharding operational complexity বাড়ায় | Scale-out common, কিন্তু coordination, replication ও hot partition-এর কারণে scaling পুরোপুরি linear নয় |
+| **Querying** | Complex `JOIN`, `GROUP BY`, `ORDER BY` সাপোর্ট করে | Cassandra query partition key-কেন্দ্রিক; অন্য NoSQL model-এর query capability আলাদা |
 | **Flexibility** | Rigid Schema। সব রো-তে সমান কলাম থাকতে হবে। | Flexible। প্রতিটি রো-তে আলাদা সংখ্যক কলাম থাকতে পারে। |
 
 ### What is wide column store?
@@ -241,7 +249,7 @@ Apache Cassandra একটি বিখ্যাত কলাম ফ্যাম
 
 **CAP Theorem** (যা Brewer's Theorem নামে পরিচিত) হলো ডিস্ট্রিবিউটেড ডাটাবেস (Distributed Database) সিস্টেমের একটি মৌলিক এবং অত্যন্ত গুরুত্বপূর্ণ থিওরিম। 
 
-এটি সহজভাবে বলে যে, যখন একটি ডাটাবেস একাধিক সার্ভারে বা নোডে (Nodes) ডিস্ট্রিবিউটেড থাকে, তখন একই সাথে নিচের তিনটি বৈশিষ্ট্যের (Properties) সবগুলোতে ১০০% গ্যারান্টি দেওয়া গাণিতিকভাবে অসম্ভব। চাইলেও যেকোনো দুটি বেছে নিতে হবে।
+CAP theorem বলে network partition ঘটলে distributed system একই operation-এর জন্য strong consistency এবং availability—দুটিই একসাথে guarantee করতে পারে না। “সবসময় যেকোনো দুটি বেছে নিন” বলা অসম্পূর্ণ, কারণ partition না থাকলে C ও A দুটোই পাওয়া সম্ভব এবং P বাস্তব network-এ design concern হিসেবেই থাকে।
 
 **CAP তিনটি শব্দের সংক্ষিপ্ত রূপ:**
 * **C - Consistency (ধারাবাহিকতা/সঠিকতা):** ডাটাবেসের যেকোনো নোড বা সার্ভারে ইউজারের করা লেটেস্ট আপডেটটি সাথে সাথেই পাওয়া যাবে। অর্থাৎ, সবগুলো সার্ভার সবসময় একই ডেটা দেখাবে।
@@ -366,7 +374,7 @@ Shard Key এর ভ্যালুকে হ্যাশ (Hash ফাংশন)
 
 2. **Ranged Sharding:** 
 Shard Key এর ভ্যালুর রেঞ্জ অনুযায়ী ডেটা ভাগ হয়। (যেমন A-M নামের মানুষ Shard 1 এ, N-Z নামের মানুষ Shard 2 এ)।
-* *সুবিধা:* Range query এর জন্য এটি সবচেয়ে ফাস্ট।
+* *সুবিধা:* shard key-এর range-কেন্দ্রিক query efficient হতে পারে। তবে monotonic key hot shard তৈরি করতে পারে, তাই “সবচেয়ে fast” universally সত্য নয়।
 * *অসুবিধা:* ডেটা আন-ইভেনলি ডিস্ট্রিবিউট হতে পারে। (ধরি A-M নামের মানুষ বেশি, তখন Shard 1 এ ওভারলোড হয়ে যাবে)।
 
 3. **Choosing the Right Key (মৌলিক নিয়ম):** 
@@ -395,7 +403,7 @@ Sharding এর মূল উদ্দেশ্য হলো "স্কেলি
 
 ### How does MongoDB replica set work?
 
-MongoDB তে রেপ্লিকেশন ব্যবস্থাটিকে **Replica Set** বলা হয়। এটি Master-Slave আর্কিটেকচারের একটি উন্নত রূপ যার অটোমেটিক রিকভারি ক্ষমতা আছে।
+MongoDB-তে replication ব্যবস্থাটিকে **Replica Set** বলা হয়। এতে একটি elected primary ও secondary node থাকে; eligible node election-এর মাধ্যমে primary failure-এর পরে failover করতে পারে।
 
 * একটি டிப்பিকেল Replica Set এ একটি **Primary (Master)** নোড এবং একাধিক **Secondary (Slave)** নোড থাকে।
 * অ্যাপ্লিকেশনের সব রাইট (Write) অপারেশন শুধুমাত্র Primary নোডেই আসে। 

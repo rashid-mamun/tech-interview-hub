@@ -3,6 +3,13 @@ sidebar_position: 2
 title: 'Joins'
 ---
 
+```mermaid
+flowchart LR
+    Customers[Customers] -->|customer_id| Join[JOIN condition]
+    Orders[Orders] -->|customer_id| Join
+    Join --> Result[Combined rows]
+```
+
 ## **26. What are SQL joins?**
 
 SQL joins হলো একটি পাওয়ারফুল technique যা দিয়ে আমরা দুই বা ততোধিক tables থেকে data কে একসাথে combine করতে পারি। এটি relational database এর সবচেয়ে গুরুত্বপূর্ণ features এর মধ্যে একটি।

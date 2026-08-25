@@ -3,6 +3,14 @@ sidebar_position: 7
 title: 'Integrity'
 ---
 
+```mermaid
+flowchart LR
+    Input[Incoming row] --> Domain[Domain checks]
+    Domain --> Entity[Primary key]
+    Entity --> Ref[Foreign key]
+    Ref --> Valid[(Valid data)]
+```
+
 Data integrity হলো database এ stored data এর accuracy, consistency এবং reliability maintain করার process, যা business rule এবং constraint enforcement এর মাধ্যমে achieve করা হয়।
 
 ## ৭. What is data integrity?
@@ -17,14 +25,19 @@ Data integrity হলো database এ stored data এর accuracy, consistency �
 - **Completeness** → Required field missing নয়
 - **Reliability** → Data trusted এবং dependable  
 
-#### উদাহরণ:
+#### উদাহরণ (MySQL 8+):
 
 ```sql
 -- Data integrity constraint example
+CREATE TABLE departments (
+    dept_id INT PRIMARY KEY,
+    dept_name VARCHAR(100) NOT NULL UNIQUE
+);
+
 CREATE TABLE employees (
     emp_id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(100) NOT NULL,                    -- Entity integrity
-    email VARCHAR(100) UNIQUE NOT NULL,            -- Entity integrity
+    name VARCHAR(100) NOT NULL,                    -- Required attribute
+    email VARCHAR(100) UNIQUE NOT NULL,            -- Key/domain rule
     age INT CHECK (age >= 18 AND age <= 65),       -- Domain integrity
     department_id INT,
     salary DECIMAL(10,2) CHECK (salary > 0),       -- Domain integrity
@@ -122,7 +135,7 @@ CREATE TABLE products (
     category ENUM('electronics', 'clothing', 'books'),         -- Limited valid values
     rating DECIMAL(2,1) CHECK (rating >= 0 AND rating <= 5),  -- Rating between 0-5
     stock_quantity INT DEFAULT 0 CHECK (stock_quantity >= 0), -- Non-negative stock
-    manufacture_date DATE CHECK (manufacture_date <= CURRENT_DATE), -- Cannot be future date
+    manufacture_date DATE,                                      -- Current-date rule app/trigger-এ check করুন
     expiry_date DATE CHECK (expiry_date > manufacture_date),   -- Expiry after manufacture
     sku VARCHAR(20) NOT NULL UNIQUE,
     is_active BOOLEAN DEFAULT TRUE
@@ -183,7 +196,7 @@ parent টেবিলের ডেটা যখন delete বা update কর�
 
 #### Indexing (দ্রুত চেক করার জন্য)
 
-referential integrity এনফোর্স করা ডাটাবেজের জন্য কস্টলি হতে পারে। তাই DBMS সাধারণত foreign কি কলামগুলোর ওপর অটোমেটিক একটি **Index** তৈরি করে। যখনই আপনি parent থেকে কিছু delete করেন, DBMS দ্রুত ইনডেক্স ব্যবহার করে চেক করে দেখে যে child টেবিলে কোনো বাধা আছে কি না।
+referential integrity এনফোর্স করা কস্টলি হতে পারে। Foreign key থাকলেই সব DBMS referencing (child) column-এ index বানায় না—PostgreSQL বানায় না, আর MySQL/InnoDB-তে প্রয়োজনীয় index থাকতে হয় এবং প্রয়োজনে তৈরি হয়। তাই workload দেখে child foreign-key column-এ index আছে কি না যাচাই করা জরুরি।
 
 
 

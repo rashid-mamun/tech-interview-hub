@@ -3,6 +3,13 @@ sidebar_position: 3
 title: "Triggers & Cursors"
 ---
 
+```mermaid
+flowchart LR
+    DML[INSERT UPDATE DELETE] --> Trigger[Trigger fires]
+    Trigger --> Rule[Validation or audit]
+    Rule --> Tables[(Target and audit tables)]
+```
+
 # Triggers & Cursors
 
 ## **66. What is a trigger?**
@@ -48,15 +55,15 @@ CREATE TRIGGER trigger_name
 - Used for **validation** and **data transformation**
 
 #### **AFTER Triggers:**
-- Execute **after** the triggering event and COMMIT
+- Triggering statement-এর row/statement action-এর পরে execute হয়, কিন্তু সাধারণত একই transaction-এর ভেতরে COMMIT-এর আগে
 - **Cannot modify** the row being changed
 - Used for **logging**, **notifications**, and **cascading operations**
 
 | ফিচার | BEFORE Triggers | AFTER Triggers |
 | --- | --- | --- |
-| **কখন এক্সিকিউট হয়?** | মেইন অপারেশন (Insert/Update) ঘটার ঠিক আগে। | মেইন অপারেশন এবং COMMIT সম্পন্ন হওয়ার পর। |
+| **কখন এক্সিকিউট হয়?** | মেইন row/statement action-এর আগে। | Action-এর পরে, সাধারণত transaction commit হওয়ার আগে। |
 | **ডেটা মডিফিকেশন** | `NEW` ভ্যালুকে পরিবর্তন (Modify) করতে পারে। | যে রো-টি পরিবর্তন হচ্ছে, তাকে আর মডিফাই করতে পারে না। |
-| **অপারেশন বাতিল** | Error জেনারেট করে অপারেশনটি আটকে দিতে পারে। | অপারেশন আটকানো যায় না (কারণ তা আগেই হয়ে গেছে)। |
+| **অপারেশন বাতিল** | Error জেনারেট করে operation আটকাতে পারে। | Error দিলে সাধারণত statement/transaction rollback হতে পারে। |
 | **Use Case** | Data Validation এবং Data Transformation. | Logging, Notifications এবং Cascading Operations. |
 
 
@@ -120,13 +127,13 @@ DELIMITER ;
 
 ## **67. What is an INSTEAD OF trigger?**
 
-**INSTEAD OF Trigger** হলো একটি বিশেষ ধরনের trigger যা শুধুমাত্র **Views (ভিউ)**-এর ওপর তৈরি করা হয়। সাধারণ trigger যেমন মূল অপারেশনের আগে বা পরে কাজ করে, এই trigger মূল DML অপারেশনের (INSERT, UPDATE, DELETE) **পরিবর্তে (Instead of)** নিজস্ব কাস্টম লজিক এক্সিকিউট করে।
+**INSTEAD OF Trigger** মূল DML অপারেশনের (INSERT, UPDATE, DELETE) **পরিবর্তে** custom logic চালায়। এটি complex view update করতে বেশি ব্যবহৃত হয়; support DBMS-ভেদে ভিন্ন—SQL Server table ও view দুটিতেই দেয়, PostgreSQL/SQLite মূলত view-তে দেয়।
 
 **Technical Definition:** INSTEAD OF trigger হলো একটি ভিউ-স্পেসিফিক trigger, যা ভিউয়ের ওপর চালানো কোনো DML কমান্ডের ডিফল্ট আচরণকে বাতিল করে দেয় এবং তার বদলে ইউজারের লিখে দেওয়া custom logic or command রান করে।
 
 ### Key Characteristics:
 
-- শুধুমাত্র **views** এর উপর ব্যবহার হয়, tables এর উপর নয়
+- কোন object-এ ব্যবহার করা যায় তা DBMS-নির্ভর
 - Original operation **replace** করে, supplement করে না
 - এর প্রধান কাজ হলো এমন **Complex Views**-কে Updatable করা, যেগুলো সাধারণত সরাসরি আপডেট করা যায় না (যেমন: Join করা ভিউ)।
 - এটি **FOR EACH ROW** বেসিসে কাজ করে।
@@ -350,13 +357,38 @@ INSERT INTO customer_contact_view (
 
 | Aspect | BEFORE/AFTER Triggers | INSTEAD OF Triggers |
 | --- | --- | --- |
-| **কোথায় ব্যবহৃত হয়?** | শুধুমাত্র Tables-এ। | শুধুমাত্র Views-এ। |
+| **কোথায় ব্যবহৃত হয়?** | DBMS অনুযায়ী table/view। | DBMS অনুযায়ী view, কখনও table-ও। |
 | **কাজের ধরন** | অরিজিনাল অপারেশনের সাথে যুক্ত হয়ে কাজ করে। | অরিজিনাল অপারেশনকে পুরোপুরি রিপ্লেস করে দেয়। |
 | **কখন রান হয়?** | অরিজিনাল DML-এর আগে বা পরে। | অরিজিনাল DML-এর পরিবর্তে। |
 | **মূল উদ্দেশ্য** | ভ্যালিডেশন, অডিটিং বা অতিরিক্ত অ্যাকশন নেওয়া। | কমপ্লেক্স ভিউয়ের মাধ্যমে ডেটাবেজ আপডেট করার কাস্টম লজিক তৈরি করা। |
 | **অরিজিনাল অপারেশন** | সম্পন্ন হয় (যদি এরর না দেয়)। | সম্পন্ন হয় না (শুধু ট্রিগারের ভেতরের লজিক রান করে)। |
 
-## **68. What is a cursor? When would you use it?**
+## **68. What are the Advantages and Disadvantages of Triggers?**
+
+**Advantages:**
+
+- Application bypass করেও database-level audit বা invariant enforce করা যায়।
+- একই rule একাধিক application/client-এর জন্য central থাকে।
+- Base-table change-এর সঙ্গে audit row একই transaction-এ লেখা যায়।
+
+**Disadvantages:**
+
+- Hidden side effect debugging ও change impact বোঝা কঠিন করে।
+- প্রতি write-এ extra query/lock যোগ হয়ে latency ও deadlock risk বাড়তে পারে।
+- Cascading/recursive trigger unexpected work করতে পারে এবং vendor syntax portable নয়।
+
+**Concrete example:** `orders.status` বদলালে ছোট audit row লেখা trigger-এর ভালো use case। Email/API call trigger-এর মধ্যে করা ভালো নয়; external side effect transaction rollback-এর সঙ্গে atomic নয়। Transactional outbox table-এ event লিখে worker দিয়ে email পাঠানো নিরাপদ pattern।
+
+```mermaid
+flowchart LR
+    Update[Order update] --> Trigger[AFTER UPDATE trigger]
+    Trigger --> Audit[(Audit row)]
+    Trigger --> Outbox[(Outbox event)]
+    Outbox --> Worker[Async worker]
+    Worker --> Email[Email service]
+```
+
+## **69. What is a cursor? When would you use it?**
 
 **Cursor** হলো একটি ডাটাবেজ object যা কোনো SQL query রেজাল্ট সেট থেকে Row-by-Row প্রসেস করার জন্য ব্যবহৃত হয়। সাধারণ SQL যেখানে সেট হিসেবে (সব row একসাথে) কাজ করে, cursor সেখানে একটি **Pointer** হিসেবে কাজ করে যা বর্তমানে কোন row প্রসেস হচ্ছে তা নির্দেশ করে।
 

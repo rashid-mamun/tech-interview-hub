@@ -3,6 +3,14 @@ sidebar_position: 3
 title: 'SQL Functions and Operations'
 ---
 
+```mermaid
+flowchart LR
+    Rows[Input rows] --> Function[Scalar or aggregate function]
+    Function --> Value[Computed value]
+    Rows --> Group[Grouping]
+    Group --> Summary[Aggregate result]
+```
+
 ## **20. What is ORDER BY and GROUP BY?**
 
 ORDER BY এবং GROUP BY SQL এর দুটি গুরুত্বপূর্ণ clauses যা data organization এবং analysis এর জন্য ব্যবহৃত হয়।
@@ -352,7 +360,99 @@ SELECT
 FROM test_employees;
 ```
 
-## **22. What is CTE (Common Table Expression)?**
+## **22. What is a Window Function?**
+
+Window function related row-এর ওপর calculation করে, কিন্তু `GROUP BY`-এর মতো row collapse করে না। `OVER()` clause দিয়ে window define করা হয়।
+
+### ROW_NUMBER, RANK এবং DENSE_RANK
+
+```sql
+WITH scores(name, score) AS (
+    VALUES ('Asha', 95), ('Rafi', 90), ('Mina', 90), ('Nabil', 80)
+)
+SELECT name,
+       score,
+       ROW_NUMBER() OVER (ORDER BY score DESC) AS row_no,
+       RANK()       OVER (ORDER BY score DESC) AS rank_no,
+       DENSE_RANK() OVER (ORDER BY score DESC) AS dense_rank_no
+FROM scores
+ORDER BY score DESC, name;
+```
+
+**Sample response:**
+
+```text
+name  | score | row_no | rank_no | dense_rank_no
+------+-------+--------+---------+--------------
+Asha  | 95    | 1      | 1       | 1
+Mina  | 90    | 2      | 2       | 2
+Rafi  | 90    | 3      | 2       | 2
+Nabil | 80    | 4      | 4       | 3
+```
+
+`ROW_NUMBER()` প্রতিটি row-কে আলাদা sequence দেয়। `RANK()` tie-এর পরে gap রাখে, আর `DENSE_RANK()` gap রাখে না। Tie-এর মধ্যে deterministic `ROW_NUMBER()` চাইলে window-এর `ORDER BY`-তে unique tie-breaker যোগ করতে হবে।
+
+### PARTITION BY বনাম GROUP BY
+
+```sql
+WITH sales(employee, department, amount) AS (
+    VALUES ('Asha', 'Engineering', 500),
+           ('Rafi', 'Engineering', 300),
+           ('Mina', 'Sales', 700)
+)
+SELECT employee,
+       department,
+       amount,
+       SUM(amount) OVER (PARTITION BY department) AS department_total
+FROM sales
+ORDER BY department, employee;
+```
+
+**Sample response:**
+
+```text
+employee | department  | amount | department_total
+---------+-------------+--------+-----------------
+Asha     | Engineering | 500    | 800
+Rafi     | Engineering | 300    | 800
+Mina     | Sales       | 700    | 700
+```
+
+এখানে প্রতিটি employee row থাকে; `GROUP BY department` ব্যবহার করলে department-পিছু একটি row হতো।
+
+### LAG এবং LEAD
+
+```sql
+WITH monthly_sales(month_no, amount) AS (
+    VALUES (1, 1000), (2, 1250), (3, 1100)
+)
+SELECT month_no,
+       amount,
+       LAG(amount)  OVER (ORDER BY month_no) AS previous_amount,
+       LEAD(amount) OVER (ORDER BY month_no) AS next_amount
+FROM monthly_sales
+ORDER BY month_no;
+```
+
+**Sample response:**
+
+```text
+month_no | amount | previous_amount | next_amount
+---------+--------+-----------------+------------
+1        | 1000   | NULL            | 1250
+2        | 1250   | 1000            | 1100
+3        | 1100   | 1250            | NULL
+```
+
+```mermaid
+flowchart LR
+    Rows[Input rows] --> Partition[PARTITION BY groups]
+    Partition --> Order[ORDER BY within window]
+    Order --> Calculate[Rank lag lead aggregate]
+    Calculate --> SameRows[Original rows retained]
+```
+
+## **23. What is CTE (Common Table Expression)?**
 
 CTE (Common Table Expression) হলো একটি temporary named result set যা একটি single SQL statement এর scope এর মধ্যে exist করে। এটি complex queries কে more readable এবং maintainable বানায়।
 

@@ -3,6 +3,13 @@ sidebar_position: 8
 title: 'Abstraction'
 ---
 
+```mermaid
+flowchart TD
+    View[External view] --> Logical[Logical schema]
+    Logical --> Physical[Physical storage]
+    Physical --> Disk[(Files and pages)]
+```
+
 # Data Abstraction
 
 Data abstraction হলো database system এর complexity hide করে user এবং application developer দের simplified view প্রদান করার mechanism।

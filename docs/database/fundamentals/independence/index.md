@@ -3,6 +3,14 @@ sidebar_position: 9
 title: 'Independence'
 ---
 
+```mermaid
+flowchart TD
+    Apps[Applications] --> Logical[Logical schema]
+    Logical --> Physical[Physical schema]
+    Physical --> Storage[(Storage)]
+    Change[Storage or index change] -. isolated by .-> Logical
+```
+
 # Data Independence
 
 Data independence হলো database এর ability যেখানে higher level এর structure বা application lower level এর change দ্বারা affected হয় না।

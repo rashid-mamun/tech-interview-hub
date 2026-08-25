@@ -3,6 +3,32 @@ sidebar_position: 5
 title: 'Normalization'
 ---
 
+```mermaid
+flowchart LR
+    U[Unnormalized data] --> F1[First normal form]
+    F1 --> F2[Second normal form]
+    F2 --> F3[Third normal form]
+    F3 --> B[BCNF]
+```
+
+### Running example
+
+একটি order row-তে customer বারবার রাখলে update anomaly হয়। 3NF design-এ entity আলাদা করে relationship key দিয়ে রাখা যায়:
+
+```sql
+CREATE TABLE customers (
+    customer_id INT PRIMARY KEY,
+    customer_name VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE orders (
+    order_id INT PRIMARY KEY,
+    customer_id INT NOT NULL,
+    order_date DATE NOT NULL,
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+);
+```
+
 ## **32. What is Database Normalization?**
 
 **Normalization** হলো একটি ডাটাবেস ডিজাইন টেকনিক যা একটি বড় টেবিলকে ছোট ছোট টেবিলে বিভক্ত করে এবং তাদের মধ্যে লজিক্যাল রিলেশন তৈরি করে। এর মূল লক্ষ্য হলো ডাটাবেস থেকে অপ্রয়োজনীয় বা duplicate ডেটা (Redundancy) দূর করা এবং ডেটার Integrity নিশ্চিত করা।
@@ -320,7 +346,67 @@ Normalization প্রধানত তিনটি বড় সমস্যা
 
 ---
 
-## **35. What is Denormalization?**
+## **34. What is BCNF (Boyce-Codd Normal Form)?**
+
+BCNF-এ প্রতিটি non-trivial functional dependency `X -> Y`-এর determinant `X` অবশ্যই superkey হবে। 3NF কিছু ক্ষেত্রে non-superkey determinant allow করে যদি dependent attribute prime attribute হয়; BCNF সেই exception রাখে না।
+
+ধরা যাক `class(student, subject, teacher)` relation-এ নিয়ম দুটি:
+
+- `(student, subject) -> teacher`
+- `teacher -> subject`
+
+Candidate key হলো `(student, subject)` এবং `(student, teacher)`। Relationটি 3NF হতে পারে, কিন্তু `teacher -> subject`-এ teacher superkey নয়—তাই BCNF violation।
+
+BCNF decomposition:
+
+```text
+teacher_subject(teacher, subject)
+student_teacher(student, teacher)
+```
+
+```mermaid
+flowchart LR
+    Original[class student subject teacher] --> TS[teacher_subject]
+    Original --> ST[student_teacher]
+    Rule[teacher determines subject] --> TS
+```
+
+এই decomposition redundancy কমায়। তবে decomposition lossless এবং প্রয়োজনীয় dependency preserve করছে কি না আলাদাভাবে যাচাই করতে হয়।
+
+## **35. What are 4NF and 5NF?**
+
+**4NF** multi-valued dependency দূর করে। একজন student-এর skill এবং hobby যদি পরস্পর independent হয়, এক table-এ রাখলে সব combination repeat হয়:
+
+```text
+student | skill | hobby
+--------+-------+--------
+Rafi    | SQL   | Chess
+Rafi    | SQL   | Music
+Rafi    | C++   | Chess
+Rafi    | C++   | Music
+```
+
+4NF decomposition:
+
+```text
+student_skill(student, skill)
+student_hobby(student, hobby)
+```
+
+**5NF** এমন join dependency দূর করে যা তিন বা তার বেশি projection-এ lossless decomposition ছাড়া সরানো যায় না। Supplier–Part–Project-এর মতো ternary relationship-এ pairwise facts দিয়ে valid triple reconstruct করা যায় কি না business rule দেখে 5NF সিদ্ধান্ত নিতে হয়।
+
+```mermaid
+flowchart TD
+    Multi[Independent multi-valued facts] --> Skills[student_skill]
+    Multi --> Hobbies[student_hobby]
+    JoinDep[Ternary join dependency] --> SP[supplier_part]
+    JoinDep --> SJ[supplier_project]
+    JoinDep --> PJ[part_project]
+```
+
+Higher normal form practical যখন independent multi-valued fact বা complex join anomaly সত্যিই আছে। সাধারণ OLTP design প্রায়ই 3NF/BCNF-এ যথেষ্ট; অকারণে decomposition করলে query complexity বাড়ে।
+
+## **36. What is Denormalization?**
 
 **Denormalization** হলো একটি ডাটাবেস অপ্টিমাইজেশন টেকনিক যেখানে পূর্বে নরমালাইজ করা একটি ডাটাবেসে ইচ্ছাকৃতভাবে কিছু duplicate ডেটা বা রিডান্ডেন্সি (Redundancy) ফিরিয়ে আনা হয়।
 
@@ -595,4 +681,3 @@ functionally dependencies চিহ্নিত করতে নিম্নল�
 * Use normalized RDBMS for transactions
 * Use denormalized NoSQL for read-heavy operations
 * Example: Product catalog in MongoDB, orders in PostgreSQL
-
