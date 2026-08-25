@@ -1,9 +1,18 @@
-﻿---
+---
 sidebar_position: 4
 title: Networking
 ---
 
 ## 16. What is a VPC, and why is a CIDR block needed?
+
+```mermaid
+flowchart TB
+    VPC[VPC 10.0.0.0/16] --> Pub[Public subnet 10.0.1.0/24]
+    VPC --> PriA[Private subnet A 10.0.10.0/24]
+    VPC --> PriB[Private subnet B 10.0.20.0/24]
+    Pub --> Route[Route table to internet gateway]
+    PriA & PriB --> Internal[Internal routes]
+```
 
 **VPC (Virtual Private Cloud):** এটা হলো cloud provider-এর মধ্যে একটা **logically isolated, virtual network environment**, যেখানে আপনি আপনার resource (VM/instance, database, load balancer ইত্যাদি) deploy করতে পারেন এবং সেই network-এর **IP addressing, subnet, routing, security** সম্পূর্ণভাবে নিজে control করতে পারেন — অনেকটা নিজের data center-এর private network-এর মতো, কিন্তু cloud-এ। VPC আপনার resource গুলোকে অন্য customer-এর resource থেকে সম্পূর্ণভাবে isolate করে রাখে।
 
@@ -39,7 +48,7 @@ CIDR overlap একটা common এবং গুরুত্বপূর্ণ 
 
 - **Environment অনুযায়ী separate octet/range রাখা:** যেমন second octet দিয়ে environment বোঝানো (production = `10.0.x.x`, staging = `10.1.x.x`, dev = `10.2.x.x`), যাতে visually এবং logically সহজে distinguish করা যায় কোনটা কোন environment-এর।
 
-- **Future growth-এর জন্য margin রাখা:** প্রতিটা VPC/subnet-এর জন্য বর্তমান প্রয়োজনের চেয়ে বেশি room রাখা (যেমন `/16` ব্যবহার করা, `/24` না) যাতে ভবিষ্যতে নতুন subnet/resource যোগ করার সময় resize বা new CIDR block যোগ করার দরকার না পড়ে।
+- **Future growth-এর জন্য margin রাখা:** বর্তমান ও সম্ভাব্য subnet/IP demand, provider-reserved address এবং connected network বিবেচনা করে যথেষ্ট room রাখতে হবে। সব ক্ষেত্রে `/16` নেওয়া ঠিক নয়; অতিরিক্ত বড় allocation address space নষ্ট ও overlap risk বাড়াতে পারে।
 
 - **RFC 1918 private range-এর মধ্যেই থাকা, কিন্তু non-overlapping segment ব্যবহার করা:** `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16` — এই তিনটা private range-এর মধ্যে থেকেই প্রতিটা environment/region-এর জন্য আলাদা, অনতিক্রান্ত (non-overlapping) subrange বরাদ্দ করা।
 
@@ -48,6 +57,14 @@ CIDR overlap একটা common এবং গুরুত্বপূর্ণ 
 - **Documentation ও governance:** একটা clear naming convention এবং allocation policy তৈরি করা, এবং নতুন VPC তৈরি করার সময় সেই policy অনুযায়ী approval/review process রাখা, যাতে ভবিষ্যতে কেউ ভুল করে duplicate/overlapping range ব্যবহার না করে।
 
 ## 17. What is the difference between a public subnet and a private subnet?
+
+```mermaid
+flowchart LR
+    Internet --> IGW[Internet gateway] --> LB[Public load balancer]
+    LB --> App[Private application subnet]
+    App --> DB[(Private database subnet)]
+    App --> NAT[NAT gateway] --> Internet
+```
 
 **Public Subnet:** এমন একটা subnet যার route table-এ সরাসরি একটা **Internet Gateway (IGW)**-এর route থাকে (যেমন `0.0.0.0/0 → IGW`)। এর ফলে এই subnet-এ থাকা resource (যেমন EC2 instance) যদি একটা **public IP address** পায়, তাহলে সেটা সরাসরি internet থেকে accessible হয়, এবং instance নিজেও সরাসরি internet-এ outbound traffic পাঠাতে পারে। সাধারণত **load balancer, bastion host, web server (যা সরাসরি user request receive করে)** এই ধরনের resource public subnet-এ রাখা হয়।
 
@@ -78,7 +95,19 @@ Outbound access (যদি দরকার হয়, যেমন patch update 
 
 ## 18. What is the difference between an internet gateway and a NAT gateway?
 
-**Internet Gateway (IGW):** এটা একটা VPC-level component যা VPC-কে internet-এর সাথে সংযুক্ত করে এবং **bidirectional traffic** allow করে — অর্থাৎ inbound (internet থেকে VPC-তে) এবং outbound (VPC থেকে internet-এ) উভয় দিকের traffic-ই পাস করতে পারে। এটা মূলত সেই resource-গুলোর জন্য ব্যবহৃত হয় যাদের **public IP address** আছে এবং যেগুলোকে সরাসরি internet থেকে **reachable** হতে হবে — যেমন public subnet-এ থাকা web server বা load balancer। IGW নিজে কোনো **Network Address Translation (NAT)** করে না নিজে থেকে (instance-এর public IP-ই সরাসরি ব্যবহৃত হয়), এবং এটা **highly available, horizontally scaled** একটা managed service, কোনো bandwidth bottleneck নেই।
+```mermaid
+sequenceDiagram
+    participant P as Private instance
+    participant N as NAT gateway
+    participant I as Internet service
+    P->>N: Outbound connection
+    N->>I: Translated public source
+    I-->>N: Response to existing mapping
+    N-->>P: Reverse translation
+    I-xN: Unsolicited inbound connection dropped
+```
+
+**Internet Gateway (IGW):** এটা VPC-কে internet-এর সাথে bidirectional route দেয়। Resource reachable হতে route-এর পাশাপাশি public address, firewall/security rule এবং listening service-ও দরকার। Public IPv4 mapping/NAT-এর implementation provider-specific; তাই “IGW কখনো NAT করে না” generic cloud rule নয়। Managed gateway scale করলেও quota ও downstream bandwidth limit থাকতে পারে।
 
 **NAT Gateway:** এটা এমন একটা component যা **private subnet**-এ থাকা resource-কে internet-এ **outbound connection** করতে দেয় (যেমন software update download, external API call), কিন্তু বাইরে থেকে internet-এর কেউ সেই private resource-এ সরাসরি **inbound connection initiate** করতে পারে না। NAT Gateway private instance-এর **private IP address**-কে NAT Gateway-এর নিজস্ব **public/elastic IP**-তে translate করে, যাতে internet-এ request পাঠানো যায়, এবং response আসলে সেটা আবার সঠিক private instance-এ ফেরত পাঠায় — কিন্তু এই connection সবসময় **internal resource থেকেই initiate** হতে হয়।
 
@@ -104,6 +133,14 @@ Outbound access (যদি দরকার হয়, যেমন patch update 
 এই design-এর ফলে private subnet-এর resource (যেমন application server, database) নিরাপদে বাইরের প্রয়োজনীয় resource-এর (updates, third-party API) সাথে communicate করতে পারে, অথচ নিজেরা কখনো বাইরের কারো কাছে সরাসরি **attack surface/entry point** হয়ে ওঠে না।
 
 ## 19. What is the difference between a security group and a network ACL — stateful vs. stateless?
+
+```mermaid
+flowchart LR
+    Packet --> NACL{Subnet NACL\nstateless allow or deny}
+    NACL --> SG{Security group\nstateful allow rules}
+    SG --> ENI[Resource network interface]
+    ENI -->|return traffic tracked| SG
+```
 
 **Security Group (SG):** এটা একটা **instance/resource-level** (যেমন EC2 instance, ENI) virtual firewall, যা সেই নির্দিষ্ট resource-এর inbound এবং outbound traffic control করে। এটা **stateful** — অর্থাৎ যদি কোনো inbound traffic allow করা হয়, তাহলে সেই connection-এর response (outbound) traffic **automatically allow** হয়ে যায়, কোনো explicit outbound rule না থাকলেও। Security Group শুধু **"allow" rule** support করে (কোনো explicit "deny" rule নেই — যা list করা নেই, সেটাই implicitly deny)।
 
@@ -134,6 +171,15 @@ Outbound access (যদি দরকার হয়, যেমন patch update 
 সংক্ষেপে বলা যায়: **Security Group** হলো fine-grained, stateful, instance-level protection — দৈনন্দিন traffic control-এর জন্য প্রধান tool, আর **NACL** হলো broader, stateless, subnet-level backup layer — বিশেষ পরিস্থিতিতে (যেমন explicit block, broad policy) ব্যবহারের জন্য। দুটো layer একসাথে ব্যবহার করলে security posture অনেক বেশি robust হয়, single point of failure এড়ানো যায়।
 
 ## 20. What is the difference between Layer 4 and Layer 7 load balancing (ALB vs. NLB)?
+
+```mermaid
+flowchart TB
+    Client --> L4[L4: IP, port, TCP or UDP]
+    Client --> L7[L7: host, path, headers]
+    L4 --> Any[Backend connection]
+    L7 -->|/api| API[API service]
+    L7 -->|/images| IMG[Image service]
+```
 
 Load balancer OSI model-এর কোন **layer**-এ কাজ করে তার উপর ভিত্তি করে এই দুই ধরনের load balancing আলাদা হয়:
 
@@ -182,6 +228,15 @@ Load balancer OSI model-এর কোন **layer**-এ কাজ করে ত�
 
 ## 21. What is the difference between VPC peering and a transit gateway, and when do you need each?
 
+```mermaid
+flowchart TB
+    A[VPC A] <-->|direct peering| B[VPC B]
+    A -. no transitive path through B .- C[VPC C]
+    A2[VPC A] --> Hub[Transit hub]
+    B2[VPC B] --> Hub
+    C2[VPC C] --> Hub
+```
+
 **VPC Peering:** এটা দুটি VPC-এর মধ্যে একটা **point-to-point (one-to-one) network connection** তৈরি করে, যা তাদের মধ্যে **private IP address** দিয়ে সরাসরি যোগাযোগ করতে দেয়, যেন তারা একই network-এর অংশ। এটা একটা simple, direct connection, কোনো intermediate hop বা gateway device ছাড়াই।
 - প্রতিটা peering connection আলাদা আলাদা ভাবে setup এবং manage করতে হয়।
 - **Transitive routing support করে না** (নিচে বিস্তারিত)।
@@ -223,6 +278,14 @@ VPC Peering-এর design principle-ই হলো একটা **strictly point-
 
 ## 22. What is a private endpoint/private link, and why is it more secure than a public endpoint?
 
+```mermaid
+flowchart LR
+    App[Private workload] --> PE[Private endpoint IP]
+    PE --> Backbone[Provider private backbone]
+    Backbone --> Service[Managed service]
+    App -. no NAT or internet gateway required .-> PE
+```
+
 **Private Endpoint (বা AWS-এ PrivateLink, Azure-এ Private Link/Private Endpoint)** হলো একটা mechanism যা কোনো cloud service (যেমন S3, database service, বা কোনো SaaS/third-party service)-কে আপনার VPC-এর **ভিতরে একটা private IP address** হিসেবে expose করে দেয়, যাতে আপনি সেই service-এ access করতে পারেন **internet, NAT Gateway, বা Internet Gateway ব্যবহার না করেই** — সব traffic cloud provider-এর নিজস্ব **private, internal network backbone**-এর মধ্য দিয়ে যায়।
 
 সাধারণত এটা কাজ করে একটা **ENI (Elastic Network Interface)** তৈরি করে, যেটা আপনার VPC-এর subnet-এর একটা private IP নেয় এবং সেই IP-তে connect করলেই backend service-এ পৌঁছে যায় — provider-এর internal network দিয়ে, public internet স্পর্শ না করেই।
@@ -245,6 +308,15 @@ VPC Peering-এর design principle-ই হলো একটা **strictly point-
 সংক্ষেপে, Private Endpoint মূলত traffic-এর **route** পরিবর্তন করে দেয় — public, shared internet infrastructure থেকে সরিয়ে cloud provider-এর নিজস্ব, isolated, private network-এ নিয়ে আসে, যা security, performance (কম latency, predictable bandwidth), এবং compliance — তিনটার জন্যই উপকারী।
 
 ## 23. What is DNS-based routing (latency-based, weighted, failover)?
+
+```mermaid
+flowchart TD
+    Query[DNS query] --> Policy{Routing policy}
+    Policy -->|latency| Near[Nearest healthy region]
+    Policy -->|weighted| Canary[Canary or split rollout]
+    Policy -->|failover| Standby[Secondary endpoint]
+    TTL[Resolver cache and TTL] -. affects switch time .-> Query
+```
 
 **DNS-based routing** হলো একটা mechanism যেখানে DNS service (যেমন AWS Route 53, Cloudflare, Azure Traffic Manager) কোনো domain name query-এর জবাবে, নির্দিষ্ট **routing policy** অনুযায়ী বিভিন্ন IP address/endpoint return করে — client কোন server-এ connect করবে তা DNS resolution level-এই নির্ধারিত হয়ে যায়, connection establish হওয়ার আগেই।
 
@@ -276,6 +348,15 @@ VPC Peering-এর design principle-ই হলো একটা **strictly point-
 ---
 
 ## 24. What is the difference between a site-to-site VPN and a dedicated interconnect (e.g., Direct Connect)?
+
+```mermaid
+flowchart LR
+    OnPrem[On-prem network] -->|encrypted tunnel over internet| VPN[Cloud VPN]
+    OnPrem -->|private circuit, encryption optional| DX[Dedicated interconnect]
+    VPN --> VPC[Cloud VPC]
+    DX --> VPC
+    VPN -. common backup path .-> DX
+```
 
 **Site-to-Site VPN:** এটা on-premises network এবং cloud VPC-এর মধ্যে একটা **secure, encrypted tunnel** তৈরি করে, যা **public internet**-এর মধ্য দিয়েই traffic পাঠায় (তবে IPsec-এর মতো protocol দিয়ে encrypted থাকে বলে data secure থাকে)। এটা তুলনামূলক দ্রুত setup করা যায় (ঘণ্টা/দিনের মধ্যে), এবং cost কম।
 - Bandwidth সীমিত এবং internet-নির্ভর, তাই **latency ও throughput unpredictable** (internet congestion-এর উপর নির্ভরশীল)।

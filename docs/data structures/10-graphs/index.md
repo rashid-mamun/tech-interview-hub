@@ -268,6 +268,17 @@ adj[0].push_back({1, 20}); // route 2 cost 20
 
 ## 🚶🔍 62. What are BFS and DFS, and when would you use each?
 
+```mermaid
+flowchart TB
+    A((A)) --> B((B))
+    A --> C((C))
+    B --> D((D))
+    B --> E((E))
+    C --> F((F))
+    BFS[BFS order: A, B, C, D, E, F]
+    DFS[One DFS order: A, B, D, E, C, F]
+```
+
 **BFS** হলো একটি graph traversal algorithm, যা **level-by-level** (breadth-wise) ভাবে graph explore করে। এটি প্রথমে source node-এর সব **immediate neighbor** visit করে, তারপর তাদের neighbor-দের visit করে — এভাবে "ঢেউ" (wave) আকারে বাইরের দিকে ছড়িয়ে পড়ে।
 **Data Structure: Queue (FIFO)**
 

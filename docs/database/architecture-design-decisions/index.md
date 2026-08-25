@@ -3,19 +3,19 @@ sidebar_position: 11
 title: 'Architecture and Design Decisions'
 ---
 
-```mermaid
-flowchart TD
-    Requirements[Workload requirements] --> Model[Choose data model]
-    Requirements --> Consistency[Choose consistency]
-    Model --> Partition[Partition strategy]
-    Consistency --> Replication[Replication strategy]
-    Partition --> Operations[Backup monitoring recovery]
-    Replication --> Operations
-```
 
 ## 🏗️ **18. Architecture & Design Decisions**
 
 ## **159. When would you choose NoSQL over SQL database?**
+
+```mermaid
+flowchart TD
+    R[Workload requirements] --> D{Data and access pattern}
+    D -->|Relations, joins, strict transactions| SQL[SQL database]
+    D -->|Flexible model, scale-out, specialized access| N[NoSQL database]
+    SQL --> V[Validate with realistic workload]
+    N --> V
+```
 
 NoSQL এবং SQL এর মধ্যে নির্বাচন করা সিস্টেম ডিজাইনের অন্যতম গুরুত্বপূর্ণ সিদ্ধান্ত। আপনি তখন NoSQL বেছে নেবেন যখন আপনার সিস্টেমে প্রথাগত রিলেশনাল ডাটাবেসের (SQL) সীমারেখা পার হয়ে যাওয়ার উপক্রম হয়।
 

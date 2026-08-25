@@ -3,6 +3,11 @@ sidebar_position: 7
 title: 'Integrity'
 ---
 
+
+Data integrity হলো database এ stored data এর accuracy, consistency এবং reliability maintain করার process, যা business rule এবং constraint enforcement এর মাধ্যমে achieve করা হয়।
+
+## ৭. What is data integrity?
+
 ```mermaid
 flowchart LR
     Input[Incoming row] --> Domain[Domain checks]
@@ -10,10 +15,6 @@ flowchart LR
     Entity --> Ref[Foreign key]
     Ref --> Valid[(Valid data)]
 ```
-
-Data integrity হলো database এ stored data এর accuracy, consistency এবং reliability maintain করার process, যা business rule এবং constraint enforcement এর মাধ্যমে achieve করা হয়।
-
-## ৭. What is data integrity?
 
 **Data Integrity** হলো database এ data এর correctness, consistency এবং validity ensure করার mechanism যা data quality এবং reliability maintain করে।
 

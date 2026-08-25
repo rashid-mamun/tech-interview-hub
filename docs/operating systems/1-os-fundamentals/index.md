@@ -6,6 +6,15 @@ title: 'OS Fundamentals'
 
 ## 📖 1. What is an Operating System, and what are its main functions?
 
+```mermaid
+flowchart TB
+    Apps[Applications] --> API[System calls and OS services]
+    API --> K[Kernel]
+    K --> CPU[CPU scheduling]
+    K --> M[Memory management]
+    K --> IO[Devices and file systems]
+```
+
 **Operating System (OS)** হলো একটি **system software** যা **computer hardware এবং user/application software-এর মধ্যে মধ্যস্থতাকারী** হিসেবে কাজ করে। এটি computer-এর সকল hardware resource (যেমন CPU, memory, disk, I/O devices) পরিচালনা করে এবং application program-গুলোকে চলার জন্য একটি environment প্রদান করে।
 
 সহজভাবে বললে, OS ছাড়া computer-এর hardware ব্যবহার করা, program চালানো, file manage করা বা user interaction করা খুব কঠিন হয়ে যেত।
@@ -135,6 +144,15 @@ title: 'OS Fundamentals'
 ---
 
 ## 🗂️ 2. What are the different types of operating systems?
+
+```mermaid
+flowchart TB
+    OS[Operating systems] --> B[Batch]
+    OS --> T[Time-sharing]
+    OS --> D[Distributed]
+    OS --> R[Real-time]
+    OS --> E[Embedded]
+```
 Operating System (OS) বিভিন্ন ধরনের হতে পারে, এবং প্রতিটি ধরনের OS একটি নির্দিষ্ট computing environment বা requirement-এর জন্য তৈরি করা হয়।
 কিছু OS **single user system**-এর জন্য, কিছু **multiple users/processes** handle করার জন্য, কিছু **real-time control system**-এর জন্য, আবার কিছু **embedded devices**-এর জন্য ব্যবহৃত হয়।
 
@@ -399,6 +417,16 @@ System নিজেই সব manage করছে।
 
 ## 🧩 3. What is the difference between a monolithic kernel and a microkernel?
 
+```mermaid
+flowchart TB
+    subgraph Monolithic
+        MK[Kernel space: scheduler, memory, drivers, file system]
+    end
+    subgraph Microkernel
+        Mic[Kernel: scheduling, IPC, basic memory] --> S[User-space services]
+    end
+```
+
 Monolithic kernel এবং microkernel হলো **operating system kernel design-এর দুটি ভিন্ন architectural approach**।
 দুটোর মূল পার্থক্য হলো — **OS-এর কোন কোন service kernel space-এ থাকবে, আর কোনগুলো user space-এ চলবে**।
 
@@ -626,6 +654,17 @@ Hybrid kernel সাধারণত এই দুই design-এর **মাঝ�
 
 
 ## 🔐 4. What is the difference between user mode and kernel mode?
+
+```mermaid
+sequenceDiagram
+    participant U as User process
+    participant K as Kernel
+    participant H as Hardware
+    U->>K: system call or interrupt
+    K->>H: privileged operation
+    H-->>K: result
+    K-->>U: return to user mode
+```
 
 Modern operating system সাধারণত CPU-এর available privilege level থেকে প্রধানত **দুই ধরনের execution mode** ব্যবহার করে:
 

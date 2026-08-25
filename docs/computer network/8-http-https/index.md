@@ -2,7 +2,17 @@
 sidebar_position: 2
 title: 'HTTP & HTTPS'
 ---
+
 ## 🌐 60. What are HTTP and HTTPS protocols?
+
+```mermaid
+flowchart LR
+    HTTP[HTTP message] --> Plain[Plain transport, commonly port 80]
+    HTTP --> TLS[TLS-protected HTTPS]
+    TLS --> Auth[Server authentication]
+    TLS --> Secure[Encryption and integrity]
+    Secure --> P443[Commonly port 443]
+```
 **HTTP (HyperText Transfer Protocol)** হলো ইন্টারনেটে ক্লায়েন্ট (ব্রাউজার) এবং সার্ভারের মধ্যে তথ্য আদান-প্রদান করার মূল প্রোটোকল। এটি রিকোয়েস্ট-রেসপন্স মডেলে কাজ করে এবং পোর্ট 80 ব্যবহার করে।
 **HTTPS (HTTP Secure)** হলো HTTP এরই নিরাপদ বা এনক্রিপ্ট করা ভার্সন। এটি ডেটার নিরাপত্তা দিতে TLS প্রোটোকল যুক্ত করে এবং পোর্ট 443 ব্যবহার করে।
 
@@ -20,6 +30,21 @@ HTTP/3 ট্রান্সপোর্ট লেয়ার প্রোট�
 
 ---
 ## 🔄 61. What happens during an HTTP request-response cycle?
+
+```mermaid
+sequenceDiagram
+    participant B as Browser
+    participant D as DNS
+    participant L as Load balancer
+    participant A as Application
+    B->>D: Resolve hostname
+    D-->>B: IP address
+    B->>L: Connect, TLS, HTTP request
+    L->>A: Forward request
+    A-->>L: Status, headers and body
+    L-->>B: HTTP response
+    Note over B: Parse, fetch subresources, render
+```
 ```text
 URL type → DNS → TCP → TLS → Request → Server → Response → Render
 ```
@@ -204,6 +229,16 @@ HTTP/1.1-এ ডিফল্টভাবেই কানেকশনগুলো
 
 ---
 ## 🛡️ 63. What is SSL/TLS, and how does it secure data during transmission?
+
+```mermaid
+flowchart LR
+    Cert[Certificate validation] --> Auth[Server authenticated]
+    KX[Ephemeral key exchange] --> Keys[Shared session keys]
+    Auth --> Channel[Secure channel]
+    Keys --> Channel
+    Channel --> Enc[Confidentiality]
+    Channel --> Int[Integrity via AEAD tag]
+```
 > TLS হলো **internet এর security layer** — data পাঠানোর আগে encrypt করে, পৌঁছানোর পরে decrypt করে। কেউ মাঝপথে দেখলেও বুঝতে পারবে না।
 
 #### 🛡️ TLS কী কী Problem Solve করে?
@@ -268,7 +303,7 @@ Receiver একই key দিয়ে decrypt করে:
 Data বদলানো হয়েছে কিনা detect করতে **Message Authentication Code:**
 ```text
 Data পাঠানোর সময়:
-MAC = HMAC(data + secret key)
+Authentication tag = AEAD(key, nonce, encrypted data)
 পাঠাও: [data] + [MAC]
 Receiver এ:
 MAC recompute করো
@@ -360,6 +395,17 @@ TLS = তিনটা জিনিস নিশ্চিত করে
 
 ---
 ## 🍪 65. What are cookies, and how are they used in HTTP/HTTPS communication?
+
+```mermaid
+sequenceDiagram
+    participant B as Browser
+    participant S as Server
+    B->>S: POST /login
+    S-->>B: Set-Cookie session=abc; HttpOnly; Secure; SameSite=Lax
+    Note over B: Store cookie under domain/path rules
+    B->>S: GET /dashboard plus Cookie session=abc
+    S-->>B: Authenticated response
+```
 > Cookie হলো **ছোট্ট data piece** যা Server browser এ রেখে যায় — পরের request এ browser সেটা ফেরত পাঠায়। এভাবে server "মনে রাখে" তুমি কে।
 
 #### 🤔 কেন Cookie দরকার?
@@ -570,13 +616,22 @@ SameSite  → CSRF থেকে বাঁচো 🔒
 
 ---
 ## 🚀 66. What is the role of HTTP/2 and HTTP/3 in improving web performance?
+
+```mermaid
+flowchart TB
+    H1[HTTP/1.1] -->|multiple connections or ordered pipeline| HOL1[Application-level waiting]
+    H2[HTTP/2 over one TCP connection] --> Streams[Multiplexed HTTP streams]
+    Streams --> HOL2[TCP packet loss can pause all streams]
+    H3[HTTP/3 over QUIC] --> QStreams[Independent QUIC streams]
+    QStreams --> Loss[Loss mainly pauses affected stream]
+```
 আধুনিক ওয়েব পেজ অনেক ভারী, তাতে প্রচুর সিএসএস, জেএস (JS) এবং ছবি থাকে।
 - **HTTP/2** একটিমাত্র TCP কানেকশনের মাধ্যমে একসাথে অনেকগুলো রিকোয়েস্ট প্যারালালি পাঠায় (Multiplexing) এবং সার্ভার চাইলে ফাইল রিকোয়েস্ট করার আগেই পুশ করতে পারে (Server Push)।
 - **HTTP/3** TCP-কে সরিয়ে QUIC (UDP-ভিত্তিক) নিয়ে আসে। এতে মোবাইলে নেটওয়ার্ক সুইচিং (ওয়াইফাই থেকে ডাটা) হলে কানেকশন বিচ্ছিন্ন হয় না এবং কানেকশন স্পিড উল্লেখযোগ্যভাবে বাড়ে।
 
-### 🔀 What is HTTP/2 multiplexing and how does it solve head-of-line blocking?
+### 🔀 How does HTTP/2 multiplexing reduce HTTP/1.1 blocking, and what blocking remains?
 - **সমস্যা (HTTP/1.1):** ব্রাউজার যদি একই কানেকশনে প্রথমে একটি ৫ মেগাবাইটের ছবি এবং তারপর একটি ছোট্ট CSS ফাইল রিকোয়েস্ট করে, তবে আগে ওই ছবি সম্পূর্ণ ডাউনলোড না হওয়া পর্যন্ত CSS ফাইলটি ডাউনলোডের অপেক্ষায় হোল্ড করে বসে থাকত। একে হেড-অফ-লাইন ব্লকিং (Head-of-Line Blocking) বলে।
-- **সমাধান (Multiplexing):** HTTP/2 ডেটাকে বাইনারি ফ্রেমে বিভক্ত করে। ফলে একটি কানেকশনের ভেতর দিয়েই ছবি এবং CSS ফাইলটির টুকরোগুলো মিশ্রিত (Interleaved) অবস্থায় একই সাথে প্যারালালি ক্লায়েন্টে আসতে থাকে এবং কোনো ফাইল কাউকে ব্লক করে রাখে না।
+- **সমাধান ও সীমা:** HTTP/2 binary frame interleave করে, তাই application-level stream একে অপরের response শেষ হওয়ার জন্য অপেক্ষা করে না। কিন্তু সব stream একই TCP connection-এ থাকায় একটি TCP packet loss হলে missing byte retransmit না হওয়া পর্যন্ত connection-এর পরের bytes আটকে যেতে পারে। HTTP/3-এর QUIC independent stream দিয়ে এই transport-level head-of-line blocking কমায়।
 
 ### ⚡ What is QUIC and how does HTTP/3 use it?
 **QUIC (Quick UDP Internet Connections)** প্রোটোকলটি ট্রান্সপোর্ট লেয়ার হিসেবে HTTP/3 তে কাজ করে।
@@ -602,6 +657,15 @@ SameSite  → CSRF থেকে বাঁচো 🔒
 
 ---
 ## 🚦 68. What is the role of rate limiting in HTTP-based APIs, and how is it implemented? 
+
+```mermaid
+flowchart LR
+    Req[API request] --> Key[Identify key: user, token or IP]
+    Key --> Store[(Shared counter or token bucket)]
+    Store --> Decision{Limit available?}
+    Decision -->|yes| API[Serve request]
+    Decision -->|no| R429[429 plus Retry-After]
+```
 **Rate Limiting** হলো কোনো ইউজার বা আইপিকে নির্দিষ্ট সময়ের মধ্যে একটি লিমিটের বেশি API কল করতে না দেওয়া (যেমন: মিনিটে ১০০ রিকোয়েস্ট)। এটি সার্ভারকে স্প্যামিং, ব্রুট-ফোর্স অ্যাটাক, এবং DDoS আক্রমণ থেকে রক্ষা করে সার্ভারের পারফরম্যান্স স্বাভাবিক রাখে।
 
 ### 🧮 What are common rate limiting algorithms (token bucket, leaky bucket, sliding window)?
@@ -615,6 +679,20 @@ SameSite  → CSRF থেকে বাঁচো 🔒
 
 ---
 ## 🌍 69. How do backend developers handle CORS (Cross-Origin Resource Sharing) in web applications? 
+
+```mermaid
+sequenceDiagram
+    participant B as Browser at frontend.example
+    participant A as api.example
+    B->>A: OPTIONS preflight with Origin and requested method
+    A-->>B: Allowed origin, methods and headers
+    alt policy permits request
+        B->>A: Actual cross-origin request
+        A-->>B: Response with matching CORS headers
+    else policy rejects request
+        Note over B: Browser does not expose response to script
+    end
+```
 ব্রাউজারে একটি বিল্ট-ইন সিকিউরিটি সিস্টেম আছে যাকে বলা হয় Same-Origin Policy (SOP)। এটি একটি ডোমেইনকে (যেমন `frontend.com`) অন্য কোনো ডোমেইনের (যেমন `api.com`) ডাটা এক্সেস করতে দেয় না।
 - ব্যাকএন্ড ডেভেলপাররা সার্ভার রেসপন্সে **CORS Headers** যুক্ত করে ব্রাউজারকে জানান যে "আমি নিরাপদ, তুমি অমুক ডোমেইনকে আমার ডাটা এক্সেস করতে দাও"।
 
@@ -628,7 +706,7 @@ SameSite  → CSRF থেকে বাঁচো 🔒
 - **Preflighted Requests:** যদি কন্টেন্ট টাইপ `application/json` হয়, বা রিকোয়েস্টে `Authorization` (টোকেন) হেডার থাকে, তবে ব্রাউজার অবশ্যই আগে `OPTIONS` রিকোয়েস্ট বা Preflight পাঠাবে।
 
 ### 🔒 How do you securely configure CORS headers in production?
-কখনোই প্রোডাকশনে `Access-Control-Allow-Origin: *` ব্যবহার করা উচিত নয়, কারণ এতে বিশ্বের যেকোনো সাইট আপনার এপিআই কল করতে পারবে।
+Credential বা private data-সহ API-তে `Access-Control-Allow-Origin: *` ব্যবহার করা উচিত নয়। তবে intentionally public, credential-less resource-এর ক্ষেত্রে wildcard বৈধ হতে পারে। CORS authentication নয় এবং request পাঠানো সম্পূর্ণ বন্ধও করে না; browser কোন origin-কে response পড়তে দেবে সেটি নিয়ন্ত্রণ করে।
 - **নিরাপদ কনফিগারেশন:** 
   - `Access-Control-Allow-Origin: https://mywebsite.com` (শুধুমাত্র ফিক্সড ফ্রন্টএন্ড ডোমেইন উল্লেখ করা)।
   - `Access-Control-Allow-Methods: GET, POST` (শুধু দরকারি মেথডগুলো অ্যালাউ করা)।

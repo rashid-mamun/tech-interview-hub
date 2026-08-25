@@ -5,6 +5,16 @@ title: 'Recursion & Backtracking'
 
 ## 🔁 69. What is recursion, and what are its essential components?
 
+```mermaid
+flowchart TD
+    F4[factorial 4] --> F3[factorial 3]
+    F3 --> F2[factorial 2]
+    F2 --> F1[factorial 1: base case]
+    F1 -->|return 1| F2
+    F2 -->|return 2| F3
+    F3 -->|return 6| F4
+```
+
 Recursion-এ function ছোট input দিয়ে নিজেকেই call করে। **Base case** recursion থামায় এবং **recursive case** problem ছোট করে। Base case না থাকলে stack overflow হয়। Direct recursion-এ function নিজেকে call করে; indirect recursion-এ একাধিক function পরস্পরকে call করে।
 
 ```cpp title="Complete example: factorial"
@@ -67,6 +77,16 @@ Iterative: 55
 
 ## 🧩 71. What is backtracking, and how does it differ from plain brute force?
 
+```mermaid
+flowchart TD
+    State[Current partial solution] --> Choose[Choose candidate]
+    Choose --> Valid{Still valid?}
+    Valid -->|yes| Explore[Explore recursively]
+    Explore --> Undo[Undo choice]
+    Valid -->|no| Prune[Prune branch]
+    Undo --> Choose
+```
+
 Backtracking-এর template হলো **choose → explore → undo**। অসম্পূর্ণ solution আর valid result দিতে পারবে না বুঝলে branch-টি prune করা হয়।
 
 ```cpp title="Complete example: target-sum combinations"
@@ -105,6 +125,17 @@ Combinations with sum 10:
 ```
 
 ## 👑 72. How would you solve the N-Queens problem using backtracking?
+
+```mermaid
+flowchart TD
+    Row[Place queen in current row] --> Safe{Column and diagonals free?}
+    Safe -->|no| Next[Try next column]
+    Safe -->|yes| Mark[Mark column and diagonals]
+    Mark --> More{All rows placed?}
+    More -->|yes| Solution[Record solution]
+    More -->|no| Row
+    Row --> Backtrack[Unmark and try alternative]
+```
 
 প্রতি row-তে একটি queen বসানো হয়। Column ও দুই diagonal-এর boolean array ব্যবহার করলে attack test `O(1)`।
 
@@ -160,6 +191,15 @@ Total solutions: 2
 Worst-case upper bound প্রায় `O(n!)`; recursion/state-array space `O(n)`।
 
 ## 💭 73. How does memoization improve recursive algorithms?
+
+```mermaid
+flowchart TD
+    F5[Fibonacci 5] --> F4[Fibonacci 4]
+    F5 --> F3a[Fibonacci 3]
+    F4 --> F3b[Fibonacci 3]
+    F3b -. reuse cached result .-> F3a
+    Cache[(Memo table)] --> F3a
+```
 
 Memoization top-down result cache করে; tabulation bottom-up table বানায়। Fibonacci-তে একই subproblem পুনরায় solve না করায় time `O(2^n)` থেকে `O(n)` হয়।
 
@@ -252,59 +292,3 @@ Subsets:
 ```
 
 Permutation time `O(n·n!)`; power-set time `O(n·2^n)` including printing।
-
-## 🗺️ Concept diagrams
-
-### Recursive call stack
-
-```text
-factorial(4)
-└── 4 × factorial(3)
-        └── 3 × factorial(2)
-                └── 2 × factorial(1)
-                        └── 1  ← base case
-
-Return: 1 → 2 → 6 → 24
-Stack : push calls ↓   ↑ pop calls
-```
-
-### Backtracking decision tree
-
-```text
-                         []
-                    choose / \ skip
-                         1
-                  [1]         []
-                /    \       /  \
-             [1,2]   [1]   [2]  []
-              / \     / \   / \  / \
-             include/exclude element 3
-
-At every node: choose → explore → undo
-Invalid branch: prune immediately
-```
-
-### N-Queens state
-
-```text
-Board            Occupied lookup arrays
-. Q . .          column[1] = true
-. . . Q          diagonal1[row-col+n-1]
-Q . . .          diagonal2[row+col]
-. . Q .
-
-Each safety check = O(1)
-```
-
-### Memoization flow
-
-```text
-          F(5)
-       /        \
-    F(4)        F(3) ── cache hit
-   /    \
- F(3)  F(2)
-
-Without cache: repeated subtrees
-With cache   : each F(i) computed once
-```

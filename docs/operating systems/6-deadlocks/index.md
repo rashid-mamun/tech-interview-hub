@@ -6,6 +6,12 @@ title: 'Deadlocks'
 
 ## 🔗 21. What is a deadlock, and what are the four necessary conditions for it to occur (Coffman conditions)?
 
+```mermaid
+flowchart LR
+    P1[Process 1 holds Resource A] -->|waits for B| P2[Process 2 holds Resource B]
+    P2 -->|waits for A| P1
+```
+
 **Deadlock** হলো এমন একটি অবস্থা যেখানে এক বা একাধিক process/thread এমন event বা resource-এর জন্য অপেক্ষা করে যা deadlocked set-এর অন্য সদস্যের action ছাড়া ঘটবে না; ফলে set-এর কেউই আর progress করতে পারে না। সাধারণত একাধিক participant থাকে, তবে non-recursive lock দ্বিতীয়বার acquire করার মতো ক্ষেত্রে একটি thread নিজেকেও deadlock করতে পারে।
 
 সহজ উদাহরণ:
@@ -101,6 +107,14 @@ Deadlock-এর জন্য চারটি condition একসাথে দর
 ---
 
 ## 🛡️ 22. What is the difference between deadlock prevention, avoidance, detection, and recovery?
+
+```mermaid
+flowchart TB
+    D[Deadlock handling] --> P[Prevention: break a Coffman condition]
+    D --> A[Avoidance: grant only safe requests]
+    D --> X[Detection: allow then find cycles]
+    X --> R[Recovery: terminate, preempt, or roll back]
+```
 
 Deadlock handle করার চারটি major strategy আছে:
 
@@ -225,6 +239,16 @@ Detection-এরও overhead আছে এবং খুব ঘন ঘন full de
 
 ## 🏦 23. How does the Banker's algorithm work for deadlock avoidance?
 
+```mermaid
+flowchart LR
+    Q[Resource request] --> C{Request within need and available?}
+    C -->|No| W[Reject or wait]
+    C -->|Yes| T[Temporarily allocate]
+    T --> S{Safe sequence exists?}
+    S -->|Yes| G[Grant]
+    S -->|No| R[Roll back and wait]
+```
+
 **Banker’s Algorithm** হলো deadlock avoidance algorithm। এটি এমনভাবে resource allocate করে যাতে system সবসময় **safe state**-এ থাকে।
 
 এর নাম banker analogy থেকে এসেছে:
@@ -339,6 +363,14 @@ Banker’s Algorithm চালাতে system-কে আগে থেকেই 
 
 ## 🗺️ 24. How is a resource allocation graph used to detect deadlocks?
 
+```mermaid
+flowchart LR
+    P1((P1)) -->|requests| R2[Resource 2]
+    R2 -->|assigned| P2((P2))
+    P2 -->|requests| R1[Resource 1]
+    R1 -->|assigned| P1
+```
+
 **Resource Allocation Graph (RAG)** হলো একটি directed graph, যেখানে process এবং resource-এর relationship দেখানো হয়।
 
 Graph-এ দুই ধরনের node থাকে:
@@ -420,6 +452,13 @@ P1 → R2 → P2 → R1 → P1
 
 ## 🐌 25. What is the difference between deadlock, livelock, and starvation?
 
+```mermaid
+flowchart TB
+    S[No useful progress] --> D[Deadlock: blocked forever]
+    S --> L[Livelock: active but repeatedly interfering]
+    S --> T[Starvation: one task never receives service]
+```
+
 Deadlock, livelock এবং starvation দেখতে কাছাকাছি মনে হলেও এগুলো আলাদা problem।
 
 ---
@@ -495,6 +534,17 @@ T2: if A unavailable, release B and retry
 ---
 
 ## 🔓 26. What recovery strategies exist once a deadlock is detected?
+
+```mermaid
+flowchart LR
+    Detect[Deadlock detected] --> Pick[Choose victim by cost]
+    Pick --> Kill[Terminate process]
+    Pick --> Preempt[Preempt resource]
+    Pick --> Rollback[Rollback to checkpoint]
+    Kill --> Retry[Reclaim resources and retry]
+    Preempt --> Retry
+    Rollback --> Retry
+```
 
 Deadlock detect হওয়ার পরে system-কে recovery করতে হয়। Recovery সাধারণত painful, কারণ কোনো না কোনো process/resource state disturb করতে হয়।
 

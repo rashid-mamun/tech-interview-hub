@@ -3,6 +3,13 @@ sidebar_position: 10
 title: 'Buffer Pool'
 ---
 
+
+# Database Buffer Pool
+
+Database buffer pool হলো main memory এর একটি allocated area যেখানে frequently accessed database page গুলো cache করা হয় disk I/O reduce করার জন্য।
+
+## ১০. What is a database buffer pool?
+
 ```mermaid
 flowchart LR
     Query[Query] --> Buffer[Buffer pool]
@@ -10,12 +17,6 @@ flowchart LR
     Buffer -->|miss| Disk[(Data file)]
     Disk --> Buffer
 ```
-
-# Database Buffer Pool
-
-Database buffer pool হলো main memory এর একটি allocated area যেখানে frequently accessed database page গুলো cache করা হয় disk I/O reduce করার জন্য।
-
-## ১০. What is a database buffer pool?
 
 **Database Buffer Pool** হলো database management system এর একটি core component যা main memory (RAM) এ database page গুলোর cache হিসেবে কাজ করে। এটি disk storage এবং application এর মধ্যে intermediate layer হিসেবে কাজ করে।
 

@@ -2,21 +2,29 @@
 sidebar_position: 2
 title: 'Agile, Scrum, and Kanban'
 ---
+
 ## 8. What is Agile, and how does it differ from Waterfall?
 
-**Agile** হলো একটি software development **philosophy বা mindset** (specific model নয়), যেখানে software কে ছোট ছোট **iteration/sprint** এর মাধ্যমে develop করা হয়, প্রতিটি sprint শেষে একটি **working software increment** delivery করা হয়। Agile এ emphasis দেওয়া হয় **flexibility, collaboration, continuous feedback**, এবং **customer satisfaction** এর উপর।
+```mermaid
+flowchart LR
+    Waterfall[Waterfall: plan sequentially] --> Release[Large later release]
+    Backlog[Agile backlog] --> Sprint1[Short iteration] --> Inc1[Working increment]
+    Inc1 --> Feedback[Customer feedback] --> Sprint2[Next iteration]
+```
+
+**Agile** হলো software development-এর **values ও principles-ভিত্তিক mindset**, কোনো একক process নয়। Team ছোট batch, frequent feedback এবং adaptation ব্যবহার করে; sprint Scrum-এর time-box, সব Agile approach sprint ব্যবহার করে না। Working increment releaseযোগ্য রাখা হয়, কিন্তু প্রতিটি iteration শেষে production deployment বাধ্যতামূলক নয়।
 
 **Agile বনাম Waterfall:**
 
 | বিষয় | Waterfall | Agile |
 |---|---|---|
 | **Approach** | Linear, sequential | Iterative, incremental |
-| **Requirement** | শুরুতেই সম্পূর্ণভাবে fix | ধীরে ধীরে evolve করে, change কে স্বাগত জানানো হয় |
-| **Delivery** | শেষে একবারে পুরো product | প্রতি sprint শেষে working increment |
-| **Customer Involvement** | মূলত শুরু ও শেষে | Continuous, প্রতি sprint এ |
-| **Documentation** | Heavy | Minimal, working software কে অগ্রাধিকার |
-| **Testing** | শেষ দিকে, আলাদা phase | প্রতিটি sprint এর অংশ হিসেবে continuous |
-| **Change Management** | কঠিন এবং costly | সহজ, প্রতি sprint এ accommodate করা যায় |
+| **Requirement** | Baseline আগে বেশি detail-এ স্থির করা হয় | Backlog/requirement evidence অনুযায়ী evolve করে |
+| **Delivery** | সাধারণত বড় phase/release শেষে | ছোট usable increment ঘন ঘন দেওয়া সম্ভব |
+| **Customer Involvement** | Formal milestone-কেন্দ্রিক হতে পারে | Frequent stakeholder feedback উৎসাহিত করে |
+| **Documentation** | Upfront/formal documentation বেশি | Useful documentation রাখে; working software-কে বেশি value দেয় |
+| **Testing** | Dedicated later phase common | Development-এর সঙ্গে continuous testing common |
+| **Change Management** | Formal re-baselining লাগে | Backlog reprioritization দিয়ে adapt করে; change free নয় |
 
 ---
 
@@ -49,7 +57,19 @@ title: 'Agile, Scrum, and Kanban'
 
 ## 9. What is Scrum, and what are its key roles, artifacts, and ceremonies?
 
-**Scrum** হলো Agile এর সবচেয়ে জনপ্রিয় **framework**, যা কাজকে **Sprint** নামক fixed-length (সাধারণত ২-৪ সপ্তাহ) time-box এ ভাগ করে সম্পন্ন করা হয়।
+```mermaid
+flowchart LR
+    Product[Product backlog] --> Planning[Sprint planning]
+    Planning --> Sprint[Sprint backlog and sprint]
+    Sprint --> Increment[Done increment]
+    Sprint --> Daily[Daily Scrum]
+    Increment --> Review[Sprint review]
+    Review --> Product
+    Review --> Retro[Retrospective]
+    Retro --> Planning
+```
+
+**Scrum** হলো একটি lightweight framework, যেখানে কাজ **Sprint** নামক fixed-length, এক মাস বা কম time-box-এ হয়। Scrum Guide “roles” নয়, **accountabilities** শব্দ ব্যবহার করে: Product Owner, Scrum Master এবং Developers।
 
 ### Key Roles
 
@@ -57,27 +77,27 @@ title: 'Agile, Scrum, and Kanban'
 - **Product Backlog** তৈরি এবং maintain করেন — কী কী feature বা requirement দরকার তার prioritized list
 - Business value অনুযায়ী backlog item গুলো **prioritize** করেন
 - Stakeholder এবং development team এর মধ্যে **bridge** হিসেবে কাজ করেন
-- Requirement clarify করেন এবং delivered feature **accept বা reject** করেন
-- ROI (Return on Investment) maximize করার responsibility থাকে তার উপর
+- Product Goal ও Product Backlog item স্পষ্ট, visible এবং ordered রাখার accountability নেন
+- Stakeholder input নিলেও Product Backlog management-এর accountability Product Owner-এর থাকে
 
 **Scrum Master:**
 - Team কে Scrum process এবং Agile principle মেনে চলতে **guide এবং facilitate** করেন (কিন্তু নিজে team কে command করেন না)
 - **Obstacles/blockers** দূর করতে সাহায্য করেন, যাতে team নির্বিঘ্নে কাজ করতে পারে
-- Scrum ceremony গুলো (standup, planning, review, retrospective) organize এবং facilitate করেন
-- Team কে বাইরের distraction থেকে **protect** করেন
+- Scrum event productive এবং time-box-এর মধ্যে রাখতে team-কে সহায়তা করেন
+- Impediment removal ও organization-এর Scrum adoption-এ সহায়তা করেন
 - একজন **servant leader** হিসেবে কাজ করেন, boss হিসেবে নয়
 
-**Development Team:**
+**Developers:**
 - Self-organizing এবং cross-functional group, যারা actual product তৈরি করেন (design, code, test)
 - Sprint Backlog এ থাকা item গুলো কীভাবে সম্পন্ন করবেন, সেই সিদ্ধান্ত **নিজেরাই** নেন
-- সাধারণত ৩-৯ জন সদস্য থাকেন, এবং কোনো internal hierarchy/title থাকে না
+- Scrum Team সাধারণত ১০ বা কম মানুষ; Developers cross-functionalভাবে usable increment তৈরি করেন
 
 ### Key Artifacts
 
 - **Product Backlog** — পুরো project এর জন্য সম্ভাব্য সব feature, requirement, bug fix এর prioritized list
-- **Sprint Backlog** — একটি নির্দিষ্ট sprint এ কোন কোন item নিয়ে কাজ করা হবে তার list, task breakdown সহ
+- **Sprint Backlog** — Sprint Goal, selected Product Backlog items এবং increment deliver করার actionable plan
 - **Increment (Product Increment)** — একটি sprint শেষে তৈরি হওয়া working, potentially shippable product অংশ
-- **Burndown Chart** (কখনো কখনো ব্যবহৃত হয়) — sprint এর বাকি কাজ কতটুকু আছে তা visually দেখানোর জন্য
+- **Product Goal, Sprint Goal, Definition of Done** যথাক্রমে artifact-গুলোর commitments; burndown একটি optional forecasting practice, Scrum artifact নয়
 
 ### Key Ceremonies (Events)
 
@@ -85,10 +105,7 @@ title: 'Agile, Scrum, and Kanban'
 এই meeting এ team ঠিক করে সেই sprint এ কোন কোন Product Backlog item নিয়ে কাজ করবে (**Sprint Backlog** তৈরি হয়), এবং প্রতিটি item কীভাবে সম্পন্ন করা হবে তার task breakdown করা হয়। সাধারণত sprint শুরুর দিন এই meeting হয়।
 
 **Daily Standup (Daily Scrum):**
-প্রতিদিন একটি **short (১৫ মিনিটের) meeting**, যেখানে প্রতিটি team member তিনটি প্রশ্নের উত্তর দেন:
-- গতকাল কী করেছি?
-- আজ কী করবো?
-- কোনো **blocker/obstacle** আছে কিনা?
+এটি Developers-এর ১৫ মিনিটের event। Sprint Goal-এর দিকে progress inspect করে পরবর্তী দিনের plan adapt করা হয়। “গতকাল/আজ/blocker” তিন প্রশ্ন একটি জনপ্রিয় format, Scrum-এর বাধ্যতামূলক script নয়।
 
 **Sprint Review:**
 Sprint শেষে অনুষ্ঠিত হয়, যেখানে team তাদের তৈরি করা **increment** stakeholder দের সামনে **demo** করে এবং feedback নেয়। এটি informal এবং collaborative হয়।
@@ -100,6 +117,14 @@ Sprint Review এর পর অনুষ্ঠিত হয়, যেখান�
 
 ## 10. What is Kanban, and how does it differ from Scrum?
 
+```mermaid
+flowchart LR
+    Backlog[Backlog] --> Ready[Ready: limit 3]
+    Ready --> Doing[Doing: limit 2]
+    Doing --> Review[Review: limit 2]
+    Review --> Done[Done]
+```
+
 **Kanban** হলো একটি Agile-based **visual workflow management method**, যা মূলত Toyota এর manufacturing process থেকে অনুপ্রাণিত। এখানে কাজের প্রতিটি ধাপ একটি **Kanban Board**-এ visually represent করা হয় — সাধারণত কলাম আকারে (যেমন: **To Do → In Progress → Testing → Done**), এবং প্রতিটি task একটি **card** হিসেবে board এ move করানো হয়।
 
 **Kanban বনাম Scrum:**
@@ -109,8 +134,8 @@ Sprint Review এর পর অনুষ্ঠিত হয়, যেখান�
 | **Structure** | Fixed-length **Sprint** (time-boxed) | কোনো fixed time-box নেই, **continuous flow** |
 | **Roles** | নির্দিষ্ট roles (Product Owner, Scrum Master, Dev Team) | কোনো mandatory specific role নেই |
 | **Ceremonies** | নির্দিষ্ট meeting (Planning, Standup, Review, Retro) | কোনো mandatory meeting নেই (যদিও অনেক team standup রাখে) |
-| **Change Mid-Cycle** | Sprint চলাকালীন নতুন কাজ যোগ করা discouraged | যেকোনো সময় নতুন কাজ যোগ করা যায় |
-| **Delivery** | Sprint শেষে batch delivery | Continuous delivery, task complete হলেই deliver |
+| **Change Mid-Cycle** | Sprint Goal বিপন্ন করা যায় না; scope Product Owner ও Developers clarify/re-negotiate করতে পারে | Pull policy ও WIP capacity মেনে নতুন কাজ flow-তে আসে |
+| **Delivery** | Increment Sprint-এর মধ্যে তৈরি হয়; release Sprint end-এ বাধ্যতামূলক নয় | Continuous delivery সম্ভব, তবে Kanban নিজে deployment বাধ্য করে না |
 | **Core Mechanism** | Sprint-based iteration | **WIP Limit** এবং continuous flow |
 | **উপযুক্ত ক্ষেত্র** | Project-based কাজ, যেখানে predictable delivery cycle দরকার | Continuous, unpredictable workflow — যেমন support/maintenance team |
 
@@ -132,6 +157,13 @@ Sprint Review এর পর অনুষ্ঠিত হয়, যেখান�
 ---
 
 ## 11. What is a user story, and what makes a good one?
+
+```mermaid
+flowchart LR
+    Role[As a user or role] --> Goal[I want a capability]
+    Goal --> Value[So that business value]
+    Value --> Criteria[Given-When-Then acceptance criteria]
+```
 
 **User Story** হলো একটি **short, simple description** যা একটি feature বা functionality কে **end-user এর perspective** থেকে বর্ণনা করে। এটি সাধারণত একটি নির্দিষ্ট template অনুসরণ করে লেখা হয়:
 
@@ -158,6 +190,15 @@ User Story এর মূল উদ্দেশ্য হলো technical specifi
 
 ## 12. What is the difference between epics, stories, and tasks?
 
+```mermaid
+flowchart TD
+    Epic[Epic: improve checkout] --> Story1[Story: pay by card]
+    Epic --> Story2[Story: save delivery address]
+    Story1 --> Task1[Task: payment API]
+    Story1 --> Task2[Task: checkout UI]
+    Story1 --> Task3[Task: automated tests]
+```
+
 | বিষয় | **Epic** | **User Story** | **Task** |
 |---|---|---|---|
 | **Size** | সবচেয়ে বড়, high-level | মাঝারি | সবচেয়ে ছোট |
@@ -181,6 +222,15 @@ User Story এর মূল উদ্দেশ্য হলো technical specifi
 ---
 
 ## 13. What is a "Definition of Done," and why is it important for a team?
+
+```mermaid
+flowchart LR
+    Story[Story implemented] --> Review{Definition of Done checks}
+    Review --> Test[Tests pass]
+    Review --> ReviewCode[Code reviewed]
+    Review --> Docs[Docs and security checks complete]
+    Test & ReviewCode & Docs --> Done[Potentially releasable increment]
+```
 
 **Definition of Done (DoD)** হলো team এর একটি **shared, agreed-upon checklist**, যা নির্ধারণ করে একটি কাজ (User Story, Task, বা পুরো Sprint Increment) কখন সত্যিকার অর্থে **"সম্পন্ন" বা "done"** বলে গণ্য হবে। এটি পুরো team এর জন্য একটি **consistent, objective standard**, যা প্রতিটি item এর ক্ষেত্রেই প্রযোজ্য (individual story-specific নয়)।
 
@@ -219,9 +269,16 @@ User Story এর মূল উদ্দেশ্য হলো technical specifi
 
 ## 14. What is the difference between a sprint and a release?
 
+```mermaid
+flowchart LR
+    S1[Sprint 1: search increment] --> S2[Sprint 2: cart increment]
+    S2 --> S3[Sprint 3: payment increment]
+    S3 --> Release[Release selected done increments]
+```
+
 | বিষয় | **Sprint** | **Release** |
 |---|---|---|
-| **Definition** | একটি fixed-length time-box (সাধারণত ২-৪ সপ্তাহ), যেখানে team নির্দিষ্ট কিছু Backlog item নিয়ে কাজ করে | একটি version বা feature set, যা **end-user দের কাছে actual deploy/launch** করা হয় |
+| **Definition** | এক মাস বা কম fixed-length time-box, যেখানে Sprint Goal-এর দিকে usable increment তৈরি হয় | নির্দিষ্ট audience/environment-এ product capability available করার business/technical event |
 | **Duration** | ছোট, fixed (যেমন ২ সপ্তাহ) | বড়, variable — একাধিক sprint নিয়ে গঠিত হতে পারে |
 | **Output** | একটি **potentially shippable increment** (যা shipped নাও হতে পারে) | Actual, end-user দের কাছে **deployed/live** product version |
 | **Frequency** | নিয়মিত, নির্দিষ্ট interval এ | Business need অনুযায়ী — সাপ্তাহিক, মাসিক, বা quarterly হতে পারে |

@@ -3,6 +3,9 @@ sidebar_position: 1
 title: 'SQL Basics'
 ---
 
+
+## **11. What is SQL?**
+
 ```mermaid
 flowchart LR
     Select[SELECT] --> From[FROM]
@@ -11,8 +14,6 @@ flowchart LR
     Group --> Having[HAVING]
     Having --> Order[ORDER BY]
 ```
-
-## **11. What is SQL?**
 
 SQL (Structured Query Language) হল একটি standard programming language যা relational database management systems (RDBMS) এর সাথে communicate করার জন্য ব্যবহৃত হয়। এটি data store, manipulate, এবং retrieve করার জন্য ব্যবহৃত হয়।
 

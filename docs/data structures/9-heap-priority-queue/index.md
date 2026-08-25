@@ -221,6 +221,15 @@ Maximum value: 30
 
 ## 📊 56. How is a heap implemented using an array?
 
+```mermaid
+flowchart TB
+    A0[0: 10] --> A1[1: 20]
+    A0 --> A2[2: 15]
+    A1 --> A3[3: 30]
+    A1 --> A4[4: 40]
+    Formula[For index i: left=2i+1, right=2i+2, parent=floor((i-1)/2)]
+```
+
 **Heap** একটি বিশেষ ধরনের **Complete Binary Tree**, যা সাধারণত **Array**-এর মাধ্যমে খুব efficient ভাবে implement করা যায় — কোনো explicit **pointer** (left/right child pointer) ছাড়াই।
 
 যেহেতু Heap সবসময় একটি **Complete Binary Tree** (কোনো gap থাকে না, সব level left থেকে right ক্রমে ভরা থাকে), তাই এর node গুলোকে **index** অনুযায়ী array-তে সাজানো সম্ভব — parent-child সম্পর্ক শুধুমাত্র **index-এর গাণিতিক সম্পর্ক** দিয়েই বের করা যায়।

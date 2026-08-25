@@ -3,13 +3,6 @@ sidebar_position: 8
 title: 'NoSQL'
 ---
 
-```mermaid
-flowchart TD
-    N[NoSQL models] --> D[Document]
-    N --> K[Key value]
-    N --> W[Wide column]
-    N --> G[Graph]
-```
 
 ## 🌐 **8. NoSQL Databases**
 
@@ -45,6 +38,14 @@ NoSQL এবং SQL এর মধ্যে বেশ কিছু মৌলি�
 ---
 
 ## **80. Types of NoSQL databases?**
+
+```mermaid
+flowchart TD
+    N[NoSQL models] --> D[Document]
+    N --> K[Key value]
+    N --> W[Wide column]
+    N --> G[Graph]
+```
 
 NoSQL কোনো একক প্রযুক্তির নাম নয়; এটি একটি ছাতা-পরিভাষা (Umbrella term)। ডেটা স্টোর করার পদ্ধতির ওপর ভিত্তি করে NoSQL ডাটাবেসকে প্রধানত ৪টি শ্রেণিতে ভাগ করা যায়। 
 
@@ -247,6 +248,15 @@ Apache Cassandra একটি বিখ্যাত কলাম ফ্যাম
 
 ## **85. What is CAP theorem?**
 
+```mermaid
+flowchart TB
+    CAP[CAP theorem] --> C[Consistency]
+    CAP --> A[Availability]
+    CAP --> P[Partition tolerance]
+    P --> CP[Partition occurs: choose CP]
+    P --> AP[Partition occurs: choose AP]
+```
+
 **CAP Theorem** (যা Brewer's Theorem নামে পরিচিত) হলো ডিস্ট্রিবিউটেড ডাটাবেস (Distributed Database) সিস্টেমের একটি মৌলিক এবং অত্যন্ত গুরুত্বপূর্ণ থিওরিম। 
 
 CAP theorem বলে network partition ঘটলে distributed system একই operation-এর জন্য strong consistency এবং availability—দুটিই একসাথে guarantee করতে পারে না। “সবসময় যেকোনো দুটি বেছে নিন” বলা অসম্পূর্ণ, কারণ partition না থাকলে C ও A দুটোই পাওয়া সম্ভব এবং P বাস্তব network-এ design concern হিসেবেই থাকে।
@@ -315,6 +325,17 @@ BASE মডেলটি Strict Consistency (কঠোর সঠিকতা) এ
 
 ## **87. What is eventual consistency?**
 
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant A as Replica A
+    participant B as Replica B
+    C->>A: Write v2
+    C->>B: Immediate read may return v1
+    A-->>B: Asynchronous replication
+    C->>B: Later read returns v2
+```
+
 **Eventual Consistency** হলো ডিস্ট্রিবিউটেড কম্পিউটিং এর একটি ডেটা কনসিস্টেন্সি মডেল। এটি নিশ্চিত করে যে যদি কোনো ডেটা আইটেমে নতুন করে কোনো আপডেট না আসে, তবে "চূড়ান্ত পর্যায়ে" (Eventually) ডাটাবেসের সবগুলো কপিতে (Nodes) এই একই ডেটা আপডেট হয়ে যাবে এবং সব নোড অভিন্ন ডেটা প্রদান করবে।
 
 সহজ কথায়, আপনি যখন আপনার প্রোফাইলের ছবি আপডেট করে সেভ করেন, সেই ডেটা প্রথমে হয়তো সিঙ্গাপুরের ডাটাবেস নোডে আপডেট হলো। ঠিক ওই সেকেন্ডেই যদি কেউ আমেরিকার সার্ভার থেকে আপনার ছবি দেখে, সে হয়তো আগের ছবিটিই দেখতে পাবে। কিন্তু ডাটাবেস ব্যাকগ্রাউন্ডে খুব দ্রুত সিঙ্গাপুরের ডেটা আমেরিকার সার্ভারে পাঠিয়ে দেবে। কিছু সময় পর আমেরিকার নোডটিও আপডেট হয়ে যাবে। এই সাময়িক অমিল (Delay) মেনে নেয়াটাই হলো Eventual Consistency।
@@ -342,6 +363,14 @@ BASE মডেলটি Strict Consistency (কঠোর সঠিকতা) এ
 ---
 
 ## **88. What is sharding in NoSQL?**
+
+```mermaid
+flowchart LR
+    R[Request with shard key] --> Router
+    Router --> S1[Shard 1]
+    Router --> S2[Shard 2]
+    Router --> S3[Shard 3]
+```
 
 **Sharding** হলো ডেটাবেস স্কেলিংয়ের একটি আর্কিটেকচারাল কনসেপ্ট (যা Horizontal Partitioning নামেও পরিচিত), যেখানে একটি বিশাল ডেটাসেটকে ছোট ছোট অনেকগুলো টুকরোতে ভাগ করা হয়। এই ছোট টুকরোগুলোকে **Shard** বলা হয়। 
 
@@ -384,6 +413,13 @@ Shard key এমন হওয়া উচিত যার প্রচুর �
 
 ## **89. What is replication in NoSQL?**
 
+```mermaid
+flowchart LR
+    P[Primary] --> R1[Replica 1]
+    P --> R2[Replica 2]
+    P --> R3[Replica 3]
+```
+
 **Replication** হলো ডেটাবেসের একই ডেটাকে হুবহু একাধিক সার্ভারে (Nodes) কপি (Copy) বা ক্লোন করে রাখার একটি প্রক্রিয়া। 
 
 Sharding এর মূল উদ্দেশ্য হলো "স্কেলিং বা ক্যাপাসিটি বাড়ানো", অন্যদিকে Replication এর মূল উদ্দেশ্য হলো **High Availability (প্রাপ্যতা)** এবং **Fault Tolerance (ক্র্যাশ সামলানোর ক্ষমতা)** নিশ্চিত করা। যদি কোনো কারণে আপনার মেইন সার্ভার পুড়ে যায় বা হার্ডডিস্ক ক্র্যাশ করে, তবে অন্য সার্ভারে থাকা কপি থেকে মুহূর্তেই ডেটা রিকভার বা এক্সেস করা সম্ভব হয়।
@@ -414,6 +450,14 @@ MongoDB-তে replication ব্যবস্থাটিকে **Replica Set** 
 ---
 
 ## **90. What is MapReduce?**
+
+```mermaid
+flowchart LR
+    I[Input] --> M[Map key-value pairs]
+    M --> S[Shuffle and group]
+    S --> R[Reduce]
+    R --> O[Output]
+```
 
 **MapReduce** হলো বিশাল পরিমাণ (Petabytes) ডেটা অত্যন্ত দ্রুত প্রসেস এবং এনালাইসিস করার জন্য একটি প্রোগ্রামিং মডেল। এটি শুরুতে Google উদ্ভাবন করেছিল এবং পরবর্তীতে হাডুপ (Hadoop) ও অন্যান্য NoSQL ডাটাবেসগুলোতে ব্যাপকভাবে ব্যবহৃত হয়। 
 

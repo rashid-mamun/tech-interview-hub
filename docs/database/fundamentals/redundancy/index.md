@@ -3,12 +3,6 @@ sidebar_position: 6
 title: 'Redundancy'
 ---
 
-```mermaid
-flowchart LR
-    Duplicate[Repeated customer data] --> Anomaly[Update anomaly]
-    Duplicate --> Waste[Extra storage]
-    Normalize[Normalize shared facts] --> Reference[Store customer_id]
-```
 
 # Data Redundancy
 
@@ -21,6 +15,13 @@ flowchart LR
 Proper database design না হলে redundancy সহজেই তৈরি হয়।
 
 ## ৬. What is data redundancy?
+
+```mermaid
+flowchart LR
+    Duplicate[Repeated customer data] --> Anomaly[Update anomaly]
+    Duplicate --> Waste[Extra storage]
+    Normalize[Normalize shared facts] --> Reference[Store customer_id]
+```
 
 Database-এ একই data যদি একাধিক table বা row-এ store করা হয় এবং সেটা technically দরকার না হয়, তখন তাকে **data redundancy** বলা হয়।
 

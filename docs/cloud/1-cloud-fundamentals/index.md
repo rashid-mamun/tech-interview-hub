@@ -5,6 +5,14 @@ title: Cloud Fundamentals
 
 ## 1. What is cloud computing, and how is it different from traditional on-premise infrastructure?
 
+```mermaid
+flowchart LR
+    Need[Business needs capacity] --> Cloud[Cloud: provision by API]
+    Need --> OnPrem[On-prem: buy and install hardware]
+    Cloud --> Elastic[Scale and release resources]
+    OnPrem --> Owned[Operate capacity and facilities]
+```
+
 **Cloud Computing** হলো এমন একটা মডেল যেখানে computing resources (যেমন servers, storage, database, networking, software) internet-এর মাধ্যমে on-demand সরবরাহ করা হয়, একটা third-party provider (যেমন AWS, Azure, Google Cloud) এর data center থেকে। ইউজারকে নিজে hardware কিনতে বা maintain করতে হয় না — শুধু ব্যবহার অনুযায়ী payment করতে হয়।
 
 অন্যদিকে, **On-premise infrastructure**-এ organization নিজেই hardware (servers, storage devices, networking equipment) কিনে, নিজস্ব data center বা office-এ install করে এবং নিজেরাই maintain, upgrade ও secure করে।
@@ -57,6 +65,12 @@ Cloud-এ অনেক সুবিধা থাকলেও কিছু গু
 আপনি যদি চান, এই টপিকগুলো নিয়ে একটা comparison diagram বা visual summary বানিয়ে দিতে পারি।
 
 ## 2. What is the difference between IaaS, PaaS, SaaS, and FaaS?
+
+```mermaid
+flowchart LR
+    Control[More customer control] --> I[IaaS] --> P[PaaS] --> F[FaaS] --> S[SaaS]
+    S --> Ops[Less customer infrastructure operation]
+```
 
 Cloud computing-এর এই চারটা model মূলত **responsibility-এর distribution**-এর উপর ভিত্তি করে আলাদা হয় — অর্থাৎ কতটুকু infrastructure customer manage করবে, আর কতটুকু provider manage করবে।
 
@@ -126,6 +140,16 @@ Cloud computing-এর এই চারটা model মূলত **responsibilit
 
 ## 3. What is the difference between public, private, hybrid, and multi-cloud?
 
+```mermaid
+flowchart TB
+    Org[Organization] --> Public[Public cloud]
+    Org --> Private[Private cloud or on-prem]
+    Public <-->|integrated as hybrid| Private
+    Public --> AWS[Provider A]
+    Public --> Azure[Provider B]
+    AWS <-. multi-cloud usage .-> Azure
+```
+
 - **Public Cloud**: এখানে computing resource (servers, storage, network) একটা third-party provider (যেমন AWS, Azure, Google Cloud) owned ও operate করে, এবং সেটা internet-এর মাধ্যমে multiple organization/customer-এর মধ্যে shared থাকে (multi-tenant)। কম cost, high scalability, কিন্তু control ও customization তুলনামূলক কম।
 
 - **Private Cloud**: এখানে infrastructure একটা single organization-এর জন্য dedicated থাকে — হয় নিজস্ব data center-এ (on-premise), অথবা কোনো third-party provider hosted কিন্তু exclusively ব্যবহারের জন্য। বেশি control, security ও customization পাওয়া যায়, কিন্তু cost বেশি এবং scalability সীমিত।
@@ -171,6 +195,15 @@ Multi-cloud ব্যবহার করলে flexibility ও vendor diversity 
 ---
 
 ## 4. What are Regions and Availability Zones?
+
+```mermaid
+flowchart TB
+    Region[Cloud region] --> AZ1[Availability Zone 1]
+    Region --> AZ2[Availability Zone 2]
+    LB[Regional load balancer] --> App1[App instance in AZ1]
+    LB --> App2[App instance in AZ2]
+    App1 & App2 --> DB[(Multi-AZ database)]
+```
 
 **Region**: এটা একটা নির্দিষ্ট geographic location, যেখানে cloud provider (AWS, Azure, GCP) তাদের data center-গুলো স্থাপন করে। প্রতিটা region সাধারণত একটা দেশ বা শহরের নাম অনুযায়ী চিহ্নিত হয় — উদাহরণ: `us-east-1` (N. Virginia), `ap-southeast-1` (Singapore), `eu-west-1` (Ireland)। প্রতিটা region সম্পূর্ণভাবে independent এবং একে অপর থেকে physically ও logically আলাদা।
 
@@ -245,6 +278,13 @@ Multi-AZ benefits:
 
 ## 5. What is the Shared Responsibility Model?
 
+```mermaid
+flowchart TB
+    Provider[Provider: facilities, hardware, managed service layer] --> Secure[Secure cloud service]
+    Customer[Customer: identities, data, configuration and code] --> Secure
+    Secure --> Outcome[Security outcome depends on both]
+```
+
 **Shared Responsibility Model** হলো একটা security framework, যেখানে cloud infrastructure-এর security ও compliance-এর দায়িত্ব **cloud provider** এবং **customer**-এর মধ্যে ভাগ করা থাকে। এটার মূল কথা হলো — cloud-এ কাজ করলেও পুরো security দায়িত্ব provider একা নেয় না, বরং কিছু অংশ customer-কেও নিতে হয়।
 
 এটাকে সাধারণত দুইভাবে ভাগ করা হয়:
@@ -294,6 +334,15 @@ Deployment model যত বেশি "managed" হয় (IaaS → PaaS → SaaS
 
 
 ## 6. What is cloud elasticity and auto-scaling, and how does elasticity differ from scalability?
+
+```mermaid
+stateDiagram-v2
+    [*] --> Normal
+    Normal --> ScaleOut: load above threshold
+    ScaleOut --> Normal: capacity catches up
+    Normal --> ScaleIn: sustained low load
+    ScaleIn --> Normal: excess capacity removed
+```
 
 - **Elasticity**: এটা cloud-এর একটা core characteristic, যেখানে system automatically এবং দ্রুত resource-কে demand অনুযায়ী **বাড়াতে (scale up)** এবং **কমাতে (scale down)** পারে, real-time-এ। Traffic বাড়লে resource বাড়ে, traffic কমলে resource আবার কমে যায় — অর্থাৎ এটা একটা **dynamic, bidirectional** প্রক্রিয়া।
 

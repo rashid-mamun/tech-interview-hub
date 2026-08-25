@@ -3,16 +3,17 @@ sidebar_position: 1
 title: 'Basics'
 ---
 
+
+# Database Fundamentals
+
+## ১. What is a database?
+
 ```mermaid
 flowchart LR
     App[Application] --> DBMS[DBMS]
     DBMS --> Data[(Stored data)]
     DBMS --> Log[(Transaction log)]
 ```
-
-# Database Fundamentals
-
-## ১. What is a database?
 
 **Database** হলো একটি structured collection of data যেটা systematically store, manage এবং retrieve করা যায়। অর্থাৎ, data যাতে সহজে **insert, update, delete, query** করা যায়, সেজন্য database ব্যবহৃত হয়।
 

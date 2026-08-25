@@ -3,33 +3,29 @@ sidebar_position: 1
 title: 'Software Engineering'
 ---
 
+Software engineering শুধু code লেখা নয়; problem বোঝা থেকে শুরু করে architecture, implementation, verification, delivery এবং continuous improvement পর্যন্ত পুরো discipline। এই section-এর chapter-গুলো interview question-এর পাশাপাশি decision-making context ও practical example দেয়।
 
+```mermaid
+flowchart LR
+    Requirements[Requirements] --> Architecture[Architecture and design]
+    Architecture --> Delivery[Iterative delivery]
+    Delivery --> Testing[Testing and feedback]
+    Testing --> Operations[Release and operations]
+    Operations -->|learning and change| Requirements
+    Planning[Estimation and risk] -. supports .-> Delivery
+```
 
-## 59. What are the main activities involved in software project management?
-### How do planning, organizing, staffing, monitoring, and controlling apply across a project's lifecycle?
+## Chapters
 
-## 60. What is the COCOMO model, and how is it used for software cost and effort estimation?
-### What factors does COCOMO consider when estimating effort (e.g., project size, complexity, team experience)?
+1. [SDLC Models and Methodologies](./sdlc-models-methodologies/)
+2. [Agile, Scrum, and Kanban](./agile-scrum-kanban/)
+3. [Requirements Engineering](./requirements-engineering/)
+4. [Architecture and Design Principles](./architecture-design-principles/)
+5. [Modularity, Cohesion, and Coupling](./modularity-cohesion-coupling/)
+6. [UML Diagrams](./uml-diagrams/)
+7. [Software Testing Techniques](./software-testing-techniques/)
+8. [Estimation, Planning, and Project Management](./estimation-planning-project-management/)
 
-## 61. How do you estimate the time required for a software development task?
-### What is the difference between optimistic, pessimistic, and most-likely estimates (e.g., in three-point estimation)?
+## How to study
 
-## 62. What is story point estimation, and how does it differ from time-based (hours/days) estimation?
-### What is "planning poker," and how does it help reduce estimation bias?
-
-## 63. What is "scope creep," and how do you manage it during a project?
-### What role does a change request process play in controlling scope?
-
-## 64. What is risk management in software projects, and what are its main steps?
-### What is the difference between risk identification, risk analysis, and risk mitigation?
-
-## 65. What are Gantt charts and PERT charts, and how are they used in project scheduling?
-### What is the "critical path" in a PERT chart, and why is it important?
-
-## 66. What is Software Configuration Management (SCM), and what does it manage?
-### How do version control, change control, and release management relate to SCM?
-
-## 67. How do you handle a situation where a deadline is at risk due to unforeseen issues?
-### What trade-offs (scope, time, quality, resources) can be adjusted, and what are the implications of each?
-
----
+প্রথমে lifecycle ও requirements পড়ুন, এরপর architecture/modularity এবং UML দিয়ে design reasoning তৈরি করুন। Testing chapter quality strategy বোঝায়, আর শেষ chapter estimation, scope, risk ও delivery trade-off একসাথে যুক্ত করে।

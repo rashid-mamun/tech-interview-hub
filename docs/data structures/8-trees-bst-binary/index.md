@@ -103,6 +103,19 @@ BST শুধু ordering property maintain করে। Balanced BST ordering �
 
 ## 🔍 49. How do you search, insert, and delete a node in a BST?
 
+```mermaid
+flowchart TD
+    N{Compare key with node}
+    N -->|smaller| L[Move to left child]
+    N -->|larger| R[Move to right child]
+    N -->|equal| Found[Found]
+    L & R --> N
+    Del{Delete case}
+    Del --> Leaf[Leaf: remove]
+    Del --> One[One child: promote child]
+    Del --> Two[Two children: replace with successor or predecessor]
+```
+
 BST-এর তিনটি মূল operation-ই তার **ordering property** (`left < node < right`) ব্যবহার করে কাজ করে, যার কারণে প্রতিটি ধাপে **half of the tree** ignore করা যায় (অনেকটা Binary Search-এর মতো)।
 
 
@@ -235,6 +248,15 @@ Delete করার আগে:              Delete করার পরে (10 de
 ---
 
 ## ✅ 50. How would you validate whether a given binary tree is a valid BST?
+
+```mermaid
+flowchart TD
+    Root[Validate node with range -infinity to +infinity] --> Check{min less than value less than max?}
+    Check -->|no| Invalid[Invalid BST]
+    Check -->|yes| Left[Validate left with upper bound = value]
+    Check -->|yes| Right[Validate right with lower bound = value]
+    Left & Right --> Valid[Valid only if both subtrees pass]
+```
 একটি Binary Tree কে **valid BST** বলা যাবে তখনই, যখন তার **প্রতিটি node**-এর জন্য পুরো **left subtree**-এর সব value তার চেয়ে ছোট এবং পুরো **right subtree**-এর সব value তার চেয়ে বড় হয় — এই rule শুধু immediate children-এর জন্য নয়, বরং পুরো subtree-এর **প্রতিটি node**-এর জন্য সত্য হতে হবে।
 
 
@@ -321,6 +343,14 @@ bool isValidBST(TreeNode* root, long minVal = LONG_MIN, long maxVal = LONG_MAX) 
 ---
 
 ## 🌀 51. Why can BST operations degrade to O(n) in the worst case, and how is this avoided?
+
+```mermaid
+flowchart LR
+    Sorted[Insert 1, 2, 3, 4] --> Skewed[Skewed BST height n]
+    Skewed --> Linear[Search O(n)]
+    Sorted --> Balanced[AVL or Red-Black rotations]
+    Balanced --> Log[Height O(log n), operations O(log n)]
+```
 
 সাধারণ **BST**-এর **search, insert, delete** operation-গুলোর efficiency সম্পূর্ণভাবে নির্ভর করে tree-এর **height**-এর উপর। প্রতিটি operation-এ root থেকে শুরু করে একটি **single path** ধরে নিচের দিকে নামতে হয়, এবং worst case-এ এই path-এর length-ই হলো সেই operation-এর **time complexity**।
 
@@ -655,6 +685,7 @@ pair<SearchNode*, SearchNode*> predecessorSuccessor(SearchNode* root, int target
     for (SearchNode* node = current->right; node; node = node->left) successor = node;
     return {predecessor, successor};
 }
+```
 
 ## 🧪 Complete BST operations example
 

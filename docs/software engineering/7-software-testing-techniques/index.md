@@ -2,7 +2,15 @@
 sidebar_position: 7
 title: 'Software Testing Techniques'
 ---
+
 ## 46. What are the different levels of testing, and how do they fit together?
+
+```mermaid
+flowchart TB
+    Unit[Many fast unit tests] --> Integration[Integration tests]
+    Integration --> System[System or end-to-end tests]
+    System --> Acceptance[Fewer acceptance tests]
+```
 
 Testing কে সাধারণত চারটি স্তরে ভাগ করা হয়, যা একটি **pyramid/hierarchy** আকারে কাজ করে — ছোট, isolated অংশ থেকে শুরু করে পুরো system পর্যন্ত ধীরে ধীরে বিস্তৃত হয়:
 
@@ -13,7 +21,7 @@ Testing কে সাধারণত চারটি স্তরে ভাগ �
 একাধিক unit/module একসাথে যুক্ত হয়ে ঠিকমতো কাজ করছে কিনা তা test করা হয় — module গুলোর মধ্যে **interface এবং data flow** এ কোনো সমস্যা আছে কিনা যাচাই করা হয়।
 
 **৩. System Testing**
-সম্পূর্ণ, integrated system টি একসাথে test করা হয়, একটি complete, end-to-end product হিসেবে — functional এবং non-functional উভয় requirement যাচাই করা হয়।
+সম্পূর্ণ integrated system-কে নির্ধারিত test environment-এ functional এবং non-functional requirement-এর বিরুদ্ধে যাচাই করা হয়। এটি system boundary-কেন্দ্রিক; সব production dependencyসহ end-to-end test হওয়া বাধ্যতামূলক নয়।
 
 **৪. Acceptance Testing**
 Client/end-user এর দৃষ্টিকোণ থেকে system টি তাদের **business requirement এবং প্রয়োজন** পূরণ করছে কিনা তা যাচাই করা হয়, production এ release করার আগে চূড়ান্ত ধাপ হিসেবে।
@@ -26,10 +34,10 @@ Client/end-user এর দৃষ্টিকোণ থেকে system টি �
 |---|---|---|
 | **Unit Testing** | একটি single function/method/class — সবচেয়ে ছোট আকারে, বাকি system থেকে isolated (mock/stub ব্যবহার করে) | **Developer** নিজেই, code লেখার সময় বা সাথে সাথে |
 | **Integration Testing** | একাধিক module/component এর মধ্যে interaction এবং interface | **Developer** বা dedicated **QA/Test Engineer** |
-| **System Testing** | সম্পূর্ণ, end-to-end system — functional এবং non-functional (performance, security) সব requirement | **QA Team/Test Engineer**, স্বাধীনভাবে (developer থেকে আলাদা, যাতে unbiased perspective থাকে) |
-| **Acceptance Testing** | Business requirement এবং real-world usability, client এর perspective থেকে | **Client/End-user**, বা Product Owner (UAT - User Acceptance Testing এর মাধ্যমে) |
+| **System Testing** | সম্পূর্ণ integrated system-এর functional/non-functional behavior | স্বাধীন QA team common, তবে ownership team/process-ভেদে ভিন্ন |
+| **Acceptance Testing** | Acceptance criteria ও business need পূরণ করছে কি না | Client/end-user/product owner বা authorized representative |
 
-**একসাথে কীভাবে Fit করে:** এই চারটি level একটি **pyramid structure** অনুসরণ করে — সবচেয়ে বেশি সংখ্যক Unit Test থাকে (দ্রুত, সস্তা, এবং early bug catch করে), তার উপরে কম সংখ্যক Integration Test, তার উপরে আরও কম System Test, এবং সবচেয়ে উপরে সবচেয়ে কম কিন্তু সবচেয়ে বেশি real-world-relevant Acceptance Test। এইভাবে bug গুলো যত early সম্ভব ধরা পড়ে (Unit level এ), যা fix করা সবচেয়ে সস্তা এবং দ্রুত।
+**একসাথে কীভাবে Fit করে:** Unit, integration, system এবং acceptance হলো test level/scope। Test pyramid একটি আলাদা portfolio heuristic—সাধারণত অনেক fast unit/component test, কিছু integration test এবং অল্প broad end-to-end test রাখে। Acceptance test যেকোনো level-এ automate হতে পারে; তাই চার level-কে rigid pyramid layer ভাবা ঠিক নয়।
 
 ---
 
@@ -54,6 +62,14 @@ System এর **সবচেয়ে নিচের (low-level) module থে�
 ---
 
 ## 47. What is the difference between white-box testing and black-box testing?
+
+```mermaid
+flowchart LR
+    Spec[Requirements and examples] --> Black[Black-box tests]
+    Code[Branches paths and conditions] --> White[White-box tests]
+    Black --> Behavior[Validate observable behavior]
+    White --> Structure[Exercise implementation structure]
+```
 
 **White-box Testing (Structural/Glass-box Testing):**
 এই testing এ tester এর কাছে system এর **internal code structure, logic, এবং implementation details** সম্পর্কে সম্পূর্ণ জ্ঞান থাকে, এবং সেই জ্ঞান ব্যবহার করে test case ডিজাইন করা হয় — যেমন প্রতিটি code path, branch, বা condition কভার হচ্ছে কিনা।
@@ -82,6 +98,15 @@ System এর **সবচেয়ে নিচের (low-level) module থে�
 
 ## 48. What are common white-box testing techniques?
 
+```mermaid
+flowchart TD
+    Start --> Decision{Condition true?}
+    Decision -->|yes| A[Path A]
+    Decision -->|no| B[Path B]
+    A & B --> End
+    Coverage[Statement, branch, condition and path coverage] -. measures exercised structure .-> Decision
+```
+
 - **Statement Coverage**
 - **Branch Coverage**
 - **Path Coverage**
@@ -104,7 +129,7 @@ System এর **সবচেয়ে নিচের (low-level) module থে�
 পরিমাপ করে যে code এর মধ্য দিয়ে যাওয়া **প্রতিটি সম্ভাব্য execution path (unique combination of decisions)** কমপক্ষে একবার test করা হয়েছে কিনা। এটি সবচেয়ে **thorough এবং শক্তিশালী** coverage, কিন্তু বাস্তবে জটিল code এ path এর সংখ্যা exponentially বেড়ে যায় (বিশেষত loop থাকলে), যার ফলে সম্পূর্ণ path coverage অর্জন করা প্রায়ই **impractical**।
 
 **উদাহরণ দিয়ে পার্থক্য:**
-```
+```java
 if (a > 0) {
     x = 1;   // Statement 1
 }
@@ -131,6 +156,14 @@ if (b > 0) {
 ---
 
 ## 49. What are common black-box testing techniques?
+
+```mermaid
+flowchart LR
+    Input[Input domain] --> Part[Equivalence partitions]
+    Part --> Bound[Boundary values]
+    Requirements --> Decision[Decision table or state transitions]
+    Bound & Decision --> Cases[Behavior-focused test cases]
+```
 
 - **Equivalence Partitioning**
 - **Boundary Value Analysis**
@@ -189,6 +222,14 @@ if (b > 0) {
 
 ## 50. What is the difference between alpha testing and beta testing?
 
+```mermaid
+flowchart LR
+    Internal[Internal build] --> Alpha[Alpha: controlled internal users]
+    Alpha --> Fix[Fix critical findings]
+    Fix --> Beta[Beta: selected external users]
+    Beta --> Release[General release decision]
+```
+
 **Alpha Testing:**
 এটি একটি software এর **initial testing phase**, যা **developer এর নিজস্ব organization/environment** এর মধ্যে পরিচালিত হয়, product সাধারণ market এ release হওয়ার আগে।
 
@@ -214,6 +255,15 @@ if (b > 0) {
 
 ## 51. What is the difference between smoke testing and sanity testing?
 
+```mermaid
+flowchart TD
+    Build[New build] --> Smoke{Critical broad paths pass?}
+    Smoke -->|no| Reject[Reject build]
+    Smoke -->|yes| Change[Targeted change or fix]
+    Change --> Sanity{Focused behavior reasonable?}
+    Sanity -->|yes| Regression[Continue wider regression]
+```
+
 **Smoke Testing:**
 একটি **shallow, wide-ranging test**, যা একটি নতুন build এর পর করা হয়, যাচাই করার জন্য যে system এর **মূল, critical functionality গুলো** কাজ করছে কিনা — অর্থাৎ build টা আদৌ আরও বিস্তারিত testing এর যোগ্য কিনা। এটাকে অনেক সময় **"Build Verification Testing"** ও বলা হয়। নাম টা এসেছে hardware testing থেকে — একটি device চালু করে দেখা হতো এটা থেকে "smoke" (ধোঁয়া) বের হয় কিনা।
 
@@ -236,13 +286,23 @@ if (b > 0) {
 
 **কেন গুরুত্বপূর্ণ:**
 - **Fail Fast Principle** — যদি build এর মূল functionality-ই ভেঙে থাকে, তাহলে সেটা সাথে সাথে ধরা পড়ে, এবং team সময় ও resource **আরও বিস্তারিত, সময়সাপেক্ষ test (যেমন full regression suite)** এ ব্যয় করা থেকে বেঁচে যায়
-- CI/CD pipeline এ automated smoke test সাধারণত **কয়েক মিনিটের মধ্যে** সম্পন্ন হয়, তাই এটি দ্রুত feedback দেয় — যদি fail করে, তাহলে pipeline সাথে সাথেই **halt/reject** করে দেয় এবং developer কে notify করে
+- CI/CD pipeline-এ smoke suite ছোট ও দ্রুত রাখা হয়। Critical smoke check fail করলে pipeline সাধারণত promotion block করে; exact policy এবং timeout system risk অনুযায়ী নির্ধারিত।
 - এটি **broken build কে production এর দিকে এগিয়ে যাওয়া থেকে আটকায়**, যা পুরো deployment pipeline কে সুরক্ষিত রাখে
 - Resource efficient — পুরো test suite চালানোর আগে একটি quick sanity check দিয়ে বড় সমস্যা আগেই বাদ দেওয়া যায়
 
 ---
 
 ## 52. What is the difference between functional testing and non-functional testing?
+
+```mermaid
+flowchart TB
+    Product --> Functional[Functional: what the system does]
+    Product --> Quality[Non-functional: how well it does it]
+    Functional --> Login[Login, checkout, calculations]
+    Quality --> Perf[Performance]
+    Quality --> Security
+    Quality --> Usability
+```
 
 **Functional Testing:**
 System **কী কাজ করে** (what the system does) তা যাচাই করে — অর্থাৎ specific feature/functionality requirement অনুযায়ী সঠিকভাবে কাজ করছে কিনা।
@@ -278,6 +338,13 @@ System টি বিভিন্ন **browser, operating system, device, screen 
 ---
 
 ## 53. What is Test-Driven Development (TDD)?
+
+```mermaid
+flowchart LR
+    Red[Red: write a failing test] --> Green[Green: minimal passing code]
+    Green --> Refactor[Refactor safely]
+    Refactor --> Red
+```
 
 **Test-Driven Development (TDD)** হলো একটি software development approach, যেখানে **actual code লেখার আগে test case লেখা হয়**। অর্থাৎ, একজন developer প্রথমে একটি failing test লিখবেন (যা এখনো implement না হওয়া functionality কে represent করে), তারপর সেই test কে pass করানোর জন্য minimum প্রয়োজনীয় code লিখবেন, এবং তারপর code টি পরিষ্কার এবং optimize করবেন।
 
@@ -318,6 +385,13 @@ Test pass হয়ে যাওয়ার পর, code টিকে **পর�
 
 ## 54. What is the difference between TDD and BDD (Behavior-Driven Development)?
 
+```mermaid
+flowchart LR
+    TDD[Developer test: Red, Green, Refactor] --> Unit[Implementation design]
+    BDD[Given, When, Then behavior] --> Shared[Shared business understanding]
+    Shared --> Acceptance[Executable acceptance examples]
+```
+
 | বিষয় | **TDD** | **BDD** |
 |---|---|---|
 | **Focus** | **Code এর সঠিকতা** — নির্দিষ্ট function/method সঠিকভাবে কাজ করছে কিনা | **System এর behavior**, business/user এর দৃষ্টিকোণ থেকে |
@@ -326,10 +400,10 @@ Test pass হয়ে যাওয়ার পর, code টিকে **পর�
 | **Test Format** | Standard unit test syntax (`assertEquals`, ইত্যাদি) | **Given-When-Then** format ব্যবহার করে, প্রায়ই Gherkin syntax এ |
 | **উদ্দেশ্য** | "আমরা কি code টা সঠিকভাবে বানাচ্ছি?" | "আমরা কি সঠিক feature/behavior বানাচ্ছি, যা business need পূরণ করে?" |
 
-BDD মূলত TDD এরই একটি **extension/evolution**, যেখানে test/specification লেখার ভাষাটাকে **আরও business-friendly এবং readable** করা হয়েছে, যাতে technical এবং non-technical — উভয় ধরনের stakeholder একই document পড়ে বুঝতে পারেন।
+BDD TDD থেকে প্রভাবিত একটি collaborative specification approach। TDD developer-এর design feedback loop-এ focused; BDD concrete business behavior ও shared examples দিয়ে discovery, specification এবং automation যুক্ত করে। BDD ব্যবহার মানেই প্রতিটি scenario unit-level TDD test নয়।
 
 **BDD এর একটি typical scenario (Given-When-Then format এ):**
-```
+```gherkin
 Given a user is on the login page
 When they enter valid credentials
 Then they should be redirected to the dashboard
@@ -348,13 +422,23 @@ Then they should be redirected to the dashboard
 
 **কীভাবে BDD কে Support করে:**
 - **Business এবং Technical Team এর মধ্যে যোগাযোগের সেতু তৈরি করে** — Product Owner, QA, এবং Developer সবাই একই plain-English scenario পড়ে বুঝতে পারেন, technical knowledge ছাড়াই
-- Scenario গুলো একইসাথে **requirement documentation এবং executable test** — উভয়ের কাজ করে, তাই documentation এবং test এর মধ্যে **কখনো ভিন্নতা (mismatch) হয় না**
+- Scenario executable specification হিসেবে documentation ও test কাছাকাছি রাখে। তবে stale scenario, incomplete step definition বা ভুল automation হলে mismatch এখনও হতে পারে; review ও maintenance প্রয়োজন।
 - Requirement gathering এর সময়েই stakeholder দের সাথে বসে concrete example (scenario) নিয়ে আলোচনা করা যায়, যা **requirement এর ambiguity কমায়**
 - Automated testing এর সব সুবিধা (regression safety, CI/CD integration) পাওয়া যায়, কিন্তু human-readable format এ থাকার কারণে non-technical review ও সম্ভব হয়
 
 ---
 
 ## 55. What is regression testing, and when should it be performed?
+
+```mermaid
+flowchart LR
+    Change[Code or configuration change] --> Select[Select regression suite]
+    Select --> Run[Run in CI]
+    Run --> Gate{All critical tests pass?}
+    Gate -->|yes| Deploy[Continue delivery]
+    Gate -->|no| Diagnose[Diagnose and fix]
+    Diagnose --> Run
+```
 
 **Regression Testing** হলো এমন testing, যা নিশ্চিত করে যে **নতুন code change (নতুন feature, bug fix, বা refactoring) করার পর, পূর্বে ভালোভাবে কাজ করা existing functionality গুলো এখনও ঠিকভাবে কাজ করছে** — অর্থাৎ নতুন change কোনো পুরনো functionality কে "ভেঙে" (break) দেয়নি।
 
@@ -371,7 +455,7 @@ Then they should be redirected to the dashboard
 ### How does automated regression testing fit into a CI/CD pipeline?
 
 - প্রতিবার একজন developer কোনো **code push/commit** করেন, CI/CD pipeline automatically একটি build তৈরি করে এবং তার সাথে সাথে **automated regression test suite** চালায়
-- এই suite এ সাধারণত **unit test, integration test, এবং কিছু critical end-to-end test** থাকে, যা দ্রুত (কয়েক মিনিটের মধ্যে) সম্পন্ন হয়
+- Fast regression subset প্রতি change-এ চলতে পারে; বড় integration/end-to-end suite parallel, nightly বা pre-release stage-এ চলতে পারে। সব regression suite কয়েক মিনিটে শেষ হবে এমন নয়।
 - যদি কোনো regression test **fail** করে, তাহলে pipeline সাথে সাথেই developer কে **notify** করে এবং deployment কে **block/halt** করে দেয় — যাতে broken code production এ না পৌঁছায়
 - **Continuous এবং Automatic** হওয়ার কারণে, প্রতিটি ছোট change এর পরও regression test চলে, যা manual regression testing এর চেয়ে **অনেক দ্রুত, consistent, এবং কম error-prone**
 - এটি developer দের **দ্রুত feedback** দেয় — কোনো change এ সমস্যা হলে সাথে সাথেই জানা যায়, যা fix করাও তখন সহজ (কারণ change টা এখনও "fresh" এবং ছোট আকারে আছে)
@@ -379,3 +463,75 @@ Then they should be redirected to the dashboard
 - **Test Parallelization এবং Test Suite Optimization** প্রায়ই ব্যবহার করা হয়, যাতে বড় regression suite ও দ্রুত সম্পন্ন হয় এবং CI/CD pipeline এর overall speed কমে না যায়
 
 এভাবে Automated Regression Testing একটি CI/CD pipeline এর **quality gate** হিসেবে কাজ করে, যা নিশ্চিত করে যে দ্রুত, ঘন ঘন delivery করার পরও software এর **stability এবং reliability** বজায় থাকে।
+
+---
+
+## 56. What is the difference between verification and validation?
+
+**Verification** check করে work product—requirement, design, code—নির্ধারিত specification অনুযায়ী তৈরি হচ্ছে কি না: *“Are we building the product right?”* Review, inspection, static analysis এবং unit/integration checks এতে সাহায্য করে।
+
+**Validation** check করে delivered behavior ব্যবহারকারীর বাস্তব need পূরণ করছে কি না: *“Are we building the right product?”* Prototype evaluation, system test এবং acceptance test এতে সাহায্য করে।
+
+```mermaid
+flowchart LR
+    Need[Stakeholder need] --> Requirement[Requirement]
+    Requirement --> Design[Design]
+    Design --> Code[Code]
+    Code --> Product[Working product]
+    Requirement -. verification .-> Design
+    Design -. verification .-> Code
+    Product -->|validation with users| Need
+```
+
+**Example:** Requirement-এ “OTP ৫ মিনিট valid” লেখা হলে code সত্যিই ৫ মিনিট enforce করছে কি না verification। কিন্তু বাস্তব banking user-এর জন্য ৫ মিনিট যথেষ্ট ও নিরাপদ কি না validation। দুটোই দরকার—ভুল requirement নিখুঁতভাবে implement করলেও useful product হবে না।
+
+## 57. What is the difference between a test scenario, test case, and test plan?
+
+| Artifact | Scope | Example |
+|---|---|---|
+| **Test scenario** | কী user flow/condition যাচাই হবে | “Customer card দিয়ে order pay করে” |
+| **Test case** | Preconditions, exact steps/data এবং expected result | expired card দিলে payment declined এবং order unpaid থাকে |
+| **Test plan** | পুরো test effort-এর scope, approach, environment, roles, schedule, risks ও exit criteria | checkout release test strategy |
+
+```text
+Test case: TC-PAY-004 — expired card
+Precondition: cart has one in-stock item
+Steps: checkout -> enter expired test card -> submit
+Expected: decline message; no capture; order status remains PAYMENT_PENDING
+```
+
+```mermaid
+flowchart TD
+    Plan[Test plan] --> Scenario1[Scenario: successful payment]
+    Plan --> Scenario2[Scenario: failed payment]
+    Scenario2 --> Case1[Test case: expired card]
+    Scenario2 --> Case2[Test case: insufficient funds]
+    Case1 --> Evidence[Test result and evidence]
+```
+
+## 58. What is the defect lifecycle, and what information should a good bug report contain?
+
+Defect workflow team/tool অনুযায়ী ভিন্ন হতে পারে, তবে একটি common flow হলো:
+
+```mermaid
+stateDiagram-v2
+    [*] --> New
+    New --> Triaged: reproduce and prioritize
+    Triaged --> InProgress: assign
+    InProgress --> ReadyForTest: fix merged
+    ReadyForTest --> Closed: verification passes
+    ReadyForTest --> Reopened: still reproducible
+    Reopened --> InProgress
+    Triaged --> Deferred: accepted for later
+```
+
+একটি actionable bug report-এ থাকা উচিত:
+
+- concise title এবং affected version/environment
+- reproducible steps ও minimal test data
+- expected বনাম actual behavior
+- severity/impact; priority triage team নির্ধারণ করতে পারে
+- screenshot, log, trace/correlation ID—sensitive data redacted করে
+- frequency এবং regression কিনা
+
+**Example:** “Checkout fails” দুর্বল report। “v2.4 staging-এ expired Visa test card submit করলে HTTP 500; expected decline response; correlation ID `pay-42`; 3/3 attempts”—এটি reproduce ও diagnose করা যায়।

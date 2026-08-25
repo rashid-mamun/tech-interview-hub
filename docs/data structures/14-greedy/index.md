@@ -5,6 +5,14 @@ title: 'Greedy Algorithms'
 
 ## 🎯 86. What is a greedy algorithm, and how does it differ from dynamic programming?
 
+```mermaid
+flowchart LR
+    State[Current state] --> Greedy[Choose best local option once]
+    Greedy --> Next[Next state]
+    State --> DP[Evaluate reusable subproblems]
+    DP --> Combine[Combine stored optimal results]
+```
+
 Greedy প্রতিটি ধাপে locally best choice নেয় এবং choice পুনর্বিবেচনা করে না। DP একাধিক state-এর result সংরক্ষণ করে। Greedy সঠিক হতে **greedy-choice property** ও **optimal substructure** দরকার; সাধারণত exchange argument দিয়ে correctness প্রমাণ করা হয়।
 
 ```cpp title="Complete example: minimum coins for canonical denominations"
@@ -33,6 +41,15 @@ Coins for 63: 25x2 10x1 1x3
 এই greedy logic `{1,5,10,25}`-এর জন্য optimal, কিন্তু `{1,3,4}` দিয়ে amount `6`-এ greedy `4+1+1` নেয়; optimal হলো `3+3`। তাই greedy সব coin system-এ সঠিক নয়।
 
 ## 📅 87. How does greedy interval selection work?
+
+```mermaid
+flowchart TD
+    Intervals[Intervals sorted by finish time] --> Pick[Pick earliest finishing compatible interval]
+    Pick --> Remove[Skip overlapping intervals]
+    Remove --> More{Intervals remain?}
+    More -->|yes| Pick
+    More -->|no| Result[Maximum-size compatible set]
+```
 
 যে activity সবার আগে শেষ হয় সেটি নিলে পরবর্তী activity-র জন্য সর্বাধিক জায়গা থাকে। Meeting rooms-এর জন্য start time অনুযায়ী meeting process করে active end time-এর min-heap রাখা যায়।
 
@@ -86,6 +103,14 @@ Minimum rooms: 2
 Sorting-এর কারণে time `O(n log n)`।
 
 ## 🌳 88. How does Huffman encoding use a greedy approach?
+
+```mermaid
+flowchart TD
+    Heap[Min-heap of symbol frequencies] --> Pop[Remove two smallest]
+    Pop --> Merge[Merge into parent with summed frequency]
+    Merge --> Heap
+    Heap -->|one node remains| Codes[Root-to-leaf bits form prefix codes]
+```
 
 Priority queue থেকে সর্বনিম্ন frequency-র দুই node বারবার merge করা হয়। এতে frequent character ছোট code পায় এবং optimal prefix-free code তৈরি হয়।
 
@@ -144,6 +169,14 @@ d: 11
 
 ## 🎒 89. Fractional knapsack vs 0/1 knapsack
 
+```mermaid
+flowchart TD
+    Items[Items] --> Fractional[Fractional: sort by value divided by weight]
+    Fractional --> Take[Take whole items then a fraction]
+    Items --> ZeroOne[0/1: item either taken or skipped]
+    ZeroOne --> DP[Usually dynamic programming, not density greedy]
+```
+
 Fractional knapsack-এ item ভাগ করা যায়, তাই value/weight ratio অনুযায়ী নেওয়া optimal। 0/1 version-এ item ভাগ করা যায় না; ratio-greedy ভুল হতে পারে, তাই DP ব্যবহৃত হয়।
 
 ```cpp title="Complete example: fractional knapsack"
@@ -187,6 +220,15 @@ Time `O(n log n)`; sorting ছাড়া scan `O(n)`।
 
 ## 🔢 90. How would you solve Jump Game greedily?
 
+```mermaid
+flowchart LR
+    I0[index 0] -->|update farthest| I1[index 1]
+    I1 -->|update farthest| I2[index 2]
+    I2 --> Check{current index <= farthest?}
+    Check -->|yes, destination covered| Win[Reachable]
+    Check -->|no| Fail[Blocked]
+```
+
 বাম থেকে ডানে গিয়ে এ পর্যন্ত farthest reachable index রাখা হয়। Current index farthest-এর বাইরে গেলে destination unreachable। এই state-ই আগের সব reachable jump-এর প্রয়োজনীয় তথ্য ধরে রাখে।
 
 ```cpp title="Complete example: Jump Game"
@@ -223,71 +265,3 @@ int main() {
 ```
 
 Greedy time `O(n)`, space `O(1)`; straightforward DP/BFS সাধারণত `O(n²)` পর্যন্ত নিতে পারে।
-
-## 🗺️ Concept diagrams
-
-### Greedy vs dynamic programming
-
-```text
-Greedy                          Dynamic Programming
-current state                   current state
-    │                           /    |    \
-    ▼ best local choice       try reusable subproblems
-next state                      \    |    /
-    │                            cached results
-no reconsideration                   │
-                                      ▼
-                                global answer
-```
-
-### Activity selection timeline
-
-```text
-Time: 1 2 3 4 5 6 7 8 9 10
-A     [---]
-B       [-----]
-C           [-----]
-D               [-----]
-E                   [----]
-
-Choose earliest finish: A → C → E
-```
-
-### Huffman merge process
-
-```text
-Initial min-heap: 5(a), 9(b), 12(c), 13(d)
-
-5 + 9   → 14
-12 + 13 → 25
-14 + 25 → 39 (root)
-
-             39
-           /    \
-         14      25
-        /  \    /  \
-      a:5 b:9 c:12 d:13
-      00   01   10   11
-```
-
-### Fractional knapsack choice
-
-```text
-Item       value/weight       Greedy order
-(10,60)       6.0                 1st
-(20,100)      5.0                 2nd
-(30,120)      4.0                 3rd (take 20/30)
-
-Capacity 50 = 10 + 20 + 20
-Value       = 60 + 100 + 80 = 240
-```
-
-### Jump Game reach
-
-```text
-index       0   1   2   3   4
-jump        2   3   1   1   4
-farthest    2 → 4 ─────────→ destination
-
-If current index > farthest, the path is blocked.
-```

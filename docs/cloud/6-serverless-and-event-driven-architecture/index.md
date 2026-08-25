@@ -1,8 +1,18 @@
-﻿---
+---
 sidebar_position: 6
 title: Serverless & Event-Driven Architecture
 ---
+
 ## 42. What is event-driven architecture, and how does it decouple producers and consumers?
+
+```mermaid
+flowchart LR
+    Producer -->|OrderCreated| Broker[Broker or event bus]
+    Broker --> Inventory
+    Broker --> Billing
+    Broker --> Notification
+    Producer -. knows event contract, not consumer location .-> Broker
+```
 
 **Event-Driven Architecture (EDA)** হলো একটা software design paradigm যেখানে system-এর বিভিন্ন component **event** (কোনো কিছু ঘটার notification, যেমন "OrderCreated", "PaymentProcessed", "UserRegistered") তৈরি এবং প্রক্রিয়া করার মাধ্যমে একে অপরের সাথে communicate করে, সরাসরি একে অপরকে call না করে। এখানে মূলত তিনটা component থাকে:
 
@@ -40,6 +50,16 @@ title: Serverless & Event-Driven Architecture
 
 ## 43. What is the difference between a message queue and pub/sub?
 
+```mermaid
+flowchart TB
+    P1[Producer] --> Q[Queue]
+    Q -->|one competing consumer handles a message| W1[Worker 1]
+    Q --> W2[Worker 2]
+    P2[Publisher] --> Topic[Topic]
+    Topic --> S1[Subscription A]
+    Topic --> S2[Subscription B]
+```
+
 **Message Queue:** এখানে একটা producer message পাঠায় একটা **queue**-তে, এবং সেই message সাধারণত শুধুমাত্র **একটা consumer** দ্বারা receive এবং process করা হয় (point-to-point model)। একবার কোনো consumer message টা process করে ফেললে (এবং acknowledge করলে), সেই message queue থেকে **মুছে যায়** — অন্য কোনো consumer সেটা আবার পাবে না। যদি একাধিক consumer একই queue-তে listen করে, তাহলে তারা মূলত **load balance** করে message গুলো ভাগ করে নেয় (প্রতিটা message যেকোনো একজন consumer পায়, সবাই না)। উদাহরণ: **Amazon SQS, RabbitMQ (queue mode)**।
 
 **Pub/Sub (Publish/Subscribe):** এখানে publisher একটা **topic**-এ message পাঠায়, এবং সেই topic-এ subscribe করা **প্রতিটা subscriber (consumer)-ই সেই message-এর একটা copy পায়** — এটা one-to-many broadcasting model। একটা message একাধিক independent consumer একসাথে, স্বাধীনভাবে process করতে পারে, একজনের processing অন্যজনকে প্রভাবিত করে না। উদাহরণ: **Amazon SNS, Google Pub/Sub, Kafka (consumer group ছাড়া raw broadcast অর্থে)**।
@@ -73,6 +93,14 @@ title: Serverless & Event-Driven Architecture
 
 ## 44. What is an event bus, and how is it different from pub/sub?
 
+```mermaid
+flowchart LR
+    Events[Events] --> Bus{Event bus rules}
+    Bus -->|type = OrderCreated| Orders[Order target]
+    Bus -->|source = billing| Audit[Audit target]
+    Bus -->|region = eu| EU[EU processing target]
+```
+
 **Event Bus** হলো একটা centralized, intelligent messaging infrastructure (যেমন AWS EventBridge, Azure Event Grid) যা বিভিন্ন producer থেকে আসা event গ্রহণ করে এবং **content/attribute-এর ভিত্তিতে বুদ্ধিমত্তার সাথে route** করে সঠিক consumer/target-এর কাছে পাঠায়। এটা অনেকটা pub/sub-এরই একটা **advanced, বেশি flexible version**, যেখানে routing logic অনেক বেশি sophisticated এবং configurable।
 
 
@@ -104,6 +132,15 @@ title: Serverless & Event-Driven Architecture
 
 ## 45. What role does an API Gateway play in serverless architecture (auth, throttling)?
 
+```mermaid
+flowchart LR
+    Client --> Gateway{API gateway}
+    Gateway --> Auth[Authentication and authorization]
+    Gateway --> Limit[Throttle and quota]
+    Gateway --> Validate[Request validation]
+    Auth & Limit & Validate --> Function[Serverless function]
+```
+
 **API Gateway** হলো একটা managed service (যেমন AWS API Gateway, Azure API Management) যা client (web/mobile app) এবং backend serverless function (যেমন Lambda)-এর মধ্যে একটা **single entry point** হিসেবে কাজ করে। এটা HTTP request গ্রহণ করে, প্রয়োজনীয় processing/validation করে, এবং সঠিক backend service-এ route করে দেয়।
 
 Serverless architecture-এ API Gateway-এর মূল ভূমিকা:
@@ -131,6 +168,16 @@ Serverless architecture-এ API Gateway-এর মূল ভূমিকা:
 ---
 
 ## 46. What is a serverless workflow/state-machine service (orchestration vs. choreography)?
+
+```mermaid
+stateDiagram-v2
+    [*] --> ReserveInventory
+    ReserveInventory --> ChargePayment: reserved
+    ChargePayment --> ShipOrder: paid
+    ChargePayment --> CancelReservation: failed
+    ShipOrder --> [*]
+    CancelReservation --> [*]
+```
 
 **Serverless Workflow/State-Machine Service** (যেমন AWS Step Functions, Azure Durable Functions) হলো একটা managed service যা একাধিক serverless function/task-কে একটা নির্দিষ্ট **sequence/logic** অনুযায়ী coordinate করে চালানোর সুযোগ দেয় — যেমন conditional branching, parallel execution, retry logic, error handling, এবং long-running process-এর state track করা। এটা একটা **visual workflow (state machine)** হিসেবে define করা হয়, যেখানে প্রতিটা step একটা "state" এবং তাদের মধ্যে transition rule দিয়ে define করা।
 

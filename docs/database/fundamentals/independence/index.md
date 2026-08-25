@@ -3,6 +3,13 @@ sidebar_position: 9
 title: 'Independence'
 ---
 
+
+# Data Independence
+
+Data independence হলো database এর ability যেখানে higher level এর structure বা application lower level এর change দ্বারা affected হয় না।
+
+## ৯. What is data independence?
+
 ```mermaid
 flowchart TD
     Apps[Applications] --> Logical[Logical schema]
@@ -10,12 +17,6 @@ flowchart TD
     Physical --> Storage[(Storage)]
     Change[Storage or index change] -. isolated by .-> Logical
 ```
-
-# Data Independence
-
-Data independence হলো database এর ability যেখানে higher level এর structure বা application lower level এর change দ্বারা affected হয় না।
-
-## ৯. What is data independence?
 
 **Data Independence** হলো database system এর একটি fundamental property যা ensure করে যে database এর এক level এ change করা হলে অন্য level গুলো unaffected থাকে।
 

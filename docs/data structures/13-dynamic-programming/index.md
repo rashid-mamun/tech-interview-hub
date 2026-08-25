@@ -5,6 +5,16 @@ title: 'Dynamic Programming'
 
 ## 📐 79. What is dynamic programming, and when should it be applied?
 
+```mermaid
+flowchart TD
+    Problem --> Optimal{Optimal substructure?}
+    Optimal -->|no| Other[Use another technique]
+    Optimal -->|yes| Overlap{Overlapping subproblems?}
+    Overlap -->|yes| DP[Dynamic programming]
+    DP --> Memo[Top-down memoization]
+    DP --> Tab[Bottom-up tabulation]
+```
+
 একই subproblem বারবার এলে এবং optimal substructure থাকলে DP ব্যবহার করা হয়। Top-down memoization recursion + cache; bottom-up tabulation ছোট state থেকে বড় state তৈরি করে। Divide and conquer-এর subproblem সাধারণত overlap করে না।
 
 ```cpp title="Complete example: top-down and bottom-up Fibonacci"
@@ -79,6 +89,13 @@ Time `O(n)`, space `O(1)`।
 
 ## 🎒 81. How would you solve the classic 0/1 knapsack problem?
 
+```mermaid
+flowchart TD
+    State[dp item i, capacity w] --> Skip[Skip item: dp i-1, w]
+    State -->|if weight fits| Take[Take item: value i plus dp i-1, w-weight]
+    Skip & Take --> Max[Store maximum]
+```
+
 `dp[w]` হলো capacity `w`-তে সর্বোচ্চ value। প্রতিটি item একবারই নিতে weight-কে ডান থেকে বাঁয়ে iterate করতে হয়।
 
 ```cpp title="Complete example: space-optimized 0/1 knapsack"
@@ -114,6 +131,13 @@ Time `O(nW)`, space `O(W)`।
 Full 2D table-এ `dp[i][w]` মানে প্রথম `i`টি item ব্যবহার করে capacity `w`-তে maximum value; dimensions `(n+1) × (W+1)`। 1D version একই previous row reuse করে space `O(W)` করেছে।
 
 ## 📏 82. How does the Longest Common Subsequence (LCS) problem work?
+
+```mermaid
+flowchart TD
+    Cell[dp i,j] --> Match{Characters match?}
+    Match -->|yes| Diag[1 plus dp i-1,j-1]
+    Match -->|no| Best[max of top and left]
+```
 
 Character সমান হলে diagonal state-এর সঙ্গে 1 যোগ হয়; না হলে top ও left-এর maximum নেওয়া হয়। Table থেকে পিছনে হেঁটে actual subsequence পাওয়া যায়।
 
@@ -234,6 +258,16 @@ Ways to make 5: 4
 
 ## 🛣️ 85. How would you solve grid-based DP problems?
 
+```mermaid
+flowchart LR
+    Start --> A[Cell 0,0]
+    A --> R[Move right]
+    A --> D[Move down]
+    R & D --> Cell[dp r,c combines valid predecessor states]
+    Cell --> Goal
+    Block[Obstacle] -. excludes transition .-> Cell
+```
+
 `dp[r][c]`-কে cell `(r,c)` পর্যন্ত best answer ধরা হয়। নিচে obstacle এড়িয়ে unique path count করা হয়েছে; obstacle cell-এর state শূন্য।
 
 ```cpp title="Complete example: unique paths with obstacles"
@@ -270,59 +304,3 @@ Unique paths: 2
 ```
 
 Time `O(rows × columns)`, space `O(columns)`।
-
-## 🗺️ Concept diagrams
-
-### DP decision flow
-
-```text
-Does the problem have optimal substructure?
-                  │
-                  ▼ yes
-Do subproblems overlap?
-      │                       │
-      ▼ yes                   ▼ no
-Dynamic Programming     Divide and Conquer
-      │
-      ├── Top-down: recursion + memo
-      └── Bottom-up: iterative table
-```
-
-### 0/1 knapsack transition
-
-```text
-For item i and capacity w:
-
-                 ┌─ skip item i ── dp[i-1][w]
-dp[i][w] = max ──┤
-                 └─ take item i ── value[i] + dp[i-1][w-weight[i]]
-
-1D optimization: iterate w from W down to weight[i]
-                 (prevents taking the same item twice)
-```
-
-### LCS table dependency
-
-```text
-                 text B →
-              ""  B  D  C  A  B
-text A  ""    0   0  0  0  0  0
-   ↓     A     0   0  0  0  1  1
-         B     0   1  1  1  1  2
-         C     0   1  1  2  2  2
-
-match    : ↖ + 1
-not match: max(↑, ←)
-```
-
-### Grid DP dependency
-
-```text
-Start ──→ [1] ──→ [1]
-  │         │         │
-  ▼         ▼         ▼
- [1]       [X]       [1]    X = obstacle
-  │                   │
-  ▼                   ▼
- [1] ──→ [1] ──→    [2]    answer = top + left
-```

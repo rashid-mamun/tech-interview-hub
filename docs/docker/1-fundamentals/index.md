@@ -5,6 +5,14 @@ title: 'Docker Fundamentals'
 
 
 ## 🧱 1. What is Docker, and why is it used in modern software development?
+
+```mermaid
+flowchart LR
+    Dev[Source code and Dockerfile] --> Build[docker build]
+    Build --> Image[Portable image]
+    Image --> Run[docker run]
+    Run --> Container[Isolated container process]
+```
 **Docker** হলো একটি open-source platform যা application-কে **container**-এর মধ্যে package করে run করার সুবিধা দেয়। একটি container হলো একটি lightweight, isolated environment যেখানে application এবং তার সমস্ত **dependencies** (যেমন libraries, runtime, configuration) একসাথে থাকে।
 
 সহজ ভাষায় বলতে গেলে — Docker একটি "বাক্সের" মতো, যেখানে তোমার পুরো application সহ সবকিছু ভরে দিতে পারো, এবং সেই বাক্স যেকোনো machine-এ হুবহু একইভাবে চলবে।
@@ -80,6 +88,21 @@ VM-based environment বারবার spin up ও tear down করা ধী�
 ---
 
 ### What is the difference between containerization and virtualization?
+
+```mermaid
+flowchart TB
+    subgraph Containers
+        A1[App A] --> CE[Container engine]
+        A2[App B] --> CE
+        CE --> HK[Shared host kernel]
+    end
+    subgraph VirtualMachines
+        B1[App A] --> G1[Guest OS 1]
+        B2[App B] --> G2[Guest OS 2]
+        G1 --> H[Hypervisor]
+        G2 --> H
+    end
+```
 Virtualization-এ **Hypervisor** নামের একটি software, physical hardware-এর উপরে বসে একাধিক **Virtual Machine** তৈরি করে। প্রতিটি VM-এর নিজস্ব **Guest OS**, virtual **CPU**, virtual **RAM**, এবং virtual **storage** থাকে।
 
 ```
@@ -122,6 +145,16 @@ Containerization-এ **Container Engine** (যেমন Docker) host machine-এ
 > 💡 বাস্তবে অনেক সময় দুটো একসাথে ব্যবহার হয় — cloud provider-এর VM-এর উপরে Docker container চালানো হয়। এতে VM-এর security এবং Docker-এর efficiency দুটোই পাওয়া যায়।
 
 ### How does Docker use Linux kernel features (namespaces, cgroups) under the hood?
+
+```mermaid
+flowchart LR
+    D[Docker runtime] --> N[Namespaces: isolate processes, network, mounts]
+    D --> C[cgroups: limit and account resources]
+    D --> U[Union filesystem: layered storage]
+    N --> P[Container process]
+    C --> P
+    U --> P
+```
 Docker আসলে নিজে কোনো "magic" করে না — এটি Linux kernel-এর দুটি শক্তিশালী feature ব্যবহার করে container তৈরি করে: **Namespaces** এবং **cgroups**।
 
 #### 🔷 Namespaces — Isolation-এর জন্য
@@ -204,19 +237,30 @@ Docker মূলত এই kernel feature-গুলোকে একটি সহ
 ---
 
 ### What is the Open Container Initiative (OCI) and how does Docker relate to it?
+
+```mermaid
+flowchart LR
+    D[Docker and BuildKit] --> I[OCI image specification]
+    I --> R[OCI runtime specification]
+    R --> RunC[runc]
+    RunC --> C[Running container]
+```
 **Open Container Initiative (OCI)** হলো একটি open governance structure যা container technology-র জন্য industry-wide **open standard** তৈরি করে। এটি ২০১৫ সালে **Linux Foundation**-এর অধীনে প্রতিষ্ঠিত হয়।
 
 OCI তৈরির কারণ ছিল — Docker তখন container জগতে একচেটিয়া ছিল, এবং বিভিন্ন vendor চাইছিল একটি neutral, shared standard থাকুক যাতে কোনো একটি কোম্পানির উপর নির্ভরশীল না হতে হয়।
 
 ---
 
-#### OCI-এর দুটি মূল Specification
+#### OCI-এর তিনটি মূল Specification
 
 **১. OCI Image Spec**
 Container image কীভাবে তৈরি ও package করতে হবে তার standard। এই spec মেনে তৈরি করা যেকোনো image, যেকোনো OCI-compliant runtime-এ চলবে।
 
 **২. OCI Runtime Spec**
 Container কীভাবে চালু করতে হবে তার standard। এই spec-এর reference implementation হলো **runc** — যা Docker নিজেই তৈরি করে OCI-তে donate করেছে।
+
+**৩. OCI Distribution Spec**
+Registry API ব্যবহার করে image manifest ও content blob কীভাবে push, pull এবং distribute হবে তার standard।
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -274,6 +318,20 @@ OCI standard থাকায় এখন Docker ছাড়াও অন্য
 > Docker container technology-কে জনপ্রিয় করেছে, আর OCI সেই technology-কে একটি **vendor-neutral open standard**-এ পরিণত করেছে — যাতে পুরো industry একসাথে এগিয়ে যেতে পারে।
 
 ### 🔩 containerd এবং runc — বিস্তারিত আলোচনা
+
+```mermaid
+sequenceDiagram
+    participant CLI as Docker CLI
+    participant D as dockerd
+    participant C as containerd
+    participant R as runc
+    participant P as Container process
+    CLI->>D: docker run
+    D->>C: create container task
+    C->>R: create OCI container
+    R->>P: start isolated process
+    R-->>C: exits after start
+```
 
 Docker CLI-তে `docker run` লিখলে আসলে অনেকগুলো layer কাজ করে। containerd এবং runc এই chain-এর দুটি আলাদা স্তরে কাজ করে:
 

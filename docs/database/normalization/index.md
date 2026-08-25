@@ -3,13 +3,6 @@ sidebar_position: 5
 title: 'Normalization'
 ---
 
-```mermaid
-flowchart LR
-    U[Unnormalized data] --> F1[First normal form]
-    F1 --> F2[Second normal form]
-    F2 --> F3[Third normal form]
-    F3 --> B[BCNF]
-```
 
 ### Running example
 
@@ -30,6 +23,14 @@ CREATE TABLE orders (
 ```
 
 ## **32. What is Database Normalization?**
+
+```mermaid
+flowchart LR
+    U[Unnormalized data] --> F1[First normal form]
+    F1 --> F2[Second normal form]
+    F2 --> F3[Third normal form]
+    F3 --> B[BCNF]
+```
 
 **Normalization** হলো একটি ডাটাবেস ডিজাইন টেকনিক যা একটি বড় টেবিলকে ছোট ছোট টেবিলে বিভক্ত করে এবং তাদের মধ্যে লজিক্যাল রিলেশন তৈরি করে। এর মূল লক্ষ্য হলো ডাটাবেস থেকে অপ্রয়োজনীয় বা duplicate ডেটা (Redundancy) দূর করা এবং ডেটার Integrity নিশ্চিত করা।
 
@@ -116,6 +117,13 @@ Normalization প্রধানত তিনটি বড় সমস্যা
 ---
 
 ## **33. Explain 1NF, 2NF, 3NF?**
+
+```mermaid
+flowchart LR
+    U[Unnormalized table] --> N1[1NF: atomic values]
+    N1 --> N2[2NF: remove partial dependency]
+    N2 --> N3[3NF: remove transitive dependency]
+```
 
 ### Step 1: 1NF Achieving Atomicity
 
@@ -408,6 +416,14 @@ Higher normal form practical যখন independent multi-valued fact বা comp
 
 ## **36. What is Denormalization?**
 
+```mermaid
+flowchart LR
+    N[Normalized tables] --> J[Frequent joins]
+    J --> D[Duplicate selected data intentionally]
+    D --> R[Faster reads]
+    D --> W[More write and consistency work]
+```
+
 **Denormalization** হলো একটি ডাটাবেস অপ্টিমাইজেশন টেকনিক যেখানে পূর্বে নরমালাইজ করা একটি ডাটাবেসে ইচ্ছাকৃতভাবে কিছু duplicate ডেটা বা রিডান্ডেন্সি (Redundancy) ফিরিয়ে আনা হয়।
 
 সহজ কথায়, নরমালাইজেশনে আমরা টেবিলগুলোকে ভেঙে ছোট করি, আর ডিনরমালাইজেশনে আমরা টেবিলগুলোকে আবার জোড়া দিই বা একই তথ্য একাধিক টেবিলে রাখি যাতে query করার সময় অনেকগুলো `JOIN` ব্যবহার করতে না হয়।
@@ -460,6 +476,16 @@ The key difference lies in the type of dependency eliminated:
 
 ## **37. What are anomalies in database design?**
 
+```mermaid
+flowchart TB
+    R[Redundant table design] --> I[Insertion anomaly]
+    R --> U[Update anomaly]
+    R --> D[Deletion anomaly]
+    I --> N[Normalize relations]
+    U --> N
+    D --> N
+```
+
 ডাটাবেস ডিজাইনে **Anomalies** হলো এমন কিছু অনাকাঙ্ক্ষিত সমস্যা যা মূলত অগোছালো বা ত্রুটিপূর্ণ টেবিল স্ট্রাকচারের কারণে ঘটে। যখন একটি টেবিলে অপ্রয়োজনীয়ভাবে একই ডেটা বারবার (Redundancy) রাখা হয়, তখন ডেটা ইনসার্ট, আপডেট বা ডিলিট করতে গেলে যে অসামঞ্জস্যতা তৈরি হয়, তাকেই Anomaly বলে।
 
 নিচে তিনটি প্রধান Anomaly উদাহরণের মাধ্যমে ব্যাখ্যা করা হলো:
@@ -500,6 +526,22 @@ The key difference lies in the type of dependency eliminated:
 ---
 
 ## **38. How do you handle many-to-many relationships in database design?**
+
+```mermaid
+erDiagram
+    STUDENT ||--o{ ENROLLMENT : has
+    COURSE ||--o{ ENROLLMENT : has
+    STUDENT {
+        int student_id PK
+    }
+    COURSE {
+        int course_id PK
+    }
+    ENROLLMENT {
+        int student_id FK
+        int course_id FK
+    }
+```
 
 Many-to-many relationships require a Junction/Bridge table:
 
@@ -622,6 +664,13 @@ Several strategies can optimize queries on normalized databases:
 ---
 
 ## **41. What is functional dependency?**
+
+```mermaid
+flowchart LR
+    A[Determinant: Student ID] --> B[Student Name]
+    A --> C[Department]
+    D[Student ID + Course ID] --> E[Grade]
+```
 
 Functional Dependency হলো Database Management System এর একটি গুরুত্বপূর্ণ ধারণা, যা রিলেশনাল ডাটাবেসের টেবিলে attributes এর মধ্যে সম্পর্ক বোঝায়। সহজ ভাষায়, যদি একটি attribute বা attribute set `X` এর মান থেকে আরেকটি attribute বা attribute set `Y` এর মান নির্ধারিত হয়, তাহলে বলা হয় যে `Y` হলো `X` এর উপর functionally dependent। এটি সাধারণত `X → Y` হিসেবে প্রকাশ করা হয়।
 

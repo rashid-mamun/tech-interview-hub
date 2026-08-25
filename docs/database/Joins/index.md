@@ -3,14 +3,15 @@ sidebar_position: 2
 title: 'Joins'
 ---
 
+
+## **26. What are SQL joins?**
+
 ```mermaid
 flowchart LR
     Customers[Customers] -->|customer_id| Join[JOIN condition]
     Orders[Orders] -->|customer_id| Join
     Join --> Result[Combined rows]
 ```
-
-## **26. What are SQL joins?**
 
 SQL joins হলো একটি পাওয়ারফুল technique যা দিয়ে আমরা দুই বা ততোধিক tables থেকে data কে একসাথে combine করতে পারি। এটি relational database এর সবচেয়ে গুরুত্বপূর্ণ features এর মধ্যে একটি।
 
@@ -227,6 +228,15 @@ ON s.department_id = d.department_id
 
 ## **27. What is FULL OUTER JOIN?**
 
+```mermaid
+flowchart LR
+    L[All left rows] --> Match[Matched rows]
+    R[All right rows] --> Match
+    L --> LOnly[Unmatched left plus NULLs]
+    R --> ROnly[Unmatched right plus NULLs]
+    Match & LOnly & ROnly --> Full[FULL OUTER JOIN result]
+```
+
 **FULL OUTER JOIN** হলো SQL এর একটি advanced join type যা দুইটি tables এর **সব records** return করে, regardless of whether they match or not। এটি LEFT JOIN এবং RIGHT JOIN এর combination এর মতো কাজ করে।
 
 - **বাম table** এর সব records return করে
@@ -393,6 +403,13 @@ WHERE s.department_id IS NULL;
 
 
 ## **28. What is CROSS JOIN?**
+
+```mermaid
+flowchart LR
+    A[3 colors] --> Product[Cartesian product]
+    B[2 sizes] --> Product
+    Product --> Rows[6 combinations]
+```
 
 **CROSS JOIN** হলো SQL এর একটি special type of join যা **Cartesian Product** তৈরি করে। এটি first table এর প্রতিটি row কে second table এর প্রতিটি row এর সাথে combine করে, **কোনো condition ছাড়াই**।
 
@@ -601,6 +618,13 @@ WHERE s.active = 1 AND srv.monitored = 1;
 
 
 ## **29. What is SELF JOIN?**
+
+```mermaid
+flowchart LR
+    E1[employees as employee] -->|employee.manager_id = manager.id| Join[SELF JOIN]
+    E2[employees as manager] --> Join
+    Join --> Result[Employee with manager name]
+```
 
 **SELF JOIN** হলো একটি special type of join যেখানে একটি table নিজের সাথেই join করে। এটি technically কোনো আলাদা join type নয়, বরং **same table** কে দুইবার reference করে INNER JOIN বা LEFT JOIN করার technique।
 
@@ -857,6 +881,13 @@ SELF JOIN একটি অত্যন্ত powerful technique যা hierarchi
 
 ## **30. What is the difference between INNER JOIN and WHERE clause for joining tables?**
 
+```mermaid
+flowchart LR
+    A & B --> Join[JOIN ON defines row matching]
+    Join --> Where[WHERE filters joined rows]
+    Where --> Result
+```
+
 এটি একটি fundamental question যা অনেক developers এর মনে confusion তৈরি করে। আসলে দুইটা approach দিয়েই same result পাওয়া যায়, কিন্তু readability, maintainability এবং performance এর দিক থেকে পার্থক্য আছে।
 
 
@@ -1092,6 +1123,13 @@ WHERE t1.id = t2.t1_id
 
 
 ## **31. What is a cartesian product?**
+
+```mermaid
+flowchart LR
+    Left[m rows] --> Product[Every left row paired with every right row]
+    Right[n rows] --> Product
+    Product --> Count[m times n result rows]
+```
 
 **Cartesian Product** হলো একটি mathematical concept যা database এ তখন ঘটে যখন দুই বা ততোধিক tables এর **প্রতিটি row** অন্য table এর **সব rows** এর সাথে combine হয়। এটি **CROSS JOIN** এর result বা **accidental join** এর ফলাফল।
 

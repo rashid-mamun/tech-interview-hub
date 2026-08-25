@@ -3,6 +3,9 @@ sidebar_position: 3
 title: 'SQL Functions and Operations'
 ---
 
+
+## **20. What is ORDER BY and GROUP BY?**
+
 ```mermaid
 flowchart LR
     Rows[Input rows] --> Function[Scalar or aggregate function]
@@ -10,8 +13,6 @@ flowchart LR
     Rows --> Group[Grouping]
     Group --> Summary[Aggregate result]
 ```
-
-## **20. What is ORDER BY and GROUP BY?**
 
 ORDER BY এবং GROUP BY SQL এর দুটি গুরুত্বপূর্ণ clauses যা data organization এবং analysis এর জন্য ব্যবহৃত হয়।
 

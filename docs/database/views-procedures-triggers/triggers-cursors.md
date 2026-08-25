@@ -3,16 +3,17 @@ sidebar_position: 3
 title: "Triggers & Cursors"
 ---
 
+
+# Triggers & Cursors
+
+## **66. What is a trigger?**
+
 ```mermaid
 flowchart LR
     DML[INSERT UPDATE DELETE] --> Trigger[Trigger fires]
     Trigger --> Rule[Validation or audit]
     Rule --> Tables[(Target and audit tables)]
 ```
-
-# Triggers & Cursors
-
-## **66. What is a trigger?**
 
 **Trigger** হলো ডাটাবেজের একটি বিশেষ ধরনের Stored Procedure, যা নির্দিষ্ট ডাটাবেজ ইভেন্ট (INSERT, UPDATE, DELETE) ঘটার সাথে সাথে **স্বয়ংক্রিয়ভাবে (automatically)** এক্সিকিউট হয়। এটিকে ম্যানুয়ালি কল করা যায় না।
 

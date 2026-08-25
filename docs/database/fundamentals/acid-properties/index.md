@@ -3,6 +3,9 @@ sidebar_position: 3
 title: 'ACID Properties'
 ---
 
+
+## ৩. What are ACID properties?
+
 ```mermaid
 flowchart LR
     T[Transaction] --> A[Atomicity]
@@ -10,8 +13,6 @@ flowchart LR
     T --> I[Isolation]
     T --> D[Durability]
 ```
-
-## ৩. What are ACID properties?
 ACID properties হলো database transaction এর চারটি fundamental characteristic যা data integrity এবং reliability ensure করে।
 
 Transaction হলো ডাটাবেসের এক বা একাধিক অপারেশনের একটি সিঙ্গেল লজিক্যাল ইউনিট। উদাহরণস্বরূপ, ব্যাংক থেকে টাকা ট্রান্সফার করার প্রক্রিয়ায় দুটি অপারেশন থাকে: একাউন্ট এ থেকে টাকা কাটা এবং একাউন্ট বি-তে টাকা যোগ করা। এই পুরো প্রক্রিয়াটি মিলে একটি Transaction তৈরি হয়।

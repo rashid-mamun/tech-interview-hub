@@ -2,7 +2,21 @@
 sidebar_position: 6
 title: 'UML Diagrams'
 ---
+
 ## 37. What is UML, and how are its diagrams broadly categorized?
+
+```mermaid
+flowchart TB
+    UML --> Structural[Structural diagrams]
+    UML --> Behavioral[Behavioral diagrams]
+    Structural --> Class
+    Structural --> Component
+    Structural --> Deployment
+    Behavioral --> UseCase[Use case]
+    Behavioral --> Activity
+    Behavioral --> State
+    Behavioral --> Interaction[Sequence and interaction]
+```
 
 **UML (Unified Modeling Language)** হলো একটি standardized, graphical **modeling language**, যা software system কে design এবং document করার জন্য ব্যবহার করা হয়। এটি কোনো programming language নয়, বরং একটি **visual notation system**, যা developer, architect, এবং stakeholder দের মধ্যে system এর structure এবং behavior সম্পর্কে **common understanding** তৈরি করতে সাহায্য করে। UML তৈরি করেছিলেন Grady Booch, Ivar Jacobson, এবং James Rumbaugh, এবং এটি বর্তমানে **OMG (Object Management Group)** দ্বারা maintained।
 
@@ -47,6 +61,24 @@ UML diagram গুলোকে মূলত দুটি বড় category ত�
 ---
 
 ## 38. What is a class diagram, and what does it represent?
+
+```mermaid
+classDiagram
+    class Customer {
+      +String name
+      +placeOrder()
+    }
+    class Order {
+      +String status
+      +calculateTotal()
+    }
+    class OrderItem {
+      +int quantity
+      +decimal unitPrice
+    }
+    Customer "1" --> "0..*" Order : places
+    Order "1" *-- "1..*" OrderItem : contains
+```
 
 **Class Diagram** হলো একটি **structural UML diagram**, যা একটি system এর **classes**, তাদের **attributes (properties)**, **methods (operations)**, এবং class গুলোর মধ্যে বিভিন্ন **relationship** (inheritance, association, aggregation, composition) দেখায়। এটি OOP system design করার সময় সবচেয়ে বেশি ব্যবহৃত diagram।
 
@@ -105,6 +137,25 @@ UML diagram গুলোকে মূলত দুটি বড় category ত�
 
 ## 39. What is a use case diagram, and what are its main components (actors, use cases, relationships)?
 
+```mermaid
+flowchart LR
+    Customer[Customer]
+    Gateway[Payment gateway]
+    subgraph Ordering_System
+      Browse([Browse products])
+      Place([Place order])
+      Pay([Process payment])
+      Coupon([Apply coupon])
+    end
+    Customer --- Browse
+    Customer --- Place
+    Place -. include .-> Pay
+    Coupon -. extend .-> Place
+    Gateway --- Pay
+```
+
+Mermaid-এ dedicated UML use-case notation নেই, তাই উপরের diagramটি actor, system boundary এবং include/extend direction বোঝানোর practical approximation। Formal UML tool-এ actor stick figure ও `<<include>>`/`<<extend>>` stereotype ব্যবহার করতে হবে।
+
 **Use Case Diagram** হলো একটি **behavioral UML diagram**, যা একটি system এর **functional requirements** কে high-level এ দেখায় — অর্থাৎ **কারা (actors)** system ব্যবহার করবে এবং তারা system এর সাথে **কী কী কাজ (use cases)** করতে পারবে। এটি মূলত requirement gathering এবং client communication এ ব্যবহৃত হয়, কারণ এটি বোঝা সহজ এবং technical detail ছাড়াই high-level functionality দেখায়।
 
 **Main Components:**
@@ -144,6 +195,20 @@ System এর একটি নির্দিষ্ট **functionality বা �
 ---
 
 ## 40. What is a sequence diagram, and how does it show interaction between objects over time?
+
+```mermaid
+sequenceDiagram
+    actor Customer
+    participant API as Order API
+    participant Payment as Payment Service
+    participant DB as Order Database
+    Customer->>API: placeOrder(items)
+    API->>Payment: authorize(total)
+    Payment-->>API: authorizationId
+    API->>DB: save(order, authorizationId)
+    DB-->>API: orderId
+    API-->>Customer: order confirmed
+```
 
 **Sequence Diagram** হলো একটি **behavioral UML diagram**, যা দেখায় বিভিন্ন **object/participant** সময়ের সাথে সাথে (chronologically) একে অপরের সাথে **কীভাবে message পাঠায় এবং কী order এ interact করে**, একটি নির্দিষ্ট scenario বা use case বাস্তবায়নের জন্য। এটি একটি **vertical time axis** ব্যবহার করে, যেখানে উপর থেকে নিচে সময় অগ্রসর হয়।
 
@@ -185,7 +250,23 @@ Polymorphism এ, একটি parent class/interface টাইপের referen
 
 
 
-## 41. What is an activity diagram, and how does it differ from a traditional flowchart?**
+## 41. What is an activity diagram, and how does it differ from a traditional flowchart?
+
+```mermaid
+flowchart TD
+    Start([Start]) --> Validate{Order valid?}
+    Validate -->|no| Reject[Reject order]
+    Validate -->|yes| Fork[Start parallel work]
+    Fork --> Reserve[Reserve inventory]
+    Fork --> Fraud[Run fraud check]
+    Reserve --> Join[Both complete]
+    Fraud --> Join
+    Join --> Confirm[Confirm order]
+    Reject --> End([End])
+    Confirm --> End
+```
+
+এটি Mermaid flowchart দিয়ে UML activity flow-এর approximation। Formal UML-এ initial/final node, decision/merge diamond এবং parallel কাজের জন্য fork/join bar ব্যবহার করা হয়।
 
 **Activity Diagram** হলো একটি **behavioral UML diagram**, যা একটি **business process বা workflow** এর ধাপে ধাপে logic দেখায় — কার্যক্রমের sequence, decision point, parallel activities, এবং control flow সহ। এটি অনেকটা flowchart এর মতো দেখতে হলেও এতে কিছু গুরুত্বপূর্ণ অতিরিক্ত সুবিধা আছে।
 
@@ -214,7 +295,21 @@ Swimlane এর মূল সুবিধা হলো এটি একটি pr
 
 ---
 
-## 42. What is a state machine (state chart) diagram, and what kinds of systems is it best suited for modeling?**
+## 42. What is a state machine (state chart) diagram, and what kinds of systems is it best suited for modeling?
+
+```mermaid
+stateDiagram-v2
+    [*] --> Draft
+    Draft --> Submitted: submit
+    Submitted --> Paid: payment succeeds
+    Submitted --> Cancelled: cancel
+    Paid --> Shipped: dispatch
+    Paid --> Refunded: refund
+    Shipped --> Delivered: deliver
+    Cancelled --> [*]
+    Refunded --> [*]
+    Delivered --> [*]
+```
 
 **State Machine Diagram (State Chart Diagram)** হলো একটি behavioral UML diagram, যা একটি **single object এর জীবনচক্রে (lifecycle)** সম্ভাব্য সব **state (অবস্থা)** এবং সেই state গুলোর মধ্যে **transition** কীভাবে ঘটে (কোন event/condition এর কারণে) তা দেখায়।
 
@@ -241,7 +336,20 @@ Swimlane এর মূল সুবিধা হলো এটি একটি pr
 
 ---
 
-## 43. What is a component diagram, and what does it show about a system's architecture?**
+## 43. What is a component diagram, and what does it show about a system's architecture?
+
+```mermaid
+flowchart LR
+    Web[Web application] --> API[Order API]
+    Mobile[Mobile application] --> API
+    API --> Catalog[Catalog component]
+    API --> Order[Order component]
+    Order --> Payment[Payment adapter]
+    Catalog --> CatalogDB[(Catalog DB)]
+    Order --> OrderDB[(Order DB)]
+```
+
+এটি readable component view; formal UML component diagram-এ component symbol এবং provided/required interface notation যোগ করা যায়।
 
 **Component Diagram** হলো একটি **structural UML diagram**, যা একটি system এর **high-level software components** (যেমন modules, libraries, services, executables) এবং তাদের মধ্যে **dependency এবং interface** কীভাবে সংযুক্ত তা দেখায়। এটি মূলত **software architecture এর logical/organizational structure** কে represent করে — অর্থাৎ কোড কীভাবে বিভিন্ন replaceable, deployable অংশে সংগঠিত।
 
@@ -266,6 +374,22 @@ Component Diagram মূলত দেখায় **system টি কী কী 
 ---
 
 ## 44. What is a deployment diagram, and what does it represent in terms of physical architecture?
+
+```mermaid
+flowchart TD
+    Browser[Client browser] --> LB[Load balancer]
+    subgraph Application_Cluster
+      App1[Application instance 1]
+      App2[Application instance 2]
+    end
+    LB --> App1
+    LB --> App2
+    App1 --> DB[(Primary database)]
+    App2 --> DB
+    DB --> Replica[(Standby replica)]
+```
+
+এটি deployment topology-এর Mermaid approximation। Formal UML-এ device/execution-environment node-এর ভেতরে deployed artifact এবং node communication path দেখানো হয়।
 
 **Deployment Diagram** হলো একটি **structural UML diagram**, যা একটি system এর **physical/runtime infrastructure** দেখায় — অর্থাৎ software components গুলো **কোন কোন hardware node (server, device)** এ deploy এবং execute হচ্ছে, এবং সেই node গুলো একে অপরের সাথে **নেটওয়ার্কের মাধ্যমে** কীভাবে সংযুক্ত।
 
@@ -295,11 +419,35 @@ Component Diagram মূলত দেখায় **system টি কী কী 
 
 ৫. প্রয়োজনে **Load Balancer node**, **CDN node**, বা **Cache Server (Redis) node** ও যোগ করা যায়, যদি architecture তে সেগুলো থাকে
 
-এভাবে Deployment Diagram স্পষ্টভাবে দেখায় software এর কোন অংশ (artifact) **কোথায় বাস্তবে চলবে**, এবং infrastructure/network এর মধ্য দিয়ে data কীভাবে প্রবাহিত হবে — যা deployment planning, infrastructure cost estimation, এবং system এর physical scalability বোঝার জন্য অপরিহার্য।
+Deployment Diagram software artifact কোন execution node-এ থাকে এবং node-গুলোর communication path দেখায়। এটি deployment planning ও physical topology discussion-এ useful; detailed cost, capacity ও network analysis-এর জন্য অতিরিক্ত model/measurement লাগে।
 
 ---
 
 ## 45. How would you go about designing the class structure for a real-world system (e.g., a library management system or an online ordering system)?
+
+```mermaid
+classDiagram
+    class Member {
+      +borrow(copy)
+      +return(copy)
+    }
+    class Book {
+      +String isbn
+      +String title
+    }
+    class BookCopy {
+      +String barcode
+      +CopyStatus status
+    }
+    class Loan {
+      +Date borrowedAt
+      +Date dueAt
+      +close()
+    }
+    Book "1" *-- "1..*" BookCopy
+    Member "1" --> "0..*" Loan
+    Loan "0..*" --> "1" BookCopy
+```
 
 একটি Library Management System এর উদাহরণ নিয়ে ব্যাখ্যা করা যাক, কীভাবে ধাপে ধাপে class structure design করা হয়।
 
@@ -347,7 +495,7 @@ Requirement/user story গুলো পড়ে যেসব গুরুত্
 
 **Library System এর একটি সম্ভাব্য Class Hierarchy:**
 
-```
+```text
 LibraryItem (Abstract)
 ├── attributes: itemId, title, availableCopies
 ├── abstract method: calculateLateFee()
@@ -365,4 +513,4 @@ Member (Abstract বা Concrete, প্রয়োজন অনুযায়
 └── PremiumMember (Concrete)
 ```
 
-**সাধারণ নীতি হিসেবে:** যদি প্রশ্ন হয় *"এই class এর একটি generic, standalone object কি বাস্তবে অর্থবহ?"* — উত্তর যদি "না" হয় (যেমন "একটি plain LibraryItem" এর কোনো বাস্তব অর্থ নেই, এটা সবসময় হয় Book নয়তো DVD), তাহলে সেটা **Abstract** হওয়া উচিত। আর যদি উত্তর "হ্যাঁ" হয় (যেমন "একটি Book" সরাসরি তৈরি করা অর্থবহ), তাহলে সেটা **Concrete** থাকবে।
+**সাধারণ heuristic:** generic standalone instance অর্থবহ না হলে abstract class বিবেচনা করা যায়। তবে abstraction শুধু real-world noun hierarchy দিয়ে নয়—shared invariant, substitutability এবং common behavior দেখে ঠিক করতে হবে; inheritance-এর বদলে composition উপযুক্ত কি না তাও যাচাই করুন।

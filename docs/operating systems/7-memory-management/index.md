@@ -6,6 +6,13 @@ title: 'Memory Management'
 
 ## 📍 27. What is the difference between a logical (virtual) address and a physical address?
 
+```mermaid
+flowchart LR
+    CPU[CPU virtual address] --> MMU
+    MMU --> PT[Page table]
+    PT --> RAM[Physical address in RAM]
+```
+
 **Logical Address (Virtual Address)**
 
 Normal translated execution-এ CPU instruction যে address ব্যবহার করে সেটি **logical/virtual address**। এটি process-এর perspective-এর address; প্রতিটি process একটি independent virtual address range দেখে। Range conceptually address `0` থেকে শুরু হতে পারে, তবে security ও null-pointer detection-এর জন্য modern OS সাধারণত low/null page mapped রাখে না।
@@ -53,6 +60,12 @@ MMU-এর কারণে ordinary user process তার actual physical memor
 ---
 
 ## 🧩 28. What is the difference between internal and external fragmentation?
+
+```mermaid
+flowchart TB
+    F[Wasted memory] --> I[Internal: unused bytes inside allocated block]
+    F --> E[External: free space split between allocated blocks]
+```
 
 **Internal Fragmentation**
 
@@ -107,6 +120,14 @@ Compaction একটি **ব্যয়বহুল (costly)** operation, ক�
 > * **External Fragmentation = Free memory block-গুলোর মাঝে ছড়িয়ে থাকা gaps, যেগুলো contiguous না হওয়ায় বড় allocation সম্ভব হয় না।**
 
 ## 📄 29. What is paging, and how does it solve the fragmentation problem?
+
+```mermaid
+flowchart LR
+    VA[Virtual pages] --> PT[Page table]
+    PT --> F1[Physical frame 7]
+    PT --> F2[Physical frame 2]
+    PT --> F3[Physical frame 11]
+```
 
 **Paging কী এবং এটা কীভাবে Fragmentation Problem সমাধান করে?**
 
@@ -274,6 +295,13 @@ TLB হলো একটি ছোট এবং খুব দ্রুত hardwar
 
 
 ## ✂️ 30. What is segmentation, and how does it differ from paging?
+
+```mermaid
+flowchart TB
+    A[Logical address] --> S{Memory model}
+    S -->|Segmentation| Seg[Variable-size code, data, stack segments]
+    S -->|Paging| Page[Fixed-size pages mapped to frames]
+```
 **Segmentation** হলো একটি **memory management technique** যেখানে একটি process-এর logical address space-কে **variable-size**, logically meaningful অংশে ভাগ করা হয়, যেগুলোকে **segment** বলা হয়।
 
 প্রতিটি segment একটি নির্দিষ্ট logical unit represent করে, যেমন—
@@ -398,6 +426,12 @@ Intel-এর **32-bit x86 architecture**-এ segmentation এবং paging উ�
 
 ## 💱 31. What is swapping, and how does it relate to memory management?
 
+```mermaid
+flowchart LR
+    RAM[RAM] -->|swap out inactive process or pages| Disk[Swap area]
+    Disk -->|swap in when needed| RAM
+```
+
 **Swapping** হলো একটি **memory management technique** যেখানে কোনো process-এর memory-কে সাময়িকভাবে **main memory (RAM)** থেকে **secondary storage**-এ (সাধারণত **swap space** বা **backing store**) স্থানান্তর করা হয় এবং পরে প্রয়োজন হলে আবার RAM-এ ফিরিয়ে আনা হয়।
 
 **Classical Operating System**-এ swapping বলতে সাধারণত **একটি সম্পূর্ণ process-এর memory image** (code, data, stack ইত্যাদি) RAM থেকে disk-এ এবং পরে disk থেকে RAM-এ স্থানান্তর করাকে বোঝানো হতো।
@@ -501,6 +535,13 @@ Operating System শুধুমাত্র প্রয়োজনীয় p
 
 
 ## 📦 32. What is the difference between contiguous and non-contiguous memory allocation?
+
+```mermaid
+flowchart TB
+    P[Process memory] --> C[Contiguous: one adjacent physical region]
+    P --> N[Non-contiguous: pages or segments in separate regions]
+    N --> M[Mapping table reconstructs logical view]
+```
 
 **Contiguous memory allocation** হলো এমন একটি memory allocation technique যেখানে একটি process-এর জন্য **একটানা (continuous)** physical memory block বরাদ্দ করা হয়।
 

@@ -3,6 +3,9 @@ sidebar_position: 5
 title: 'Transactions'
 ---
 
+
+## **51. What is a transaction?**
+
 ```mermaid
 stateDiagram-v2
     [*] --> Active: BEGIN
@@ -11,8 +14,6 @@ stateDiagram-v2
     Committed --> [*]
     Aborted --> [*]
 ```
-
-## **51. What is a transaction?**
 
 Transaction হল database operations এর একটি logical unit যা complete হতে হবে as a whole অথবা একেবারেই হবে না। এটি database consistency এবং integrity maintain করার জন্য অত্যন্ত গুরুত্বপূর্ণ।
 
@@ -73,6 +74,14 @@ COMMIT;
 ---
 
 ## **52. What is COMMIT and ROLLBACK?**
+
+```mermaid
+flowchart LR
+    A[BEGIN] --> B[Execute changes]
+    B --> C{Successful?}
+    C -->|Yes| D[COMMIT: make changes permanent]
+    C -->|No| E[ROLLBACK: restore previous state]
+```
 
 **COMMIT** এবং **ROLLBACK** হল transaction control করার জন্য দুটি fundamental commands।
 
@@ -204,6 +213,14 @@ BEGIN TRANSACTION;
 
 ## **53. What is SAVEPOINT in SQL?**
 
+```mermaid
+flowchart LR
+    A[BEGIN] --> B[Step 1] --> S[SAVEPOINT]
+    S --> C[Step 2 fails]
+    C --> R[ROLLBACK TO SAVEPOINT]
+    R --> D[Continue and COMMIT]
+```
+
 **SAVEPOINT** মূলত একটি বড় বা জটিল ট্রানজেকশনের ভেতরে ছোট ছোট "চেকপয়েন্ট" (checkpoints) তৈরি করতে ব্যবহৃত হয়। এটি আপনাকে পুরো ট্রানজেকশনটি বাতিল না করে কেবল একটি নির্দিষ্ট অংশ পর্যন্ত **Partial Rollback** করার সুবিধা দেয়।
 
 ### Basic SAVEPOINT Syntax:
@@ -261,6 +278,12 @@ COMMIT;
 
 ## **54. What are isolation levels?**
 
+```mermaid
+flowchart LR
+    RU[Read Uncommitted] --> RC[Read Committed] --> RR[Repeatable Read] --> S[Serializable]
+    RU -. increasing isolation .-> S
+```
+
 **Isolation levels** হলো ডেটাবেস ম্যানেজমেন্ট সিস্টেমের (DBMS) একটি গুরুত্বপূর্ণ কনসেপ্ট যা নির্ধারণ করে যে, একটি transaction চলাকালীন অন্য transaction গুলো ওই ডেটা কীভাবে দেখতে পাবে। এটি ACID প্রপার্টিজের **'I' (Isolation)** নিশ্চিত করে।
 
 সহজ কথায়, একাধিক ইউজার যখন একই সময়ে একই ডেটা নিয়ে কাজ করেন, তখন তাদের কাজের মধ্যে যেন conflict না হয় এবং ডেটার নির্ভুলতা বজায় থাকে, সেটিই isolation লেভেল নিয়ন্ত্রণ করে
@@ -311,6 +334,16 @@ COMMIT;
 
 ## **55. What is dirty read?**
 
+```mermaid
+sequenceDiagram
+    participant T1 as Transaction 1
+    participant T2 as Transaction 2
+    T1->>T1: Update value, not committed
+    T2->>T1: Read uncommitted value
+    T1->>T1: ROLLBACK
+    Note over T2: T2 used a value that never became permanent
+```
+
 **Dirty read** হলো ডাটাবেসের একটি concurrency problem, যা তখন ঘটে যখন একটি transaction এমন কিছু ডেটা পড়ে ফেলে যা অন্য একটি transaction পরিবর্তন করেছে কিন্তু এখনও **Commit** (স্থায়ীভাবে সেভ) করেনি।
 
 সহজ কথায়, আপনি এমন একটি ডেটা দেখছেন যা ডাটাবেসে এখনও কাঁচা বা "অপরিষ্কার" (dirty), কারণ এটি যেকোনো মুহূর্তে বাতিল বা **Rollback** হয়ে যেতে পারে।
@@ -358,6 +391,15 @@ Dirty Read বন্ধ করার প্রধান উপায় হলো �
 
 ## **56. What is non-repeatable read?**
 
+```mermaid
+sequenceDiagram
+    participant T1 as Transaction 1
+    participant T2 as Transaction 2
+    T1->>T1: Read row = 100
+    T2->>T2: Update row = 120 and COMMIT
+    T1->>T1: Read same row = 120
+```
+
 **Non-repeatable read** হলো এমন একটি ডেটাবেস সমস্যা যেখানে একটি ট্রানজেকশনের ভেতরে একই ডেটা দুইবার পড়লে দুইবার দুই রকম রেজাল্ট পাওয়া যায়।
 
 এটি সাধারণত **READ COMMITTED** আইসোলেশন লেভেলে ঘটে। যখন একটি transaction চলাকালীন অন্য একটি transaction ওই একই ডেটা পরিবর্তন (Update) করে **Commit** করে দেয়, তখনই এই সমস্যাটি দেখা দেয়।
@@ -390,6 +432,15 @@ Non-repeatable read প্রতিরোধ করার জন্য নিচ
 **সহজ কথায়:** যদি আপনি চান যে আপনার transaction চলাকালীন ডেটা স্থির থাকুক এবং অন্য কারো পরিবর্তনের ফলে আপনার রিপোর্টে গড়মিল না হোক, তবে আপনাকে **Repeatable Read** লেভেল ব্যবহার করতে হবে।
 
 ## **57. What is phantom read?**
+
+```mermaid
+sequenceDiagram
+    participant T1 as Transaction 1
+    participant T2 as Transaction 2
+    T1->>T1: Query returns 5 rows
+    T2->>T2: Insert matching row and COMMIT
+    T1->>T1: Same query returns 6 rows
+```
 
 **Phantom read** হলো এমন একটি কনকারেন্সি সমস্যা যেখানে একটি ট্রানজেকশনের ভেতরে একই কুয়েরি (Query) দুইবার চালালে দ্বিতীয়বার ভিন্ন সংখ্যক রো (Rows) বা ডেটা পাওয়া যায়। এটি সাধারণত ঘটে যখন একটি transaction চলাকালীন অন্য একটি transaction নতুন কোনো ডেটা **Insert** করে বা কোনো ডেটা **Delete** করে।
 
@@ -429,6 +480,12 @@ Phantom read প্রতিরোধ করা বেশ কঠিন কার
 * **Snapshot Isolation:** কিছু ডাটাবেস (যেমন PostgreSQL বা SQL Server) স্ন্যাপশট ব্যবহার করে এই সমস্যা সমাধান করে।
 
 ## **58. What is deadlock?**
+
+```mermaid
+flowchart LR
+    T1[Transaction 1 holds Row A] -->|waits for Row B| T2[Transaction 2 holds Row B]
+    T2 -->|waits for Row A| T1
+```
 
 **Deadlock** হলো ডাটাবেস বা অপারেটিং সিস্টেমের এমন একটি অবস্থা যেখানে দুটি বা তার বেশি transaction একে অপরের জন্য অপেক্ষা করতে করতে চিরস্থায়ীভাবে আটকে যায়। এটি অনেকটা ট্রাফিক জ্যামের মতো, যেখানে রাস্তার চারদিক থেকে গাড়ি এসে এমনভাবে আটকে গেছে যে কোনো গাড়িই আর নড়তে পারছে না।
 
@@ -487,6 +544,13 @@ Transaction 2: Wants Lock(A001) ← Holds Lock(A002)
 
 ## **59. Difference between optimistic and pessimistic locking?**
 
+```mermaid
+flowchart TB
+    A[Concurrent update] --> B{Locking strategy}
+    B -->|Optimistic| C[Read version → update if unchanged → retry on conflict]
+    B -->|Pessimistic| D[Acquire lock → update → release lock]
+```
+
 ডেটাবেসে যখন একাধিক ইউজার একই সময়ে একই ডেটা এডিট করার চেষ্টা করেন, তখন ডেটার নির্ভুলতা বজায় রাখার জন্য **Locking** ব্যবহার করা হয়। এটি মূলত দুই প্রকার: **Optimistic** এবং **Pessimistic**।
 
 ### Pessimistic Locking:
@@ -517,6 +581,14 @@ Transaction 2: Wants Lock(A001) ← Holds Lock(A002)
 
 
 ## **60. What is two-phase locking (2PL)?**
+
+```mermaid
+flowchart LR
+    A[Growing phase] --> B[Acquire locks]
+    B --> C[Lock point]
+    C --> D[Shrinking phase]
+    D --> E[Release locks; acquire no new lock]
+```
 
 **Two-Phase Locking (2PL)** হলো একটি transaction কন্ট্রোল প্রটোকল যা ডাটাবেসে **Serializability** নিশ্চিত করে। এটি নিশ্চিত করে যে একাধিক transaction একসাথে চললেও তাদের ফলাফল এমন হবে যেন তারা one after another চলেছে।
 
@@ -678,6 +750,15 @@ Two-Phase Locking (2PL) এর মূল উদ্দেশ্য হলো ড�
 
 
 ## **61. What is multi-version concurrency control (MVCC)?**
+
+```mermaid
+flowchart LR
+    W[Writer creates Version 3] --> V3[Version 3: current]
+    R1[Older reader] --> V1[Version 1 snapshot]
+    R2[New reader] --> V2[Version 2 snapshot]
+    V1 -. reader does not block writer .- V3
+    V2 -. reader does not block writer .- V3
+```
 
 **Multi-Version Concurrency Control (MVCC)** হলো ডেটাবেসে কনকারেন্সি (একসাথে একাধিক ইউজারের কাজ করা) কন্ট্রোল করার একটি অত্যন্ত জনপ্রিয় এবং আধুনিক পদ্ধতি। এটি ডেটাবেসের পারফরম্যান্স অনেক বাড়িয়ে দেয়, বিশেষ করে যেখানে একই সময়ে প্রচুর Read এবং Write অপারেশন হয়।
 

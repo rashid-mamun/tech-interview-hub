@@ -7,6 +7,15 @@ title: 'Processes'
 
 ## 📦 5. What is a process, and how does it differ from a program?
 
+```mermaid
+flowchart LR
+    P[Program executable on disk] -->|load and execute| Proc[Process]
+    Proc --> Code[Code]
+    Proc --> Data[Data and heap]
+    Proc --> Stack
+    Proc --> PCB[PCB and resources]
+```
+
 একটি **program** হলো disk বা secondary storage-এ সংরক্ষিত **static set of instructions**—যেমন একটি executable file (`.exe`, ELF binary, script file ইত্যাদি)।
 এটি নিজে চলমান নয়; এটি শুধু code এবং related data-এর একটি stored form।
 
@@ -178,6 +187,17 @@ OS process-গুলোকে তাদের state অনুযায়ী বি
 ---
 
 ## 🔄 6. What are the different states in the process lifecycle?
+
+```mermaid
+stateDiagram-v2
+    [*] --> New
+    New --> Ready: admitted
+    Ready --> Running: dispatch
+    Running --> Ready: preempt
+    Running --> Waiting: I/O or event
+    Waiting --> Ready: event completes
+    Running --> Terminated: exit
+```
 
 একটি process তার lifetime-এ সাধারণত কয়েকটি **state**-এর মধ্য দিয়ে যায়।
 এই state-গুলো OS-কে বোঝাতে সাহায্য করে:
@@ -361,6 +381,17 @@ Parent process child process শেষ হওয়ার জন্য বা �
 
 
 ## 🔁 7. What is context switching, and what overhead does it introduce?
+
+```mermaid
+sequenceDiagram
+    participant A as Process A
+    participant K as Kernel scheduler
+    participant B as Process B
+    A->>K: interrupt or block
+    K->>K: save A registers into PCB
+    K->>K: choose B and restore its context
+    K->>B: resume execution
+```
 
 যখন operating system CPU-র execution **একটি running task** (process বা thread) থেকে **অন্য একটি task**-এ স্থানান্তর করে, তখন সেই প্রক্রিয়াকে **context switch** বলে।
 
@@ -575,6 +606,13 @@ Context switch useful application work নয়; এটি **management overhead**
 
 ## 👶 8. What is the difference between fork() and exec()?
 
+```mermaid
+flowchart LR
+    Parent[Parent process] -->|fork| Child[Child process copy]
+    Child -->|exec new program| New[Same PID, replaced address space]
+    Parent -->|continues| P2[Parent execution]
+```
+
 `fork()` হলো একটি Unix/Linux **system call** যা calling process-এর ভিত্তিতে একটি নতুন **child process** তৈরি করে।
 
 Child process parent-এর **অনেক state inherit করে** এবং শুরুতে parent-এর execution state-এর খুব কাছাকাছি অবস্থায় থাকে। `fork()` call শেষ হওয়ার পর parent এবং child—দুই process-ই `fork()`-এর পরের instruction থেকে চলতে থাকে।
@@ -697,6 +735,14 @@ iv. **Parent** চাইলে `wait()` দিয়ে child-এর জন্য �
 
 
 ## 📋 9. What is process scheduling, and what are the roles of the long-term, short-term, and medium-term schedulers?
+
+```mermaid
+flowchart LR
+    Jobs[Job pool] -->|long-term admits| Ready[Ready queue]
+    Ready -->|short-term dispatches| CPU
+    CPU -->|medium-term swaps out| Suspended
+    Suspended -->|swap in| Ready
+```
 
 Process scheduling হলো OS-এর সেই mechanism যার মাধ্যমে OS সিদ্ধান্ত নেয় **ready অবস্থায় থাকা runnable task/thread-গুলোর মধ্যে কে CPU পাবে, কখন পাবে, এবং কতক্ষণ পাবে**। Textbook-এ একে process scheduling বলা হলেও mainstream modern OS সাধারণত individual thread/task schedule করে। এই chapter-এ scheduler-এর role বোঝানো হচ্ছে; individual CPU scheduling algorithm chapter 4-এ বিস্তারিত আছে।
 

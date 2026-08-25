@@ -1,10 +1,19 @@
-﻿---
+---
 sidebar_position: 7
 title: Reliability, High Availability & Disaster Recovery
 ---
 
+## 72. High Availability এবং Fault Tolerance-এর মধ্যে পার্থক্য কী?
 
-## ৭২. High Availability এবং Fault Tolerance-এর মধ্যে পার্থক্য কী?
+```mermaid
+flowchart TB
+    Failure[Component failure] --> HA[High availability]
+    HA --> Detect[Detect and fail over]
+    Detect --> Brief[Possible brief interruption]
+    Failure --> FT[Fault tolerance]
+    FT --> Parallel[Redundant component already serving]
+    Parallel --> Seamless[No visible interruption within designed fault scope]
+```
 
 **High Availability (HA):** এটা একটা system-এর সেই বৈশিষ্ট্য যা নিশ্চিত করে system **সর্বোচ্চ পরিমাণ সময় uptime/accessible** থাকবে, downtime যতটা সম্ভব কমিয়ে আনা হবে। HA সাধারণত achieve করা হয় **redundancy** এবং **automatic failover** এর মাধ্যমে — কোনো component fail করলে দ্রুত (কিছু সেকেন্ড/মিনিটের মধ্যে) backup component সেই জায়গা নিয়ে নেয়, ফলে সামান্য downtime হলেও overall system বেশিরভাগ সময় available থাকে। এটা measure করা হয় "**nines**" দিয়ে (যেমন 99.9%, 99.99% uptime)।
 
@@ -31,7 +40,13 @@ title: Reliability, High Availability & Disaster Recovery
 
 ---
 
-## ৭৩. RPO এবং RTO কী, এবং এগুলো কীভাবে Backup Design-কে Shape করে?
+## 73. RPO এবং RTO কী, এবং এগুলো কীভাবে Backup Design-কে Shape করে?
+
+```mermaid
+flowchart LR
+    Point[Last recoverable point] -->|RPO: acceptable data-loss window| Failure[Disaster occurs]
+    Failure -->|RTO: acceptable recovery-time window| Restored[Service restored]
+```
 
 **RPO (Recovery Point Objective):** এটা নির্ধারণ করে কোনো disaster/failure ঘটলে, **সর্বোচ্চ কতটুকু data loss হওয়া acceptable** — অর্থাৎ শেষ backup/recovery point থেকে failure-এর মুহূর্ত পর্যন্ত সময়ের data হারানোর সর্বোচ্চ সীমা। এটা মূলত একটা **"সময়"** metric — যেমন "RPO = ১ ঘণ্টা" মানে হলো, disaster হলে সর্বোচ্চ ১ ঘণ্টার data হারানো acceptable, তার বেশি না।
 
@@ -64,6 +79,13 @@ title: Reliability, High Availability & Disaster Recovery
 **সংক্ষেপে trade-off:** RPO যত কম করার চেষ্টা করবেন (কম data loss tolerance), backup **frequency, infrastructure sophistication, এবং overall cost তত বেশি বাড়বে** — তাই practical backup design সবসময় business-এর actual প্রয়োজন (কতটুকু data loss সত্যিই acceptable, কতটুকু budget আছে) বিবেচনা করে RPO/RTO target ঠিক করে, এবং সেই অনুযায়ী সবচেয়ে cost-effective backup strategy বেছে নেওয়া হয় — সব critical system-এর জন্য "সবচেয়ে কম RPO/RTO" চাওয়া বাস্তবসম্মত না, বরং **business impact vs. cost**-এর ভারসাম্য রক্ষা করাই মূল লক্ষ্য।
 
 ## 74. What's the difference between backup/restore, pilot light, warm standby, and active-active DR strategies?
+
+```mermaid
+flowchart LR
+    Backup[Backup and restore\nlowest standby cost, highest RTO] --> Pilot[Pilot light]
+    Pilot --> Warm[Warm standby]
+    Warm --> Active[Active-active\nhighest cost, lowest failover delay]
+```
 
 Disaster Recovery (DR)-এর এই চারটা strategy মূলত একটা **spectrum** তৈরি করে — যেখানে একদিকে কম cost, বেশি RTO/RPO (Backup/Restore), এবং অন্যদিকে বেশি cost, প্রায় zero RTO/RPO (Active-Active)।
 
@@ -101,6 +123,15 @@ Cost বৃদ্ধি পায় মূলত কারণ **প্রতি
 ---
 
 ## 75. What's the difference between active-active and active-passive multi-region architecture? How does DNS failover work?
+
+```mermaid
+flowchart TB
+    DNS[Health-aware DNS or global routing] --> A[Region A active]
+    DNS --> B[Region B]
+    A <-->|replication and conflict policy| B
+    B -->|active-passive: standby| Passive[Promotion on failure]
+    B -->|active-active: serves traffic now| Active[Concurrent writes require reconciliation]
+```
 
 **Active-Passive:** এখানে একটা region **primary/active** (সব live traffic handle করে), এবং অন্য region(গুলো) **passive/standby** (traffic serve করে না, শুধু data replicate/sync হয়ে prepared থাকে)। Primary fail করলে, traffic manually বা automatically secondary region-এ **failover** করা হয়, যা তখন নতুন active হয়ে যায়। এটা মূলত আগের প্রশ্নে আলোচিত **Warm Standby বা Pilot Light** pattern-এর সাথে সামঞ্জস্যপূর্ণ।
 
@@ -141,13 +172,23 @@ DNS-based routing (Route 53-এর মতো service) ব্যবহার ক�
 
 ## 76. What is chaos engineering, and what is a game day?
 
+```mermaid
+flowchart LR
+    Hypothesis[Define steady-state hypothesis] --> Scope[Choose small blast radius]
+    Scope --> Inject[Inject controlled failure]
+    Inject --> Observe[Observe metrics and safeguards]
+    Observe --> Abort{Abort condition hit?}
+    Abort -->|yes| Stop[Stop and recover]
+    Abort -->|no| Learn[Record findings and fixes]
+```
+
 **Chaos Engineering** হলো একটা discipline/practice যেখানে ইচ্ছাকৃতভাবে (deliberately) একটা production system-এ **controlled failure/disruption inject করা হয়** (যেমন কোনো server বন্ধ করে দেওয়া, network latency বাড়িয়ে দেওয়া, dependency unavailable করে দেওয়া), যাতে system সেই unexpected condition-এ কীভাবে behave করে তা পর্যবেক্ষণ করা যায় এবং system-এর **resilience/weakness** সম্পর্কে জানা যায় — বাস্তব disaster ঘটার আগেই। এর মূল দর্শন হলো: "Failure হবেই, তাই সেটা নিয়ন্ত্রিতভাবে (controlled manner-এ), আমাদের নির্বাচিত সময়ে ঘটিয়ে শিখে নেওয়া ভালো, বরং যখন সেটা অপ্রত্যাশিতভাবে, worst possible time-এ নিজে থেকে ঘটবে তখন ভোগান্তির চেয়ে।" জনপ্রিয় tool: **Netflix-এর Chaos Monkey**, AWS Fault Injection Simulator।
 
 **Game Day:** এটা একটা **planned, scheduled event** যেখানে পুরো team (engineering, ops, on-call) একসাথে বসে একটা নির্দিষ্ট disaster scenario simulate করে (যেমন "মূল database region সম্পূর্ণভাবে down হয়ে গেছে") এবং তারা সেই scenario-তে **কীভাবে respond করে** তা practice করে — incident response process, communication, runbook follow করা, এবং actual technical recovery সবকিছুই টেস্ট করা হয়। এটা অনেকটা fire drill-এর মতো — একটা controlled, pre-announced exercise যেখানে team-এর readiness এবং process-এর কার্যকারিতা যাচাই করা হয়।
 
 **সংক্ষেপে পার্থক্য:** Chaos Engineering মূলত **system-এর technical resilience** টেস্ট করে (automated বা semi-automated), আর Game Day মূলত **মানুষ/team-এর response process এবং preparedness** টেস্ট করে (organized, human-centric exercise) — যদিও দুটো প্রায়ই একসাথে ব্যবহার করা হয় (Game Day-এ chaos engineering tool দিয়ে failure inject করা হতে পারে)।
 
-### Why is chaos engineering typically run in production rather than only in staging?
+### Why might mature teams run carefully scoped chaos experiments in production?
 
 - **Staging environment বাস্তব production traffic/scale reflect করে না:** Staging-এ সাধারণত কম traffic, কম data volume, এবং সরলীকৃত (simplified) infrastructure থাকে। বাস্তব production-এ যে জটিল interaction, race condition, বা load-related issue দেখা দেয়, সেগুলো staging-এ পুনরায় তৈরি (reproduce) করা প্রায় অসম্ভব — real user traffic pattern, real concurrent load, real network condition এর মতো factor গুলো staging-এ মিস হয়ে যায়।
 
@@ -155,13 +196,22 @@ DNS-based routing (Route 53-এর মতো service) ব্যবহার ক�
 
 - **প্রকৃত dependency এবং integration point:** Production-এ third-party service, external API, real network topology, এবং actual data volume-এর সাথে system interact করে — এই real-world complexity staging-এ পুরোপুরি replicate করা কঠিন, এবং অনেক critical failure mode শুধুমাত্র সেই real interaction-এর মধ্যেই প্রকাশ পায়।
 
-- **Real confidence build করা:** Chaos Engineering-এর মূল উদ্দেশ্যই হলো এই প্রশ্নের উত্তর দেওয়া — "আমাদের production system কি সত্যিই resilient?" এই প্রশ্নের সত্যিকারের উত্তর শুধুমাত্র প্রকৃত production environment-এ experiment চালিয়েই পাওয়া সম্ভব, staging-এ পাওয়া "সফল" ফলাফল একটা false sense of security তৈরি করতে পারে।
+- **Real confidence build করা:** Staging test production behavior পুরোপুরি প্রমাণ করে না। তবে production experiment বাধ্যতামূলক নয়—প্রথমে staging-এ শেখা, তারপর maturity, business approval, observability ও rollback capability থাকলে production-এ ছোট blast radius দিয়ে validation করা নিরাপদ progression।
 
 - **Controlled এবং সীমিত blast radius দিয়ে risk manage করা:** এটা ঠিক যে production-এ experiment চালানো ঝুঁকিপূর্ণ শোনায়, কিন্তু chaos engineering practice-এ এই ঝুঁকি **carefully controlled** করা হয় — ছোট, সীমিত scope (blast radius) দিয়ে শুরু করা, off-peak hour-এ চালানো, monitoring রাখা, এবং যেকোনো সময় দ্রুত experiment বন্ধ (abort) করার mechanism রাখা — যাতে actual user impact minimal থাকে, কিন্তু insight টা real এবং actionable হয়।
 
 ---
 
 ## 77. Why is backup testing important, and how do you run a restore drill?
+
+```mermaid
+flowchart LR
+    Backup[(Backup)] --> Restore[Restore into isolated environment]
+    Restore --> Integrity[Checksum and data integrity checks]
+    Integrity --> AppTest[Run application-level tests]
+    AppTest --> Measure[Measure actual RTO and recovered point]
+    Measure --> Fix[Update automation and runbook]
+```
 
 **Backup Testing** হলো নিয়মিতভাবে যাচাই করা যে আপনার নেওয়া backup **আসলেই কাজ করে** — অর্থাৎ সেটা থেকে সত্যিই সম্পূর্ণ, ব্যবহারযোগ্য (usable) data সফলভাবে restore করা যায় কিনা। এটা গুরুত্বপূর্ণ কারণ:
 
@@ -200,6 +250,15 @@ DNS-based routing (Route 53-এর মতো service) ব্যবহার ক�
 ---
 
 ## 78. What is a runbook, and how does it help incident response? How is it different from a postmortem?
+
+```mermaid
+flowchart LR
+    Alert[Incident alert] --> Runbook[Runbook: diagnose, mitigate, escalate]
+    Runbook --> Recovery[Service recovered]
+    Recovery --> Postmortem[Postmortem: timeline, causes, lessons]
+    Postmortem --> Actions[Owned corrective actions]
+    Actions --> Update[Update monitoring and runbook]
+```
 
 **Runbook** হলো একটা **step-by-step, actionable document/guide** যা নির্দিষ্ট করে দেয়, কোনো নির্দিষ্ট ধরনের incident/situation ঘটলে **ঠিক কী কী করতে হবে**, কোন order-এ — যেমন "database CPU 90%-এর বেশি হলে কী করতে হবে", বা "payment service down হলে কীভাবে troubleshoot এবং mitigate করতে হবে"। এটা সাধারণত আগে থেকে (proactively, incident ঘটার আগে) তৈরি করা হয়, based on পূর্ববর্তী অভিজ্ঞতা, known failure mode, এবং best practice-এর উপর ভিত্তি করে।
 

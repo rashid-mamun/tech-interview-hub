@@ -3,14 +3,16 @@ sidebar_position: 2
 title: 'Advanced SQL Queries'
 ---
 
-```mermaid
-flowchart LR
-    Base[Base rows] --> Window[Window partition]
-    Window --> Rank[Rank or aggregate]
-    Rank --> Result[Result rows retained]
-```
 
 ## **16. What is a Subquery?**
+
+```mermaid
+flowchart LR
+    Outer[Outer query] --> Inner[Execute inner query]
+    Inner --> Value[Return scalar, row, or set]
+    Value --> Outer
+    Outer --> Result[Final result]
+```
 
 Subquery হল একটি SQL query যা অন্য একটি SQL query এর ভিতরে nested বা embedded থাকে। এটি "query within a query" নামেও পরিচিত। Subquery এর result main query তে ব্যবহৃত হয়।
 

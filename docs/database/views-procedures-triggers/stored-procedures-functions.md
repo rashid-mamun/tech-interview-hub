@@ -3,6 +3,11 @@ sidebar_position: 2
 title: "Stored Procedures & Functions"
 ---
 
+
+# Stored Procedures & Functions
+
+## **64. What is a stored procedure?**
+
 ```mermaid
 flowchart LR
     Caller[Caller] --> Routine[Stored routine]
@@ -10,10 +15,6 @@ flowchart LR
     Statements --> Database[(Database)]
     Routine --> Result[Return value or result set]
 ```
-
-# Stored Procedures & Functions
-
-## **64. What is a stored procedure?**
 
 **Stored Procedure** হলো একগুচ্ছ SQL স্টেটমেন্টের একটি কালেকশন বা গ্রুপ, যা ডাটাবেজে একটি নির্দিষ্ট নামে সেভ করে রাখা হয়। সহজ কথায়, এটি ডাটাবেজের ভেতর তৈরি করা একটি **Function**-এর মতো, যা আপনি একবার লিখে রাখলে বারবার কল করে ব্যবহার করতে পারেন।
 

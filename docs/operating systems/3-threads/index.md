@@ -7,6 +7,14 @@ title: 'Threads'
 
 ## 🧶 10. What is a thread, and how does it differ from a process?
 
+```mermaid
+flowchart TB
+    P[One process] --> Shared[Shared code, data, heap, files]
+    P --> T1[Thread 1: stack and registers]
+    P --> T2[Thread 2: stack and registers]
+    P --> T3[Thread 3: stack and registers]
+```
+
 **Thread** হলো একটি process-এর ভেতরে **execution-এর সবচেয়ে ছোট unit**।
 একটি process-এ **একটি বা একাধিক thread** থাকতে পারে। প্রতিটি thread-এর **নিজস্ব execution flow** থাকে, তবে তারা একই process-এর **code, data, heap, open files** ইত্যাদি resource share করে।
 
@@ -269,6 +277,19 @@ Process A      Process B          Thread 1    Thread 2
 
 ## 🏗️ 11. What is the difference between user-level threads and kernel-level threads?
 
+```mermaid
+flowchart TB
+    subgraph UserLevel
+        U1[User thread] --> L[User thread library]
+        U2[User thread] --> L
+        L --> K1[Kernel thread]
+    end
+    subgraph KernelLevel
+        A[User thread] --> KA[Kernel thread A]
+        B[User thread] --> KB[Kernel thread B]
+    end
+```
+
 **মূল প্রশ্ন: OS কি thread-এর অস্তিত্ব জানে?**
 
 User-level threads এবং kernel-level threads-এর পার্থক্যের মূল ভিত্তি হলো:
@@ -504,6 +525,13 @@ Kernel-level thread switch-এ kernel scheduler involvement লাগে। ত�
 
 ## 🔀 12. What are the multithreading models, and how do they differ?
 
+```mermaid
+flowchart LR
+    U[User threads] --> O[Many-to-one: one kernel thread]
+    U --> One[One-to-one: one kernel thread per user thread]
+    U --> M[Many-to-many: multiplex over kernel threads]
+```
+
 User-level threads (ULT) এবং kernel-level threads (KLT)-এর মধ্যে **mapping** কীভাবে হবে, সেটাই **multithreading model** নির্ধারণ করে।
 
 মূল প্রশ্ন:
@@ -717,6 +745,14 @@ Kernel:   KT1    KT2         KT3
 
 
 ## ⚡ 13. What is the difference between concurrency and parallelism?
+
+```mermaid
+flowchart TB
+    C[Concurrency] --> C1[Tasks overlap in time]
+    C1 --> C2[Possible on one CPU by interleaving]
+    P[Parallelism] --> P1[Tasks execute at the same instant]
+    P1 --> P2[Requires multiple execution units]
+```
 
 **Concurrency** হলো এমন একটি অবস্থা বা execution model যেখানে **একাধিক task একই সময়কালে progress করতে পারে**, যদিও তারা **একই মুহূর্তে** necessarily execute নাও করতে পারে।
 

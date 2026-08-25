@@ -3,12 +3,6 @@ sidebar_position: 5
 title: 'Keys'
 ---
 
-```mermaid
-erDiagram
-    CUSTOMERS ||--o{ ORDERS : customer_id
-    ORDERS ||--|{ ORDER_ITEMS : order_id
-    PRODUCTS ||--o{ ORDER_ITEMS : product_id
-```
 
 # Database Keys
 
@@ -17,6 +11,13 @@ Database key হলো table এর row গুলোকে uniquely identify ক
 ডাটাবেস design এবং data integrity নিশ্চিত করার জন্য key অত্যন্ত গুরুত্বপূ
 
 ## ৫. What are keys in databases?
+
+```mermaid
+erDiagram
+    CUSTOMERS ||--o{ ORDERS : customer_id
+    ORDERS ||--|{ ORDER_ITEMS : order_id
+    PRODUCTS ||--o{ ORDER_ITEMS : product_id
+```
 
 **Database Key** হলো একটি column বা column এর combination যা table এর প্রতিটি row কে uniquely identify করে এবং data integrity maintain করে।
 

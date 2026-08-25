@@ -5,6 +5,14 @@ title: 'Modularity, Cohesion, and Coupling'
 
 ## 33. What is modularity in software design, and why is it desirable?
 
+```mermaid
+flowchart TB
+    System --> Auth[Authentication module]
+    System --> Orders[Order module]
+    System --> Payments[Payment module]
+    Auth & Orders & Payments --> Contracts[Explicit module interfaces]
+```
+
 **Modularity** হলো একটি design approach, যেখানে একটি বড় system কে ছোট ছোট, **স্বাধীন (independent) এবং স্ব-সম্পূর্ণ (self-contained)** অংশ বা **module** এ ভাগ করা হয়। প্রতিটি module একটি নির্দিষ্ট, well-defined functionality handle করে, এবং একটি clear **interface** এর মাধ্যমে অন্য module এর সাথে communicate করে — internal implementation details বাইরে থেকে **hidden** থাকে।
 
 **Modularity কেন Desirable:**
@@ -35,6 +43,11 @@ title: 'Modularity, Cohesion, and Coupling'
 ---
 
 ## 34. What is cohesion, and what are its different types (functional, sequential, communicational, procedural, temporal, logical, coincidental)?
+
+```mermaid
+flowchart LR
+    Low[Coincidental] --> Logical --> Temporal --> Procedural --> Communicational --> Sequential --> High[Functional cohesion]
+```
 
 **Cohesion** বলতে বোঝায় একটি module এর ভেতরের elements (function, method, বা data) **কতটা closely related এবং একটি single, well-defined purpose এর দিকে কাজ করছে**। High cohesion মানে module এর সব অংশ একসাথে মিলে **একটি নির্দিষ্ট কাজ** ভালোভাবে সম্পন্ন করছে।
 
@@ -68,7 +81,7 @@ Module এর elements গুলোর মধ্যে **কোনো অর্�
 **Functional Cohesion সবচেয়ে ভালো কেন:**
 - Module টি **একটি single responsibility** নিয়ে কাজ করে (SOLID এর Single Responsibility Principle এর সাথে সরাসরি সামঞ্জস্যপূর্ণ)
 - এটিকে **সহজে বোঝা, test করা, এবং reuse** করা যায় — কারণ এর কাজ স্পষ্ট এবং সীমিত
-- Change করার প্রয়োজন হলে, শুধু সেই নির্দিষ্ট functionality সংশ্লিষ্ট module এ change করলেই হয় — অন্য কিছু প্রভাবিত হয় না
+- Change সাধারণত focused module-এ সীমিত থাকে; public contract বা shared invariant বদলালে consumer-ও প্রভাবিত হতে পারে
 - এটি সবচেয়ে বেশি **predictable এবং maintainable**
 
 **Coincidental Cohesion সবচেয়ে খারাপ কেন:**
@@ -81,6 +94,11 @@ Module এর elements গুলোর মধ্যে **কোনো অর্�
 
 
 ## 35. What is coupling, and what are its different types (content, common, control, stamp, data, message)?
+
+```mermaid
+flowchart LR
+    High[Content coupling] --> Common --> Control --> Stamp --> Data --> Low[Message coupling]
+```
 
 **Coupling** বলতে বোঝায় দুটি module এর মধ্যে **আন্তঃনির্ভরতার (interdependency) মাত্রা** — অর্থাৎ একটি module কতটা অন্য module এর internal details জানে বা নির্ভর করে। Low coupling মানে module গুলো একে অপরের থেকে যতটা সম্ভব স্বাধীন।
 
@@ -98,18 +116,18 @@ Module এর elements গুলোর মধ্যে **কোনো অর্�
 **৪. Stamp (Data-Structure) Coupling**
 Module গুলো একটি **সম্পূর্ণ data structure/object** share করে, যদিও receiving module হয়তো তার শুধু একটি অংশ ব্যবহার করে। যেমন: একটি সম্পূর্ণ `Customer` object পাঠানো, যদিও function এ শুধু customer এর নাম প্রয়োজন।
 
-**৫. Data Coupling (সবচেয়ে ভালো)**
+**৫. Data Coupling (classical structured-design taxonomy-তে desirable)**
 Module গুলো শুধু **প্রয়োজনীয় data (primitive value বা simple parameter)** exchange করে, কোনো internal structure বা control logic শেয়ার না করে। যেমন: `calculateDiscount(price, discountRate)` — শুধু প্রয়োজনীয় value গুলোই pass করা হচ্ছে।
 
-**৬. Message Coupling (সবচেয়ে loose)**
-Module গুলো একে অপরের সাথে সরাসরি কোনো data/reference শেয়ার না করে, শুধু **message/event** এর মাধ্যমে communicate করে (যেমন Event-Driven Architecture এ)। এটি সবচেয়ে কম coupling প্রদান করে।
+**৬. Message Coupling (object/distributed design context)**
+Module সরাসরি internal reference share না করে **message/event** দিয়ে communicate করতে পারে। তবে schema, semantics, ordering ও delivery expectation coupling তৈরি করে; তাই transport asynchronous হলেই coupling সর্বনিম্ন হয় না।
 
 ---
 
 ### Why is data coupling generally preferred over content or common coupling?
 
 - **Encapsulation বজায় থাকে** — Data Coupling এ module গুলো একে অপরের internal implementation সম্পর্কে কিছুই জানে না, শুধু প্রয়োজনীয় data exchange করে। Content Coupling এ এই encapsulation সম্পূর্ণভাবে ভেঙে যায়, যা design এর সবচেয়ে মৌলিক নীতি লঙ্ঘন করে
-- **Independent Change সম্ভব হয়** — Data Coupling এ একটি module এর internal implementation পরিবর্তন করলে, যতক্ষণ interface (parameter/return type) একই থাকে, অন্য module প্রভাবিত হয় না। Common Coupling এ shared global data এর structure change করলে, যেসব module সেই data ব্যবহার করে, তাদের সবাইকেই প্রভাবিত হতে হয়
+- **Independent Change সহজ হয়** — parameter/return contract ও observable behavior stable থাকলে internal implementation বদলানো সহজ। শুধু type signature একই থাকাই behavioral compatibility guarantee করে না।
 - **Debugging সহজ হয়** — Data Coupling এ কোনো bug এর source খুঁজে বের করা সহজ, কারণ data flow স্পষ্ট এবং explicit (function parameter এর মাধ্যমে)। Common Coupling এ কোন module কখন shared data পরিবর্তন করলো, তা track করা কঠিন — কারণ যেকোনো module যেকোনো সময় সেটা change করতে পারে
 - **Testability বৃদ্ধি পায়** — Data Coupling এ module কে সহজে isolated ভাবে test করা যায় (শুধু input/output নিয়ন্ত্রণ করে), কিন্তু Content/Common Coupling এ পুরো shared state/context ছাড়া test করাই সম্ভব হয় না
 - **Concurrency/Thread-Safety সমস্যা কম হয়** — Common Coupling এ shared global data একাধিক module থেকে access হওয়ার কারণে race condition এর ঝুঁকি বেশি থাকে, যা Data Coupling এ থাকে না
@@ -117,6 +135,13 @@ Module গুলো একে অপরের সাথে সরাসরি �
 ---
 
 ## 36. What is the relationship between "high cohesion, low coupling" and good modular design?
+
+```mermaid
+flowchart TB
+    ModuleA[Module A: one focused responsibility] -->|small stable contract| ModuleB[Module B: one focused responsibility]
+    ChangeA[Change inside A] --> ModuleA
+    ModuleA -. minimal ripple effect .-> ModuleB
+```
 
 **"High Cohesion, Low Coupling"** হলো একটি foundational design principle, যা বলে একটি ভালো modular design এমন হওয়া উচিত যেখানে:
 - প্রতিটি module এর ভেতরে **High Cohesion** থাকবে — অর্থাৎ module এর সব অংশ একটি single, well-defined purpose এর দিকে কাজ করবে
@@ -137,12 +162,12 @@ Module গুলো একে অপরের সাথে সরাসরি �
 **Microservice Boundaries এর ক্ষেত্রে:**
 
 - একটি ভালো microservice এর **High Cohesion** থাকা উচিত — অর্থাৎ সেই service একটি নির্দিষ্ট **business capability** (যেমন "Order Management" বা "Payment Processing") এর সাথে সম্পর্কিত সব functionality একসাথে রাখবে, ভিন্ন domain এর logic মিশিয়ে ফেলবে না
-- Services গুলোর মধ্যে **Low Coupling** থাকা উচিত — অর্থাৎ একটি service এর internal database schema বা implementation পরিবর্তন করলে, অন্য service কে redeploy করার প্রয়োজন হওয়া উচিত না। এই কারণেই microservices এ services গুলো সাধারণত **well-defined API** এর মাধ্যমে communicate করে, এবং প্রতিটি service তার **নিজস্ব database** রাখে (shared database এড়িয়ে, যা Common Coupling তৈরি করত)
+- Services গুলোর মধ্যে **Low Coupling** থাকা উচিত—এক service-এর internal schema change যেন consumer contract না ভাঙে। Well-defined API/event contract এবং service-owned data autonomy এতে সাহায্য করে; physical database instance আলাদা হওয়া সবসময় বাধ্যতামূলক নয়, কিন্তু shared schema/table ownership coupling বাড়ায়।
 - Domain-Driven Design (DDD) এর **Bounded Context** concept টা মূলত High Cohesion, Low Coupling কে microservice architecture এ প্রয়োগ করার একটি formal approach — প্রতিটি bounded context একটি সুসংগত (cohesive) business domain represent করে, এবং context গুলোর মধ্যে সীমিত, well-defined interaction থাকে
 
 **OOP এর Class Responsibilities এর ক্ষেত্রে:**
 
-- **Single Responsibility Principle (SRP)** মূলত High Cohesion কেই বোঝায় OOP প্রেক্ষাপটে — একটি class এর শুধু **একটি কারণে change হওয়া উচিত**, অর্থাৎ class টির সব method/attribute একটি single, well-defined responsibility এর দিকে focused থাকবে
+- **Single Responsibility Principle (SRP)** এবং High Cohesion ঘনিষ্ঠভাবে related, কিন্তু identical নয়। SRP change-এর actor/reason আলাদা রাখে; cohesion module-এর elements কতটা related তা মাপে।
 - **Dependency Injection, Interface-based Programming, এবং Design Patterns** (যেমন Strategy, Observer) মূলত Low Coupling অর্জনের কৌশল — class গুলো concrete implementation এর বদলে abstraction/interface এর উপর নির্ভর করে, যাতে একটি class পরিবর্তন করলে অন্য class প্রভাবিত না হয়
 - একটি ভালো OOP design এ, একটি class এর method গুলো একে অপরের সাথে সম্পর্কিত থাকবে এবং class এর attribute গুলো ব্যবহার করবে (High Cohesion), কিন্তু class টি অন্য class এর internal details সম্পর্কে যতটা সম্ভব কম জানবে, শুধু public interface এর মাধ্যমে interact করবে (Low Coupling)
 

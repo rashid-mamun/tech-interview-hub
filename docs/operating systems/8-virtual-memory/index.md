@@ -6,6 +6,13 @@ title: 'Virtual Memory'
 
 ## 🪟 33. What is virtual memory, and why is it used?
 
+```mermaid
+flowchart LR
+    P[Process virtual address space] --> Map[Page table mapping]
+    Map --> RAM[Resident pages in RAM]
+    Map --> Disk[Non-resident pages on disk]
+```
+
 **Virtual Memory** হলো একটি **memory management technique** যা প্রতিটি process-কে এমন একটি **illusion (বিভ্রম)** দেয় যে তার নিজস্ব একটি বড়, continuous এবং private address space রয়েছে—যদিও বাস্তবে physical RAM সীমিত এবং সেটি একাধিক process-এর মধ্যে share করা হয়।
 
 Virtual Memory-তে process শুধুমাত্র **logical (virtual) address** ব্যবহার করে। এই virtual address সরাসরি physical RAM-এর address নয়। **Memory Management Unit (MMU)** এবং Operating System একসঙ্গে virtual address-কে physical address-এ translate করে।
@@ -98,6 +105,15 @@ Kernel service ব্যবহার করতে হলে process-কে **sys
 ---
 
 ## ⚡ 34. What is a Translation Lookaside Buffer (TLB), and how does it speed up address translation?
+
+```mermaid
+flowchart LR
+    VA[Virtual page number] --> T{TLB lookup}
+    T -->|hit| F[Frame number]
+    T -->|miss| PT[Page-table walk]
+    PT --> U[Update TLB]
+    U --> F
+```
 
 **Translation Lookaside Buffer (TLB)** হলো একটি ছোট, অত্যন্ত দ্রুতগতির (**high-speed**) **hardware cache**, যা সাধারণত **MMU (Memory Management Unit)**-এর অংশ হিসেবে বা CPU-এর memory management hardware-এর মধ্যে implement করা হয়।
 
@@ -230,6 +246,19 @@ TLB Flush-এর পরে TLB-তে খুব কম translation থাকে�
 ---
 
 ## 📥 35. What is demand paging, and how does a page fault work end-to-end?
+
+```mermaid
+sequenceDiagram
+    participant P as Process
+    participant K as OS
+    participant D as Disk
+    participant M as RAM
+    P->>K: access non-resident page
+    K->>D: read page from backing store
+    D-->>M: load into free or replaced frame
+    K->>K: update page table and TLB
+    K-->>P: restart faulting instruction
+```
 
 **Demand Paging** হলো **Virtual Memory** বাস্তবায়নের একটি technique, যেখানে কোনো page **শুধুমাত্র তখনই RAM-এ load করা হয় যখন সেটি প্রথমবার সত্যিই প্রয়োজন হয় (on demand)**।
 
@@ -377,6 +406,15 @@ Restart Faulting Instruction
 
 
 ## 🔄 36. What are the common page replacement algorithms?
+
+```mermaid
+flowchart TB
+    F[Page fault with no free frame] --> A{Replacement policy}
+    A --> FIFO[Evict oldest loaded page]
+    A --> LRU[Evict least recently used page]
+    A --> OPT[Evict page used farthest in future]
+    A --> Clock[Approximate LRU with reference bit]
+```
 
 যখন একটি **page fault** ঘটে এবং physical memory-তে কোনো **free frame** না থাকে, তখন OS-কে RAM-এ থাকা কোনো একটি existing page বেছে সরিয়ে ফেলতে হয়। এই page-কে **victim page** বলা হয়। কোন page সরানো হবে, সেটি ঠিক করার strategy-ই হলো **page replacement algorithm**।
 

@@ -6,6 +6,19 @@ title: 'Dynamic Memory Allocation'
 
 ## 🧠 47. How does dynamic memory allocation work (e.g., malloc/free)?
 
+```mermaid
+sequenceDiagram
+    participant A as Application
+    participant M as malloc allocator
+    participant O as OS virtual memory
+    A->>M: malloc size
+    M->>M: find or split a free block
+    M->>O: request more pages if needed
+    M-->>A: pointer to usable block
+    A->>M: free pointer
+    M->>M: mark free and possibly coalesce
+```
+
 **Dynamic memory allocation** হলো runtime-এ program-এর প্রয়োজন অনুযায়ী memory allocate এবং release করার process।
 
 Static storage program lifetime অনুযায়ী এবং stack storage সাধারণত lexical scope/function-call lifetime অনুযায়ী manage হয়। কিন্তু অনেক data structure-এর size বা lifetime runtime behavior-এর ওপর নির্ভর করে:
@@ -130,6 +143,15 @@ free(p);
 
 ## 🧭 48. What are the common memory allocation strategies?
 
+```mermaid
+flowchart TB
+    R[Allocation request] --> A{Free-block strategy}
+    A --> F[First-fit: first sufficient block]
+    A --> B[Best-fit: smallest sufficient block]
+    A --> W[Worst-fit: largest block]
+    A --> N[Next-fit: continue from last search]
+```
+
 Dynamic memory allocator free memory blocks থেকে request-এর জন্য suitable block বেছে নেয়। Common strategies:
 
 * **First-fit**
@@ -250,6 +272,15 @@ First-fit-এর মতো, কিন্তু প্রতিবার list-এ
 
 ## 🧩 49. What is the buddy system, and how does it manage memory allocation?
 
+```mermaid
+flowchart LR
+    B64[64 KB block] --> B32A[32 KB buddy]
+    B64 --> B32B[32 KB buddy]
+    B32A --> B16A[16 KB]
+    B32A --> B16B[16 KB]
+    B16A -->|free adjacent buddies| B32A
+```
+
 **Buddy system** হলো memory allocation technique যেখানে memory power-of-two size block-এ manage করা হয়:
 
 ```text
@@ -342,6 +373,15 @@ Is my buddy free?
 ---
 
 ## 🧯 50. What is a memory leak, and how can OS-level or language-level tools help detect them?
+
+```mermaid
+flowchart LR
+    A[Allocate memory] --> U[Use object]
+    U --> L{Reference released correctly?}
+    L -->|Yes| F[Free or garbage collect]
+    L -->|No| Leak[Unreachable or unused allocation remains]
+    Leak --> Growth[Process memory grows]
+```
 
 **Memory leak** হলো এমন bug যেখানে program heap memory allocate করে কিন্তু আর দরকার না থাকলেও release করে না, এবং সেই memory-এর reference হারিয়ে যায় বা unused থেকেও allocated থাকে।
 
@@ -463,6 +503,14 @@ Example:
 ---
 
 ## 🧱 51. What is fragmentation in the context of dynamic memory allocators, and how is it mitigated?
+
+```mermaid
+flowchart TB
+    F[Allocator fragmentation] --> I[Internal waste inside allocated blocks]
+    F --> E[External holes between allocations]
+    I --> Size[Size classes and smaller granularity]
+    E --> Coalesce[Coalescing, compaction, buddy or slab allocation]
+```
 
 Dynamic memory allocator-এ fragmentation মানে heap memory এমনভাবে ভেঙে যাওয়া যে memory থাকলেও তা efficientভাবে ব্যবহার করা যাচ্ছে না।
 

@@ -1,10 +1,16 @@
-﻿---
+---
 sidebar_position: 3
 title: Storage
 ---
 
-
 ## 11. What is the difference between object, block, and file storage?
+
+```mermaid
+flowchart LR
+    App[Application] -->|HTTP API and object key| Object[Object storage]
+    VM[VM or database] -->|raw volume then filesystem| Block[Block storage]
+    Clients[Multiple clients] -->|NFS or SMB path| File[Shared file storage]
+```
 
 **Object Storage:** এখানে data **object** হিসেবে store হয়, প্রতিটা object-এর একটা unique identifier (key), data নিজেই, এবং metadata থাকে। এটা একটা flat namespace-এ থাকে (traditional folder hierarchy নেই, যদিও logically prefix দিয়ে folder-এর মতো দেখানো যায়)। Access করা হয় সাধারণত **HTTP-based API** (REST API) দিয়ে, filesystem-এর মতো direct mount করে না। উদাহরণ: **AWS S3, Google Cloud Storage, Azure Blob Storage**।
 - Highly scalable (petabyte-scale), durable, কিন্তু low-level file editing (partial update) করা যায় না — পুরো object আবার upload করতে হয়।
@@ -29,6 +35,14 @@ title: Storage
 
 ---
 ## 12. What are storage tiers/classes (hot, cool, cold, archive)?
+
+```mermaid
+flowchart LR
+    Hot[Hot: frequent and immediate] -->|lifecycle after inactivity| Cool[Cool]
+    Cool -->|older data| Cold[Cold]
+    Cold -->|long-term retention| Archive[Archive]
+    Archive --> Tradeoff[Lower storage cost, higher retrieval cost or delay]
+```
 
 Cloud provider-রা data-এর **access frequency** অনুযায়ী বিভিন্ন storage tier/class অফার করে, যাতে cost optimize করা যায়:
 
@@ -60,13 +74,26 @@ Cloud provider-রা data-এর **access frequency** অনুযায়ী 
 
 ## 13. What is storage replication (same-region vs. cross-region, sync vs. async)?
 
+```mermaid
+sequenceDiagram
+    participant A as Application
+    participant P as Primary storage
+    participant R as Required sync replica or quorum
+    participant D as Async DR replica
+    A->>P: Write
+    P->>R: Replicate
+    R-->>P: Durable acknowledgement
+    P-->>A: Write success
+    P-->>D: Replicate later
+```
+
 **Storage Replication** হলো data-এর একাধিক copy বিভিন্ন location-এ automatically maintain করার প্রক্রিয়া, যাতে data loss prevent করা যায় এবং availability/durability বাড়ানো যায়।
 
 **Same-Region Replication:** একই geographic region-এর মধ্যে different **Availability Zone (AZ)**-এ data copy রাখা হয়। এটা মূলত single data center failure বা hardware failure থেকে protect করে। Latency কম, কারণ physical distance কম।
 
 **Cross-Region Replication:** সম্পূর্ণ ভিন্ন geographic region-এ data copy রাখা হয় (যেমন US থেকে Europe)। এটা **disaster recovery (DR)** এবং region-wide outage (যেমন natural disaster, regional cloud provider issue) থেকে protect করে, এবং সাথে **data locality/compliance** (data residency law) পূরণেও সাহায্য করে। কিন্তু network distance বেশি হওয়ায় latency বেশি হয়।
 
-**Synchronous (Sync) Replication:** এখানে data primary location-এ write হওয়ার সাথে সাথে replica location-এও write সম্পন্ন হতে হয়, এবং **acknowledgment (ack)** দুই জায়গা থেকেই confirm হওয়ার পরই write operation "successful" ধরা হয়। এতে **zero data loss (RPO = 0)** নিশ্চিত হয়, কিন্তু write latency বেশি হয় কারণ সব replica-র response-এর জন্য অপেক্ষা করতে হয়।
+**Synchronous (Sync) Replication:** configured replica বা quorum-এ write durable হওয়ার পর operation successful ধরা হয়। সঠিক configuration-এ acknowledged write-এর জন্য **RPO প্রায় 0** করা যায়, কিন্তু software bug বা common-mode failure-এর বিরুদ্ধে absolute zero-loss guarantee নয়। দূরের replica acknowledgement path-এ থাকলে write latency বাড়ে।
 
 **Asynchronous (Async) Replication:** এখানে primary location-এ write হওয়ার সাথে সাথেই ack পাঠানো হয়, replica-তে data পরে (কিছুটা delay নিয়ে) sync হয়। Write latency কম হয় (fast response), কিন্তু primary যদি হঠাৎ fail করে replication complete হওয়ার আগে, তাহলে কিছু data loss (non-zero RPO) হতে পারে।
 
@@ -74,8 +101,8 @@ Cloud provider-রা data-এর **access frequency** অনুযায়ী 
 
 | বিষয় | Sync Replication | Async Replication |
 |---|---|---|
-| **Data consistency/loss** | Zero data loss (RPO = 0) | সামান্য data loss হতে পারে |
-| **Write latency** | বেশি (সব replica-র জন্য wait) | কম (primary ack দিলেই done) |
+| **Data consistency/loss** | Configured failure scope-এ acknowledged write-এর RPO প্রায় 0 হতে পারে | Replication lag অনুযায়ী data loss হতে পারে |
+| **Write latency** | বেশি (required replica/quorum-এর জন্য wait) | কম (primary durable হলেই ack হতে পারে) |
 | **Distance suitability** | কাছাকাছি location (same-region/AZ) | দূরবর্তী location (cross-region)-এর জন্য উপযুক্ত |
 | **Performance impact** | Application performance-এ প্রভাব ফেলতে পারে | Performance ভালো থাকে |
 | **Use case** | Critical transactional data (financial system) | DR, backup, geographically distributed read replicas |
@@ -85,6 +112,17 @@ Cloud provider-রা data-এর **access frequency** অনুযায়ী 
 ---
 
 ## 14. What is a signed/pre-signed URL, and why is it used?
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant API as Trusted backend
+    participant O as Object storage
+    C->>API: Request upload permission
+    API-->>C: Short-lived signed PUT URL
+    C->>O: Upload directly with signed URL
+    O-->>C: Upload result
+```
 
 **Pre-signed URL** হলো একটা temporary, cryptographically signed URL যা একটি **private/protected resource** (যেমন object storage-এর কোনো file)-কে নির্দিষ্ট সময়ের জন্য, নির্দিষ্ট permission সহ, credential ছাড়াই access করার অনুমতি দেয়। URL-টা generate করা হয় owner-এর credential/secret key দিয়ে sign করে, এবং সেই signature-এই embedded থাকে expiry time ও permission।
 
@@ -107,6 +145,14 @@ Cloud provider-রা data-এর **access frequency** অনুযায়ী 
 ---
 
 ## 15. What is data durability, and how is it different from availability?
+
+```mermaid
+flowchart TB
+    Data[(Stored data)] --> Copies[Replicas or erasure-coded fragments]
+    Copies --> Durability[Durability: data survives failures]
+    API[API and network path] --> Availability[Availability: data reachable now]
+    Durability -. does not guarantee .-> Availability
+```
 
 **Durability** বোঝায় data সময়ের সাথে **loss/corruption ছাড়া টিকে থাকার সম্ভাবনা** — অর্থাৎ একবার data store করার পর, সেটা কতটা নিশ্চিতভাবে অক্ষত (intact) থাকবে, হার্ডওয়্যার failure, bit rot, বা অন্য কোনো corruption সত্ত্বেও। এটা সাধারণত percentage-এ প্রকাশ করা হয় (যেমন AWS S3-এর famous "**99.999999999% (11 nines) durability**"), যা বোঝায় কোটি কোটি object store করলেও practically কোনোটাই হারানোর সম্ভাবনা নেই। Durability achieve করা হয় সাধারণত **data replication** (একাধিক copy, একাধিক device/location-এ) এবং **error-checking/checksum** mechanism দিয়ে।
 

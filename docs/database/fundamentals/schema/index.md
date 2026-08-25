@@ -3,18 +3,19 @@ sidebar_position: 4
 title: 'Schema'
 ---
 
-```mermaid
-erDiagram
-    USERS ||--o{ ORDERS : places
-    ORDERS ||--|{ ORDER_ITEMS : contains
-    PRODUCTS ||--o{ ORDER_ITEMS : referenced_by
-```
 
 # Database Schema
 
 **Database Schema** হলো একটি ডাটাবেসের Blueprint or Skeleton। এটি ডাটাবেসের logical structure সংজ্ঞায়িত করে, অর্থাৎ data কীভাবে organization করা হবে, table মধ্যে সম্পর্ক কেমন হবে এবং কী কী  Constraints থাকবে—সবই schema মাধ্যমে নির্ধারিত হয়।
 
 ## ৪. What is a schema in databases?
+
+```mermaid
+erDiagram
+    USERS ||--o{ ORDERS : places
+    ORDERS ||--|{ ORDER_ITEMS : contains
+    PRODUCTS ||--o{ ORDER_ITEMS : referenced_by
+```
 
 **Database Schema** হলো database এর blueprint বা structural design যা define করে:
 
