@@ -213,6 +213,7 @@
 }
 
 .theme-doc-markdown {
+  --docs-content-inline-padding: 26px;
   background: var(--ifm-background-surface-color);
   border: 0;
   border-radius: 0;
@@ -411,6 +412,49 @@
   margin-top: 1.35rem;
   padding-top: 0.72rem;
   border-top: 0;
+}
+
+/* Question pages are grouped at compile time so every answer element stays
+   visually attached to the heading that owns it. */
+.theme-doc-markdown .question-section {
+  min-width: 0;
+}
+
+.theme-doc-markdown .question-section__answer {
+  min-width: 0;
+}
+
+.theme-doc-markdown .question-section__answer--main {
+  padding-inline-start: 0.2rem;
+}
+
+.theme-doc-markdown .question-section__answer--sub {
+  padding-inline-start: 0.1rem;
+}
+
+.theme-doc-markdown .question-section__answer > ul,
+.theme-doc-markdown .question-section__answer > ol {
+  padding-inline-start: 1.45rem;
+}
+
+.theme-doc-markdown header + .question-section--main > h2 {
+  margin-top: 1.35rem;
+  border-top: 0;
+}
+
+.theme-doc-markdown .question-section--main:first-child > h2 {
+  margin-top: 0;
+  border-top: 0;
+}
+
+.theme-doc-markdown .question-section--main > h2 {
+  margin-inline: calc(var(--docs-content-inline-padding) * -1);
+  padding-inline: 0.8rem;
+}
+
+.theme-doc-markdown .question-section--sub > h3 {
+  margin-top: 1.7rem;
+  margin-inline-start: calc(0.3rem - var(--docs-content-inline-padding));
 }
 
 [data-theme='dark'] .theme-doc-markdown blockquote {
@@ -973,6 +1017,7 @@ body.docs-left-hidden.docs-right-hidden .theme-doc-markdown {
   }
 
   .theme-doc-markdown {
+    --docs-content-inline-padding: clamp(1.2rem, 2vw, 2rem);
     max-width: 100%;
     padding: clamp(1.2rem, 2vw, 2rem);
   }
@@ -1009,6 +1054,7 @@ body.docs-left-hidden.docs-right-hidden .theme-doc-markdown {
   }
 
   .theme-doc-markdown {
+    --docs-content-inline-padding: 0px;
     border-radius: 8px;
     padding: 0;
     max-width: 100%;
@@ -1061,6 +1107,15 @@ body.docs-left-hidden.docs-right-hidden .theme-doc-markdown {
     padding: 0.62rem 0.65rem;
   }
 
+  .theme-doc-markdown .question-section--main > h2 {
+    margin-inline: 0;
+    padding-inline: 0.25rem;
+  }
+
+  .theme-doc-markdown .question-section--sub > h3 {
+    margin-inline-start: 0;
+  }
+
   .theme-doc-markdown h3 {
     font-size: 1.02rem;
     margin-top: 1.45rem;
@@ -1080,6 +1135,19 @@ body.docs-left-hidden.docs-right-hidden .theme-doc-markdown {
   .theme-doc-markdown li {
     font-size: 15px;
     line-height: 1.78;
+  }
+
+  .theme-doc-markdown .question-section__answer--main {
+    padding-inline-start: 0.25rem;
+  }
+
+  .theme-doc-markdown .question-section__answer--sub {
+    padding-inline-start: 0.1rem;
+  }
+
+  .theme-doc-markdown .question-section__answer > ul,
+  .theme-doc-markdown .question-section__answer > ol {
+    padding-inline-start: 1.25rem;
   }
 
   .theme-doc-markdown ul,

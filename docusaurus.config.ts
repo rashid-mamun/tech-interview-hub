@@ -1,6 +1,7 @@
 import { themes as prismThemes } from 'prism-react-renderer';
 import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
+import remarkQuestionSections from './plugins/remark-question-sections';
 
 const siteUrl = 'https://rashid-mamun.github.io';
 const siteBaseUrl = '/tech-interview-hub/';
@@ -36,7 +37,8 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
-          editUrl: `${repoUrl}/tree/desgin/`
+          editUrl: `${repoUrl}/tree/desgin/`,
+          remarkPlugins: [remarkQuestionSections]
         },
         sitemap: {
           priority: 0.8,
