@@ -3,7 +3,7 @@ sidebar_position: 4
 title: 'Sliding Window & Two Pointers'
 ---
 
-## 🪟 16. What is the sliding window technique, and what types of problems is it suited for?
+## 16. What is the sliding window technique, and what types of problems is it suited for?
 
 **Sliding Window** হলো একটা technique যেখানে array/string এর উপর একটা **contiguous window (range)** maintain করা হয়, এবং সেই window কে ধীরে ধীরে **slide (সরানো)** করা হয় — প্রতিবার পুরো subarray/substring আবার থেকে recalculate না করে, শুধু window এর boundary (start/end) update করে result বের করা হয়।
 
@@ -34,7 +34,6 @@ sum = 7 - 1 + 3 = 9
 প্রতিবার পুরো sum আবার calculate করা লাগছে না।
 ```
 
----
 
 ### What is the difference between a fixed-size sliding window and a variable-size (dynamic) sliding window?
 
@@ -107,7 +106,6 @@ remove 2 -> [3, 1, 2] sum = 6 invalid
 আবার right grow করবে।
 ```
 
----
 
 ### How does the sliding window technique reduce time complexity from O(n²) to O(n)?
 
@@ -134,9 +132,8 @@ right moves: 0 -> 1 -> 2 -> ...
 
 এর ফলে প্রতিটি element মাত্র **constant বার** (সাধারণত একবার `right` pointer দিয়ে যোগ হওয়ার সময়, এবং একবার `left` pointer দিয়ে বাদ যাওয়ার সময়) process হয়, ফলে total complexity `O(n)` তে নেমে আসে — যেখানে প্রতিটি element সর্বোচ্চ দুইবার visited হয় (once by each pointer)।
 
----
 
-## 👉👈 17. How does the two-pointer technique work, and what conditions make it applicable?
+## 17. How does the two-pointer technique work, and what conditions make it applicable?
 
 **Two-pointer technique** এ দুইটা pointer (index) ব্যবহার করা হয় যেগুলো array/string এর মধ্যে **বিভিন্ন দিক থেকে বা বিভিন্ন গতিতে** move করে, একটা নির্দিষ্ট condition খুঁজে বের করার জন্য। সাধারণত brute-force nested loop (`O(n²)`) এর বদলে একটা single pass এ (`O(n)`) সমস্যা সমাধান করা যায়।
 
@@ -177,7 +174,6 @@ fast নতুন unique value খুঁজে,
 slow next write position manage করে।
 ```
 
----
 
 ### How would you solve the "two sum" problem on a sorted array using two pointers?
 
@@ -259,7 +255,6 @@ Values: 3 + 7 = 9
 
 **কেন কাজ করে:** যেহেতু array sorted, `left` বাড়ালে sum বাড়ে এবং `right` কমালে sum কমে। তাই প্রতিটি ধাপে আমরা logically সঠিক দিকে move করছি, কোনো সম্ভাবনা miss করছি না।
 
----
 
 ### How is the two-pointer technique used to remove duplicates from a sorted array in place?
 
@@ -334,9 +329,8 @@ Array after removing duplicates: 1 2 3 4 5
 
 **Time Complexity**: `O(n)` **Space Complexity**: `O(1)` (in-place, কোনো extra array লাগেনি)
 
----
 
-## 🔤 18. How would you find the longest substring without repeating characters?
+## 18. How would you find the longest substring without repeating characters?
 
 এই সমস্যায় **variable-size sliding window** এবং একটা **hash map/set** ব্যবহার করে character এর last-seen position track করা হয়।
 
@@ -432,16 +426,14 @@ Length of longest substring without repeating characters: 3
 - যদি current character আগে দেখা গিয়ে থাকে এবং সেই position current window এর মধ্যেই থাকে (`lastSeen[c] >= left`), তাহলে `left` pointer কে সেই duplicate এর ঠিক পরের position এ নিয়ে যাওয়া হয় (window shrink করা)
 - প্রতিটি ধাপে window এর current length (`right - left + 1`) দিয়ে `maxLength` update করা হয়
 
----
 
 **Time এবং Space Complexity কত?**
 
 - **Time Complexity**: `O(n)` — কারণ `right` pointer পুরো string এ একবার iterate করে, এবং `left` pointer ও সর্বোচ্চ `n` বার move করতে পারে (প্রতিটি pointer সর্বোচ্চ n বার), তাই total কাজ `O(n)`
 - **Space Complexity**: `O(min(n, k))` — যেখানে `k` হলো character set এর size (যেমন English lowercase এর জন্য 26, ASCII এর জন্য 128)। Hashmap এ সর্বোচ্চ `min(n, k)` টা entry থাকতে পারে।
 
----
 
-## 📊 19. How would you find the smallest subarray with a sum greater than or equal to a target value?
+## 19. How would you find the smallest subarray with a sum greater than or equal to a target value?
 
 এখানেও **variable-size sliding window** ব্যবহার করা হয় — window কে **grow** করা হয় (right বাড়িয়ে) যতক্ষণ না sum target এ পৌঁছায়, এবং **shrink** করা হয় (left বাড়িয়ে) যতক্ষণ sum target এর সমান বা বেশি থাকে (minimum length খোঁজার জন্য)।
 
@@ -500,7 +492,6 @@ Length of smallest subarray with sum >= 7: 2
 
 > **Precondition:** এই grow/shrink logic-এর জন্য array-এর সব value positive (বা অন্তত non-negative, প্রয়োজনমতো zero handlingসহ) হতে হবে। Negative number থাকলে right বাড়ালে sum সবসময় বাড়ে না এবং left বাড়ালে সবসময় কমে না; তখন prefix sum + ordered structure/deque-এর মতো অন্য technique দরকার।
 
----
 
 ### How does the sliding window shrink and grow based on the running sum?
 
@@ -540,9 +531,8 @@ Answer = 2, subarray [4,3]
 **Time Complexity**: `O(n)` — যদিও দুইটা nested loop দেখতে মনে হচ্ছে, কিন্তু `left` pointer সব মিলিয়ে সর্বোচ্চ `n` বার move করে (প্রতিটি element সর্বোচ্চ একবার `left` দিয়ে remove হয়), তাই total কাজ `O(n)`।
 **Space Complexity**: `O(1)`
 
----
 
-## 🎯 20. How would you solve the "minimum window substring" problem?
+## 20. How would you solve the "minimum window substring" problem?
 
 **সমস্যা:** একটা string `s` এবং একটা string `t` দেওয়া আছে। `s` এর মধ্যে সবচেয়ে ছোট window (substring) খুঁজে বের করতে হবে যেটাতে `t` এর সব character (তাদের frequency সহ) অন্তর্ভুক্ত আছে।
 
@@ -666,7 +656,6 @@ int main() {
 Minimum window substring: "BANC"
 ```
 
----
 
 ### How do you track which characters are "needed" vs. "satisfied" within the window?
 

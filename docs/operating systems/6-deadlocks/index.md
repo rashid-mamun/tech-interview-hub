@@ -4,7 +4,7 @@ title: 'Deadlocks'
 ---
 
 
-## 🔗 21. What is a deadlock, and what are the four necessary conditions for it to occur (Coffman conditions)?
+## 21. What is a deadlock, and what are the four necessary conditions for it to occur (Coffman conditions)?
 
 ```mermaid
 flowchart LR
@@ -30,7 +30,6 @@ P1 ──waits for──> B ──held by──> P2
 P2 ──waits for──> A ──held by──> P1
 ```
 
----
 
 ### Coffman Conditions
 
@@ -49,7 +48,6 @@ Example:
 
 যদি resource fully shareable হয়, তাহলে সেই resource নিয়ে deadlock হওয়ার সম্ভাবনা থাকে না।
 
----
 
 **2. Hold and Wait**
 
@@ -61,7 +59,6 @@ Example:
 * তারপর lock B নেওয়ার চেষ্টা করছে
 * lock B না পেয়ে wait করছে
 
----
 
 **3. No Preemption**
 
@@ -73,7 +70,6 @@ Example:
 * OS সাধারণত সেই mutex জোর করে unlock করে না
 * thread নিজে unlock না করা পর্যন্ত অন্যরা wait করবে
 
----
 
 **4. Circular Wait**
 
@@ -89,7 +85,6 @@ P3 waits for P1
 
 অর্থাৎ সবাই chain আকারে একে অপরের জন্য wait করছে, এবং chain শেষ হয়ে আবার শুরুতে ফিরে আসছে।
 
----
 
 ### Why must all four conditions hold simultaneously for a deadlock to exist?
 
@@ -104,9 +99,8 @@ Deadlock-এর জন্য চারটি condition একসাথে দর
 
 তাই deadlock prevention-এর basic idea হলো এই চারটির যেকোনো একটি condition intentionally ভেঙে দেওয়া।
 
----
 
-## 🛡️ 22. What is the difference between deadlock prevention, avoidance, detection, and recovery?
+## 22. What is the difference between deadlock prevention, avoidance, detection, and recovery?
 
 ```mermaid
 flowchart TB
@@ -123,7 +117,6 @@ Deadlock handle করার চারটি major strategy আছে:
 * **Detection**
 * **Recovery**
 
----
 
 ### Deadlock Prevention
 
@@ -158,7 +151,6 @@ Never acquire:  Lock C → Lock A
 * concurrency কমতে পারে
 * সব resource একসাথে request করা practical নাও হতে পারে
 
----
 
 ### Deadlock Avoidance
 
@@ -181,7 +173,6 @@ Classic example:
 * runtime overhead বেশি
 * general-purpose OS-এ practical কম
 
----
 
 ### Deadlock Detection
 
@@ -200,7 +191,6 @@ Classic example:
 * detection algorithm চালানোর overhead আছে
 * recovery কঠিন হতে পারে
 
----
 
 ### Deadlock Recovery
 
@@ -212,7 +202,6 @@ Common recovery techniques:
 * resource preempt করা
 * rollback/checkpoint restore করা
 
----
 
 ### Which approach tends to have the highest runtime overhead, and why?
 
@@ -235,9 +224,8 @@ Detection-এরও overhead আছে এবং খুব ঘন ঘন full de
 | Detection | deadlock হওয়ার পরে | cycle/deadlock খুঁজে বের করে | deadlock ঘটতে দেয় |
 | Recovery | detection-এর পরে | system unblock করে | data loss/rollback/termination risk |
 
----
 
-## 🏦 23. How does the Banker's algorithm work for deadlock avoidance?
+## 23. How does the Banker's algorithm work for deadlock avoidance?
 
 ```mermaid
 flowchart LR
@@ -262,7 +250,6 @@ Operating system context-এ:
 * allocation হলো currently দেওয়া resource
 * maximum demand হলো process maximum কত resource চাইতে পারে
 
----
 
 ### Algorithm-এর main data structures
 
@@ -288,7 +275,6 @@ Operating system context-এ:
 Need = Max - Allocation
 ```
 
----
 
 ### Safety check idea
 
@@ -303,7 +289,6 @@ System check করে এমন কোনো order আছে কি না য�
 5. সব process finish করা গেলে system safe
 6. যদি কোনো point-এ আর কোনো process proceed করতে না পারে, system unsafe
 
----
 
 ### Resource request handling
 
@@ -316,7 +301,6 @@ System check করে এমন কোনো order আছে কি না য�
 5. Safe হলে request grant
 6. Unsafe হলে provisional allocation rollback করে process-কে wait করানো হয়
 
----
 
 ### What do "safe state" and "unsafe state" mean in this context?
 
@@ -334,7 +318,6 @@ Safe sequence: P2 → P1 → P3
 
 Safe state মানে deadlock নেই এবং system এমনভাবে আছে যে careful allocation করলে deadlock এড়ানো সম্ভব।
 
----
 
 **Unsafe State**
 
@@ -346,7 +329,6 @@ Unsafe state মানে system এমন অবস্থায় আছে য�
 
 Unsafe state মানে ভবিষ্যতের request pattern-এর উপর নির্ভর করে deadlock হতে পারে। তাই Banker’s Algorithm unsafe state-এ যেতে দেয় না।
 
----
 
 ### What information does the algorithm require about each process in advance?
 
@@ -359,9 +341,8 @@ Banker’s Algorithm চালাতে system-কে আগে থেকেই 
 
 এই কারণেই Banker’s Algorithm বাস্তব general-purpose OS-এ কম ব্যবহৃত হয়। কারণ process আগে থেকেই তার exact maximum resource demand জানে বা declare করে, এমন assumption সবসময় practical নয়।
 
----
 
-## 🗺️ 24. How is a resource allocation graph used to detect deadlocks?
+## 24. How is a resource allocation graph used to detect deadlocks?
 
 ```mermaid
 flowchart LR
@@ -396,7 +377,6 @@ R1 → P1
 
 মানে R1 currently P1-কে allocated।
 
----
 
 ### Deadlock detection with graph
 
@@ -417,7 +397,6 @@ P1 → R2 → P2 → R1 → P1
 
 এটি circular wait।
 
----
 
 ### How does a cycle in the graph relate to a deadlock when each resource has a single instance vs multiple instances?
 
@@ -429,7 +408,6 @@ P1 → R2 → P2 → R1 → P1
 
 > Single-instance resource graph-এ cycle আছে মানে deadlock আছে।
 
----
 
 **Multiple instances per resource type**
 
@@ -448,9 +426,8 @@ P1 → R2 → P2 → R1 → P1
 | Single instance | Deadlock নিশ্চিত |
 | Multiple instances | Deadlock হতে পারে, কিন্তু নিশ্চিত নয় |
 
----
 
-## 🐌 25. What is the difference between deadlock, livelock, and starvation?
+## 25. What is the difference between deadlock, livelock, and starvation?
 
 ```mermaid
 flowchart TB
@@ -461,7 +438,6 @@ flowchart TB
 
 Deadlock, livelock এবং starvation দেখতে কাছাকাছি মনে হলেও এগুলো আলাদা problem।
 
----
 
 ### Deadlock
 
@@ -476,7 +452,6 @@ P2 holds B, waits for A
 
 এখানে দুজনই wait করছে, কিন্তু কেউ resource release করছে না।
 
----
 
 ### Livelock
 
@@ -493,7 +468,6 @@ OS/concurrency example:
 * দুজনই বারবার retry করছে
 * কিন্তু timing-এর কারণে কেউ successful progress করছে না
 
----
 
 ### Starvation
 
@@ -506,7 +480,6 @@ Example:
 
 এখানে system overall progress করছে, কিন্তু নির্দিষ্ট process progress করতে পারছে না।
 
----
 
 ### Can a system be in livelock without being in deadlock? Give an example.
 
@@ -531,9 +504,8 @@ T2: if A unavailable, release B and retry
 | Livelock | active/retrying | activity আছে | useful progress নেই |
 | Starvation | ready/waiting | অন্যরা progress করছে | নির্দিষ্ট process progress পাচ্ছে না |
 
----
 
-## 🔓 26. What recovery strategies exist once a deadlock is detected?
+## 26. What recovery strategies exist once a deadlock is detected?
 
 ```mermaid
 flowchart LR
@@ -554,7 +526,6 @@ Common strategies:
 * resource preemption
 * rollback/checkpoint restore
 
----
 
 ### 1. Process Termination
 
@@ -590,7 +561,6 @@ Process victim selection-এ বিবেচনা করা যেতে পা
 * restart করা সহজ কি না
 * user/system critical কি না
 
----
 
 ### 2. Resource Preemption
 
@@ -614,7 +584,6 @@ Resource কেড়ে নেওয়ার পর process-কে previous safe sta
 
 একই process বারবার victim হলে starvation হতে পারে। তাই victim selection policy-তে fairness দরকার।
 
----
 
 ### 3. Rollback / Checkpoint Recovery
 
@@ -628,7 +597,6 @@ Problem:
 * সব process rollback-safe নয়
 * external side effect থাকলে rollback কঠিন
 
----
 
 ### What are the trade-offs of process termination vs resource preemption as recovery strategies?
 
@@ -643,5 +611,3 @@ Problem:
 * **Termination** সহজ কিন্তু destructive।
 * **Preemption** flexible কিন্তু complex।
 * **Rollback** clean হতে পারে, কিন্তু আগে থেকে checkpoint support দরকার।
-
----

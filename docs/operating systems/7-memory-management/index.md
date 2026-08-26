@@ -4,7 +4,7 @@ title: 'Memory Management'
 ---
 
 
-## 📍 27. What is the difference between a logical (virtual) address and a physical address?
+## 27. What is the difference between a logical (virtual) address and a physical address?
 
 ```mermaid
 flowchart LR
@@ -57,9 +57,8 @@ MMU-এর কারণে ordinary user process তার actual physical memor
 
 > **মনে রাখুন:** Virtual-memory enabled normal load/store-এ CPU virtual address ব্যবহার করে, MMU সেটিকে physical address-এ translate করে। Boot/physical mode, DMA এবং কিছু privileged/device operation এই simplified path-এর ব্যতিক্রম হতে পারে।
 
----
 
-## 🧩 28. What is the difference between internal and external fragmentation?
+## 28. What is the difference between internal and external fragmentation?
 
 ```mermaid
 flowchart TB
@@ -119,7 +118,7 @@ Compaction একটি **ব্যয়বহুল (costly)** operation, ক�
 > * **Internal Fragmentation = Allocated block-এর ভেতরে wasted space।**
 > * **External Fragmentation = Free memory block-গুলোর মাঝে ছড়িয়ে থাকা gaps, যেগুলো contiguous না হওয়ায় বড় allocation সম্ভব হয় না।**
 
-## 📄 29. What is paging, and how does it solve the fragmentation problem?
+## 29. What is paging, and how does it solve the fragmentation problem?
 
 ```mermaid
 flowchart LR
@@ -154,7 +153,6 @@ Paging এই সমস্যাটি দূর করে কারণ—
 
 অতএব, base-page allocation-এর ক্ষেত্রে paging process-level **external fragmentation দূর করে**, তবে **internal fragmentation** ও page-table overhead থাকে। Kernel-এর higher-order contiguous allocation, huge page বা DMA buffer-এর ক্ষেত্রে physical fragmentation এখনও relevant হতে পারে।
 
----
 
 ### What is a page table, and what kind of information does each page table entry contain?
 
@@ -206,7 +204,6 @@ Dirty page-এর contents preserve করতে হলে eviction-এর আ�
 
 কিছু architecture-এ page cache করা যাবে কিনা, cache policy কী হবে ইত্যাদি নিয়ন্ত্রণ করার জন্য অতিরিক্ত cache control bit থাকে। এগুলো বিশেষ করে **memory-mapped I/O**-এর ক্ষেত্রে গুরুত্বপূর্ণ।
 
----
 
 ### What is a multi-level page table, and why is it used for large address spaces?
 
@@ -229,7 +226,6 @@ Single-level page table-এর size সম্পূর্ণ virtual address spa
 
 যদিও process হয়তো তার address space-এর অল্প অংশই ব্যবহার করছে, তবুও পুরো page table-এর জন্য memory বরাদ্দ রাখতে হয়। ফলে অনেক memory অপচয় হয়।
 
----
 
 **সমাধান — Multi-level Page Table**
 
@@ -237,7 +233,6 @@ Multi-level (Hierarchical) page table-এ page table-কে ছোট ছোট 
 
 ফলে যেসব অংশ ব্যবহারই করা হয় না, সেগুলোর জন্য page table তৈরি করার প্রয়োজন হয় না।
 
----
 
 **কীভাবে কাজ করে (Two-level Page Table)**
 
@@ -254,7 +249,6 @@ Translation ধাপগুলো হলো—
 3. এরপর p2 ব্যবহার করে Inner Page Table থেকে **Frame Number** পাওয়া যায়।
 4. সবশেষে Frame Number-এর সঙ্গে Offset যুক্ত করে Physical Address তৈরি করা হয়।
 
----
 
 ### কেন Large Address Space-এর জন্য এটি উপকারী?
 
@@ -277,7 +271,6 @@ Address space যত বড় হয় (বিশেষ করে 64-bit archi
 * 32-bit system → সাধারণত 2-level page table
 * x86-64 architecture → সাধারণত 4-level page table (এবং অনেক আধুনিক implementation-এ 5-level paging-ও সমর্থিত)
 
----
 
 #### Trade-off
 
@@ -294,7 +287,7 @@ TLB হলো একটি ছোট এবং খুব দ্রুত hardwar
 
 
 
-## ✂️ 30. What is segmentation, and how does it differ from paging?
+## 30. What is segmentation, and how does it differ from paging?
 
 ```mermaid
 flowchart TB
@@ -315,7 +308,6 @@ flowchart TB
 
 Segmentation programmer-এর memory view-এর সঙ্গে সামঞ্জস্যপূর্ণ। অর্থাৎ, programmer যেভাবে program-কে বিভিন্ন logical অংশে (code, data, stack ইত্যাদি) চিন্তা করে, segmentation সেইভাবেই memory organize করে।
 
----
 
 **Address Translation কীভাবে হয়?**
 
@@ -336,7 +328,6 @@ Address translation-এর ধাপগুলো—
 3. Offset বৈধ হলে Base Address-এর সঙ্গে Offset যোগ করে Physical Address তৈরি করা হয়।
 4. Offset যদি limit-এর বাইরে যায়, তাহলে protection fault ঘটে। Unix/Linux user program-এ এমন invalid memory access অনেক সময় `SIGSEGV` বা segmentation fault হিসেবে দেখা যায়।
 
----
 
 **Segmentation vs Paging — মূল পার্থক্য**
 
@@ -351,7 +342,6 @@ Address translation-এর ধাপগুলো—
 | Logical Meaning       | Page-এর কোনো logical অর্থ নেই                             | প্রতিটি segment একটি meaningful logical unit             |
 | Protection & Sharing  | Page level-এ করা যায়, তবে logical unit অনুযায়ী করা কঠিন | Logical unit অনুযায়ী protection ও sharing করা সহজ       |
 
----
 
 ### What is segmentation with paging, and why might a system use both?
 
@@ -379,7 +369,6 @@ Translation ধাপগুলো—
 2. Page Number ব্যবহার করে Page Table থেকে Frame Number বের করা হয়।
 3. Frame Number-এর সঙ্গে Offset যোগ করে Final Physical Address তৈরি করা হয়।
 
----
 
 ### কেন একটি System Segmentation এবং Paging দুটোই ব্যবহার করবে?
 
@@ -401,7 +390,6 @@ Segmentation with Paging-এ growth হলে নতুন page allocate কর�
 
 **4. Large Memory Efficiently Handle করা যায়:** বড় address space-এ প্রতিটি segment-এর জন্য paging ব্যবহারের ফলে memory utilization আরও efficient হয় এবং allocation সহজ হয়।
 
----
 **বাস্তব উদাহরণ**
 Intel-এর **32-bit x86 architecture**-এ segmentation এবং paging উভয়ই সমর্থিত ছিল।
 
@@ -413,7 +401,6 @@ Intel-এর **32-bit x86 architecture**-এ segmentation এবং paging উ�
 
 আধুনিক **64-bit operating system**-এ (যেমন Linux ও Windows on x86-64) segmentation-এর ব্যবহার খুব সীমিত; অধিকাংশ memory management paging-এর মাধ্যমেই করা হয়। x86-64-এ সাধারণ code/data segmentation প্রায় flat model হিসেবে থাকে, তবে কিছু special register/segment mechanism এখনও TLS বা kernel-related কাজের জন্য ব্যবহৃত হতে পারে।
 
----
 
 **সংক্ষেপে**
 
@@ -424,7 +411,7 @@ Intel-এর **32-bit x86 architecture**-এ segmentation এবং paging উ�
 
 এই hybrid design ঐতিহাসিক ও কিছু architecture-এ গুরুত্বপূর্ণ। তবে mainstream x86-64 OS সাধারণত flat segmentation-এর সঙ্গে paging-কে মূল isolation/allocation mechanism হিসেবে ব্যবহার করে; textbook segmentation-with-paging model সব modern platform-এর dominant implementation নয়।
 
-## 💱 31. What is swapping, and how does it relate to memory management?
+## 31. What is swapping, and how does it relate to memory management?
 
 ```mermaid
 flowchart LR
@@ -438,7 +425,6 @@ flowchart LR
 
 তবে **আধুনিক Operating System** (যেমন Linux ও Windows)-এ পুরো process swap করার পরিবর্তে সাধারণত **page-level swapping (paging)** ব্যবহার করা হয়, যেখানে শুধুমাত্র প্রয়োজনীয় page-গুলো swap করা হয়।
 
----
 
 **কেন Swapping দরকার হয়?**
 
@@ -452,7 +438,6 @@ Classical swapping-এর ধারণা অনুযায়ী—
 2. এতে RAM-এ জায়গা খালি হয়।
 3. পরে process-টির execution চালানোর প্রয়োজন হলে সেটিকে আবার **swap in** করা হয়।
 
----
 
 **Memory Management-এর সাথে Swapping-এর সম্পর্ক**
 
@@ -467,7 +452,6 @@ Inactive memory disk-এ রেখে RAM বর্তমানে প্রয�
 
 বর্তমানে পুরো process swap করার পরিবর্তে সাধারণত **individual page** swap করা হয়।
 
----
 
 **Swapping-এর Cost**
 
@@ -479,13 +463,11 @@ Swapping-এর প্রধান অসুবিধা হলো—
 
 যদি system বারবার page swap করতে থাকে এবং CPU-এর বেশিরভাগ সময় page আনা-নেওয়াতেই ব্যয় হয়, তাহলে সেই অবস্থাকে **Thrashing** বলা হয়।
 
----
 
 ### How does swapping differ from paging in terms of granularity?
 
 দুটি technique-এর সবচেয়ে গুরুত্বপূর্ণ পার্থক্য হলো **granularity**, অর্থাৎ একবারে কতটুকু memory স্থানান্তর করা হয়।
 
----
 
 #### Swapping-এর Granularity (Coarse-grained)
 
@@ -498,7 +480,6 @@ Classical swapping-এ granularity হলো **সম্পূর্ণ process*
 
 এ কারণে classical swapping-কে **coarse-grained** technique বলা হয়।
 
----
 
 #### Paging (Demand Paging)-এর Granularity (Fine-grained)
 
@@ -515,7 +496,6 @@ Operating System শুধুমাত্র প্রয়োজনীয় p
 
 এ কারণে Paging-কে **fine-grained** technique বলা হয়।
 
----
 
 | বিষয়                  | Classical Swapping                        | Demand Paging              |
 | ---------------------- | ----------------------------------------- | -------------------------- |
@@ -534,7 +514,7 @@ Operating System শুধুমাত্র প্রয়োজনীয় p
 > * Modern OS → **Page-level Swapping / Demand Paging**
 
 
-## 📦 32. What is the difference between contiguous and non-contiguous memory allocation?
+## 32. What is the difference between contiguous and non-contiguous memory allocation?
 
 ```mermaid
 flowchart TB
@@ -556,7 +536,6 @@ flowchart TB
 * Memory allocation ও deallocation-এর ফলে **external fragmentation** হতে পারে।
 * বড় contiguous free block না থাকলে পর্যাপ্ত মোট free memory থাকা সত্ত্বেও allocation ব্যর্থ হতে পারে।
 
----
 
 ### Non-contiguous Memory Allocation কী?
 
@@ -568,7 +547,6 @@ flowchart TB
 
 Paging-এর ক্ষেত্রে process-এর page-গুলো বিভিন্ন frame-এ থাকতে পারে। আবার Segmentation-এর ক্ষেত্রে প্রতিটি segment আলাদা physical location-এ থাকতে পারে।
 
----
 
 **Contiguous vs Non-contiguous Memory Allocation**
 
@@ -582,7 +560,6 @@ Paging-এর ক্ষেত্রে process-এর page-গুলো বি�
 | Flexibility             | কম                                 | বেশি                                                                          |
 | আধুনিক Operating System | User-process allocation-এ uncommon; kernel/DMA/huge page-এ এখনও দরকার | User virtual memory-র standard approach |
 
----
 
 ### What are the advantages of non-contiguous allocation schemes like paging?
 
@@ -616,6 +593,3 @@ Operating System প্রতিটি page-এর জন্য read, write এ�
 Contiguous memory খুঁজে পুরো process relocate করার প্রয়োজন হয় না।
 
 **8. Large Address Space সহজে Handle করা যায়:** Paging এবং Multi-level Page Table ব্যবহার করে Operating System বড় virtual address space efficiently manage করতে পারে।
-
-
----

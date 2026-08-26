@@ -5,13 +5,12 @@ title: 'Synchronization'
 
 
 
-## ⚠️ 17. What is a race condition, and how does it occur?
+## 17. What is a race condition, and how does it occur?
 
 **Race Condition** হলো এমন একটি correctness problem যেখানে program-এর ফলাফল concurrent operation-গুলোর timing বা execution order-এর ওপর অনাকাঙ্ক্ষিতভাবে নির্ভর করে। Shared memory-এর **data race**-এ দুই বা ততোধিক thread/process synchronization ছাড়া একই memory location access করে এবং অন্তত একটি access write হয়। Access-গুলোকে literally একই instant-এ ঘটতে হবে না; problematic interleaving-ই যথেষ্ট।
 
 এটি ঘটে কারণ thread-গুলো প্রয়োজনীয় **synchronization** ছাড়া independently execute করে। Scheduler preemption, multi-core parallel execution, interrupt বা asynchronous event—সবই unpredictable interleaving তৈরি করতে পারে।
 
----
 
 ### Can you give a simple example involving two threads incrementing a shared counter?
 
@@ -25,7 +24,6 @@ title: 'Synchronization'
 
 এই তিনটি ধাপের মাঝখানে যদি Operating System অন্য thread-কে CPU দিয়ে দেয়, তাহলে দুইটি thread একই পুরোনো মান পড়ে ফেলতে পারে এবং শেষে একটি update হারিয়ে যেতে পারে (**Lost Update Problem**)। এটিই Race Condition-এর মূল কারণ।
 
----
 
 **কীভাবে Race Condition ঘটে?**
 
@@ -79,7 +77,6 @@ print(counter)   # সবসময় 200000
 
 > **নোট:** CPython-এর **GIL** Python-level thread-কে একই সময়ে bytecode execute করা সীমিত করলেও compound shared-state operation-কে application-level synchronization guarantee দেয় না। তাই correctness-এর জন্য GIL-এর ওপর নির্ভর না করে lock বা উপযুক্ত thread-safe primitive ব্যবহার করা উচিত। উপরের interleaving table-টি conceptual lost-update scenario দেখায়; code block-টি তার synchronized solution।
 
----
 
 **এর সমাধান কী?**
 
@@ -89,7 +86,6 @@ Race Condition এড়ানোর জন্য **Synchronization Mechanism** 
 
 একটি thread যখন **Critical Section**-এ প্রবেশ করে, তখন অন্য thread-গুলোকে অপেক্ষা করতে হয়। ফলে একই সময়ে একাধিক thread shared data modify করতে পারে না।
 
----
 
 **Atomic Operation**
 
@@ -103,7 +99,6 @@ Atomic operation-এর বৈশিষ্ট্য হলো—
 
 তবে atomic operation সব synchronization problem solve করে না। একাধিক step, complex invariant, বা একাধিক shared resource একসাথে protect করতে হলে lock/mutex/monitor-এর মতো mechanism দরকার হতে পারে।
 
----
 
 | বিষয়                | ব্যাখ্যা                                                                                           |
 | -------------------- | -------------------------------------------------------------------------------------------------- |
@@ -114,9 +109,8 @@ Atomic operation-এর বৈশিষ্ট্য হলো—
 | **Atomic Operation** | এমন operation যা একটিমাত্র indivisible step হিসেবে সম্পন্ন হয়                                     |
 | **Deadlock**         | দুই বা ততোধিক thread একে অপরের lock-এর জন্য অনির্দিষ্টকাল অপেক্ষা করলে যে অবস্থা তৈরি হয়          |
 
----
 
-## 🚪 18. What is a critical section, and what are the requirements for a correct solution to the critical-section problem?
+## 18. What is a critical section, and what are the requirements for a correct solution to the critical-section problem?
 
 **Critical Section** হলো কোনো program-এর এমন একটি **code block** যেখানে **shared resource** (যেমন: variable, memory, file, database বা shared data structure) access বা modify করা হয়।
 
@@ -167,10 +161,9 @@ Critical-Section Problem-এর একটি **সঠিক (Correct) Solution**
 
 **Mutex, Semaphore, Peterson's Algorithm, Monitor** ইত্যাদি synchronization mechanism এই লক্ষ্য অর্জনের জন্য ব্যবহৃত হয়। তবে কোনো mechanism বাস্তবে starvation-free হবে কি না বা bounded waiting নিশ্চিত করবে কি না, তা তার **implementation এবং scheduling policy**-এর উপর নির্ভর করে।
 
----
 
 
-## 🔑 19. What is the difference between a mutex and a semaphore?
+## 19. What is the difference between a mutex and a semaphore?
 Mutex, semaphore এবং spinlock—সবই synchronization-এর জন্য ব্যবহৃত হয়। তবে এদের কাজের ধরন, ownership এবং ব্যবহারের ক্ষেত্র একে অপরের থেকে ভিন্ন।
 
 
@@ -187,7 +180,6 @@ Mutex সবসময় **Binary** অবস্থায় থাকে—
 
 তাই এটি মূলত **Mutual Exclusion** নিশ্চিত করার জন্য ব্যবহৃত হয়।
 
----
 
 **Semaphore**: Semaphore হলো একটি **integer counter**, যা একসাথে একাধিক thread বা process-এর access নিয়ন্ত্রণ করতে ব্যবহৃত হয়।
 
@@ -202,7 +194,6 @@ Semaphore সাধারণত দুটি operation ব্যবহার ক
 
 ![Mutex vs semaphore](./mutex_vs_semaphore.svg)
 
----
 
 ### What is the difference between a binary semaphore and a counting semaphore?
 
@@ -222,7 +213,6 @@ Semaphore সাধারণত দুটি operation ব্যবহার ক
 
 যদি Semaphore-এর মান **10** হয়, তাহলে সর্বোচ্চ **10টি thread** একসাথে resource ব্যবহার করতে পারবে।
 
----
 
 ### What is the difference between a mutex and a spinlock, and when would you use each?
 
@@ -233,7 +223,6 @@ Semaphore সাধারণত দুটি operation ব্যবহার ক
 
 Spinlock সাধারণত **খুব অল্প সময়ের জন্য lock ধরে রাখার ক্ষেত্রে**, বিশেষ করে **kernel** বা **low-level system programming**-এ ব্যবহৃত হয়, যেখানে sleep করা সম্ভব নয় বা context-switch overhead lock hold-time-এর চেয়ে বেশি হতে পারে। Interrupt context-এ spinlock ব্যবহার করলে interrupt/preemption rules সঠিকভাবে মানতে হয়; interrupted code একই lock ধরে থাকলে ordinary spinlock deadlock করতে পারে।
 
----
 **সবকিছু একসাথে তুলনা**
 
 | বৈশিষ্ট্য                   | Mutex                              | Binary Semaphore                      | Counting Semaphore       | Spinlock                                             |
@@ -245,7 +234,6 @@ Spinlock সাধারণত **খুব অল্প সময়ের জ�
 | Scheduler-এর সাহায্য        | লাগে                               | লাগে                                  | লাগে                     | Waiting-এর সময় লাগে না                              |
 | মূল ব্যবহার                 | Mutual Exclusion                   | Thread Signaling / Event Notification | Resource Pool Management | Kernel, Interrupt Handler, Low-level Synchronization |
 
----
 
 **সংক্ষেপে**
 
@@ -255,7 +243,7 @@ Spinlock সাধারণত **খুব অল্প সময়ের জ�
 * **Spinlock** waiting-এর সময় sleep না করে **Busy Waiting** করে। তাই এটি খুব স্বল্প সময়ের lock এবং kernel-level programming-এর জন্য উপযুক্ত, যেখানে context switch-এর overhead এড়ানো গুরুত্বপূর্ণ।
 
 
-## 📺 20. What are monitors, and how do they simplify synchronization compared to raw semaphores?
+## 20. What are monitors, and how do they simplify synchronization compared to raw semaphores?
 
 **Monitor** হলো একটি **high-level synchronization construct**, যা shared data, সেই data access করার procedures (methods), এবং synchronization mechanism-কে একটি **একক unit**-এর মধ্যে সংগঠিত করে।
 
@@ -265,7 +253,6 @@ Monitor-এর সবচেয়ে বড় বৈশিষ্ট্য হ�
 
 ![Monitor structure vs semaphore](./monitor_structure_vs_semaphore.svg)
 
----
 
 **Monitor কেন Semaphore-এর চেয়ে সহজ?**
 
@@ -277,7 +264,6 @@ Monitor এই কাজগুলো অনেক সহজ করে দেয�
 
 Programmer শুধুমাত্র shared data নিয়ে কাজ করেন, আর mutual exclusion-এর দায়িত্ব language বা runtime নিজেই পরিচালনা করে।
 
----
 
 **Condition Variable কীভাবে কাজ করে?**
 
@@ -299,7 +285,6 @@ Condition Variable মূলত একটি **waiting queue**, যেখান�
 
 ![Monitor internal queues](./monitor_internal_queues.svg)
 
----
 
 **wait()**
 
@@ -312,7 +297,6 @@ Condition Variable মূলত একটি **waiting queue**, যেখান�
 
 কারণ lock ছাড়া না হলে অন্য thread Monitor-এ প্রবেশ করে condition পরিবর্তন করতে পারত না।
 
----
 
 **signal() / notify()**
 
@@ -324,7 +308,6 @@ Condition Variable মূলত একটি **waiting queue**, যেখান�
 
 এই semantic difference এবং spurious wakeup-এর কারণে condition জেগে ওঠার পর predicate আবার check করা জরুরি।
 
----
 
 **Bounded Buffer উদাহরণ**
 
@@ -340,7 +323,6 @@ Condition Variable মূলত একটি **waiting queue**, যেখান�
 
 এভাবে Producer এবং Consumer নিরাপদভাবে একই buffer ব্যবহার করতে পারে।
 
----
 
 **Semaphore বনাম Monitor**
 
@@ -353,7 +335,6 @@ Condition Variable মূলত একটি **waiting queue**, যেখান�
 | Encapsulation         | Shared data ও synchronization আলাদা                        | Shared data + procedures + synchronization একসাথে থাকে                                                                      |
 | Language Support      | Low-level primitive                                        | Java (`synchronized`), C# (`lock`), C++ (`std::mutex` + `std::condition_variable`) দিয়ে monitor-style pattern implement করা যায় |
 
----
 
 **কেন `while` ব্যবহার করা হয়?**
 
@@ -376,7 +357,6 @@ while (buffer.isEmpty())
 
 তাই thread জেগে ওঠার পরে condition আবার পরীক্ষা করা প্রয়োজন।
 
----
 
 **সংক্ষেপে**
 

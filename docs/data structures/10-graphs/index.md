@@ -4,7 +4,7 @@ title: 'Graphs'
 ---
 
 
-## 🗺️ 60. What is a graph, and how is it represented in code?
+## 60. What is a graph, and how is it represented in code?
 
 **Graph** হলো একটি **non-linear data structure**, যা একগুচ্ছ **vertices (নোড)** এবং তাদের মধ্যে সংযোগকারী **edges** নিয়ে গঠিত। Tree-এর মতো এখানে কোনো strict **hierarchy** বা **root** থাকে না — যেকোনো vertex, যেকোনো অন্য vertex-এর সাথে সংযুক্ত থাকতে পারে, এমনকি **cycle** তৈরি হতে পারে।
 
@@ -150,9 +150,8 @@ adj[0].push_back({1, 10});
 adj[0].push_back({2, 5});
 ```
 
----
 
-## ➡️ 61. What is the difference between a directed graph and an undirected graph?
+## 61. What is the difference between a directed graph and an undirected graph?
 
 **Undirected graph** এ edge দুই দিকে কাজ করে। যদি `u` এবং `v` connected হয়, তাহলে `u` থেকে `v` এবং `v` থেকে `u` দুই দিকেই যাওয়া যায়।
 
@@ -264,9 +263,8 @@ adj[0].push_back({1, 10}); // route 1 cost 10
 adj[0].push_back({1, 20}); // route 2 cost 20
 ```
 
----
 
-## 🚶🔍 62. What are BFS and DFS, and when would you use each?
+## 62. What are BFS and DFS, and when would you use each?
 
 ```mermaid
 flowchart TB
@@ -314,7 +312,6 @@ void dfs(int curr, vector<list<int>>& adjList, vector<bool>& visited) {
 | **Level-order প্রয়োজন হলে** (যেমন social network-এ "k-degree connection") | **BFS** | স্বাভাবিকভাবেই level ধরে ধরে কাজ করে |
 | **Minimum Spanning Tree, Network Flow-related Problem** | **DFS/BFS উভয়ই ব্যবহৃত হয়** | Algorithm-ভেদে ভিন্ন (Prim's-এ BFS-এর মতো priority queue, Kruskal's-এ Union-Find) |
 
----
 
 ### What is the time and space complexity of BFS and DFS?
 
@@ -331,7 +328,6 @@ void dfs(int curr, vector<list<int>>& adjList, vector<bool>& visited) {
   - BFS-এ worst case space লাগে যখন graph-এর **width** বেশি (যেমন একটি node-এর অনেক neighbor)
   - DFS-এ worst case space লাগে যখন graph-এর **depth** বেশি (যেমন একটি লম্বা chain)
 
----
 
 ### How is BFS used to find the shortest path in an unweighted graph?
 
@@ -402,7 +398,6 @@ vector<int> getPath(int target, vector<int>& parent) {
 
 > ⚠️ **গুরুত্বপূর্ণ Limitation:** BFS শুধুমাত্র **unweighted graph**-এ shortest path দেয়। **Weighted graph**-এ shortest path বের করতে হলে **Dijkstra's Algorithm** (priority queue সহ BFS-এর একটি variant) প্রয়োজন।
 
----
 
 ### How is DFS used to detect connected components?
 
@@ -473,7 +468,7 @@ Component 1:  0 - 1     Component 2:  3 - 4     Component 3: 5
 
 > 🎯 **সারকথা:** **BFS** ব্যবহার করা হয় যখন **shortest path (unweighted)** বা **level-wise processing** প্রয়োজন, এবং এটি **Queue** ব্যবহার করে; **DFS** ব্যবহার করা হয় যখন **path existence, connectivity, cycle detection** ইত্যাদি "গভীরে গিয়ে সম্পূর্ণ explore করা" ধরনের সমস্যা সমাধান করতে হয়, এবং এটি **Stack (recursion)** ব্যবহার করে। উভয়েরই Time complexity **O(V+E)**, কিন্তু ব্যবহারের ধরন এবং internal data structure ভিন্ন — এই পার্থক্যটাই নির্ধারণ করে কোন সমস্যায় কোনটি বেছে নেওয়া উচিত।
 
-## 🔄 63. How do you detect a cycle in a graph?
+## 63. How do you detect a cycle in a graph?
 
 Cycle detection graph type অনুযায়ী আলাদা হয়:
 
@@ -582,9 +577,8 @@ bool hasCycleDirected(vector<vector<int>>& adj) {
 **Time Complexity**: `O(V + E)`
 **Space Complexity**: `O(V)`
 
----
 
-## 📋 64. What is topological sorting, and where is it used?
+## 64. What is topological sorting, and where is it used?
 
 **Topological Sort** হলো directed graph এর vertex গুলোকে এমন order এ সাজানো, যাতে প্রতিটি edge `u -> v` এর জন্য `u` সবসময় `v` এর আগে আসে।
 
@@ -709,9 +703,8 @@ vector<int> topologicalSortKahn(vector<vector<int>>& adj) {
 
 **Time Complexity**: `O(V + E)`
 
----
 
-## 🛣️ 65. What are the common shortest-path algorithms, and how do they differ?
+## 65. What are the common shortest-path algorithms, and how do they differ?
 
 Shortest path problem graph type অনুযায়ী solve করা হয়।
 
@@ -877,9 +870,8 @@ Floyd-Warshall শেষে যদি dist[i][i] < 0 হয়,
 তাহলে negative cycle আছে।
 ```
 
----
 
-## 🌲 66. What is a minimum spanning tree (MST), and how do Prim's and Kruskal's algorithms differ?
+## 66. What is a minimum spanning tree (MST), and how do Prim's and Kruskal's algorithms differ?
 
 **Minimum Spanning Tree (MST)** হলো connected undirected weighted graph এর এমন subset of edges, যা:
 
@@ -1057,9 +1049,8 @@ Prim with heap: O(E log V)
 Kruskal: O(E log E), usually O(E log V)
 ```
 
----
 
-## 🔗 67. What are strongly connected components (SCCs), and how are they found?
+## 67. What are strongly connected components (SCCs), and how are they found?
 
 **Strongly Connected Component (SCC)** directed graph এর এমন একটা component, যেখানে component এর যেকোনো node থেকে অন্য যেকোনো node এ যাওয়া যায়।
 
@@ -1242,9 +1233,8 @@ Time Complexity = O(V + E)
 Space Complexity = O(V + E)
 ```
 
----
 
-## 🌐 68. What is bipartite graph checking, and how is it done?
+## 68. What is bipartite graph checking, and how is it done?
 
 **Bipartite graph** হলো এমন graph যার vertices দুইটা group/set এ ভাগ করা যায়, যাতে কোনো edge same group এর দুই node এর মধ্যে না থাকে।
 
@@ -1399,5 +1389,3 @@ int maximumBipartiteMatching(vector<vector<int>>& adj, int leftSize, int rightSi
 ```
 
 এখানে `adj[u]` মানে left side এর node `u` কোন right side nodes এর সাথে match হতে পারে।
-
----

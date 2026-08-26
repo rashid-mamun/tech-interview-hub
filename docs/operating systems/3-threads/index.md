@@ -5,7 +5,7 @@ title: 'Threads'
 
 
 
-## 🧶 10. What is a thread, and how does it differ from a process?
+## 10. What is a thread, and how does it differ from a process?
 
 ```mermaid
 flowchart TB
@@ -21,7 +21,6 @@ flowchart TB
 Thread-কে অনেক সময় **lightweight process** বলা হয়, কারণ এটি process-এর মতো execution করে, কিন্তু সাধারণত **নিজস্ব আলাদা address space তৈরি করে না**। বরং একই process-এর resources share করে।
 এই কারণে thread তৈরি ও একই process-এর threadগুলোর মধ্যে context switch করা process-এর তুলনায় সাধারণত **কম খরচসাপেক্ষ**।
 
----
 
 **Single-threaded vs Multi-threaded Process**
 
@@ -39,7 +38,6 @@ Single-threaded Process:        Multi-threaded Process:
 └───────────────────┘          └───────────────────────────┘
 ```
 
----
 
 **Thread এবং Process-এর পার্থক্য**
 
@@ -53,7 +51,6 @@ Single-threaded Process:        Multi-threaded Process:
 | **Context switch** | তুলনামূলক ধীর ও ব্যয়বহুল                                           | তুলনামূলক দ্রুত                                                            |
 | **Crash effect**   | একটি process crash করলে সাধারণত অন্য process সরাসরি প্রভাবিত হয় না | একটি thread-এ গুরুতর error হলে পুরো process প্রভাবিত বা terminate হতে পারে |
 
----
 
 ### What resources are shared between threads of the same process, and what is private to each thread?
 
@@ -91,7 +88,6 @@ Thread বোঝার জন্য এটি সবচেয়ে গুরু
 └─────────────────────────────────────────┘
 ```
 
----
 
 **Private — প্রতিটি thread-এর নিজস্ব**
 
@@ -130,7 +126,6 @@ Thread বোঝার জন্য এটি সবচেয়ে গুরু
 └──────────────┘  └──────────────┘  └──────────────┘
 ```
 
----
 
 ### Why is creating a thread generally cheaper than creating a process?
 
@@ -161,7 +156,6 @@ Thread process-এর তুলনায় সস্তা হওয়ার �
 └──────────────────────┘          └──────────────────────┘
 ```
 
----
 
 **Memory overhead কম**
 
@@ -174,7 +168,6 @@ Thread-এর ক্ষেত্রে আলাদা পুরো memory space
 * memory management overhead কম
 * resource duplication কম
 
----
 **Context switch তুলনামূলক দ্রুত**
 
 **Process context switch**-এ OS-কে সাধারণত:
@@ -197,7 +190,6 @@ Process Context Switch:           Thread Context Switch:
 └────────────────────────┘       └────────────────────────┘
 ```
 
----
 
 **Communication সহজ ও দ্রুত**
 
@@ -226,7 +218,6 @@ Process A      Process B          Thread 1    Thread 2
 
 > তবে shared memory ব্যবহারের সময় **synchronization** না করলে **race condition** হতে পারে।
 
----
 
 ধরো একটি **web server process** আছে। সেখানে একাধিক thread থাকতে পারে:
 
@@ -246,7 +237,6 @@ Process A      Process B          Thread 1    Thread 2
 
 ফলে UI freeze না হয়ে application responsive থাকতে পারে।
 
----
 
 ### Thread-এর সুবিধা
 
@@ -259,7 +249,6 @@ Process A      Process B          Thread 1    Thread 2
 
 **Scalability / Parallelism**: Multi-core CPU থাকলে একাধিক thread সত্যিকারের parallel execution পেতে পারে — **যদি underlying threading model ও OS support তা allow করে**।
 
----
 
 ### Thread-এর সমস্যা
 
@@ -273,9 +262,8 @@ Process A      Process B          Thread 1    Thread 2
 
 **একটি thread-এর গুরুতর error পুরো process-কে প্রভাবিত করতে পারে**: যেহেতু thread গুলো একই process-এর memory space share করে, তাই memory corruption বা segmentation fault-এর মতো error পুরো process-কে ক্ষতিগ্রস্ত করতে পারে।
 
----
 
-## 🏗️ 11. What is the difference between user-level threads and kernel-level threads?
+## 11. What is the difference between user-level threads and kernel-level threads?
 
 ```mermaid
 flowchart TB
@@ -315,7 +303,6 @@ User-level Thread (ULT):          Kernel-level Thread (KLT):
 └─────────────────┘               └─────────────────┘
 ```
 
----
 
 **User-Level Threads (ULT)**
 
@@ -360,7 +347,6 @@ ULT-এ সাধারণত:
 * context switch library code-এর মাধ্যমেই হয়
 * kernel শুধু পুরো process-টিকে schedule করে
 
----
 
 
 **Kernel-Level Threads (KLT)**
@@ -368,7 +354,6 @@ ULT-এ সাধারণত:
 **Kernel-level thread** হলো এমন thread যাকে **OS kernel সরাসরি manage করে**।
 প্রতিটি thread OS-এর কাছে আলাদা scheduling entity হিসেবে পরিচিত থাকে। Kernel সরাসরি প্রতিটি thread-কে CPU দিতে পারে।
 
----
 
 ```text
 User Space:
@@ -388,7 +373,6 @@ Kernel:│           │           │
 Kernel প্রতিটি thread আলাদাভাবে schedule করে
 ```
 
----
 
 **ULT বনাম KLT — মূল পার্থক্য**
 
@@ -402,7 +386,6 @@ Kernel প্রতিটি thread আলাদাভাবে schedule কর�
 | **Multi-core parallelism**   | সীমিত / model-নির্ভর                      | সম্ভব                                             |
 | **Kernel features**          | সরাসরি সব সুবিধা পায় না                  | Kernel scheduling, priority, signals ইত্যাদি পায় |
 
----
 
 ### What are the advantages and disadvantages of each?
 
@@ -434,7 +417,6 @@ Application নিজেই তার দরকারমতো scheduling policy
 
 যদি kernel প্রতিটি user thread-এর জন্য আলাদা kernel structure না রাখে, তাহলে অনেক ULT তৈরি করা তুলনামূলক সস্তা হতে পারে।
 
----
 
 **ULT-এর অসুবিধা**
 
@@ -459,7 +441,6 @@ T1 block (I/O wait):
 
 Kernel প্রতিটি thread-কে আলাদা entity হিসেবে না দেখলে per-thread priority বা kernel-level scheduling সুবিধা সীমিত হয়।
 
----
 
 **KLT-এর সুবিধা ও অসুবিধা**
 
@@ -493,7 +474,6 @@ T1 block (I/O wait):
 
 Priority scheduling, CPU accounting, signals, real-time support ইত্যাদি সুবিধা thread-level-এ পাওয়া যায়।
 
----
 
 **অসুবিধা**
 
@@ -520,10 +500,9 @@ Kernel-level thread switch-এ kernel scheduler involvement লাগে। ত�
 
 প্রতিটি thread kernel-এর কাছে visible হওয়ায় scale বাড়লে overhead-ও বাড়তে পারে।
 
----
 
 
-## 🔀 12. What are the multithreading models, and how do they differ?
+## 12. What are the multithreading models, and how do they differ?
 
 ```mermaid
 flowchart LR
@@ -544,7 +523,6 @@ User-level threads (ULT) এবং kernel-level threads (KLT)-এর মধ্�
 * **One-to-One**
 * **Many-to-Many**
 
----
 
 **Many-to-One Model**
 
@@ -571,7 +549,6 @@ User-level threads (ULT) এবং kernel-level threads (KLT)-এর মধ্�
                    CPU
 ```
 
----
 
 **কীভাবে কাজ করে**
 
@@ -587,7 +564,6 @@ CPU:   [T1] [T1] [T2] [T3] [T3] [T2] [T4] [T5]
 Library নিজেই একের পর এক thread চালায়
 ```
 
----
 
 **সমস্যা — Blocking**
 
@@ -604,7 +580,6 @@ Kernel:         KT1 → BLOCKED
 ফলে T2, T3-ও অপেক্ষা করবে
 ```
 
----
 
 **সুবিধা ও অসুবিধা**
 
@@ -615,7 +590,6 @@ Kernel:         KT1 → BLOCKED
 | Portable                | Kernel-level scheduling সুবিধা সীমিত            |
 | Custom scheduling সম্ভব | True parallelism নেই                            |
 
----
 
 **One-to-One Model**
 
@@ -638,13 +612,11 @@ Kernel:
   Core1   Core2   Core3   Core4
 ```
 
----
 
 **কীভাবে কাজ করে**
 
 প্রতিটি user thread-এর জন্য একটি corresponding kernel thread থাকে। Kernel প্রতিটি thread-কে আলাদাভাবে schedule করতে পারে।
 
----
 
 **Blocking situation**
 
@@ -658,7 +630,6 @@ Kernel:        KT1        KT2        KT3
               blocked    running    running
 ```
 
----
 
 **সুবিধা ও অসুবিধা**
 
@@ -671,7 +642,6 @@ Kernel:        KT1        KT2        KT3
 
 **আধুনিক Linux, Windows, macOS** মূলত one-to-one ধরনের kernel-managed threading model ব্যবহার করে।
 
----
 
 **Many-to-Many Model**
 
@@ -691,7 +661,6 @@ Kernel:   KT1    KT2         KT3
          Core1  Core2       Core3
 ```
 
----
 
 **কীভাবে কাজ করে**
 
@@ -703,7 +672,6 @@ Kernel:   KT1    KT2         KT3
 * ULT-এর flexibility রাখা
 * আবার KLT-এর parallelism-ও পাওয়া
 
----
 
 **সুবিধা ও অসুবিধা**
 
@@ -714,7 +682,6 @@ Kernel:   KT1    KT2         KT3
 | ULT-এর flexibility + KLT-এর power | OS support সবসময় নেই         |
 | Resource usage optimize করা যায়  | Runtime mapping logic complex |
 
----
 
 **তিনটি Model-এর পাশাপাশি তুলনা**
 
@@ -728,7 +695,6 @@ Kernel:   KT1    KT2         KT3
 | **Kernel visibility**         | Kernel সাধারণত একটিমাত্র entity দেখে | প্রতিটি thread visible | একাধিক KLT visible |
 | **Modern usage**              | বিরল                                 | খুবই common            | বিরল / specialized |
 
----
 
 **ULT, KLT এবং Multithreading Model-এর সম্পর্ক**
 
@@ -744,7 +710,7 @@ Kernel:   KT1    KT2         KT3
 
 
 
-## ⚡ 13. What is the difference between concurrency and parallelism?
+## 13. What is the difference between concurrency and parallelism?
 
 ```mermaid
 flowchart TB
@@ -761,7 +727,6 @@ flowchart TB
 > **মূল কথা:** Concurrency হলো **multiple tasks-এর progress overlap করা**।
 > এটি অনেক সময় **time-sharing, scheduling, context switching, async I/O, event-driven execution** ইত্যাদির মাধ্যমে অর্জন করা হয়।
 
----
 
 **Parallelism (সমান্তরালতা)**
 
@@ -772,7 +737,6 @@ flowchart TB
 > **মূল কথা:** Parallelism হলো **multiple tasks actually একই instant-এ run করা**।
 > এটি true simultaneous execution, যা সাধারণত **multi-core system**-এ সম্ভব হয়।
 
----
 
 ```text
 Concurrency:                    Parallelism:
@@ -789,11 +753,9 @@ A ও B দুটোই progress করছে      A ও B literally
 কিন্তু একসাথে নয়               একই সময়ে চলছে
 ```
 
----
 
 ### তিনটি প্রধান execution pattern
 
----
 
 #### i) Sequential Execution
 
@@ -808,7 +770,6 @@ A ও B দুটোই progress করছে      A ও B literally
 
 এখানে task A শেষ না হওয়া পর্যন্ত task B শুরুই হচ্ছে না।
 
----
 
 #### ii) Concurrent but not Parallel
 
@@ -824,7 +785,6 @@ A ও B দুটোই progress করছে      A ও B literally
 এখানে A ও B দুটোরই progress হচ্ছে, কিন্তু একই মুহূর্তে নয়।
 CPU interleave করছে।
 
----
 
 #### iii) Concurrent and Parallel
 
@@ -840,7 +800,6 @@ Core 2: [B][B][B][B]
 
 এখানে multiple task একই সময়েও চলছে, এবং সবার progress-ও হচ্ছে।
 
----
 
 ### Can a single-core system exhibit concurrency? Can it exhibit parallelism?
 
@@ -877,7 +836,6 @@ Single-core concurrency সাধারণত নিচের উপায়ে �
 
 অর্থাৎ এটি **true simultaneous execution** না, বরং **interleaved execution**।
 
----
 
 **Single-core system-এ parallelism কি সম্ভব?**
 
@@ -891,7 +849,6 @@ Single-core concurrency সাধারণত নিচের উপায়ে �
 > **Single-core → Concurrency সম্ভব**
 > **Single logical execution context → True task-level parallelism সম্ভব নয়**
 
----
 
 ### Concurrency এবং Parallelism — সম্পর্ক
 
@@ -915,11 +872,9 @@ Concurrency
 * কিন্তু **Concurrency থাকলেই parallelism হবে না**
 * একটি single logical execution context concurrency দিতে পারে, কিন্তু independent software task-এর true parallelism দিতে পারে না
 
----
 
 #### বাস্তব উদাহরণ দিয়ে পার্থক্য
 
----
 
 #### উদাহরণ ১ — Web Server
 
@@ -950,7 +905,6 @@ Request 3 → process → DB wait → process → respond
 * non-blocking server model দিয়ে
 * scheduling/interleaving দিয়ে
 
----
 
 ##### Parallel Web Server (multi-core)
 
@@ -966,7 +920,6 @@ Core 3 → Request 3 handle করছে
 
 এটি **Parallelism**।
 
----
 
 #### উদাহরণ ২ — Video Rendering
 
@@ -982,7 +935,6 @@ Frame 3: [░██░░░░██░░░]
 
 সব frame-এর progress হচ্ছে, কিন্তু একসাথে নয়।
 
----
 
 ##### Parallel rendering (multi-core)
 
@@ -998,7 +950,6 @@ Core 4 → Frame 4
 এখানে 4টি frame একই সময়ে render হতে পারে।
 এটি **Parallelism**, এবং সাধারণত rendering time কমিয়ে দেয়।
 
----
 
 ### Concurrency ও Parallelism-এর লক্ষ্য আলাদা
 
@@ -1020,7 +971,6 @@ Concurrency-এর মূল উদ্দেশ্য সবসময় speedup �
 * web server-এ বহু request manage করা
 * background কাজ চলতে থাকা অবস্থায় foreground কাজ চালানো
 
----
 
 #### Parallelism-এর লক্ষ্য
 
@@ -1040,7 +990,6 @@ Parallelism-এর মূল উদ্দেশ্য সাধারণত **sp
 * scientific simulation
 * large-scale data processing
 
----
 
 **গুরুত্বপূর্ণ পর্যবেক্ষণ**
 
@@ -1055,7 +1004,6 @@ Concurrency system-কে responsive ও efficient করতে সাহায�
 * locking complexity
 * race condition handling
 
----
 
 #### ii) Parallelism speedup দিতে পারে
 
@@ -1068,7 +1016,6 @@ Concurrency system-কে responsive ও efficient করতে সাহায�
 * communication cost
 * load balancing
 
----
 
 #### iii) CPU-bound vs I/O-bound কাজ
 
@@ -1090,7 +1037,6 @@ Concurrency system-কে responsive ও efficient করতে সাহায�
 * simulation
 * data processing
 
----
 
 | বিষয়                               | Concurrency                                            | Parallelism                                 |
 | ---------------------------------- | ------------------------------------------------------ | ------------------------------------------- |
@@ -1102,5 +1048,3 @@ Concurrency system-কে responsive ও efficient করতে সাহায�
 | প্রধান লক্ষ্য                      | responsiveness, overlap, resource utilization          | speedup, throughput                         |
 | I/O-bound task-এ useful?           | খুব বেশি                                               | কখনো কখনো                                   |
 | CPU-bound task-এ useful?           | সীমিত                                                  | খুব বেশি                                    |
-
----

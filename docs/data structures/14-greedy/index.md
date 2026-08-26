@@ -3,7 +3,7 @@ sidebar_position: 15
 title: 'Greedy Algorithms'
 ---
 
-## 🎯 86. What is a greedy algorithm, and how does it differ from dynamic programming?
+## 86. What is a greedy algorithm, and how does it differ from dynamic programming?
 
 ```mermaid
 flowchart LR
@@ -40,7 +40,7 @@ Coins for 63: 25x2 10x1 1x3
 
 এই greedy logic `{1,5,10,25}`-এর জন্য optimal, কিন্তু `{1,3,4}` দিয়ে amount `6`-এ greedy `4+1+1` নেয়; optimal হলো `3+3`। তাই greedy সব coin system-এ সঠিক নয়।
 
-## 📅 87. How does greedy interval selection work?
+## 87. How does greedy interval selection work?
 
 ```mermaid
 flowchart TD
@@ -102,7 +102,7 @@ Minimum rooms: 2
 
 Sorting-এর কারণে time `O(n log n)`।
 
-## 🌳 88. How does Huffman encoding use a greedy approach?
+## 88. How does Huffman encoding use a greedy approach?
 
 ```mermaid
 flowchart TD
@@ -167,7 +167,7 @@ d: 11
 
 একই frequency থাকলে একাধিক ভিন্ন কিন্তু সমান optimal code সম্ভব। Time `O(k log k)`।
 
-## 🎒 89. Fractional knapsack vs 0/1 knapsack
+## 89. Fractional knapsack vs 0/1 knapsack
 
 ```mermaid
 flowchart TD
@@ -218,7 +218,7 @@ Maximum value: 240.00
 
 Time `O(n log n)`; sorting ছাড়া scan `O(n)`।
 
-## 🔢 90. How would you solve Jump Game greedily?
+## 90. How would you solve Jump Game greedily?
 
 ```mermaid
 flowchart LR

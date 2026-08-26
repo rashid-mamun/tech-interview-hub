@@ -220,8 +220,10 @@
   padding: 18px 28px 36px;
   box-shadow: none;
   margin: 0;
-  max-width: none;
+  max-width: 900px;
   width: 100%;
+  margin-left: auto;
+  margin-right: auto;
   overflow-wrap: break-word;
 }
 
@@ -231,12 +233,13 @@
 
 .theme-doc-markdown h1,
 .theme-doc-markdown h2,
-.theme-doc-markdown h3 {
+.theme-doc-markdown h3,
+.theme-doc-markdown h4,
+.theme-doc-markdown h5 {
   letter-spacing: 0;
-  font-weight: 600;
-  margin-bottom: 0.8rem;
   max-width: 100%;
   overflow-wrap: anywhere;
+  color: var(--ifm-heading-color);
 }
 
 .theme-doc-markdown h1 {
@@ -244,14 +247,16 @@
   line-height: 1.32;
   font-weight: 800;
   padding-bottom: 0.9rem;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid var(--docs-border);
+  margin: 0 0 1.35rem;
+  border-bottom: 2px solid var(--docs-border);
 }
 
 .theme-doc-markdown h2 {
-  margin-top: 1.7rem;
-  padding-top: 0.85rem;
+  margin: 2.5rem 0 1rem;
+  padding: 0.72rem 0.8rem;
   border-top: 1px solid var(--docs-border);
+  border-bottom: 1px solid var(--docs-border);
+  background: linear-gradient(90deg, var(--docs-accent-soft), transparent 82%);
   font-size: clamp(1.22rem, 1.45vw, 1.45rem);
   line-height: 1.42;
   font-weight: 700;
@@ -260,29 +265,49 @@
 .theme-doc-markdown > h2:first-child,
 .theme-doc-markdown > h1:first-child {
   margin-top: 0;
-  padding-top: 0;
+  padding-top: 0.72rem;
   border-top: 0;
 }
 
 .theme-doc-markdown h3 {
   font-size: clamp(1.05rem, 1.15vw, 1.18rem);
   line-height: 1.45;
-  font-weight: 600;
-  margin-top: 1.35rem;
+  font-weight: 700;
+  margin: 1.85rem 0 0.7rem;
+  padding-bottom: 0.38rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--docs-border) 72%, transparent);
 }
 
 .theme-doc-markdown h1 code,
 .theme-doc-markdown h2 code,
-.theme-doc-markdown h3 code {
+.theme-doc-markdown h3 code,
+.theme-doc-markdown h4 code,
+.theme-doc-markdown h5 code {
   font-size: 0.78em;
   line-height: 1;
   padding: 0.05em 0.32em;
 }
 
 .theme-doc-markdown h4 {
-  font-size: 1.05rem;
-  line-height: 1.4;
+  font-size: 1rem;
+  line-height: 1.45;
   font-weight: 700;
+  margin: 1.4rem 0 0.55rem;
+  color: color-mix(in srgb, var(--ifm-heading-color) 84%, var(--ifm-color-primary));
+}
+
+.theme-doc-markdown h5 {
+  font-size: 0.92rem;
+  line-height: 1.45;
+  font-weight: 700;
+  margin: 1.15rem 0 0.45rem;
+  color: var(--docs-text-muted);
+}
+
+.theme-doc-markdown h2 + h3,
+.theme-doc-markdown h3 + h4,
+.theme-doc-markdown h4 + h5 {
+  margin-top: 0.85rem;
 }
 
 .theme-doc-markdown p,
@@ -301,6 +326,7 @@
 
 .theme-doc-markdown p {
   max-width: 82ch;
+  margin-top: 0;
 }
 
 .theme-doc-markdown > ul,
@@ -315,25 +341,75 @@
 
 .theme-doc-markdown ul,
 .theme-doc-markdown ol {
-  padding-left: 1.25rem;
+  margin-top: 0.4rem;
+  margin-bottom: 1.1rem;
+  padding-left: 1.9rem;
+}
+
+.theme-doc-markdown li::marker {
+  color: var(--ifm-color-primary);
+  font-weight: 500;
+}
+
+.theme-doc-markdown ul li::marker {
+  font-size: 0.72em;
+}
+
+.theme-doc-markdown ol li::marker {
+  font-size: 0.92em;
+  font-weight: 600;
+}
+
+.theme-doc-markdown ul ul,
+.theme-doc-markdown ol ol,
+.theme-doc-markdown ul ol,
+.theme-doc-markdown ol ul {
+  margin-top: 0.35rem;
+  margin-bottom: 0.35rem;
+  padding-left: 1.45rem;
+}
+
+.theme-doc-markdown ul ul {
+  list-style-type: circle;
+}
+
+.theme-doc-markdown ul ul ul {
+  list-style-type: square;
+}
+
+.theme-doc-markdown li > p {
+  margin: 0.2rem 0 0.45rem;
 }
 
 .theme-doc-markdown strong {
   color: var(--ifm-heading-color);
-  font-weight: 700;
+  font-weight: 600;
+}
+
+.theme-doc-markdown h1 strong,
+.theme-doc-markdown h2 strong,
+.theme-doc-markdown h3 strong,
+.theme-doc-markdown h4 strong,
+.theme-doc-markdown h5 strong {
+  font-weight: inherit;
 }
 
 .theme-doc-markdown blockquote {
+  margin: 1rem 0 1.35rem;
   border: 1px solid #c9e9dc;
-  border-radius: 6px;
+  border-radius: 4px;
   background: #eefaf5;
-  padding: 0.9rem 1rem;
+  padding: 0.85rem 1rem;
   color: var(--docs-text);
+}
+
+.theme-doc-markdown blockquote > :last-child {
+  margin-bottom: 0;
 }
 
 .theme-doc-markdown header + h2 {
   margin-top: 1.35rem;
-  padding-top: 0;
+  padding-top: 0.72rem;
   border-top: 0;
 }
 
@@ -346,15 +422,20 @@
   display: block;
   width: 100%;
   max-width: 100%;
+  margin: 1rem 0 1.5rem;
   overflow-x: auto;
   font-size: 14px;
   scrollbar-width: thin;
+  border: 1px solid var(--docs-border);
 }
 
 .theme-doc-markdown table th,
 .theme-doc-markdown table td {
   min-width: 8.5rem;
+  padding: 0.68rem 0.78rem;
+  border-color: var(--docs-border);
   vertical-align: top;
+  line-height: 1.55;
 }
 
 .theme-doc-markdown table th:first-child,
@@ -366,9 +447,29 @@
   background: var(--docs-soft-bg);
 }
 
+.theme-doc-markdown tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--docs-soft-bg) 58%, transparent);
+}
+
+.theme-doc-markdown hr {
+  height: 0;
+  margin: 2.25rem 0;
+  border: 0;
+  border-top: 1px solid var(--docs-border);
+  background: transparent;
+}
+
 .theme-doc-markdown pre {
+  margin: 0.85rem 0 1.35rem;
   border-radius: 6px;
   border: 1px solid var(--docs-border);
+  box-shadow: none;
+}
+
+.theme-doc-markdown .alert {
+  margin: 1rem 0 1.35rem;
+  border-width: 1px;
+  border-radius: 5px;
   box-shadow: none;
 }
 
@@ -854,7 +955,7 @@ body.docs-left-hidden.docs-right-hidden .theme-doc-markdown {
 
 @media only screen and (max-width: 1400px) {
   .theme-doc-markdown {
-    max-width: none;
+    max-width: 900px;
   }
 }
 
@@ -956,17 +1057,47 @@ body.docs-left-hidden.docs-right-hidden .theme-doc-markdown {
 
   .theme-doc-markdown h2 {
     font-size: 1.2rem;
-    margin-top: 1.4rem;
+    margin-top: 1.9rem;
+    padding: 0.62rem 0.65rem;
   }
 
   .theme-doc-markdown h3 {
     font-size: 1.02rem;
+    margin-top: 1.45rem;
+  }
+
+  .theme-doc-markdown h4 {
+    font-size: 0.96rem;
+    margin-top: 1.15rem;
+  }
+
+  .theme-doc-markdown h5 {
+    font-size: 0.9rem;
+    margin-top: 1rem;
   }
 
   .theme-doc-markdown p,
   .theme-doc-markdown li {
     font-size: 15px;
     line-height: 1.78;
+  }
+
+  .theme-doc-markdown ul,
+  .theme-doc-markdown ol {
+    padding-left: 1.5rem;
+  }
+
+  .theme-doc-markdown ul ul,
+  .theme-doc-markdown ol ol,
+  .theme-doc-markdown ul ol,
+  .theme-doc-markdown ol ul {
+    padding-left: 1.15rem;
+  }
+
+  .theme-doc-markdown table th,
+  .theme-doc-markdown table td {
+    min-width: 7.5rem;
+    padding: 0.58rem 0.65rem;
   }
 
   .theme-doc-markdown img {

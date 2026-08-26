@@ -4,7 +4,7 @@ title: 'Heap & Priority Queue'
 ---
 
 
-## 🏔️ 54. What is a heap, and how does it differ from a binary search tree?
+## 54. What is a heap, and how does it differ from a binary search tree?
 
 **Heap** হলো একটা special tree-based data structure, সাধারণত **complete binary tree** আকারে represent করা হয়, যেখানে parent এবং child node এর মধ্যে একটা priority rule follow করা হয়। এই rule কে বলা হয় **heap property**।
 
@@ -113,9 +113,8 @@ Value: 50  30  40  10  20  35
 
 এই array-based representation memory efficient এবং cache-friendly।
 
----
 
-## ⬆️⬇️ 55. What is the difference between a min-heap and a max-heap?
+## 55. What is the difference between a min-heap and a max-heap?
 
 **Min-heap** এ root node সবসময় minimum element।
 **Max-heap** এ root node সবসময় maximum element।
@@ -217,9 +216,8 @@ Maximum value: 30
 
 > **Overflow note:** Signed `int`-এর minimum value (`INT_MIN`) negate করা representable নয় এবং undefined behavior ঘটায়। Arbitrary integer input-এর জন্য negation trick-এর বদলে comparator ব্যবহার করা নিরাপদ।
 
----
 
-## 📊 56. How is a heap implemented using an array?
+## 56. How is a heap implemented using an array?
 
 ```mermaid
 flowchart TB
@@ -251,7 +249,6 @@ vector<int> heap = {10, 8, 9, 4, 7, 5};
 
 Tree-এর প্রতিটি **level** array-তে **পাশাপাশি (sequentially)** সাজানো থাকে।
 
----
 
 ### How do you calculate the indices of a node's parent, left child, and right child?
 
@@ -292,7 +289,6 @@ Index `1` (value `8`)-এর জন্য:
 - **Left Child** = `2*1+1 = 3` → index `3` (value `4`) ✅
 - **Right Child** = `2*1+2 = 4` → index `4` (value `7`) ✅
 
----
 
 ### What are the "heapify-up" and "heapify-down" (sift up/down) operations?
 
@@ -323,7 +319,6 @@ void insert(vector<int>& heap, int value) {
 
 ##### Time Complexity: **O(log n)** — কারণ element সর্বোচ্চ tree-এর **height** পরিমাণ ধাপ move করতে পারে।
 
----
 
 #### Heapify-Down (Sift Down) Operation
 
@@ -368,7 +363,7 @@ int extractMax(vector<int>& heap) {
 ##### Time Complexity: **O(log n)** — একইভাবে, element সর্বোচ্চ tree-এর **height** পরিমাণ ধাপ move করতে পারে।
 
 
-## ⏱️ 57. What is the time complexity of heap operations (insert, extract-min/max, build-heap)?
+## 57. What is the time complexity of heap operations (insert, extract-min/max, build-heap)?
 
 
 
@@ -381,7 +376,6 @@ int extractMax(vector<int>& heap) {
 | **Search (নির্দিষ্ট value)** | **O(n)** | Heap-এর কোনো **ordering property** (BST-এর মতো) না থাকায়, নির্দিষ্ট value খুঁজতে পুরো array scan করতে হয় |
 | **Delete (নির্দিষ্ট element)** | **O(log n)** | Element-এর index জানা থাকলে, সেটিকে শেষ element দিয়ে replace করে heapify-up/down করা হয় |
 
----
 
 ### Why is building a heap from an array O(n) rather than O(n log n)?
 
@@ -436,7 +430,6 @@ T(n) = O(n) * sum from h=0 to infinity of h / 2^h
 | **Insert একে একে** (প্রতিটি element-এ heapify-up) | **O(n log n)** | প্রতিটি insert-এ worst case O(log n), n বার করা হয় |
 | **Bottom-Up Build (Floyd's Algorithm)** | **O(n)** | নিচের দিকের বেশিরভাগ node-এ সামান্য কাজ লাগে |
 
----
 
 
 ### What is the time complexity of heap sort, and is it stable?
@@ -472,7 +465,6 @@ void heapSort(vector<int>& arr) {
 #### Space Complexity:
 **O(1)** — Heap Sort একটি **in-place** sorting algorithm, কারণ এটি মূল array-এর মধ্যেই heap তৈরি করে এবং sort করে, কোনো extra array-এর প্রয়োজন হয় না।
 
----
 
 #### Heap Sort কি Stable?
 
@@ -493,9 +485,8 @@ Heap Sort-এর পর হয়তো output হবে:
 
 > ⚠️ **Practical প্রভাব:** যদি সমান value-যুক্ত element গুলোর original order গুরুত্বপূর্ণ হয় (যেমন, একাধিক field অনুযায়ী sort করার সময়), তাহলে Heap Sort উপযুক্ত নয়। এক্ষেত্রে **Merge Sort** (যা stable) ব্যবহার করা ভালো।
 
----
 
-## 🥇 58. How would you find the kth largest (or smallest) element in an unsorted array?
+## 58. How would you find the kth largest (or smallest) element in an unsorted array?
 
 Unsorted array থেকে kth largest বের করার common approaches:
 
@@ -644,9 +635,8 @@ int findKthLargestQuickselect(vector<int> nums, int k) {
 ```
 
 `quickselect` core input-কে in-place modify করলে iterative version-এর auxiliary space `O(1)`। উপরের public wrapper ইচ্ছাকৃতভাবে `nums` by value নিয়েছে, তাই caller-এর input বাঁচানোর জন্য copy-তে `O(n)` অতিরিক্ত space লাগে।
----
 
-## 🔗 59. How would you merge k sorted arrays or lists efficiently using a heap?
+## 59. How would you merge k sorted arrays or lists efficiently using a heap?
 
 প্রতিটি sorted array-এর প্রথম element min-heap-এ রাখা হয়। Minimum pop করার পর একই array-এর পরের element push করা হয়। Heap-এ সর্বোচ্চ `k`টি candidate থাকায় মোট `N` element merge করতে `O(N log k)` time এবং `O(k)` auxiliary space লাগে। Linked-list version-এ heap entry-তে node pointer রাখা হয়; pop করা node-এর `next` push করলেই একই algorithm কাজ করে।
 

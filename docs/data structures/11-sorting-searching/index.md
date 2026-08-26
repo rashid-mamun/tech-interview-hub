@@ -4,7 +4,7 @@ title: 'Sorting & Searching'
 ---
 
 
-## 📋 91. What are the common sorting algorithms, and what are their time and space complexities?
+## 91. What are the common sorting algorithms, and what are their time and space complexities?
 
 **Sorting** মানে data কে কোনো নির্দিষ্ট order এ arrange করা, যেমন ascending বা descending। Interview এ sorting important কারণ অনেক problem sorting করার পর সহজ হয়ে যায়: duplicate detect, interval merge, two pointers, greedy scheduling, kth element ইত্যাদি।
 
@@ -128,9 +128,8 @@ Benefits:
 
 এই কারণে অনেক production sorting algorithm small partition এর জন্য insertion sort ব্যবহার করে।
 
----
 
-## 🔒 92. What is the difference between stable and unstable sorting algorithms?
+## 92. What is the difference between stable and unstable sorting algorithms?
 
 **Stable sorting** হলে equal keys এর relative order preserve থাকে।
 **Unstable sorting** হলে equal keys এর relative order change হতে পারে।
@@ -217,9 +216,8 @@ sort(v.begin(), v.end());
 stable_sort(v.begin(), v.end());
 ```
 
----
 
-## ⚡ 93. How does quicksort work, and what is its worst-case time complexity?
+## 93. How does quicksort work, and what is its worst-case time complexity?
 
 **Quick Sort** divide-and-conquer algorithm। একটা **pivot** choose করা হয়, তারপর array partition করা হয়:
 
@@ -349,9 +347,8 @@ void quickSortHoare(vector<int>& nums, int left, int right) {
 | Lomuto | Yes | বেশি | Yes |
 | Hoare | একটু tricky | কম | Not always |
 
----
 
-## 🔗 94. How does merge sort work, and why is it often preferred for linked lists?
+## 94. How does merge sort work, and why is it often preferred for linked lists?
 
 **Merge Sort** divide-and-conquer algorithm:
 
@@ -438,9 +435,8 @@ Linked list merge sort extra array লাগে না, কারণ pointer rel
 
 C++ `stable_sort()` commonly merge-sort-like strategy use করে এবং stable।
 
----
 
-## 🔢 95. What is the difference between comparison-based and non-comparison-based sorting algorithms?
+## 95. What is the difference between comparison-based and non-comparison-based sorting algorithms?
 
 **Comparison-based sorting** element compare করে order ঠিক করে। যেমন:
 - Bubble Sort
@@ -575,9 +571,8 @@ Radix sort preferable যখন:
 - range/digit count controlled
 - stable linear-ish sort দরকার
 
----
 
-## 🏔️ 96. When would you use heap sort over quicksort or merge sort?
+## 96. When would you use heap sort over quicksort or merge sort?
 
 **Heap Sort** heap data structure ব্যবহার করে sorting করে। Max-heap build করে বারবার maximum element end এ পাঠানো হয়।
 
@@ -642,10 +637,9 @@ int main() {
 
 Heap sort random index jump করে parent-child relation maintain করে, তাই cache locality quicksort এর মতো ভালো না। তবে memory কম লাগা এবং worst-case guarantee এর জন্য heap sort useful।
 
----
 
 
-## 🎯 97. How does binary search work, and what are its prerequisites?
+## 97. How does binary search work, and what are its prerequisites?
 
 **Binary Search** sorted/monotonic search space এ target খোঁজার algorithm। প্রতিবার middle element check করে search space অর্ধেক করে।
 
@@ -722,9 +716,8 @@ bool exists = binary_search(nums.begin(), nums.end(), target);
 auto it = lower_bound(nums.begin(), nums.end(), target);
 ```
 
----
 
-## 🔄 98. How would you perform binary search on a rotated sorted array?
+## 98. How would you perform binary search on a rotated sorted array?
 
 Rotated sorted array হলো sorted array কে কোনো pivot এ rotate করা।
 
@@ -825,9 +818,8 @@ bool searchRotatedWithDuplicates(vector<int>& nums, int target) {
 Without duplicates: `O(log n)`
 With duplicates: worst case `O(n)`
 
----
 
-## 📐 99. What is the difference between "search for exact value" and "search for boundary" (lower bound/upper bound) binary search variants?
+## 99. What is the difference between "search for exact value" and "search for boundary" (lower bound/upper bound) binary search variants?
 
 **Exact value search** target আছে কিনা খোঁজে।
 **Boundary search** target বা condition এর first/last valid position খোঁজে।
@@ -943,9 +935,8 @@ int firstTrue(int n) {
 false false false true true true
 ```
 
----
 
-## ♾️ 100. How would you search in an array of unknown or infinite size?
+## 100. How would you search in an array of unknown or infinite size?
 
 যদি array size জানা না থাকে, তাহলে direct binary search এর `right` boundary জানা যায় না। তাই আগে range বের করতে হয়।
 
@@ -1017,9 +1008,8 @@ int searchUnknownSize(ArrayReader& reader, int target) {
 **Time Complexity**: `O(log p)`
 এখানে `p` হলো target এর position। কারণ boundary double করতে `O(log p)`, তারপর binary search `O(log p)`।
 
----
 
-## 🔢 101. What is ternary search, and when might it be useful?
+## 101. What is ternary search, and when might it be useful?
 
 **Ternary Search** এমন search technique যা unimodal function/array এর maximum বা minimum খুঁজতে ব্যবহার করা হয়।
 
@@ -1124,5 +1114,3 @@ double ternarySearchDouble(double left, double right) {
     return (left + right) / 2.0;
 }
 ```
-
----

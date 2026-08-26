@@ -4,7 +4,7 @@ title: 'OS Fundamentals'
 ---
 
 
-## 📖 1. What is an Operating System, and what are its main functions?
+## 1. What is an Operating System, and what are its main functions?
 
 ```mermaid
 flowchart TB
@@ -50,7 +50,6 @@ flowchart TB
 
 **vii) System Call Interface:** Application program সরাসরি privileged hardware operation করতে পারে না। তাই OS একটি **system call interface** দেয়, যার মাধ্যমে application নিরাপদভাবে file, process, memory, network বা device-related service request করতে পারে।
 
----
 
 
 ### What is the difference between an OS and the kernel?
@@ -65,7 +64,6 @@ flowchart TB
 * **Linux** technically একটি **kernel**
 * **Ubuntu, Fedora, Debian** হলো complete **operating systems / Linux distributions**, যেখানে Linux kernel-এর সাথে shell, package manager, libraries, utilities, এবং অন্যান্য software components যুক্ত থাকে
 
----
 
 #### OS vs Kernel Comparison
 
@@ -78,7 +76,6 @@ flowchart TB
 | Mode             | Kernel mode / privileged mode                                       | Kernel + user-space components নিয়ে গঠিত                     |
 | উদাহরণ           | Linux kernel, Windows NT kernel, XNU kernel                         | Ubuntu, Fedora, Windows 11, macOS                            |
 
----
 
 
 ### What is the difference between an operating system and a hypervisor?
@@ -92,7 +89,6 @@ flowchart TB
 * **OS** একটি computer system-কে **একজন user বা application-এর জন্য ব্যবহারযোগ্য** করে
 * **Hypervisor** একটি physical machine-কে **একাধিক virtual computer-এ ভাগ করে**
 
----
 
 #### Types of Hypervisors
 
@@ -117,7 +113,6 @@ flowchart TB
 * VMware Workstation
 * VMware Fusion / Parallels Desktop
 
----
 
 #### OS vs Hypervisor Comparison
 
@@ -141,9 +136,8 @@ flowchart TB
 * **OS একটি OS instance-এর process, memory, device ও অন্যান্য resource manage করে**
 * **Hypervisor একাধিক VM এবং তাদের virtual hardware resource manage করে**
 
----
 
-## 🗂️ 2. What are the different types of operating systems?
+## 2. What are the different types of operating systems?
 
 ```mermaid
 flowchart TB
@@ -165,7 +159,6 @@ Operating System (OS) বিভিন্ন ধরনের হতে পার�
 * **Real-Time Operating System (RTOS)**
 * **Embedded Operating System**
 
----
 
 ### What distinguishes batch, time-sharing, distributed, real-time, and embedded operating systems?
 
@@ -198,7 +191,6 @@ Operating System (OS) বিভিন্ন ধরনের হতে পার�
 ধরো একটি company মাসের শেষে 10,000 employee-র salary generate করবে।
 সব employee data একসাথে batch হিসেবে দিয়ে system salary slip তৈরি করল — এটাই batch processing।
 
----
 
 **ii) Time-Sharing Operating System**: **Time-sharing OS** এমন একটি OS যেখানে **একাধিক user বা process** একই system ব্যবহার করতে পারে, এবং CPU time-কে ছোট ছোট **time slice**-এ ভাগ করে প্রত্যেক process/user-কে পালাক্রমে দেওয়া হয়।
 
@@ -225,7 +217,6 @@ Operating System (OS) বিভিন্ন ধরনের হতে পার�
 একটি university server-এ একাধিক student একই সাথে login করে program run করছে।
 OS CPU time slice দিয়ে সবাইকে service দিচ্ছে — এটাই time-sharing।
 
----
 
 **iii) Distributed Operating System**: **Distributed OS** এমন একটি OS যেখানে **একাধিক independent computer/machine** একসাথে কাজ করে কিন্তু user-এর কাছে পুরো system-টিকে **একটি single unified system** হিসেবে উপস্থাপন করা হয়।
 
@@ -251,7 +242,6 @@ OS CPU time slice দিয়ে সবাইকে service দিচ্ছে —
 
 ধরো ৫টি computer মিলে একটি বড় computation করছে, কিন্তু user-এর কাছে মনে হচ্ছে যেন একটাই system কাজ করছে — এটাই distributed OS-এর idea। তবে মনে রাখতে হবে, **সব distributed system বা cloud platform Distributed OS নয়**; Distributed OS সাধারণত user-এর কাছে single-system image দেওয়ার চেষ্টা করে।
 
----
 
 **iv) Real-Time Operating System (RTOS)**: **Real-Time Operating System (RTOS)** এমন একটি OS যা **নির্দিষ্ট সময়সীমার মধ্যে (deadline-এর মধ্যে)** response দিতে designed।
 এখানে শুধু “correct result” দিলেই হবে না — **ঠিক সময়ে result দিতে হবে**।
@@ -296,7 +286,6 @@ Deadline miss করা ideally হওয়া উচিত না, কিন্�
 একটি car airbag system crash detect করে milliseconds-এর মধ্যে deploy না করলে result useless।
 এখানে **correctness + timing** দুটোই জরুরি — তাই RTOS দরকার।
 
----
 
 **v) Embedded Operating System**: **Embedded OS** হলো এমন OS যা **embedded systems / dedicated devices**-এ ব্যবহারের জন্য তৈরি।
 এগুলো প্রধানত **dedicated device বা নির্দিষ্ট কাজের জন্য optimized**; তবে embedded system-এ Linux-এর মতো general-purpose OS-এর customized version-ও ব্যবহৃত হতে পারে।
@@ -320,7 +309,6 @@ Deadline miss করা ideally হওয়া উচিত না, কিন্�
 * কখনও real-time features-ও থাকতে পারে
 
 
----
 
 ### How does a network OS differ from a distributed OS?
 
@@ -350,7 +338,6 @@ Deadline miss করা ideally হওয়া উচিত না, কিন্�
 * traditional Unix/Linux network server setups
 * NetWare (historically)
 
----
 
 **Distributed Operating System (again, key idea)**
 
@@ -362,7 +349,6 @@ Distributed OS-এ multiple machines **মিলে user-এর কাছে sin
 * system একক OS-এর মতো behave করে
 * workload, resource, execution distributed হতে পারে
 
----
 
 #### Core Difference: Network OS vs Distributed OS
 
@@ -380,7 +366,6 @@ Distributed OS-এ multiple machines **মিলে user-এর কাছে sin
 * system transparency বেশি
 * distributed resource management built-in
 
----
 
 **Example to Understand the Difference**
 
@@ -413,9 +398,8 @@ System নিজেই সব manage করছে।
 | Goal             | Network resource sharing                  | Single-system image + distributed computing |
 | Example concept  | File server, printer server, login server | Cluster acting like one logical system      |
 
----
 
-## 🧩 3. What is the difference between a monolithic kernel and a microkernel?
+## 3. What is the difference between a monolithic kernel and a microkernel?
 
 ```mermaid
 flowchart TB
@@ -464,7 +448,6 @@ Monolithic kernel এবং microkernel হলো **operating system kernel desi
 * **FreeBSD / OpenBSD / NetBSD**
 * traditional **Unix-like monolithic kernels**
 
----
 **Microkernel**
 
 **Microkernel** এমন একটি kernel architecture যেখানে kernel-কে যতটা সম্ভব **ছোট** রাখা হয়।
@@ -518,7 +501,6 @@ Microkernel-এ সাধারণত থাকে:
 * **L4 family**
 * **Mach** (historically important microkernel)
 
----
 
 #### Monolithic vs Microkernel Comparison
 
@@ -533,7 +515,6 @@ Microkernel-এ সাধারণত থাকে:
 | Fault isolation         | kernel component-গুলোর মধ্যে তুলনামূলক কম                   | user-space service-গুলোর মধ্যে তুলনামূলক বেশি                    |
 | Debugging / maintenance | kernel-level debugging কঠিন হতে পারে                         | service isolation-এর কারণে কিছু ক্ষেত্রে সহজ                     |
 
----
 ### What is a hybrid kernel, and can you name examples?
 
 **Hybrid kernel** হলো এমন একটি kernel architecture যা **monolithic kernel** এবং **microkernel**—এই দুই design philosophy-এর কিছু বৈশিষ্ট্য একসাথে ব্যবহার করার চেষ্টা করে।
@@ -545,7 +526,6 @@ Microkernel-এ সাধারণত থাকে:
 * **Monolithic kernel** চায় অধিকাংশ service kernel space-এ রেখে performance বাড়াতে
 * **Hybrid kernel** এই দুইয়ের মধ্যে একটি **বাস্তবমুখী সমঝোতা** করার চেষ্টা করে
 
----
 
 **Hybrid kernel-এর মূল ধারণা:**
 Hybrid kernel-এ সাধারণত microkernel-এর কিছু idea—যেমন **layered structure, modularity, কিছু message-based interaction, subsystem separation**—ব্যবহার করা হয়।
@@ -563,7 +543,6 @@ Hybrid kernel-এ সাধারণত microkernel-এর কিছু idea—�
 
 > **Note:** “Hybrid kernel” classification কিছু ক্ষেত্রে debated, কারণ real-world kernels pure textbook category-তে সবসময় perfectly fit করে না।
 
----
 
 ### What are the performance and reliability trade-offs between monolithic and microkernel designs?
 
@@ -571,7 +550,6 @@ Hybrid kernel-এ সাধারণত microkernel-এর কিছু idea—�
 **“Speed বেশি চাই, নাকি isolation ও reliability বেশি চাই?”**
 বাস্তবে উত্তরটা সবসময় black-and-white না; বরং এটি **trade-off**।
 
----
 
 **Monolithic kernel কেন দ্রুত হতে পারে**
 
@@ -584,7 +562,6 @@ Monolithic kernel-এ file system, scheduler, memory manager, networking, driver
 
 ফলে performance সাধারণত ভালো হয়।
 
----
 
 **Microkernel-এ overhead কেন হতে পারে**
 
@@ -598,7 +575,6 @@ Microkernel-এ file system server, driver, networking service ইত্যা�
 
 — এগুলোর কারণে performance cost আসতে পারে।
 
----
 
 **Monolithic kernel-এর downside**
 যেহেতু অনেক subsystem ও driver **kernel mode**-এ চলে, তাই একটি buggy kernel-mode component পুরো system stability-কে affect করতে পারে।
@@ -610,7 +586,6 @@ Microkernel-এ file system server, driver, networking service ইত্যা�
 
 এর ঝুঁকি তুলনামূলক বেশি।
 
----
 
 **Microkernel-এর advantage**
 Microkernel-এ যদি file server, driver, network service ইত্যাদি user space-এ চলে, তাহলে একটি service crash করলেও **পুরো kernel crash নাও করতে পারে**।
@@ -623,7 +598,6 @@ Microkernel-এ যদি file server, driver, network service ইত্যা�
 
 এই কারণেই microkernel-based design safety-critical ও embedded systems-এ আকর্ষণীয়।
 
----
 
 #### Monolithic vs Microkernel Trade-off Table
 
@@ -636,7 +610,6 @@ Microkernel-এ যদি file server, driver, network service ইত্যা�
 | Fault isolation           | kernel component-গুলোর মধ্যে কম              | user-space service-গুলোর মধ্যে বেশি                   |
 | Debugging / maintenance   | kernel debugging কঠিন হতে পারে               | user-space services-এর কারণে কিছু ক্ষেত্রে সহজ        |
 
----
 
 **Where does hybrid kernel fit?**
 
@@ -649,11 +622,10 @@ Hybrid kernel সাধারণত এই দুই design-এর **মাঝ�
 
 তাই hybrid kernel-কে বলা যায় **performance এবং structural modularity-এর মধ্যে compromise-oriented design**।
 
----
 
 
 
-## 🔐 4. What is the difference between user mode and kernel mode?
+## 4. What is the difference between user mode and kernel mode?
 
 ```mermaid
 sequenceDiagram
@@ -677,7 +649,6 @@ CPU architecture-এ আরও privilege level থাকতে পারে—�
 সব program-কে যদি hardware এবং memory-তে unrestricted access দেওয়া হতো, তাহলে একটি buggy program বা malicious program পুরো system crash করাতে পারত।
 এই কারণেই CPU privilege level ব্যবহার করে কিছু operation শুধু **kernel**-এর জন্য reserve করে রাখে।
 
----
 
 **User mode** হলো সেই execution mode যেখানে **সাধারণ application program** চলে।
 যেমন: **Chrome, VS Code, Spotify, browser tab-এর process**।
@@ -695,7 +666,6 @@ CPU architecture-এ আরও privilege level থাকতে পারে—�
 
 অর্থাৎ, user mode-এ program **restricted environment**-এ চলে।
 
----
 
 **Kernel mode** হলো CPU-এর **privileged / supervisor mode**, যেখানে operating system-এর **kernel** এবং kernel-level components execute করে।
 
@@ -721,7 +691,6 @@ CPU architecture-এ আরও privilege level থাকতে পারে—�
 
 অর্থাৎ, kernel mode হলো **full-privilege execution environment**।
 
----
 
 | বিষয়                   | User Mode                                 | Kernel Mode                                         |
 | ---------------------- | ----------------------------------------- | --------------------------------------------------- |
@@ -733,7 +702,6 @@ CPU architecture-এ আরও privilege level থাকতে পারে—�
 | Risk                   | crash হলেও সাধারণত সেই process-এ সীমাবদ্ধ | bug হলে পুরো system crash হতে পারে                  |
 | Purpose                | safety, isolation, app execution          | resource management, hardware control               |
 
----
 
 **যদি user program-কে full privilege দেওয়া হতো তাহলে কী হতো?**
 
@@ -749,7 +717,6 @@ CPU architecture-এ আরও privilege level থাকতে পারে—�
 
 > “Applications user mode-এ চলবে; sensitive কাজ করতে হলে kernel-এর সাহায্য নিতে হবে।”
 
----
 
 ### How does the CPU switch between user mode and kernel mode?
 
@@ -762,7 +729,6 @@ CPU নিজে থেকে randomভাবে mode switch করে না।
 2. **Interrupt**
 3. **Exception / Trap / Fault**
 
----
 **System Call-এর মাধ্যমে switch**
 যখন একটি user program এমন কিছু করতে চায় যা privileged — যেমন:
 
@@ -782,7 +748,6 @@ CPU নিজে থেকে randomভাবে mode switch করে না।
 5. kernel requested কাজ করল
 6. result প্রস্তুত হলে CPU আবার **user mode-এ ফিরে** application-এ control দিল
 
----
 
 **Interrupt-এর মাধ্যমে switch**
 
@@ -797,7 +762,6 @@ CPU নিজে থেকে randomভাবে mode switch করে না।
 4. interrupt handler execute করে
 5. কাজ শেষে CPU আগের process-এ ফিরতে পারে, অথবা scheduler প্রয়োজন মনে করলে অন্য ready process/thread চালাতে পারে
 
----
 **Exception / Fault-এর মাধ্যমে switch**
 
 যদি program কোনো abnormal কাজ করে, যেমন:
@@ -810,7 +774,6 @@ CPU নিজে থেকে randomভাবে mode switch করে না।
 তাহলে CPU exception generate করে।
 এর ফলে control kernel-এ যায়, কারণ kernel-কে decide করতে হবে কী করা হবে।
 
----
 
 **User Mode → Kernel Mode switch-এর step-by-step internal idea**
 
@@ -836,7 +799,6 @@ CPU নিজে থেকে randomভাবে mode switch করে না।
 
 6. return-from-trap / return-from-interrupt instruction ব্যবহার করে আবার user mode-এ ফিরে যায়
 
----
 
 #### User mode থেকে kernel mode-এ switch হলে কি সবসময় context switch হয়?
 
@@ -864,7 +826,6 @@ CPU এক process/thread থেকে অন্য process/thread-এ চলে
 
 এখানে **mode switch হয়েছে**, কিন্তু **process context switch না-ও হতে পারে**।
 
----
 
 ### What happens if a user-mode process tries to execute a privileged instruction?
 
@@ -882,7 +843,6 @@ CPU এক process/thread থেকে অন্য process/thread-এ চলে
 * CPU control register change করা
 * memory management unit-এর sensitive setting বদলানো
 
----
 
 **তখন কী ঘটে step by step?**
 
@@ -894,5 +854,3 @@ CPU এক process/thread থেকে অন্য process/thread-এ চলে
 4. CPU kernel mode-এ switch করে
 5. OS exception handler control পায়
 6. OS সাধারণত process-টিকে **terminate** করে বা signal/exception দেয়
-
----

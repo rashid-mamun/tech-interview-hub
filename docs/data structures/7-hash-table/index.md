@@ -4,7 +4,7 @@ title: 'Hash Table'
 ---
 
 
-## 🔑 36. What is a hash table, and how does it achieve average O(1) lookup time?
+## 36. What is a hash table, and how does it achieve average O(1) lookup time?
 
 **Hash Table** হলো একটা data structure যেটা **key-value pair** store করে, এবং একটা **hash function** ব্যবহার করে key কে একটা **array index** এ map করে। এই index এ সরাসরি data store/retrieve করা যায় বলে, average case এ lookup, insertion, এবং deletion সবই `O(1)` time এ সম্পন্ন হয়।
 
@@ -95,7 +95,6 @@ int main() {
     return 0;
 }
 ```
----
 
 ### What is a load factor, and how does it affect performance and resizing?
 
@@ -137,9 +136,8 @@ Load factor = 0.75
 
 **Resizing এর সাথে সম্পর্ক:** যখন load factor একটা নির্দিষ্ট **threshold** (সাধারণত 0.7-0.75) অতিক্রম করে, তখন hash table **automatically resize** হয় — নতুন, বড় (সাধারণত দ্বিগুণ size এর) array allocate করে সব existing element **rehash** করে নতুন array তে বসানো হয়। এই resize operation এ `O(n)` সময় লাগে, কিন্তু dynamic array এর মতোই এটাও **amortized `O(1)`** per insertion থাকে, কারণ resize infrequent ভাবে ঘটে।
 
----
 
-## 💥 37. How do hash tables handle collisions?
+## 37. How do hash tables handle collisions?
 
 **Collision** ঘটে যখন দুইটা ভিন্ন key একই hash index এ map হয়ে যায় (`hash(key1) == hash(key2)` কিন্তু `key1 ≠ key2`)। এই collision handle করার প্রধান দুইটা পদ্ধতি: **Chaining** এবং **Open Addressing**।
 
@@ -212,7 +210,6 @@ Index   Slot
 | Cache performance | তুলনামূলক খারাপ (scattered nodes) | ভালো (contiguous array) |
 | Deletion | সহজ | জটিল (special marker লাগে) |
 
----
 
 ### What is the difference between linear probing, quadratic probing, and double hashing?
 
@@ -280,9 +277,8 @@ i = 3 -> (2 + 3*3) % 10 = 1
 | Quadratic Probing | কম (কিন্তু secondary clustering আছে) | মাঝারি জটিলতা |
 | Double Hashing | সবচেয়ে কম | দুইটা hash function লাগে, তুলনামূলক জটিল |
 
----
 
-## 🗺️ 38. What is the difference between HashMap, TreeMap, and LinkedHashMap (or their equivalents)?
+## 38. What is the difference between HashMap, TreeMap, and LinkedHashMap (or their equivalents)?
 
 C++ এ এই তিনটার সবচেয়ে কাছাকাছি equivalent হলো: `unordered_map` (HashMap), `map` (TreeMap), এবং একটা custom implementation (LinkedHashMap এর জন্য কোনো direct STL equivalent নেই, তবে concept বোঝানো যাবে)।
 
@@ -377,7 +373,6 @@ cherry: 3
 
 উপরের `unordered_map` অংশটি **possible output**; compiler, standard-library implementation এবং rehash-এর কারণে actual order ভিন্ন হতে পারে।
 
----
 
 ### Why does TreeMap guarantee sorted order, and what is the trade-off in complexity?
 
@@ -391,7 +386,6 @@ cherry: 3
 
 > **Practical note:** Hash map-এর expected asymptotic lookup দ্রুত, কিন্তু “সবসময় দ্রুত” নয়। ছোট dataset, adversarial collision, expensive hashing, iteration-heavy workload বা ordered/range query-তে tree map ভালো হতে পারে।
 
----
 
 ### When would you prefer a LinkedHashMap over a regular HashMap?
 
@@ -402,9 +396,8 @@ cherry: 3
 2. **LRU Cache implement করার জন্য** — LinkedHashMap এর "access order" mode ব্যবহার করে (Java তে), সবচেয়ে সম্প্রতি ব্যবহৃত element গুলো সবসময় শেষে থাকে, এবং সবচেয়ে পুরনো (least recently used) element সহজে identify করে remove করা যায়
 3. **Reproducible iteration order** প্রয়োজন হলে (testing/debugging এ predictable output পাওয়ার জন্য), যেখানে regular HashMap এর order unpredictable
 
----
 
-## 🛠️ 39. How would you design a HashSet from scratch?
+## 39. How would you design a HashSet from scratch?
 
 **HashSet** হলো এমন data structure যেখানে শুধু **unique keys** store করা হয়, কোনো value থাকে না। Internally এটা সাধারণত hash table দিয়েই implement করা হয়: key hash করে bucket index বের করা হয়, তারপর collision handle করার জন্য chaining বা open addressing ব্যবহার করা হয়।
 
@@ -550,7 +543,6 @@ int main() {
 
 Worst case `O(n)` হয় যখন অনেক key একই bucket এ চলে যায়। ভালো hash function এবং controlled load factor থাকলে average case `O(1)` থাকে।
 
----
 
 ### How would you handle resizing when the underlying array becomes too full?
 
@@ -565,7 +557,6 @@ HashSet-এর underlying bucket array বেশি full হয়ে গেল�
 
 Resize operation নিজে `O(n)`, কারণ সব element rehash করতে হয়। কিন্তু resize মাঝে মাঝে হয়, তাই অনেকগুলো insertion মিলিয়ে **amortized insertion cost `O(1)`** থাকে।
 
----
 
 ### How would you implement a HashSet that also supports O(1) retrieval of a random element?
 
@@ -660,9 +651,8 @@ public:
 | Remove | `O(1)` average |
 | Get Random | `O(1)` |
 
----
 
-## 🌐 40. What is consistent hashing, and where is it used?
+## 40. What is consistent hashing, and where is it used?
 
 **Consistent Hashing** হলো একটি বিশেষ hashing technique, যা **distributed systems**-এ data (key) কে একাধিক server বা node-এর মধ্যে distribute করার জন্য ব্যবহৃত হয়। এর সবচেয়ে বড় সুবিধা হলো, **server যোগ বা বাদ গেলেও (scale up/down) খুব অল্প সংখ্যক key-এর mapping পরিবর্তন হয়।**
 
@@ -712,7 +702,6 @@ keyB(52) -> S5(60)
 সব key remap হলো না।
 ```
 
----
 
 
 ### How does Consistent Hashing help with Distributed Caching Systems?
@@ -731,7 +720,6 @@ Distributed caching system (যেমন **Memcached**) এ data অনেকগ
 * Database-এ অতিরিক্ত load পড়ে না
 * Cache warm-up কম লাগে
 
----
 
 #### 2. Better Load Balancing (Virtual Nodes)
 
@@ -745,7 +733,6 @@ Distributed caching system (যেমন **Memcached**) এ data অনেকগ
 
 যদি virtual node ব্যবহার না করা হয়, তাহলে hash distribution-এর কারণে কিছু server অনেক বেশি key পেতে পারে।
 
----
 
 #### 3. Easy Scalability
 
@@ -755,7 +742,6 @@ Distributed caching system (যেমন **Memcached**) এ data অনেকগ
 
 শুধু একটি ছোট অংশের key remap হয়, তাই scale করা অনেক efficient হয়।
 
----
 
 ### What problem does Consistent Hashing solve compared to simple modulo-based hashing?
 
@@ -825,7 +811,6 @@ keyD -> 44 % 5 = 4   changed
 Server count 4 থেকে 5 হলেই বেশিরভাগ key অন্য server এ চলে গেল।
 ```
 
----
 
 #### Consistent Hashing কীভাবে এই সমস্যা সমাধান করে?
 
@@ -853,7 +838,6 @@ Server count 4 থেকে 5 হলেই বেশিরভাগ key অন�
 
 এ কারণেই Consistent Hashing distributed caching system-এর জন্য অত্যন্ত কার্যকর।
 
----
 
 ### Time Complexity
 
@@ -865,7 +849,6 @@ Server count 4 থেকে 5 হলেই বেশিরভাগ key অন�
 | Remove Server |  **O(V log M)** |
 | Find Server   |    **O(log M)** |
 
----
 
 ### কোথায় ব্যবহার হয়?
 
@@ -880,5 +863,3 @@ Consistent Hashing ব্যাপকভাবে ব্যবহৃত হয�
 * Distributed Storage Systems
 * Load Balancer
 * Service Discovery Systems
-
----

@@ -3,7 +3,7 @@ sidebar_position: 13
 title: 'Divide and Conquer'
 ---
 
-## 🪓 75. What is the divide and conquer paradigm, and what are its three main steps?
+## 75. What is the divide and conquer paradigm, and what are its three main steps?
 
 Divide and conquer problem-কে independent ছোট subproblem-এ ভাগ করে, সেগুলো recursively solve করে এবং result combine করে। তিনটি ধাপ:
 
@@ -64,7 +64,7 @@ Combine       [3 8]       [1 5]
                   [1 3 5 8]
 ```
 
-## 📐 76. What is the Master Theorem, and how is it used?
+## 76. What is the Master Theorem, and how is it used?
 
 `T(n) = aT(n/b) + f(n)` recurrence-এ `a` subproblem-এর সংখ্যা, `n/b` প্রতিটির size এবং `f(n)` divide/combine cost। Merge sort-এর জন্য `a=2`, `b=2`, `f(n)=Θ(n)`। যেহেতু `n^(log_b a)=n`, Master Theorem case 2 অনুযায়ী `T(n)=Θ(n log n)`।
 
@@ -104,7 +104,7 @@ Level 2:  4 problems × n/4 work     = n
 log₂n levels × n work = Θ(n log n)
 ```
 
-## 📈 77. How does divide and conquer solve maximum subarray sum?
+## 77. How does divide and conquer solve maximum subarray sum?
 
 Maximum subarray সম্পূর্ণ left half-এ, সম্পূর্ণ right half-এ, অথবা midpoint cross করে—এই তিনটির maximum answer। Crossing sum midpoint থেকে দুইদিকে best sum নেয়। এই solution `O(n log n)`; Kadane একই problem `O(n)` time ও `O(1)` space-এ solve করে বলে practical ক্ষেত্রে preferred।
 
@@ -158,7 +158,7 @@ Maximum subarray sum: 6
 Example best crossing subarray: [4, -1, 2, 1] → 6
 ```
 
-## 🔢 78. How do you find the closest pair of points using divide and conquer?
+## 78. How do you find the closest pair of points using divide and conquer?
 
 Points প্রথমে x-coordinate অনুযায়ী sort করা হয়। দুই half recursively solve করার পর midpoint-এর দুই পাশে current best distance `d`-এর ভেতরের strip পরীক্ষা করা হয়। Strip-কে y অনুযায়ী রাখলে প্রতিটি point-এর পরের সর্বোচ্চ কয়েকটি candidate-ই পরীক্ষা করতে হয়, ফলে total time `O(n log n)`।
 

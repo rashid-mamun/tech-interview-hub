@@ -4,7 +4,7 @@ title: 'Linked List'
 ---
 
 
-## 🪢 21. What is a linked list, and how does it differ from an array?
+## 21. What is a linked list, and how does it differ from an array?
 
 **Linked List** হলো একটা linear data structure যেখানে element গুলো (যাদের **node** বলা হয়) memory তে **contiguous** না থেকে, বরং scattered ভাবে store হয়, এবং প্রতিটি node তার পরবর্তী node এর memory address (**pointer/reference**) ধরে রাখে। প্রতিটি node এ থাকে দুইটা অংশ: **data** এবং **pointer(s)** (next node এর দিকে নির্দেশ করে)।
 
@@ -55,7 +55,6 @@ Linked List:
 | Size | Fixed (static) বা resizing overhead (dynamic) | Dynamically grow/shrink করে, কোনো resize overhead নেই |
 | Extra memory | লাগে না | প্রতিটি node এ pointer store করার জন্য extra memory লাগে |
 
----
 
 ### What is the difference between a singly linked list, doubly linked list, and circular linked list?
 
@@ -102,7 +101,6 @@ head -> 10 -> 20 -> 30
 শেষ node 30 আবার head 10 কে point করছে।
 ```
 
----
 
 ### What are the trade-offs of linked lists vs arrays in terms of memory and access time?
 
@@ -124,9 +122,8 @@ head -> 10 -> 20 -> 30
 - Array এর contiguous memory এর কারণে **cache locality** ভালো (sequential access দ্রুত হয়)
 - Linked list এর scattered memory এর কারণে cache miss বেশি হয়, যা practical performance এ array কে প্রায়ই দ্রুত করে তোলে, যদিও theoretical complexity ভালো না হতে পারে
 
----
 
-## 🔁 22. How do you reverse a linked list?
+## 22. How do you reverse a linked list?
 
 Reverse করার মূল কাজ হলো প্রতিটি node এর `next` pointer উল্টো দিকে ঘুরিয়ে দেওয়া।
 
@@ -223,7 +220,6 @@ Reversed list: 4 -> 3 -> 2 -> 1
 ```
 **Time Complexity**: `O(n)` **Space Complexity**: `O(1)`
 
----
 
 ### How would you do it iteratively vs recursively?
 
@@ -270,7 +266,6 @@ Reversed list: 4 -> 3 -> 2 -> 1
 ```
 **Time Complexity**: `O(n)` **Space Complexity**: `O(n)` (recursion call stack এর কারণে — iterative approach এর তুলনায় এটা একটা disadvantage)
 
----
 
 ### How would you reverse a linked list in groups of k?
 
@@ -372,9 +367,8 @@ Reversed in groups of 2: 2 -> 1 -> 4 -> 3 -> 5
 
 **Time Complexity**: `O(n)` **Space Complexity**: `O(n/k)` (recursion stack depth এর জন্য)
 
----
 
-## 🐢🐇 23. How do you detect a cycle in a linked list?
+## 23. How do you detect a cycle in a linked list?
 
 **Floyd's cycle detection algorithm (tortoise and hare) কীভাবে কাজ করে?**
 
@@ -445,7 +439,6 @@ Has cycle: Yes
 ```
 **Time Complexity**: `O(n)` **Space Complexity**: `O(1)` (কোনো extra data structure লাগে না, যেখানে hashset ব্যবহার করলে `O(n)` space লাগত)
 
----
 ### How would you find the starting node of the cycle once detected?
 
 **Mathematical insight:** যখন `slow` এবং `fast` pointer মিলে যায়, সেই meeting point থেকে **একটা নতুন pointer** (`slow2`) কে `head` থেকে শুরু করানো হয়, এবং `slow` কে একই জায়গায় (meeting point এ) রেখে দুইজনকেই **এক ঘর করে** move করানো হয়। যেখানে তারা আবার মিলবে, সেটাই cycle এর **entry point (starting node)**।
@@ -504,9 +497,8 @@ Node* detectCycleStart(Node* head) {
 
 **Time Complexity**: `O(n)` **Space Complexity**: `O(1)`
 
----
 
-## 🎯 24. How do you find the middle of a linked list in a single pass?
+## 24. How do you find the middle of a linked list in a single pass?
 
 Slow/fast pointer technique ব্যবহার করে: `slow` এক ঘর করে এবং `fast` দুই ঘর করে এগোয়। যখন `fast` শেষে পৌঁছায়, তখন `slow` ঠিক **middle** এ থাকে (কারণ `fast` দ্বিগুণ গতিতে move করে, তাই `slow` অর্ধেক distance পার হবে)।
 
@@ -575,7 +567,6 @@ Middle node value: 3
 ```
 **Time Complexity**: `O(n)` (একটা মাত্র pass) **Space Complexity**: `O(1)`
 
----
 ### How does the slow/fast pointer technique work here?
 
 **এই technique ব্যবহার করে linked list palindrome কিনা কীভাবে check করবেন?**
@@ -677,9 +668,8 @@ Is palindrome: Yes
 ```
 **Time Complexity**: `O(n)` **Space Complexity**: `O(1)` (in-place reverse ব্যবহার করা হয়েছে, কোনো extra array/stack লাগেনি)
 
----
 
-## 🔀 25. How would you merge two sorted linked lists?
+## 25. How would you merge two sorted linked lists?
 
 দুইটা sorted linked list merge করার সময় প্রতিবার দুই list এর current node এর ছোট value result list এ attach করা হয়।
 
@@ -777,7 +767,6 @@ Merged list: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 - **Time Complexity**: `O(n + m)`, যেখানে `n` এবং `m` হলো দুইটা list এর length (প্রতিটি node একবার করে visit করা হয়)
 - **Space Complexity**: `O(1)` — কোনো নতুন node তৈরি করা হয়নি, শুধু existing node গুলোর pointer পুনরায় সাজানো হয়েছে (in-place merge)
 
----
 
 ### How would you merge k sorted linked lists efficiently?
 
@@ -892,9 +881,8 @@ Merged k lists: 1 -> 1 -> 2 -> 3 -> 4 -> 4 -> 5 -> 6
 
 > **Alternative:** Lists-কে balanced divide-and-conquer pairs-এ merge করলে heap ছাড়াও `O(N log k)` time এবং `O(log k)` recursion space পাওয়া যায়। `O(N × k)` bound মূলত sequentially growing result-এর সঙ্গে একটির পর একটি list merge করার loose worst-case।
 
----
 
-## 🪜 26. What is a skip list, and how does it improve search performance over a regular linked list?
+## 26. What is a skip list, and how does it improve search performance over a regular linked list?
 
 **Skip List** হলো একটা **probabilistic data structure** যেটা sorted linked list এর উপর ভিত্তি করে তৈরি, কিন্তু এতে **multiple levels** থাকে — প্রতিটি উপরের level এ কম সংখ্যক node থাকে, যেগুলো নিচের level এর কিছু node কে "skip" করে সরাসরি অনেক দূরের node এ পৌঁছাতে সাহায্য করে (অনেকটা একটা "express lane" এর মতো)।
 
@@ -1010,7 +998,6 @@ Search 7: Found
 Search 10: Not Found
 ```
 
----
 
 ### What is the expected time complexity of search, insert, and delete in a skip list?
 

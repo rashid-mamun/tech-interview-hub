@@ -4,7 +4,7 @@ title: 'CPU Scheduling'
 ---
 
 
-## 🎯 14. What are the key goals/criteria of a CPU scheduling algorithm?
+## 14. What are the key goals/criteria of a CPU scheduling algorithm?
 
 একটি ভালো CPU scheduler ডিজাইন করতে গেলে নিচের criteria গুলো maximize বা minimize করার চেষ্টা করা হয়।
 
@@ -28,7 +28,6 @@ title: 'CPU Scheduling'
 
 **Predictability** — real-time বা latency-sensitive workload-এ scheduler-এর behavior predictable হওয়া গুরুত্বপূর্ণ।
 
----
 
 ### What is the difference between turnaround time, waiting time, and response time?
 
@@ -40,7 +39,6 @@ Process submit (arrival) করার মুহূর্ত থেকে শু�
 
 > **Turnaround Time = Completion Time − Arrival Time**
 
----
 
 #### Waiting Time
 
@@ -54,7 +52,6 @@ Process টি Ready Queue-তে থেকে CPU পাওয়ার জন�
 
 I/O থাকলে turnaround time-এর মধ্যে I/O wait-ও থাকে, তাই তখন শুধু এই subtraction formula ব্যবহার করা যাবে না।
 
----
 
 #### Response Time
 
@@ -62,7 +59,6 @@ Process arrive করার পর প্রথমবার CPU পাওয়�
 
 > **Response Time = First Start Time − Arrival Time**
 
----
 
 ধরো একটি process **t = 0**-তে arrive করল, **t = 5**-এ প্রথমবার CPU পেল, **t = 30**-এ execution শেষ হলো এবং এর **Burst Time = 20**।
 
@@ -72,7 +68,6 @@ Process arrive করার পর প্রথমবার CPU পাওয়�
 * **Turnaround Time = 30 − 0 = 30**
 * **Waiting Time = 30 − 20 = 10**
 
----
 
 ### How do throughput and fairness factor into scheduler design?
 
@@ -83,7 +78,7 @@ Process arrive করার পর প্রথমবার CPU পাওয়�
 সবশেষে, scheduler design-এর মূল trade-off হলো **throughput**, **fairness**, এবং **responsiveness**-এর মধ্যে ভারসাম্য বজায় রাখা। একটি metric optimize করলে অন্যটির cost বাড়তে পারে। Linux-এর fair scheduling class historically **CFS (Completely Fair Scheduler)** ব্যবহার করেছে; Linux 6.6 থেকে kernel ধীরে ধীরে **EEVDF (Earliest Eligible Virtual Deadline First)**-ভিত্তিক task selection-এ transition করেছে। উভয়ের লক্ষ্য runnable task-গুলোর মধ্যে fair CPU-time distribution ও responsiveness বজায় রাখা।
 
 
-## ⏸️ 15. What is the difference between preemptive and non-preemptive scheduling?
+## 15. What is the difference between preemptive and non-preemptive scheduling?
 
 **Non-preemptive scheduling** — একটি process একবার CPU পেলে, সে নিজে থেকে CPU ছেড়ে না দেওয়া পর্যন্ত (যেমন execution শেষ করা বা I/O wait-এ যাওয়া) Operating System জোর করে CPU কেড়ে নিতে পারে না। অর্থাৎ CPU একবার কোনো process-কে দিলে সেটি স্বেচ্ছায় relinquish না করা পর্যন্ত অন্য কোনো process CPU পায় না।
 
@@ -91,13 +86,11 @@ Process arrive করার পর প্রথমবার CPU পাওয়�
 
 ধরো **P2** `t = 2`-তে arrive করেছে, কিন্তু non-preemptive scheduling-এ **P1** CPU ছাড়ার আগে তাকে অপেক্ষা করতে হতে পারে, যদিও **P2**-এর burst time কম।
 
----
 
 **Preemptive scheduling** — Operating System প্রয়োজন হলে একটি running process-কে interrupt করে CPU অন্য process-কে দিতে পারে। সাধারণত **timer interrupt**, **উচ্চতর priority-র process arrive করা**, অথবা **time quantum শেষ হয়ে যাওয়া**-র কারণে preemption ঘটে।
 
 Preemptive scheduling-এ **P1** চলতে চলতে ছোট বা বেশি priority-র process ready হলে OS **P1**-কে pause করে অন্য process চালাতে পারে। ফলে interactive বা urgent কাজ দ্রুত response পেতে পারে।
 
----
 
 ### What are the trade-offs in terms of responsiveness and overhead?
 
@@ -109,7 +102,6 @@ Preemptive scheduling-এ responsiveness অনেক বেশি। কোন�
 
 ![Convoy effect](./convoy_effect_road_metaphor.svg)
 
----
 
 **Context Switch Overhead**
 
@@ -119,7 +111,6 @@ Preemptive scheduling-এর প্রধান অসুবিধা হলো 
 
 অন্যদিকে, Non-preemptive scheduling-এ context switch তুলনামূলক কম হওয়ায় overhead-ও কম হয়।
 
----
 
 **Race Condition এবং Shared Data**
 
@@ -127,7 +118,6 @@ Preemptive scheduling execution-এর সম্ভাব্য interleaving ব
 
 এই সমস্যা এড়ানোর জন্য Operating System-কে **critical section** সুরক্ষিত রাখতে **lock**, **mutex**, **spinlock**, অথবা নির্দিষ্ট low-level context-এ local interrupt/preemption control-এর মতো mechanism ব্যবহার করতে হয়। শুধু interrupt disable করা multi-core system-এ অন্য core-এর concurrent access বন্ধ করে না।
 
----
 
 **Real-time System-এ**
 
@@ -135,10 +125,9 @@ Hard real-time system-এ নির্দিষ্ট **deadline** মেনে 
 
 অন্যদিকে, batch processing system-এ responsiveness-এর তুলনায় throughput বেশি গুরুত্বপূর্ণ। তাই কিছু ক্ষেত্রে non-preemptive scheduling উপযুক্ত হতে পারে, কারণ এতে scheduling overhead কম থাকে।
 
----
 
 
-## 📊 16. Can you explain the common CPU scheduling algorithms?
+## 16. Can you explain the common CPU scheduling algorithms?
 
 **FCFS, SJF/SRTF, Priority, এবং Round Robin**
 
@@ -152,7 +141,6 @@ Queue-তে যে process আগে আসে, সে-ই আগে CPU পা
 
 তবে যদি একটি বড় job আগে এসে CPU দখল করে, তাহলে ছোট process-গুলোকে দীর্ঘ সময় অপেক্ষা করতে হয়। এই সমস্যাকে **Convoy Effect** বলা হয়। ফলে average waiting time এবং average turnaround time অনেক বেড়ে যেতে পারে।
 
----
 
 **SJF (Shortest Job First)**
 
@@ -164,7 +152,6 @@ Queue-তে যে process আগে আসে, সে-ই আগে CPU পা
 
 **SRTF (Shortest Remaining Time First)** হলো SJF-এর preemptive version। নতুন process এলে যদি তার remaining time current running process-এর remaining time-এর চেয়ে কম হয়, তাহলে scheduler current process-কে preempt করতে পারে।
 
----
 
 **Priority Scheduling**
 
@@ -178,7 +165,6 @@ Priority **static** বা **dynamic**—দুই ধরনেরই হতে 
 
 যদি low-priority process দীর্ঘ সময় CPU না পায়, তাহলে **starvation** দেখা দিতে পারে। এই সমস্যা সমাধানের জন্য সাধারণত **Aging** ব্যবহার করা হয়।
 
----
 
 **Round Robin (RR)**
 
@@ -193,7 +179,6 @@ Round Robin সবচেয়ে **fair** scheduling algorithm-গুলোর 
 
 সাধারণ rule of thumb: quantum এমন হওয়া উচিত যাতে interactive response ভালো থাকে, কিন্তু context switch overhead অস্বাভাবিকভাবে বেশি না হয়।
 
----
 
 ### What are Multilevel Queue and Multilevel Feedback Queue scheduling, and how do they adapt to process behavior?
 
@@ -215,7 +200,6 @@ Inter-queue scheduling fixed-priority হলে উচ্চ priority-র queue 
 
 এর প্রধান অসুবিধা হলো, একটি process একবার যে queue-তে রাখা হয়, পরে সেটি আর অন্য queue-তে যেতে পারে না।
 
----
 
 **Multilevel Feedback Queue (MLFQ)**
 
@@ -232,7 +216,6 @@ Long-running lower-queue task যেন starve না করে, অনেক ML
 
 এভাবে scheduler process-এর behavior অনুযায়ী নিজেকে adapt করে এবং interactive process-কে দ্রুত response দিতে পারে।
 
----
 
 ### How does "aging" help prevent starvation in priority-based scheduling?
 

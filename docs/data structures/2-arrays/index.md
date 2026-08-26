@@ -3,7 +3,7 @@ sidebar_position: 2
 title: 'Arrays'
 ---
 
-## 📦 5. What is an array, and how is it stored in memory?
+## 5. What is an array, and how is it stored in memory?
 
 **Array** হলো একটা linear data structure যেখানে একই type এর multiple element গুলো **contiguous (পাশাপাশি, একটানা)** memory location এ store করা হয়। প্রতিটি element কে তার **index** দিয়ে identify করা যায়, এবং index সাধারণত `0` থেকে শুরু হয়।
 
@@ -38,7 +38,6 @@ Array memory:
 সব element পাশাপাশি memory block এ থাকে।
 ```
 
----
 
 ### What is the difference between a static array and a dynamic array (e.g., ArrayList, Python list)?
 
@@ -84,7 +83,6 @@ new capacity = 8
 | Resize overhead | নেই | আছে (occasionally) |
 | Flexibility | কম | বেশি |
 
----
 
 ### How does a dynamic array handle resizing internally, and what is its amortized insertion cost?
 
@@ -131,9 +129,8 @@ Insert new element:
 [10][20][30][40][50][  ][  ][  ]
 ```
 
----
 
-## ⏱️ 6. What is the time complexity of common array operations (access, search, insertion, deletion)?
+## 6. What is the time complexity of common array operations (access, search, insertion, deletion)?
 
 | Operation | Time Complexity | ব্যাখ্যা |
 |---|---|---|
@@ -158,7 +155,6 @@ Search 50:
 সব element check লাগতে পারে -> O(n)
 ```
 
----
 
 ### Why is insertion/deletion at the beginning of an array O(n)?
 
@@ -200,7 +196,6 @@ Shift left:
 
 (মাঝখানে insertion/deletion করলেও একইভাবে `O(n)` হয়, কারণ average case এ প্রায় `n/2` element shift করতে হয়, যেটা asymptotically `O(n)` ই থাকে।)
 
----
 
 ### How does access by index achieve O(1) time?
 
@@ -223,9 +218,8 @@ base + index * element_size
 তাই arr[3] এবং arr[1000000] দুটোই O(1) access।
 ```
 
----
 
-## 🧮 7. What is a 2D array, and how is it stored in memory?
+## 7. What is a 2D array, and how is it stored in memory?
 
 **2D array** হলো একটা array of arrays — row এবং column আকারে data organize করা হয় (matrix এর মতো)। যদিও logically এটা একটা **grid/table** হিসেবে দেখা যায়, কিন্তু computer memory তে সবকিছুই **linear (1D)** ভাবে store হয়, তাই 2D array কে internally একটা 1D array হিসেবেই map করা হয়।
 
@@ -244,7 +238,6 @@ Actual memory is linear:
 
 এই mapping দুইভাবে করা যায়: **row-major order** অথবা **column-major order**।
 
----
 
 ### What is the difference between row-major and column-major order?
 
@@ -287,7 +280,6 @@ col0 first, then col1, then col2
 
 > **C++/language precision:** C/C++-এর built-in rectangular array row-major contiguous। Java-এর `int[][]` এবং Python-এর সাধারণ nested list মূলত row/list object-এর reference রাখে; পুরো matrix একটি single contiguous numeric buffer—এমন guarantee নেই। Python-এ NumPy array ব্যবহার করলে contiguous C-order বা Fortran-order layout explicitly পাওয়া যায়।
 
----
 
 ### How would you rotate a matrix in place by 90 degrees?
 
@@ -326,9 +318,8 @@ Original:          After Transpose:      After Row Reverse (Final):
 
 এই approach এর **Time Complexity = `O(n²)`** (প্রতিটি element একবার করে touch হয়), এবং **Space Complexity = `O(1)`** (কোনো extra matrix লাগে না, শুধু in-place swapping)।
 
----
 
-## 🔍 8. How would you find duplicate elements in an array efficiently?
+## 8. How would you find duplicate elements in an array efficiently?
 
 **1. Sorting-based Approach**
 - প্রথমে array **sort** করে ফেলা হয়, তারপর adjacent element গুলো compare করা হয়
@@ -388,7 +379,6 @@ read 2 -> already seen -> duplicate
 
 এখানে bit-vector-এর space `O(1)` বলা যায় কেবল value universe আগে থেকে fixed constant হলে। Range `0..U-1` input-এর সঙ্গে বাড়লে space `O(U)` bits।
 
----
 
 ### How would you find the only duplicate in an array of n+1 integers ranging from 1 to n?
 
@@ -453,9 +443,8 @@ int findDuplicate(std::vector<int>& nums) {
 
 Floyd's algorithm সবচেয়ে ভালো, কারণ এটা array কে **modify করে না** এবং `O(1)` extra space ব্যবহার করে।
 
----
 
-## ♻️ 9. What is an "in-place" algorithm, and why does it matter for array problems?
+## 9. What is an "in-place" algorithm, and why does it matter for array problems?
 
 **In-place algorithm** হলো এমন একটা algorithm যেটা input data structure কে transform করতে **constant (`O(1)`) বা খুব সামান্য extra space** ব্যবহার করে — অর্থাৎ input size এর সাথে proportionally বাড়ে এমন কোনো নতুন data structure তৈরি করে না। Transformation মূল data structure এর মধ্যেই ঘটে।
 
@@ -464,7 +453,6 @@ Floyd's algorithm সবচেয়ে ভালো, কারণ এটা arr
 - বড় dataset এর ক্ষেত্রে extra copy তৈরি করলে অনেক বেশি memory এবং copy করার সময় লাগতে পারে
 - Interview এবং real-world system এ **space efficiency** একটা গুরুত্বপূর্ণ optimization metric
 
----
 
 ### Can you give an example of an in-place array transformation?
 
@@ -503,7 +491,6 @@ void reverse(std::vector<int>& arr) {
 
 আরেকটা উদাহরণ: **Quicksort** — এটাও in-place sorting algorithm (partition করে element গুলো মূল array এর মধ্যেই rearrange করে), যেখানে **Merge Sort** সাধারণত out-of-place (merging এর জন্য extra array লাগে)।
 
----
 
 ### What is the difference between in-place and out-of-place algorithms in terms of space complexity?
 
@@ -515,9 +502,8 @@ void reverse(std::vector<int>& arr) {
 
 **গুরুত্বপূর্ণ note:** কিছু algorithm এ recursion ব্যবহার হলে, যদিও data structure এর জন্য কোনো নতুন array তৈরি হয় না, তবুও **call stack** এর কারণে `O(log n)` বা `O(n)` space লাগতে পারে — তাই strictly বলতে গেলে সেটাকে পুরোপুরি "constant space" বলা যায় না, কিন্তু সাধারণত এটাকেও in-place ধরা হয় যদি auxiliary data structure না লাগে।
 
----
 
-## 📐 10. What are prefix sums, and how are they used to optimize array problems?
+## 10. What are prefix sums, and how are they used to optimize array problems?
 
 **Prefix Sum** হলো একটা technique যেখানে একটা নতুন array তৈরি করা হয়, যার প্রতিটি index `i` তে **original array এর 0 থেকে i পর্যন্ত সব element এর cumulative sum** store থাকে।
 
@@ -538,7 +524,6 @@ prefix:  [3, 4, 8, 9,14,23]
 prefix[4] = 3 + 1 + 4 + 1 + 5 = 14
 ```
 
----
 
 ### How would you use a prefix sum to answer range sum queries efficiently?
 
@@ -570,7 +555,6 @@ subtract prefix[1]:
 
 এই approach এ প্রতিটি query `O(1)` time এ answer পাওয়া যায় (একবার `O(n)` preprocessing এর পর), যা multiple queries এর ক্ষেত্রে naive `O(n)` per-query approach এর চেয়ে অনেক efficient — বিশেষত যদি `q` টা query থাকে, তাহলে total complexity `O(n + q)` হয়ে যায়, নাহলে `O(n × q)` হতো।
 
----
 
 ### What is the difference between a prefix sum and a difference array?
 
@@ -616,7 +600,7 @@ Prefix of diff gives final arr:
 | Build from | Original array | Original array এর adjacent difference |
 | Best for | Static array, বহু query | বহু range update, শেষে একবার query |
 
-## 🧪 Complete array example
+## Complete array example
 
 ```cpp
 #include <bits/stdc++.h>

@@ -3,7 +3,7 @@ sidebar_position: 12
 title: 'Recursion & Backtracking'
 ---
 
-## 🔁 69. What is recursion, and what are its essential components?
+## 69. What is recursion, and what are its essential components?
 
 ```mermaid
 flowchart TD
@@ -40,7 +40,7 @@ int main() {
 
 Time `O(n)`, auxiliary space `O(n)`।
 
-## ⚙️ 70. What is the difference between recursion and iteration?
+## 70. What is the difference between recursion and iteration?
 
 Recursion call stack এবং iteration loop ব্যবহার করে। C++ tail-call optimization-এর guarantee দেয় না, তাই tail recursion-ও stack বাড়াতে পারে।
 
@@ -75,7 +75,7 @@ Iterative: 55
 
 দুটির time `O(n)`; space যথাক্রমে `O(n)` ও `O(1)`।
 
-## 🧩 71. What is backtracking, and how does it differ from plain brute force?
+## 71. What is backtracking, and how does it differ from plain brute force?
 
 ```mermaid
 flowchart TD
@@ -124,7 +124,7 @@ Combinations with sum 10:
 [3 7]
 ```
 
-## 👑 72. How would you solve the N-Queens problem using backtracking?
+## 72. How would you solve the N-Queens problem using backtracking?
 
 ```mermaid
 flowchart TD
@@ -190,7 +190,7 @@ Total solutions: 2
 
 Worst-case upper bound প্রায় `O(n!)`; recursion/state-array space `O(n)`।
 
-## 💭 73. How does memoization improve recursive algorithms?
+## 73. How does memoization improve recursive algorithms?
 
 ```mermaid
 flowchart TD
@@ -228,7 +228,7 @@ F(10) = 55
 
 Time `O(n)`, space `O(n)`।
 
-## 🔢 74. How would you generate permutations, combinations, or subsets?
+## 74. How would you generate permutations, combinations, or subsets?
 
 Permutation-এ order গুরুত্বপূর্ণ, combination-এ নয়। Power set-এ প্রতিটি element include/exclude করা হয়।
 

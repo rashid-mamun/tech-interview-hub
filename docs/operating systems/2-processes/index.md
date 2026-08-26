@@ -5,7 +5,7 @@ title: 'Processes'
 
 
 
-## 📦 5. What is a process, and how does it differ from a program?
+## 5. What is a process, and how does it differ from a program?
 
 ```mermaid
 flowchart LR
@@ -45,7 +45,6 @@ flowchart LR
 * **CPU execution context** — program counter, CPU registers, flags
 * **OS resources** — open files, sockets, signals, scheduling info, security credentials ইত্যাদি
 
----
 
 | বৈশিষ্ট্য      | Program                                           | Process                                                |
 | -------------- | ------------------------------------------------- | ------------------------------------------------------ |
@@ -56,12 +55,10 @@ flowchart LR
 | Lifetime       | file হিসেবে থাকতে পারে যতক্ষণ delete না হয়        | execution চলাকালীন থাকে; terminate হলে শেষ             |
 | Multiplicity   | একই program থেকে বহু instance চালানো যেতে পারে    | একই program থেকে একাধিক process তৈরি হতে পারে          |
 
----
 ধরো **VS Code** install করা আছে।
 Disk-এ থাকা VS Code-এর executable file হলো **program**।
 আপনি যখন VS Code open করলেন, OS সেটিকে memory-তে load করল, resources দিল, CPU time দিল—এখন এটি একটি **process**।
 
----
 
 ### What information is stored in a Process Control Block (PCB)?
 
@@ -136,7 +133,6 @@ Process বর্তমানে কোন অবস্থায় আছে:
 * resource usage statistics
 * quotas / limits / accounting info
 
----
 
 ### How does the OS keep track of multiple processes?
 
@@ -184,9 +180,8 @@ OS process-গুলোকে তাদের state অনুযায়ী বি
 │ Accounting / Usage Info    │
 └────────────────────────────┘
 ```
----
 
-## 🔄 6. What are the different states in the process lifecycle?
+## 6. What are the different states in the process lifecycle?
 
 ```mermaid
 stateDiagram-v2
@@ -282,7 +277,6 @@ Process execution শেষ করেছে বা OS সেটিকে termina
 Waiting -- event/I/O complete --> Ready
 ```
 
----
 
 ### What transitions exist between new, ready, running, waiting, and terminated states?
 
@@ -298,7 +292,6 @@ Waiting -- event/I/O complete --> Ready
 
 \* বাস্তব OS-এ cleanup ও signal delivery-এর কারণে intermediate internal state থাকতে পারে; table-টি conceptual lifecycle দেখায়।
 
----
 
 ### What causes a process to move from "running" to "waiting"?
 
@@ -368,7 +361,6 @@ Parent process child process শেষ হওয়ার জন্য বা �
 
 কিছু interactive program terminal বা user input-এর জন্য blocked থাকতে পারে।
 
----
 
 | বিষয়                           | Ready     | Waiting / Blocked                                 |
 | ------------------------------- | --------- | ------------------------------------------------- |
@@ -376,11 +368,10 @@ Parent process child process শেষ হওয়ার জন্য বা �
 | কীসের জন্য অপেক্ষা করছে?        | শুধু CPU  | I/O, event, timer, lock, child completion ইত্যাদি |
 | Scheduler কি একে CPU দিতে পারে? | হ্যাঁ     | না, event complete না হওয়া পর্যন্ত না            |
 
----
 
 
 
-## 🔁 7. What is context switching, and what overhead does it introduce?
+## 7. What is context switching, and what overhead does it introduce?
 
 ```mermaid
 sequenceDiagram
@@ -408,7 +399,6 @@ sequenceDiagram
 
 > **বর্তমান task কোথায় থেমেছিল তা save করা, এবং অন্য task কোথায় থেমেছিল তা restore করে তাকে CPU-তে চালানো।**
 
----
 
 ### Context switch vs mode switch
 
@@ -431,7 +421,6 @@ CPU execution এক task থেকে অন্য task-এ চলে যায়
 * `getpid()` system call → kernel-এ গিয়ে same process-এ ফিরে এলো → **mode switch, but no context switch**
 * blocking `read()` → process wait-এ গেল, scheduler অন্য process চালাল → **context switch**
 
----
 
 **Context switch কখন হতে পারে?**
 
@@ -445,7 +434,6 @@ Context switch সাধারণত তখন হয় যখন scheduler সি
 | **Yield / voluntary relinquish**        | current task নিজেই CPU ছেড়ে দিয়েছে                                         |
 | **Interrupt-driven rescheduling**       | timer interrupt বা অন্য kernel event-এর পর scheduler অন্য task বেছে নিয়েছে |
 
----
 
 **Interrupt হলেই কি context switch হয়?**
 
@@ -455,7 +443,6 @@ Interrupt এলে CPU প্রথমে interrupt handler-এ যায়।
 কিন্তু interrupt handle করার পর OS চাইলে **same task**-এ ফিরে যেতে পারে।
 শুধু তখনই context switch হবে যখন kernel/scheduler সিদ্ধান্ত নেবে যে অন্য task চালানো উচিত।
 
----
 
 **System call হলেই কি context switch হয়?**
 
@@ -466,7 +453,6 @@ System call সাধারণত **mode switch** ঘটায়, কারণ CPU
 
 Context switch হবে তখনই যদি system call-এর কারণে process **block** হয়, sleep করে, wait করে, বা scheduler অন্য task চালানোর সিদ্ধান্ত নেয়।
 
----
 
 ### What information must be saved and restored during a context switch?
 
@@ -493,7 +479,6 @@ Context switch হবে তখনই যদি system call-এর কারণ�
 
 যদি next task ভিন্ন address space-এর process হয়, তাহলে OS/MMU-কে সেই process-এর memory mapping context-এ switch করতে হয়।
 
----
 
 #### ধাপে ধাপে Context Switch
 
@@ -519,13 +504,11 @@ Process/Thread A running
 6) CPU B-কে execute করতে শুরু করে
 ```
 
----
 **PCB / Task Structure-এর ভূমিকা**
 
 প্রতিটি process (বা thread/task)-এর জন্য OS একটি kernel-side structure maintain করে, যেখানে scheduling এবং execution state রাখা হয়।
 Context switch-এর সময় এই structure-এই current task-এর state save করা হয় এবং next task-এর state restore করা হয়।
 
----
 
 ### Context switch overhead কেন হয়?
 
@@ -562,7 +545,6 @@ Context switch useful application work নয়; এটি **management overhead**
 
 নতুন execution stream-এ CPU-র prediction/locality সুবিধা কমে যেতে পারে, ফলে performance penalty হয়।
 
----
 
 ### Process switch vs thread switch
 
@@ -584,7 +566,6 @@ Context switch useful application work নয়; এটি **management overhead**
 
 তবে এটাও context switch — কারণ execution context বদলাচ্ছে।
 
----
 
 ### How does the frequency of context switches affect system performance?
 
@@ -602,9 +583,8 @@ Context switch useful application work নয়; এটি **management overhead**
 * কিন্তু interactive response খারাপ হতে পারে
 * একটি task বেশি সময় CPU ধরে রাখতে পারে
 
----
 
-## 👶 8. What is the difference between fork() and exec()?
+## 8. What is the difference between fork() and exec()?
 
 ```mermaid
 flowchart LR
@@ -637,7 +617,6 @@ if (pid == 0) {
 * **Child process-এ** → `0`
 * **Error হলে** → `-1`
 
----
 
 **`fork()`-এর পরে কী inherit হয়?**
 
@@ -652,7 +631,6 @@ Child process সাধারণত parent থেকে inherit করে:
 
 তবে child-এর **নিজস্ব PID** থাকে, এবং তার execution identity parent থেকে আলাদা।
 
----
 
 **`fork()`-এর পরে memory কীভাবে কাজ করে?**
 
@@ -666,7 +644,6 @@ Child process সাধারণত parent থেকে inherit করে:
 
 এতে `fork()` অনেক দ্রুত হয়, কারণ শুরুতেই পুরো memory copy করতে হয় না।
 
----
 
 **`fork()`-এর পরে file descriptor কী হয়?**
 
@@ -677,7 +654,6 @@ Child parent-এর file descriptor table-এর copy পায়, কিন্ত
 * একজন read/write করলে offset অন্যজনের দিকেও প্রভাব ফেলতে পারে
 * pipe/socket inheritance-এর মাধ্যমে parent-child communication করা যায়
 
----
 
 
 
@@ -699,7 +675,6 @@ perror("execl failed");   // exec fail করলে তবেই এখানে
 * open file descriptors সাধারণত খোলা থাকে, **যদি close-on-exec flag set না থাকে**
 * multithreaded process-এ successful `exec()`-এর পর calling thread-টিই নতুন program image চালায়; অন্য thread-গুলো আর থাকে না
 
----
 
 **`fork()` vs `exec()`**
 
@@ -711,7 +686,6 @@ perror("execl failed");   // exec fail করলে তবেই এখানে
 | Memory image          | parent-এর logical copy দিয়ে শুরু     | পুরোপুরি নতুন program image load হয়          |
 | Return behavior       | parent ও child—দুই জায়গায় return করে | successful হলে return করে না                 |
 
----
 
 ### Why are fork() and exec() often used together?
 
@@ -731,10 +705,9 @@ iv. **Parent** চাইলে `wait()` দিয়ে child-এর জন্য �
 
 এটিই classic **fork-exec model**।
 
----
 
 
-## 📋 9. What is process scheduling, and what are the roles of the long-term, short-term, and medium-term schedulers?
+## 9. What is process scheduling, and what are the roles of the long-term, short-term, and medium-term schedulers?
 
 ```mermaid
 flowchart LR
@@ -759,7 +732,6 @@ ii. **Short-term scheduler (CPU scheduler)**
 
 iii. **Medium-term scheduler**
 
----
 
 **i) Long-term Scheduler (Job Scheduler)**
 
@@ -775,7 +747,6 @@ iii. **Medium-term scheduler**
 
 Modern Linux/Windows/macOS-এ textbook-style separate long-term scheduler স্পষ্টভাবে নাও থাকতে পারে; admission/load control অন্য mechanism-এ handle হতে পারে।
 
----
 
 **ii) Short-term Scheduler (CPU Scheduler)**
 
@@ -798,7 +769,6 @@ Modern Linux/Windows/macOS-এ textbook-style separate long-term scheduler স�
 * Priority scheduling
 * Multilevel queue / feedback queue
 
----
 
 **Dispatcher কী?**
 
@@ -813,7 +783,6 @@ Modern Linux/Windows/macOS-এ textbook-style separate long-term scheduler স�
 
 > **Scheduler chooses; dispatcher hands over the CPU.**
 
----
 
 **iii) Medium-term Scheduler**
 
@@ -834,7 +803,6 @@ Swapping ঐতিহাসিকভাবে বোঝাতো কোনো pr
 
 তাই classic swapping model এখন মূলত conceptual explanation হিসেবে বেশি ব্যবহৃত হয়।
 
----
 
 **তিন scheduler-এর refined comparison**
 
@@ -844,5 +812,3 @@ Swapping ঐতিহাসিকভাবে বোঝাতো কোনো pr
 | Frequency        | কম                                    | খুব বেশি                                 | মাঝে মাঝে / memory-pressure dependent           |
 | Focus            | Multiprogramming degree, workload mix | CPU efficiency, responsiveness, fairness | Memory management / resident set control        |
 | Modern relevance | Separate component হিসেবে কম visible  | সব OS-এ central                          | Classic form কম, VM subsystem বেশি গুরুত্বপূর্ণ |
-
----

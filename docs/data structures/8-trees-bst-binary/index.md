@@ -4,7 +4,7 @@ title: 'Binary Search Tree'
 ---
 
 
-## 🌳 48. What is a BST, and what property must every node satisfy?
+## 48. What is a BST, and what property must every node satisfy?
 
 **Binary Search Tree (BST)** হলো একটি বিশেষ ধরনের **Binary Tree**, যেখানে প্রতিটি node একটি নির্দিষ্ট **ordering rule** মেনে চলে, যার ফলে data **efficient ভাবে search, insert, এবং delete** করা যায়।
 
@@ -29,7 +29,6 @@ title: 'Binary Search Tree'
 
 > ⚠️ **সাধারণ ভুল ধারণা:** শুধু কোনো node-এর **immediate children**-এর সাথে compare করলেই হবে না। পুরো **left/right subtree**-এর **প্রতিটি node**-কেই এই property মানতে হবে। উদাহরণস্বরূপ, একটি node তার grandparent-এর তুলনায়ও সঠিক position-এ থাকতে হবে।
 
----
 
 ### Why does an in-order traversal of a BST produce sorted output?
 
@@ -84,7 +83,6 @@ int main() {
 
 > 💡 **মূল কারণ:** BST-এর ordering property (`left < node < right`) এবং in-order traversal-এর ক্রম (`Left → Root → Right`) মূলত **একই logic** অনুসরণ করে — তাই এই দুটি মিলে গেলে স্বাভাবিকভাবেই sorted sequence তৈরি হয়।
 
----
 ### What is the difference between a BST and a balanced BST?
 
 BST শুধু ordering property maintain করে। Balanced BST ordering এর সাথে height balance ও maintain করে।
@@ -99,9 +97,8 @@ BST শুধু ordering property maintain করে। Balanced BST ordering �
 | **উদাহরণ** | সাধারণ, unbalanced BST | **AVL Tree**, **Red-Black Tree** |
 
 
----
 
-## 🔍 49. How do you search, insert, and delete a node in a BST?
+## 49. How do you search, insert, and delete a node in a BST?
 
 ```mermaid
 flowchart TD
@@ -155,7 +152,6 @@ Node* insertBST(Node* root, int key) {
 
 **Time Complexity:** Balanced tree-তে **O(log n)**, Skewed tree-তে worst case **O(n)**
 
----
 
 **3️⃣ Delete Operation**
 
@@ -202,7 +198,6 @@ Node* deleteBST(Node* root, int key) {
 }
 ```
 
----
 
 ### What happens when you delete a node that has two children?
 
@@ -245,9 +240,8 @@ Delete করার আগে:              Delete করার পরে (10 de
 
 কারণ operation গুলো tree height `h` এর উপর depend করে: `O(h)`।
 
----
 
-## ✅ 50. How would you validate whether a given binary tree is a valid BST?
+## 50. How would you validate whether a given binary tree is a valid BST?
 
 ```mermaid
 flowchart TD
@@ -292,7 +286,6 @@ bool isValidBST_Wrong(TreeNode* root) {
 
 > 🔑 **মূল সমস্যা:** শুধু immediate parent-এর সাথে compare করলে node-টি তার **সব ancestor**-দের সাথে সঠিক সম্পর্কে আছে কিনা তা যাচাই হয় না। একটি node শুধু তার সরাসরি parent-এর সাথেই নয়, বরং তার **প্রতিটি ancestor**-এর সাথেও সঠিক সীমার (range) মধ্যে থাকতে হবে।
 
----
 
 ### How would you solve this using bounds (min/max range) passed down recursively?
 
@@ -340,9 +333,8 @@ bool isValidBST(TreeNode* root, long minVal = LONG_MIN, long maxVal = LONG_MAX) 
 
 যখন node `6`-এ পৌঁছানো হবে, তখন তার valid range হবে `(10, 15)` — কারণ এটি `10`-এর right subtree-তে আছে (তাই `min = 10`) এবং `15`-এর left subtree-তে আছে (তাই `max = 15`)। কিন্তু `6`, এই range-এর মধ্যে পড়ে না (`6 <= 10`), তাই সাথে সাথে **`false`** return হবে।
 
----
 
-## 🌀 51. Why can BST operations degrade to O(n) in the worst case, and how is this avoided?
+## 51. Why can BST operations degrade to O(n) in the worst case, and how is this avoided?
 
 ```mermaid
 flowchart LR
@@ -359,7 +351,6 @@ flowchart LR
 - Skewed অবস্থায় tree-এর height হয়ে যায় **O(n)** — যা কার্যত একটি **linked list**-এর মতো আচরণ করে
 - ফলে search/insert/delete-এর জন্য প্রতিটি node **একে একে** traverse করতে হয়, যা **O(n)** time নেয়
 
----
 
 ### What input pattern causes a BST to become a "skewed" tree?
 
@@ -394,7 +385,6 @@ tree.insert(5);
 
 > 💡 **অন্যান্য কারণ:** শুধু পুরোপুরি sorted data-ই নয়, বরং যেকোনো এমন insertion pattern যেখানে বারবার একই দিকে (consistently left বা right) child যুক্ত হতে থাকে, তা skewed tree তৈরি করতে পারে। যেমন `5, 4, 3, 2, 1` (descending order) দিলে **Left-Skewed Tree** তৈরি হবে।
 
----
 
 ### How do self-balancing trees prevent this degradation?
 
@@ -437,7 +427,7 @@ tree.insert(5);
 
 > 🎯 **সারকথা:** সাধারণ BST-এর performance সম্পূর্ণভাবে **insertion order**-এর উপর নির্ভরশীল — sorted বা প্রায়-sorted data দিলে এটি skewed হয়ে **O(n)** performance-এ নেমে যায়। এই সমস্যার সমাধান হলো **Self-Balancing Tree**, যা প্রতিটি insert/delete-এর পর **rotation** ব্যবহার করে tree-এর height সবসময় **O(log n)**-এ বজায় রাখে, ফলে input pattern যাই হোক না কেন, performance সবসময় **guaranteed এবং predictable** থাকে।
 
-## 🔄 52. What are self-balancing BSTs, such as AVL trees and Red-Black trees?
+## 52. What are self-balancing BSTs, such as AVL trees and Red-Black trees?
 
 Self-balancing BST insert/delete-এর পরে structure adjust করে height `O(log n)` রাখে। AVL tree প্রতিটি node-এর balance factor `-1..1` রাখে; Red-Black Tree coloring rules দিয়ে তুলনামূলক relaxed balance রাখে। AVL search-heavy workload-এ ভালো, আর Red-Black Tree কম rotation-এর কারণে update-heavy general-purpose ordered map/set-এ common। C++ `std::map`/`std::set` সাধারণত Red-Black Tree-ভিত্তিক implementation ব্যবহার করে, যদিও standard নির্দিষ্ট tree বাধ্যতামূলক করে না।
 
@@ -543,7 +533,7 @@ Height: 3
 | Updates | rotations বেশি হতে পারে | সাধারণত rotations কম |
 | Common use | lookup-heavy indexes | ordered maps/sets, kernels, runtimes |
 
-## 🥇 53. How do you find the kth smallest or kth largest element in a BST?
+## 53. How do you find the kth smallest or kth largest element in a BST?
 
 BST এর in-order traversal sorted order দেয়। তাই **kth smallest** পেতে in-order traversal করে `k` তম element নিতে হবে। **kth largest** এর জন্য reverse in-order: Right -> Root -> Left।
 
@@ -687,7 +677,7 @@ pair<SearchNode*, SearchNode*> predecessorSuccessor(SearchNode* root, int target
 }
 ```
 
-## 🧪 Complete BST operations example
+## Complete BST operations example
 
 নিচের standalone program-এ insert, search, delete, validation এবং kth-smallest একই tree-তে দেখানো হয়েছে।
 
@@ -845,5 +835,3 @@ Balanced BST             Skewed BST
                                 \
 height = O(log n)                4   height = O(n)
 ```
-
----

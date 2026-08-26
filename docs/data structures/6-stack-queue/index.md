@@ -3,7 +3,7 @@ sidebar_position: 6
 title: 'Stack & Queue'
 ---
 
-## 📥 27. What is a stack, and what are its core operations?
+## 27. What is a stack, and what are its core operations?
 
 **Stack** হলো একটা linear data structure যেটা **LIFO (Last In, First Out)** principle অনুসরণ করে — অর্থাৎ যে element সবচেয়ে শেষে যোগ হয়েছে, সেটাই সবার আগে বের হবে।
 
@@ -45,7 +45,6 @@ pop():     [10, 20]
 top():     20
 ```
 
----
 
 ### What does LIFO (Last In, First Out) mean?
 
@@ -90,7 +89,6 @@ int main() {
 Popping order (LIFO): 3 2 1
 ```
 
----
 
 ### What are real-world applications of stacks (call stack, undo/redo, expression parsing)?
 
@@ -138,9 +136,8 @@ top -> delete "B"
 Undo চাপলে সবার আগে "delete B" reverse হবে।
 ```
 
----
 
-## 🏗️ 28. How would you implement a stack using an array vs. a linked list?
+## 28. How would you implement a stack using an array vs. a linked list?
 
 **Array-based Stack:**
 
@@ -281,7 +278,6 @@ Top element: 30
 Top after pop: 20
 ```
 
----
 
 ### What are the trade-offs between the two implementations?
 
@@ -294,7 +290,6 @@ Top after pop: 20
 
 Practical ব্যবহারে array-based stack (যেমন `std::vector` বা `std::stack`) সাধারণত **preferred**, কারণ cache locality এর কারণে বাস্তবে দ্রুত কাজ করে, যদিও theoretical worst-case এ occasionally resize এর cost আছে।
 
----
 
 ###  How would you implement a stack using two queues?
 
@@ -364,9 +359,8 @@ Top after pop: 2
 ```
 এখানে প্রতিটি `push` এ নতুন element `q2` তে দিয়ে বাকি সব পুরনো element কে তার পেছনে reorder করে দেওয়া হয়, ফলে **most recently pushed element সবসময় front এ** থাকে। এতে `push` হয় `O(n)`, কিন্তু `pop`/`top` হয় `O(1)`।
 
----
 
-## 🧮 29. How do you evaluate postfix or prefix expressions using a stack?
+## 29. How do you evaluate postfix or prefix expressions using a stack?
 
 **Postfix Evaluation:** operand আসলে stack এ push করা হয়, operator আসলে stack থেকে দুইটা operand pop করে operation করে আবার push করা হয়।
 
@@ -439,7 +433,6 @@ Result: 14
 ```
 **Time Complexity**: `O(n)` — প্রতিটি token একবারই process হয়
 
----
 
 **Infix থেকে postfix expression এ কীভাবে convert করবেন (Shunting Yard algorithm)?**
 
@@ -524,7 +517,6 @@ Postfix: abcd-*+
 ```
 **Time Complexity**: `O(n)`
 
----
 
 **Operator precedence এবং parentheses কীভাবে handle করবেন?**
 
@@ -534,9 +526,8 @@ Postfix: abcd-*+
 
 - **Associativity**: একই precedence এর multiple operator এর ক্ষেত্রে (যেমন `-` এবং `-`), সাধারণত **left-to-right** associativity মেনে চলা হয় (`>=` ব্যবহার করে, `>` না)।
 
----
 
-## 📈 30. What is the "next greater element" problem, and how is it solved using a stack?
+## 30. What is the "next greater element" problem, and how is it solved using a stack?
 
 **সমস্যা:** array এর প্রতিটি element এর জন্য তার ডানদিকে থাকা **প্রথম বড় element** খুঁজে বের করতে হবে (না থাকলে `-1`)।
 
@@ -612,7 +603,6 @@ Array:              4 5 2 10 8
 Next Greater Elem:  5 10 10 -1 -1
 ```
 
----
 
 ### How would you find the next greater element for every element in an array in O(n)?
 
@@ -620,7 +610,6 @@ Naive approach এ প্রতিটি element এর জন্য ডান�
 
 **Time Complexity**: `O(n)` — কারণ প্রতিটি element **সর্বোচ্চ একবার push এবং একবার pop** হয় (amortized analysis, ঠিক dynamic array এর মতো)।
 
----
 
 ### How is a monotonic stack used in problems like "largest rectangle in histogram"?
 
@@ -692,9 +681,8 @@ Largest rectangle area: 10
 
 **Time Complexity**: `O(n)` **Space Complexity**: `O(n)` (stack এর জন্য)
 
----
 
-## ⬇️⬆️ 31. How would you design a stack that supports retrieving the minimum/maximum element in O(1)?
+## 31. How would you design a stack that supports retrieving the minimum/maximum element in O(1)?
 
 **Approach: দুইটা stack ব্যবহার করা** — একটা normal stack (মূল element গুলো রাখে), এবং একটা **auxiliary "min stack"** যেটা প্রতিটি পর্যায়ে **current minimum** track করে।
 
@@ -774,13 +762,11 @@ After another pop, minimum: 3
 ```
 **Time Complexity**: প্রতিটি operation `O(1)` **Space Complexity**: `O(n)` (দুইটা stack এর জন্য)
 
----
 
 ### What additional data structure would you use alongside the stack?
 
 উপরের approach এ একটা **second stack (min stack)** ব্যবহার করা হয়েছে, যেটা মূল stack এর প্রতিটি element এর সাথে **সেই মুহূর্তের minimum value** synchronized ভাবে রাখে। বিকল্প হিসেবে, memory optimize করতে চাইলে min stack এ **শুধু তখনই push করা যায় যখন নতুন minimum পাওয়া যায়** (duplicate না রেখে), কিন্তু তখন pop করার সময় সাবধানে handle করতে হয় (নিচে বর্ণিত)।
 
----
 
 ### How do you handle duplicates when popping elements?
 
@@ -799,9 +785,8 @@ void pop() {
 ```
 `<=` গুরুত্বপূর্ণ: duplicate minimum-ও আলাদাভাবে push না করলে প্রথম duplicate pop করার সময় minimum state ভুল হয়ে যাবে।
 
----
 
-## 📤 32. What is a queue, and what are its core operations?
+## 32. What is a queue, and what are its core operations?
 
 **Queue** হলো একটা linear data structure যেটা **FIFO (First In, First Out)** principle অনুসরণ করে।
 
@@ -862,7 +847,6 @@ int main() {
 Dequeuing order (FIFO): 1 2 3
 ```
 
----
 
 ### What does FIFO (First In, First Out) mean?
 
@@ -880,7 +864,6 @@ Service order:
 Rahim -> Karim -> Asha -> Nila
 ```
 
----
 
 ### What is the difference between a queue, a deque (double-ended queue), and a circular queue?
 
@@ -927,8 +910,7 @@ Value: [60][ ] [30][40][50]
        rear   front
 ```
 
----
-## 🔁 33. How would you implement a queue using two stacks?
+## 33. How would you implement a queue using two stacks?
 
 Queue needs FIFO, but stack gives LIFO. দুইটা stack ব্যবহার করলে order দুইবার reverse হয়ে FIFO ফিরে আসে।
 
@@ -995,7 +977,6 @@ int main() {
 Dequeue order: 1 2 3
 ```
 
----
 
 ### What is the time complexity of enqueue and dequeue in your implementation?
 
@@ -1004,7 +985,6 @@ Dequeue order: 1 2 3
 
 Worst case এ একটা single `dequeue` call এ `O(n)` লাগতে পারে (যখন `s2` খালি থাকে এবং `s1` এ অনেক element জমে থাকে), কিন্তু **amortized** ভাবে এটা `O(1)`।
 
----
 
 ### How would you implement a stack using two queues?
 
@@ -1012,9 +992,8 @@ Worst case এ একটা single `dequeue` call এ `O(n)` লাগতে প
 
 মূল কৌশল: `push` করার সময় নতুন element কে দ্বিতীয় queue তে দিয়ে, তারপর প্রথম queue এর সব পুরনো element তার পেছনে নিয়ে গিয়ে reorder করে দেওয়া হয়, যাতে সবচেয়ে সাম্প্রতিক element সবসময় front এ থাকে। এতে `push` হয় `O(n)`, কিন্তু `pop`/`top` হয় `O(1)`।
 
----
 
-## ⭐ 34. What is a priority queue, and how does it differ from a regular queue?
+## 34. What is a priority queue, and how does it differ from a regular queue?
 **Priority Queue** হলো এমন একটা abstract data structure যেখানে প্রতিটি element এর একটা **priority** থাকে, এবং element গুলো তাদের **insertion order অনুযায়ী নয়, বরং priority অনুযায়ী** বের হয় (সবচেয়ে বেশি priority — বা সবচেয়ে কম, min-heap হলে — যুক্ত element সবার আগে বের হয়)।
 
 **মূল পার্থক্য:** Regular queue FIFO অনুসরণ করে, কিন্তু priority queue কোনো নির্দিষ্ট order অনুসরণ করে না — শুধু **সবচেয়ে বেশি (বা কম) priority** যুক্ত element কেই আগে বের করে দেয়, insertion time নির্বিশেষে।
@@ -1073,7 +1052,6 @@ Max-heap priority queue order: 5 4 3 1 1
 Min-heap priority queue order: 1 3 4
 ```
 
----
 
 ### How is a priority queue typically implemented internally?
 
@@ -1104,7 +1082,6 @@ top() = 50
 
 (বিকল্প implementation: **Fibonacci Heap** — কিছু বিশেষ ক্ষেত্রে (যেমন Dijkstra's algorithm এ decrease-key অপারেশন বেশি হলে) আরো ভালো amortized complexity দেয়, কিন্তু implementation জটিল বলে practical use এ কম দেখা যায়।)
 
----
 
 ### What are common use cases for priority queues (Dijkstra's algorithm, task scheduling)?
 
@@ -1116,8 +1093,7 @@ top() = 50
 
 4. **K largest/smallest elements** বের করা, **median maintaining** (two-heap technique), এবং **event-driven simulation** এ ও priority queue ব্যাপকভাবে ব্যবহৃত হয়।
 
----
-## 📉 35. What is a monotonic queue/deque, and where is it used?
+## 35. What is a monotonic queue/deque, and where is it used?
 
 **Monotonic Deque** হলো একটা deque যেটাতে element গুলো সবসময় **monotonic order** (হয় increasing, নাহয় decreasing) বজায় রাখে। যখন কোনো নতুন element যোগ করা হয়, তখন deque এর পেছন থেকে সব element যেগুলো এই monotonic property ভঙ্গ করে, সেগুলো **remove** করে দেওয়া হয়, তারপর নতুন element যোগ করা হয়।
 
@@ -1142,7 +1118,6 @@ deque values: [3, -1]
 front always holds current maximum.
 ```
 
----
 
 ### How would you solve the "sliding window maximum" problem using a monotonic deque?
 
@@ -1220,7 +1195,6 @@ Sliding window maximums (k=3): 3 3 5 5 6 7
 - নতুন element আসলে, deque এর পেছন থেকে তার চেয়ে ছোট সব element remove করে দেওয়া হয় (কারণ সেগুলো আর কখনো maximum হতে পারবে না, যেহেতু নতুন এবং বড় element তাদের চেয়ে পরে window এ থাকবে)
 - Window এর বাইরে চলে যাওয়া (outdated) index গুলো front থেকে remove করা হয়
 
----
 
 ### What is the time complexity of this approach compared to a brute-force solution?
 

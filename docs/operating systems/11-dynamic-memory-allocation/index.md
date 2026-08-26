@@ -4,7 +4,7 @@ title: 'Dynamic Memory Allocation'
 ---
 
 
-## 🧠 47. How does dynamic memory allocation work (e.g., malloc/free)?
+## 47. How does dynamic memory allocation work (e.g., malloc/free)?
 
 ```mermaid
 sequenceDiagram
@@ -31,7 +31,6 @@ Static storage program lifetime অনুযায়ী এবং stack storage �
 
 এগুলোর জন্য program runtime-এ heap থেকে memory নেয়।
 
----
 
 ### malloc/free কীভাবে কাজ করে?
 
@@ -62,7 +61,6 @@ free(arr);
 * `free(NULL)` safe no-op, কিন্তু একই live allocation দুইবার free করা undefined behavior
 * allocator block reuse-এর জন্য রেখে দিতে পারে; `free()` মানেই সঙ্গে সঙ্গে RSS কমা বা memory OS-এ ফেরত যাওয়া নয়
 
----
 
 ### User allocator vs OS kernel
 
@@ -95,7 +93,6 @@ User-space allocator checks free lists / arenas
               split/manage/return block
 ```
 
----
 
 ### What is the difference between memory allocated on the stack vs the heap?
 
@@ -124,7 +121,6 @@ int *p = malloc(sizeof(int));  // heap allocation
 free(p);
 ```
 
----
 
 ### Stack vs Heap
 
@@ -139,9 +135,8 @@ free(p);
 
 > **Rule of thumb:** short-lived local data stack-এ ভালো; variable-size বা function lifetime-এর বাইরে দরকারি data heap-এ রাখতে হয়।
 
----
 
-## 🧭 48. What are the common memory allocation strategies?
+## 48. What are the common memory allocation strategies?
 
 ```mermaid
 flowchart TB
@@ -169,7 +164,6 @@ Request: `6 KB`
 
 Different strategy different block choose করবে।
 
----
 
 ### First-fit
 
@@ -193,7 +187,6 @@ First-fit chooses 10 KB
 
 * free list-এর শুরুতে ছোট fragments জমতে পারে
 
----
 
 ### Best-fit
 
@@ -217,7 +210,6 @@ Best-fit chooses 8 KB
 * পুরো list scan করতে হতে পারে
 * খুব ছোট unusable fragments তৈরি করতে পারে
 
----
 
 ### Worst-fit
 
@@ -241,7 +233,6 @@ Worst-fit chooses 20 KB
 * fragmentation কমাবে এমন guarantee নেই
 * search overhead বেশি হতে পারে
 
----
 
 ### Next-fit
 
@@ -255,7 +246,6 @@ First-fit-এর মতো, কিন্তু প্রতিবার list-এ
 
 * fragmentation behavior workload-dependent
 
----
 
 ### How do first-fit, best-fit, and worst-fit compare?
 
@@ -268,9 +258,8 @@ First-fit-এর মতো, কিন্তু প্রতিবার list-এ
 
 বাস্তব allocators সাধারণ textbook first/best/worst-fit সরাসরি ব্যবহার করে না; তারা bins, size classes, arenas, caches, coalescing, splitting ইত্যাদি combine করে।
 
----
 
-## 🧩 49. What is the buddy system, and how does it manage memory allocation?
+## 49. What is the buddy system, and how does it manage memory allocation?
 
 ```mermaid
 flowchart LR
@@ -297,7 +286,6 @@ Smallest power-of-two block: `8 KB`
 
 তাই 8 KB block allocate হবে।
 
----
 
 ### Buddy system কীভাবে কাজ করে?
 
@@ -317,7 +305,6 @@ Request: 8 KB
 
 Allocator বড় block বারবার split করে যতক্ষণ না required size-এর block পাওয়া যায়।
 
----
 
 ### Free করার সময়
 
@@ -331,7 +318,6 @@ Allocator বড় block বারবার split করে যতক্ষণ ন
 32 KB + 32 KB → 64 KB
 ```
 
----
 
 ### How does the buddy system simplify merging of freed blocks?
 
@@ -370,9 +356,8 @@ Is my buddy free?
 * 6 KB request করলে 8 KB allocate হয়, 2 KB waste
 * arbitrary size allocation-এর জন্য exact fit নয়
 
----
 
-## 🧯 50. What is a memory leak, and how can OS-level or language-level tools help detect them?
+## 50. What is a memory leak, and how can OS-level or language-level tools help detect them?
 
 ```mermaid
 flowchart LR
@@ -396,7 +381,6 @@ void leak() {
 
 Function return করার পর `p` local variable হারিয়ে গেল, কিন্তু heap block allocated রয়ে গেল। Program আর সেই memory free করতে পারবে না।
 
----
 
 ### Memory leak কেন সমস্যা?
 
@@ -408,7 +392,6 @@ Function return করার পর `p` local variable হারিয়ে গে
 
 Server, daemon, browser, database-এর মতো long-running software-এ memory leak খুব serious।
 
----
 
 ### OS-level tools
 
@@ -425,7 +408,6 @@ OS-level tools memory usage observe করতে সাহায্য করে
 
 তবে RSS/virtual-size বৃদ্ধি একাই leak-এর proof নয়—allocator cache, file mapping, page cache accounting বা legitimate working-set growth-ও কারণ হতে পারে। OS-level tools সাধারণত exact leak source line বলে না; trend-এর পর heap profiler/sanitizer দিয়ে confirm করতে হয়।
 
----
 
 ### Language/runtime-level tools
 
@@ -445,7 +427,6 @@ Leak source ধরতে specialized tools দরকার হয়:
 * allocation stack trace
 * use-after-free/double-free bugs
 
----
 
 ### How does garbage collection differ from manual memory management in addressing leaks?
 
@@ -465,7 +446,6 @@ Problems:
 * use-after-free
 * dangling pointer
 
----
 
 **Garbage collection (GC)**
 
@@ -500,9 +480,8 @@ Example:
 
 এগুলোকে অনেক সময় **logical memory leak** বলা হয়।
 
----
 
-## 🧱 51. What is fragmentation in the context of dynamic memory allocators, and how is it mitigated?
+## 51. What is fragmentation in the context of dynamic memory allocators, and how is it mitigated?
 
 ```mermaid
 flowchart TB
@@ -519,7 +498,6 @@ Dynamic memory allocator-এ fragmentation মানে heap memory এমনভ
 * **Internal fragmentation**
 * **External fragmentation**
 
----
 
 ### Internal fragmentation
 
@@ -539,7 +517,6 @@ Waste: 31 bytes
 * size class rounding
 * power-of-two allocation
 
----
 
 ### External fragmentation
 
@@ -553,7 +530,6 @@ Request: 12 KB contiguous block
 Fail হতে পারে, কারণ একটানা 12 KB নেই
 ```
 
----
 
 ### Fragmentation mitigation techniques
 
@@ -581,7 +557,6 @@ Moving GC বা managed runtime object move করে contiguous free space ত
 
 Frequently allocated object reuse করা, যাতে allocation/free churn কমে।
 
----
 
 ### How does slab allocation help reduce fragmentation for frequently allocated object types?
 
@@ -597,7 +572,6 @@ Kernel-এ অনেক object বারবার allocate/free হয়:
 
 প্রতিবার generic allocator থেকে arbitrary size memory না নিয়ে slab allocator object-specific cache ব্যবহার করে।
 
----
 
 ### Slab allocation idea
 
@@ -625,7 +599,6 @@ Cache for inode objects
 * memory reclaim policy দরকার
 * many caches থাকলে management overhead বাড়ে
 
----
 
 ### Final comparison
 

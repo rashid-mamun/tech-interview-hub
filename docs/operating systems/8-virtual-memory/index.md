@@ -4,7 +4,7 @@ title: 'Virtual Memory'
 ---
 
 
-## 🪟 33. What is virtual memory, and why is it used?
+## 33. What is virtual memory, and why is it used?
 
 ```mermaid
 flowchart LR
@@ -19,7 +19,6 @@ Virtual Memory-তে process শুধুমাত্র **logical (virtual) ad
 
 আধুনিক Operating System-এ Virtual Memory সাধারণত **Demand Paging** ব্যবহার করে। Process-এর পুরো code, data এবং stack একসঙ্গে RAM-এ resident থাকে না; প্রয়োজনীয় page-গুলো RAM-এ আনা হয়। Non-resident page file-backed executable/library থেকে load হতে পারে, swap-backed হতে পারে, অথবা anonymous demand-zero/COW page হিসেবে memory-তেই তৈরি হতে পারে।
 
----
 
 ### কেন Virtual Memory ব্যবহার করা হয়?
 
@@ -40,7 +39,6 @@ Virtual Memory-তে process শুধুমাত্র **logical (virtual) ad
 **5. Efficient Memory Utilization:** Operating System শুধুমাত্র প্রয়োজনীয় page-গুলো RAM-এ রাখে।
 ফলে RAM-এর ব্যবহার আরও efficient হয় এবং অপ্রয়োজনীয় memory occupation কমে যায়।
 
----
 
 ### How does virtual memory allow processes to use more memory than physically available?
 
@@ -77,7 +75,6 @@ Valid, recoverable page fault application-এর জন্য transparent থা
 
 উদাহরণস্বরূপ, 2 GB RAM-এর system-এ process-গুলোর মোট mapped virtual address space সহজেই 8 GB-এর বেশি হতে পারে। তবে সব mapped page একই সময়ে resident/committed ও actively used হলে পর্যাপ্ত RAM/backing না থাকায় severe paging বা allocation failure হতে পারে।
 
----
 
 ### How does virtual memory provide isolation between processes?
 
@@ -102,9 +99,8 @@ Operating System সেই exception handle করে। Application এটি h
 User mode-এ থাকা কোনো process সরাসরি kernel memory access করতে পারে না।
 Kernel service ব্যবহার করতে হলে process-কে **system call** করতে হয়।
 
----
 
-## ⚡ 34. What is a Translation Lookaside Buffer (TLB), and how does it speed up address translation?
+## 34. What is a Translation Lookaside Buffer (TLB), and how does it speed up address translation?
 
 ```mermaid
 flowchart LR
@@ -155,7 +151,6 @@ TLB এই বৈশিষ্ট্যের সুবিধা নিয়ে 
 
 ফলে অধিকাংশ memory access-এ Page Table পর্যন্ত যেতে হয় না এবং system performance উল্লেখযোগ্যভাবে বৃদ্ধি পায়।
 
----
 
 ### What happens on a TLB miss, and how is the page table consulted afterward?
 
@@ -185,7 +180,6 @@ TLB Miss-এর ধাপগুলো
 5. TLB update করে।
 6. Faulting instruction পুনরায় execute করে।
 
----
 
 #### TLB Miss-এর Cost:
 
@@ -196,7 +190,6 @@ TLB Miss হলে—
 
 আর যদি Page Fault-ও ঘটে, তাহলে disk access লাগার কারণে delay অনেক বেড়ে যায়।
 
----
 
 ### What is a TLB flush, and when does it need to happen?
 **TLB Flush** হলো এমন একটি operation যেখানে TLB-এর সব entry অথবা নির্দিষ্ট কিছু entry invalidate করা হয়।
@@ -210,7 +203,6 @@ TLB Miss হলে—
 
 তাই পুরোনো translation ভুল process-এর ক্ষেত্রে ব্যবহার করা গেলে memory corruption বা security সমস্যা হতে পারে।
 
----
 **কখন TLB Flush করা হয়?**
 
 
@@ -233,7 +225,6 @@ TLB Miss হলে—
 
 **4. Kernel Memory Mapping পরিবর্তন হলে:** Operating System যদি Kernel-এর memory mapping পরিবর্তন করে, তাহলে সংশ্লিষ্ট TLB entry invalidate করতে হতে পারে।
 
----
 
 **TLB Flush-এর Cost**
 
@@ -243,9 +234,8 @@ TLB Flush-এর পরে TLB-তে খুব কম translation থাকে�
 এই সময় address translation তুলনামূলক ধীর হয়।
 এই কারণেই আধুনিক processor-গুলো **ASID/PCID** ব্যবহার করে অপ্রয়োজনীয় TLB Flush এড়ানোর চেষ্টা করে।
 
----
 
-## 📥 35. What is demand paging, and how does a page fault work end-to-end?
+## 35. What is demand paging, and how does a page fault work end-to-end?
 
 ```mermaid
 sequenceDiagram
@@ -337,7 +327,6 @@ Victim page dirty হলে সেটিকে আগে disk-এ write-back ক
 
 এবার Page RAM-এ থাকায় Address Translation সফল হয় এবং execution স্বাভাবিকভাবে চলতে থাকে।
 
----
 
 **পুরো Flow**
 
@@ -400,12 +389,11 @@ Ready Queue
 Restart Faulting Instruction
 ```
 
----
 
 
 
 
-## 🔄 36. What are the common page replacement algorithms?
+## 36. What are the common page replacement algorithms?
 
 ```mermaid
 flowchart TB
@@ -425,7 +413,6 @@ flowchart TB
 * frequently used page RAM-এ রাখা
 * implementation overhead reasonable রাখা
 
----
 
 ### FIFO, LRU, Optimal, এবং LFU/MFU — তুলনামূলক আলোচনা
 
@@ -471,7 +458,6 @@ flowchart TB
 | LFU | Frequency (কতবার ব্যবহার হয়েছে) | মাঝারি, কিছু সমস্যা আছে | Costly, কম ব্যবহৃত |
 | MFU | Frequency (উল্টো logic) | সাধারণত খারাপ | কম ব্যবহৃত |
 
----
 
 ### Belady's Anomaly কী, এবং কোন Algorithm এতে ভোগে?
 
@@ -489,7 +475,6 @@ flowchart TB
 * Stack property মানে, `N` frame-এর সাথে যে pageগুলো RAM-এ থাকে, সেগুলো `N+1` frame-এর সাথে RAM-এ থাকা pageগুলোর subset হবে।
 * FIFO-এর এই stack property নেই, তাই এটি anomaly-তে পড়তে পারে।
 
----
 
 ### বাস্তবে LRU কীভাবে approximate করা হয়?
 
@@ -520,7 +505,6 @@ Pure LRU implement করতে হলে প্রতিটি page access-এ�
 
 **সংক্ষেপে:** Clock/Second-Chance Algorithm pure LRU-এর মতো নিখুঁত না হলেও কম overhead-এ ভালো practical result দেয়।
 
----
 
 ### Thrashing কী, এবং page replacement-এর সাথে এর সম্পর্ক কী?
 

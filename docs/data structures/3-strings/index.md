@@ -4,7 +4,7 @@ title: 'Strings'
 ---
 
 
-## 🧵 11. How are strings represented and stored internally?
+## 11. How are strings represented and stored internally?
 String হলো মূলত **characters এর একটা sequence/array**। Internally বেশিরভাগ language এ string কে **character array** (বা byte array, encoding অনুযায়ী) হিসেবে memory তে **contiguous** ভাবে store করা হয়।
 
 - **C** এর মতো language এ string হলো একটা `char` array যেটা `\0` (null character) দিয়ে শেষ হয় (null-terminated)
@@ -72,7 +72,6 @@ s[4] = 'o'  offset: 4
 
 > **Implementation note:** ছোট `std::string` implementation-এর Small String Optimization (SSO) ব্যবহার করে character object-এর ভেতরেই রাখতে পারে; বড় string সাধারণত dynamic buffer ব্যবহার করে। দুক্ষেত্রেই C++11 থেকে characters contiguous থাকার guarantee আছে।
 
----
 
 ### Why are strings immutable in languages like Java and Python?
 
@@ -104,7 +103,6 @@ New object: "cats"  created
 s এখন নতুন object কে point করে।
 ```
 
----
 
 ### What is string interning, and how does it save memory?
 
@@ -145,9 +143,8 @@ s3 এর value same, কিন্তু object আলাদা হতে পা
 
 C++ এ direct string interning নেই (`std::string` mutable), তবে similar concept **flyweight pattern** দিয়ে manually implement করা যায়, অথবা string literal (`const char*`) কম্পাইলার প্রায়ই একটা read-only data segment এ pool করে রাখে।
 
----
 
-## ➕ 12. Why is repeated string concatenation in a loop inefficient, and what's the alternative?
+## 12. Why is repeated string concatenation in a loop inefficient, and what's the alternative?
 
 C++ এ `std::string` mutable হলেও, `+` অপারেটর দিয়ে concatenate করলে প্রতিবার existing buffer এ জায়গা না থাকলে **নতুন, বড় buffer allocate করে পুরো content copy** করতে হয় (dynamic array resize এর মতো)।
 
@@ -194,7 +191,6 @@ Result length: 50000
 ```
 (এই ছোট উদাহরণে `std::string` এর built-in **growth strategy — doubling capacity** থাকায় খুব বেশি slow দেখাবে না, কিন্তু বড় স্কেলে এবং immutable-string language এ (Java/Python) এই সমস্যা অনেক প্রকট হয়)
 
----
 
 ### How does StringBuilder (or equivalent) improve performance?
 
@@ -243,7 +239,6 @@ With reserve(): 6 ms
 ```
 `reserve()` ব্যবহার করলে buffer বারবার resize/reallocate হওয়ার দরকার হয় না, তাই performance আরো ভালো হয়। Java এর `StringBuilder` internally ঠিক এই কাজটাই করে — একটা mutable buffer maintain করে যেটা প্রয়োজনে doubling strategy তে grow করে, এবং শেষে `.toString()` কল করলে একটা immutable `String` তৈরি হয়।
 
----
 
 ### What is the time complexity of concatenating strings in a loop vs using a builder?
 
@@ -253,9 +248,8 @@ With reserve(): 6 ms
 | `std::string +=` (C++, mutable, amortized doubling) | `O(n)` amortized |
 | `StringBuilder` / `reserve()` সহ pre-allocated buffer | `O(n)` |
 
----
 
-## 🔄 13. How do you check if two strings are anagrams of each other?
+## 13. How do you check if two strings are anagrams of each other?
 
 **Anagram** মানে দুইটা string এর character frequency একই, শুধু order আলাদা।
 
@@ -362,7 +356,6 @@ int main() {
 
 **Trade-off:** Frequency count approach **faster** (`O(n)` vs `O(n log n)`), তাই এটাই সাধারণত preferred।
 
----
 
 ### How would you handle Unicode characters in an anagram check?
 
@@ -385,9 +378,8 @@ Unicode issue:
 Normalization না করলে anagram/palindrome result ভুল হতে পারে।
 ```
 
----
 
-## 🪞 14. What is a palindrome, and how do you efficiently check for one?
+## 14. What is a palindrome, and how do you efficiently check for one?
 
 **Palindrome** হলো এমন string যা সামনে থেকে এবং পেছন থেকে একই পড়া যায়।
 
@@ -433,7 +425,6 @@ int main() {
 ```
 - **Time Complexity**: `O(n)` **Space Complexity**: `O(1)`
 
----
 
 ### How would you check if a string can be rearranged to form a palindrome?
 
@@ -489,9 +480,8 @@ int main() {
 (`"ivicc"` কে rearrange করলে `"civic"` পাওয়া যায়, তাই এটাও Yes)
 - **Time Complexity**: `O(n)` **Space Complexity**: `O(k)`
 
----
 
-## 🔎 15. What are common string-matching algorithms?
+## 15. What are common string-matching algorithms?
 
 String matching মানে text এর মধ্যে pattern আছে কিনা বা কোথায় আছে সেটা খোঁজা।
 
@@ -552,7 +542,6 @@ Pattern found at index 12
 ```
 **Worst-case Time Complexity**: `O(n × m)` — ঘটে যখন text এবং pattern প্রায় একই রকম repetitive character দিয়ে গঠিত (যেমন `text = "aaaaaaaaaa"`, `pattern = "aaab"`)।
 
----
 
 ### How does the KMP (Knuth-Morris-Pratt) algorithm improve on the naive approach?
 
@@ -653,7 +642,6 @@ Pattern found at index 12
 ```
 - **Preprocessing**: `O(m)` **Searching**: `O(n)` **Total**: `O(n + m)` — naive এর `O(n × m)` থেকে অনেক ভালো
 
----
 
 ### What is the Rabin-Karp algorithm, and how does it use hashing for pattern matching?
 
@@ -738,7 +726,6 @@ Pattern found at index 12
 
 **সবচেয়ে বড় সুবিধা**: **multiple pattern search** এ কার্যকর — একসাথে অনেক pattern এর hash compute করে দ্রুত candidate বাছাই করা যায়।
 
----
 
 ### What is the Z-algorithm used for?
 

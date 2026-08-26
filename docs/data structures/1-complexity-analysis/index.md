@@ -4,7 +4,7 @@ title: 'Complexity Analysis'
 ---
 
 
-## 📈 1. What is Big-O notation and why is it important?
+## 1. What is Big-O notation and why is it important?
 
 
 Big-O notation হলো একটি mathematical notation যা কোনো algorithm এর **time complexity** বা **space complexity** কে input size (সাধারণত `n` দিয়ে denote করা হয়) এর function হিসেবে প্রকাশ করে। এটা মূলত algorithm এর **growth rate** measure করে — অর্থাৎ input size বাড়লে execution time বা memory usage কতটা বাড়বে সেটা বোঝায়।
@@ -43,7 +43,6 @@ O(n!)
 slowest
 ```
 
----
 
 ### What is the difference between Big-O, Big-Theta (Θ), and Big-Omega (Ω)?
 
@@ -79,7 +78,6 @@ runtime
 তখন সেটাকে Big-Theta বলা হয়।
 ```
 
----
 
 ### How do you calculate the time complexity of nested loops?
 
@@ -149,7 +147,6 @@ for (int i = 0; i < n; i++) {
 
 > **Precision note:** শুধু independent loop bound হলে iteration count সরাসরি multiply করা যায়। Inner bound যদি outer variable-এর উপর নির্ভর করে, তাহলে summation দিয়ে মোট iteration হিসাব করতে হয়—যেমন triangular loop-এ `Σi = n(n-1)/2`।
 
----
 
 ### What is amortized time complexity, and can you give an example?
 
@@ -182,9 +179,8 @@ n pushes এর total cost O(n),
 so per push amortized O(1)
 ```
 
----
 
-## 💾 2. What is space complexity, and how is it different from time complexity?
+## 2. What is space complexity, and how is it different from time complexity?
 
 **Space complexity** হলো একটা algorithm চালাতে input size এর function হিসেবে কতটুকু **memory (RAM)** প্রয়োজন হয় তার measurement। অন্যদিকে **time complexity** measure করে algorithm সম্পন্ন করতে কতটা **execution time (steps/operations)** লাগে।
 
@@ -210,7 +206,6 @@ Space: O(n)
 আমরা extra memory use করে time কমালাম।
 ```
 
----
 
 ### What is the difference between auxiliary space and total space complexity?
 
@@ -237,7 +232,6 @@ Total space = input + auxiliary
 Auxiliary space = only extra temp memory
 ```
 
----
 
 ### How does recursion affect space complexity through the call stack?
 
@@ -275,9 +269,8 @@ top -> factorial(0)
 
 এই কারণে deep recursion এ **stack overflow** হওয়ার ঝুঁকি থাকে, এবং অনেক ক্ষেত্রে **tail recursion optimization** বা iterative approach ব্যবহার করে এই space cost কমানো হয়।
 
----
 
-## ⚖️ 3. What is the difference between best-case, average-case, and worst-case complexity?
+## 3. What is the difference between best-case, average-case, and worst-case complexity?
 
 - **Best-case complexity**: সবচেয়ে favorable input এর জন্য algorithm এর performance। যেমন — array আগে থেকেই sorted থাকলে linear search এ প্রথম element এ target পেয়ে যাওয়া (`O(1)`)।
 
@@ -302,7 +295,6 @@ Average case:
 target random position এ থাকলে average প্রায় n/2 checks -> O(n)
 ```
 
----
 
 ### Why do interviewers usually focus on worst-case complexity?
 
@@ -316,7 +308,6 @@ target random position এ থাকলে average প্রায় n/2 checks ->
 
 4. **Scalability testing**: Interview এ candidate এর algorithmic thinking এবং edge-case handling capability যাচাই করার জন্যও worst-case analysis ভালো measure।
 
----
 
 ### Can you give an example where average case differs significantly from worst case (e.g., quicksort)?
 
@@ -361,9 +352,8 @@ total = O(n^2)
 
 (তুলনামূলকভাবে, **Merge Sort** এর best, average, এবং worst — সব ক্ষেত্রেই complexity `O(n log n)`, যেটা এটাকে বেশি predictable করে তোলে, যদিও এর জন্য অতিরিক্ত `O(n)` space লাগে।)
 
----
 
-## 🔁 4. How do you analyze the time complexity of recursive algorithms?
+## 4. How do you analyze the time complexity of recursive algorithms?
 
 Recursive algorithm এর complexity analyze করার জন্য সাধারণত একটা **recurrence relation** তৈরি করা হয়, যেটা প্রতিটি recursive call এর cost এবং subproblem এর সংখ্যাকে represent করে। এরপর এই recurrence relation কে solve করে closed-form complexity বের করা হয়। এটা solve করার কয়েকটা common method:
 
@@ -371,7 +361,6 @@ Recursive algorithm এর complexity analyze করার জন্য সা�
 2. **Substitution Method** — একটা guess করে mathematical induction দিয়ে সেটা verify করা হয়
 3. **Master Theorem** — নির্দিষ্ট ধরনের recurrence এর জন্য direct formula ব্যবহার করা
 
----
 
 ### What is a recurrence relation?
 
@@ -422,7 +411,6 @@ Total levels = log n
 Total cost = n * log n = O(n log n)
 ```
 
----
 
 ### What is the Master Theorem and when can it be applied?
 
@@ -465,7 +453,6 @@ f(n) = n
 Case 2 -> T(n) = O(n log n)
 ```
 
----
 
 ### How would you compute the complexity of a recursive Fibonacci function vs. its memoized version?
 
@@ -530,7 +517,7 @@ Space complexity এখানে `O(n)` — memo dictionary store করার �
 
 এটা দেখায় যে **memoization** (একটা classic **time-space tradeoff** technique) কীভাবে exponential time কে linear time এ নামিয়ে আনতে পারে, সামান্য extra space এর বিনিময়ে।
 
-## 🧪 Complete complexity demonstration
+## Complete complexity demonstration
 
 ```cpp
 #include <bits/stdc++.h>

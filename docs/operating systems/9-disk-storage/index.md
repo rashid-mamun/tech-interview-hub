@@ -4,7 +4,7 @@ title: 'Disk & Storage'
 ---
 
 
-## 💿 37. What are the common disk scheduling algorithms?
+## 37. What are the common disk scheduling algorithms?
 
 ```mermaid
 flowchart TB
@@ -29,7 +29,6 @@ Traditional HDD-তে disk head-কে platter-এর track-এর উপর mo
 
 Modern HDD controller logical block address (LBA)-কে physical geometry-তে map ও internally reorder করতে পারে। তাই FCFS/SSTF/SCAN examples মূলত classical OS model বোঝায়; real device behavior firmware ও queueing stack-এর ওপরও নির্ভর করে।
 
----
 
 ### How do FCFS, SSTF, SCAN, C-SCAN, and LOOK differ?
 
@@ -41,7 +40,6 @@ Modern HDD controller logical block address (LBA)-কে physical geometry-ত�
 
 প্রতিটি algorithm request order আলাদাভাবে সাজাবে।
 
----
 
 #### FCFS (First-Come, First-Served)
 
@@ -64,7 +62,6 @@ FCFS queue-এর মতো:
 50 → 98 → 183 → 37 → 122 → 14 → 124 → 65 → 67
 ```
 
----
 
 #### SSTF (Shortest Seek Time First)
 
@@ -80,7 +77,6 @@ FCFS queue-এর মতো:
 * starvation হতে পারে
 * দূরের request দীর্ঘ সময় অপেক্ষা করতে পারে যদি কাছাকাছি request বারবার আসে
 
----
 
 #### SCAN
 
@@ -105,7 +101,6 @@ Then reverses:     end → 37 → 14
 * disk edge-এর কাছাকাছি request wait pattern আলাদা হতে পারে
 * সবসময় actual last request পর্যন্ত না গিয়ে physical end পর্যন্ত গেলে extra movement হতে পারে
 
----
 
 #### C-SCAN (Circular SCAN)
 
@@ -129,7 +124,6 @@ start → 14 → 37
 * jump-back movement service দেয় না
 * total movement কিছু ক্ষেত্রে বেশি হতে পারে
 
----
 
 #### LOOK
 
@@ -148,13 +142,11 @@ reverse
 * unnecessary movement কম
 * SCAN-এর তুলনায় efficient হতে পারে
 
----
 
 #### C-LOOK
 
 C-LOOK হলো C-SCAN-এর optimized version। Head physical end পর্যন্ত না গিয়ে current direction-এর last pending request পর্যন্ত যায়, তারপর lowest pending request-এ jump করে।
 
----
 
 ### Comparison Table
 
@@ -167,7 +159,6 @@ C-LOOK হলো C-SCAN-এর optimized version। Head physical end পর্�
 | LOOK | SCAN but only up to last request | less movement than SCAN | direction-dependent wait |
 | C-LOOK | C-SCAN but only pending range | uniform + less movement | jump still exists |
 
----
 
 ### Which algorithm provides the most uniform wait time, and why?
 
@@ -177,9 +168,8 @@ C-LOOK হলো C-SCAN-এর optimized version। Head physical end পর্�
 
 তাই C-SCAN fairness ও predictable wait time-এর জন্য ভালো, যদিও total head movement সবসময় minimum হয় না।
 
----
 
-## 📏 38. What metrics are used to evaluate disk scheduling algorithms?
+## 38. What metrics are used to evaluate disk scheduling algorithms?
 
 ```mermaid
 flowchart LR
@@ -198,7 +188,6 @@ Disk head-কে target track/cylinder-এ move করতে যে সময়
 
 HDD performance-এ seek time বড় factor, কারণ এটি mechanical movement-এর উপর নির্ভর করে।
 
----
 
 **2. Rotational Latency**
 
@@ -206,7 +195,6 @@ Head target track-এ পৌঁছানোর পরে target sector head-এ�
 
 Average rotational latency সাধারণত এক rotation time-এর প্রায় অর্ধেক।
 
----
 
 **3. Transfer Time**
 
@@ -219,7 +207,6 @@ Data actual read/write করতে যে সময় লাগে।
 * controller speed
 * storage medium
 
----
 
 **4. Waiting / Queue Time**
 
@@ -227,19 +214,16 @@ Request queue-তে অপেক্ষা করে যত সময় কা�
 
 High load system-এ queue time অনেক বড় হতে পারে।
 
----
 
 **5. Throughput**
 
 প্রতি unit time-এ কতগুলো I/O request complete হলো।
 
----
 
 **6. Fairness / Starvation**
 
 কোনো request বা process অনির্দিষ্টকাল wait করছে কি না।
 
----
 
 ### What is seek time, rotational latency, and transfer time, and how do they combine to form access time?
 
@@ -264,9 +248,8 @@ Disk scheduling mainly seek time এবং queue behavior optimize করার 
 
 > **SSD note:** SSD-তে mechanical seek বা rotational latency নেই। তাই HDD-style seek optimization SSD-তে ততটা গুরুত্বপূর্ণ নয়।
 
----
 
-## 🗃️ 39. What is RAID, and how do the common levels differ?
+## 39. What is RAID, and how do the common levels differ?
 
 ```mermaid
 flowchart TB
@@ -287,7 +270,6 @@ RAID-এর তিনটি core idea:
 * **Mirroring** — একই data একাধিক disk-এ copy রাখা
 * **Parity** — failure হলে missing data reconstruct করার জন্য calculated redundancy রাখা
 
----
 
 ### What are the differences between RAID 0, RAID 1, RAID 5, RAID 6, and RAID 10?
 
@@ -307,7 +289,6 @@ Data multiple disk-এ stripe করে ছড়িয়ে রাখা হ�
 
 Minimum disks: `2`
 
----
 
 #### RAID 1: Mirroring
 
@@ -325,7 +306,6 @@ Minimum disks: `2`
 
 Minimum disks: `2`
 
----
 
 #### RAID 5: Striping with distributed parity
 
@@ -344,7 +324,6 @@ Data এবং parity multiple disk-এ distributed থাকে। একটি
 
 Minimum disks: `3`
 
----
 
 #### RAID 6: Striping with double distributed parity
 
@@ -362,7 +341,6 @@ RAID 5-এর মতো, কিন্তু দুটি independent parity র�
 
 Minimum disks: `4`
 
----
 
 #### RAID 10: Mirroring + Striping
 
@@ -381,7 +359,6 @@ RAID 1 mirrors-এর উপর RAID 0 striping। অর্থাৎ mirrored p
 
 Minimum disks: `4`
 
----
 
 ### RAID Comparison
 
@@ -395,7 +372,6 @@ Minimum disks: `4`
 
 > **Important:** RAID improves availability, but it is **not a backup**. Accidental deletion, corruption, ransomware, or site failure can still destroy data.
 
----
 
 ### What is the "write penalty" in RAID 5, and why does it occur?
 
@@ -413,9 +389,8 @@ Classic small-write read-modify-write flow:
 
 RAID 6-এ দুটি parity update করতে হওয়ায় small-write penalty সাধারণত আরও বেশি।
 
----
 
-## 💽 40. What is the difference between an HDD and an SSD, and how does it affect OS-level design decisions?
+## 40. What is the difference between an HDD and an SSD, and how does it affect OS-level design decisions?
 
 ```mermaid
 flowchart TB
@@ -429,7 +404,6 @@ flowchart TB
 
 **SSD (Solid State Drive)** flash memory-based storage। এতে moving mechanical part নেই।
 
----
 
 ### HDD vs SSD
 
@@ -443,7 +417,6 @@ flowchart TB
 | Wear | mechanical wear | write/erase cycle limit |
 | OS scheduling focus | seek optimization | queueing, parallelism, wear/TRIM awareness |
 
----
 
 ### OS-level design impact
 
@@ -460,7 +433,6 @@ flowchart TB
 * write amplification, erase blocks, garbage collection consideration থাকে
 * TRIM/discard support দরকার
 
----
 
 ### What is the TRIM command, and why is it relevant for SSDs?
 
@@ -479,7 +451,6 @@ flowchart TB
 
 TRIM না থাকলে SSD অনেক stale data valid মনে করে ধরে রাখতে পারে, ফলে write performance degrade হতে পারে।
 
----
 
 ### How does disk scheduling differ for SSDs compared to HDDs?
 
@@ -496,9 +467,8 @@ SSD scheduling focus করে:
 
 NVMe SSD-তে multiple hardware queues থাকে। তাই modern OS I/O scheduling অনেক ক্ষেত্রে multi-queue block layer, latency target, and device parallelism-এর সাথে কাজ করে।
 
----
 
-## 📤 41. What is I/O scheduling, and how does it relate to disk scheduling at the OS level?
+## 41. What is I/O scheduling, and how does it relate to disk scheduling at the OS level?
 
 ```mermaid
 flowchart LR
@@ -520,7 +490,6 @@ Disk scheduling ঐতিহাসিকভাবে HDD head movement optimize 
 * priority handle করা
 * device queue efficiently fill করা
 
----
 
 ### How do I/O schedulers differ in their goals?
 
@@ -536,7 +505,6 @@ Useful when:
 * SSD/flash storage
 * virtualization layer-এর নিচে আরেক scheduler আছে
 
----
 
 **Deadline (legacy)**
 
@@ -547,7 +515,6 @@ Useful when:
 * latency important
 * read starvation avoid করতে হবে
 
----
 
 **CFQ (legacy Completely Fair Queuing)**
 
@@ -560,7 +527,6 @@ Useful historically for:
 
 > **Modern note:** Linux blk-mq block layer-এ available scheduler device/configuration অনুযায়ী `mq-deadline`, `kyber`, `bfq`, বা `none` হতে পারে। Legacy `noop` আর modern `none` conceptually minimal হলেও একই implementation নয়; একইভাবে legacy `deadline` ও `mq-deadline` আলাদা implementation generation।
 
----
 
 ### Summary
 

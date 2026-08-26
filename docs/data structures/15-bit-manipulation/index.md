@@ -4,7 +4,7 @@ title: 'Bit Manipulation'
 ---
 
 
-## ⚙️ 102. What are the common bitwise operators, and what are typical use cases for each?
+## 102. What are the common bitwise operators, and what are typical use cases for each?
 
 **Bit Manipulation** হলো integer এর binary representation এর উপর সরাসরি operation করা। Interview problem এ এটা খুব useful, কারণ অনেক কাজ `O(1)` বা খুব কম memory দিয়ে করা যায়।
 
@@ -175,7 +175,6 @@ int main() {
 }
 ```
 
----
 
 ## 2️⃣ 103. How do you check if a number is a power of two using bit manipulation?
 
@@ -272,9 +271,8 @@ bool isPowerOfTwoLong(long long n) {
 **Time Complexity**: `O(1)`
 **Space Complexity**: `O(1)`
 
----
 
-## 🔢 104. How do you count the number of set bits (1s) in an integer's binary representation?
+## 104. How do you count the number of set bits (1s) in an integer's binary representation?
 
 Set bit মানে binary representation এ যতগুলো `1` আছে। যেমন:
 
@@ -390,9 +388,8 @@ int main() {
 }
 ```
 
----
 
-## ⊕ 105. How is XOR used to solve problems like "find the unique element in an array where every other element appears twice"?
+## 105. How is XOR used to solve problems like "find the unique element in an array where every other element appears twice"?
 
 XOR এর সবচেয়ে important properties:
 
@@ -534,9 +531,8 @@ vector<int> twoSingleNumbers(vector<int>& nums) {
 
 Idea: unique দুইটা number এর মধ্যে যেই bit আলাদা, সেই bit দিয়ে array কে দুই group এ ভাগ করা হয়।
 
----
 
-## 🎭 106. How do bitmasks help in solving subset-related problems?
+## 106. How do bitmasks help in solving subset-related problems?
 
 **Bitmask** হলো integer এর bit ব্যবহার করে কোনো set/state represent করা। যদি set এ `n` টা element থাকে, তাহলে `n` bit এর একটা mask দিয়ে বোঝানো যায় কোন element selected।
 
@@ -718,5 +714,3 @@ Space Complexity = O(2^n * n)
 ```
 
 এই approach brute force `O(n!)` থেকে অনেক better, কিন্তু still exponential। তাই bitmask DP সাধারণত `n <= 20` এর মতো constraints এ use করা হয়।
-
----

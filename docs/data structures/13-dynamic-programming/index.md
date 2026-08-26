@@ -3,14 +3,13 @@ sidebar_position: 14
 title: 'Dynamic Programming'
 ---
 
-## 📐 79. What is dynamic programming, and when should it be applied?
+## 79. What is dynamic programming, and when should it be applied?
 
 ```mermaid
 flowchart TD
-    Problem --> Optimal{Optimal substructure?}
-    Optimal -->|no| Other[Use another technique]
-    Optimal -->|yes| Overlap{Overlapping subproblems?}
-    Overlap -->|yes| DP[Dynamic programming]
+    Problem[Problem] --> Fit[Optimal substructure + repeated subproblems]
+    Fit --> DP[Dynamic programming]
+    Fit -. otherwise .-> Other[Use another technique]
     DP --> Memo[Top-down memoization]
     DP --> Tab[Bottom-up tabulation]
 ```
@@ -53,7 +52,7 @@ Top-down: 55
 Bottom-up: 55
 ```
 
-## 🧱 80. What are optimal substructure and overlapping subproblems?
+## 80. What are optimal substructure and overlapping subproblems?
 
 **Optimal substructure:** optimal answer ছোট state-এর optimal answer দিয়ে তৈরি হয়। **Overlapping subproblems:** একই state বারবার আসে। State, transition, base case ও evaluation order নির্ধারণ করাই DP design-এর মূল ধাপ।
 
@@ -87,7 +86,7 @@ Minimum cost: 15
 
 Time `O(n)`, space `O(1)`।
 
-## 🎒 81. How would you solve the classic 0/1 knapsack problem?
+## 81. How would you solve the classic 0/1 knapsack problem?
 
 ```mermaid
 flowchart TD
@@ -130,7 +129,7 @@ Time `O(nW)`, space `O(W)`।
 
 Full 2D table-এ `dp[i][w]` মানে প্রথম `i`টি item ব্যবহার করে capacity `w`-তে maximum value; dimensions `(n+1) × (W+1)`। 1D version একই previous row reuse করে space `O(W)` করেছে।
 
-## 📏 82. How does the Longest Common Subsequence (LCS) problem work?
+## 82. How does the Longest Common Subsequence (LCS) problem work?
 
 ```mermaid
 flowchart TD
@@ -180,7 +179,7 @@ Time ও space `O(mn)`।
 
 LCS deletion-only edit relation দেয়: দুই string-কে একই করতে minimum deletion সংখ্যা `m + n - 2·LCS`। General edit distance insertion/deletion/replacement-এর আলাদা DP transition ব্যবহার করে।
 
-## 📈 83. How do you approach the Longest Increasing Subsequence (LIS) problem?
+## 83. How do you approach the Longest Increasing Subsequence (LIS) problem?
 
 `tails[k]`-এ length `k+1` increasing subsequence-এর ক্ষুদ্রতম শেষ value রাখা হয়। `lower_bound` ব্যবহারে `O(n log n)` time পাওয়া যায়।
 
@@ -212,7 +211,7 @@ LIS length: 4
 
 Classic `O(n²)` DP-তে `dp[i] = 1 + max(dp[j])` for every `j < i` যেখানে `numbers[j] < numbers[i]`; `tails` version length দ্রুত দেয়, তবে `tails` নিজে actual LIS sequence নয়।
 
-## 💰 84. How is the coin change problem solved using DP?
+## 84. How is the coin change problem solved using DP?
 
 Minimum-coins variant minimum count রাখে; number-of-ways variant count যোগ করে। Coin reuse করা যায় বলে এটি unbounded knapsack-এর উদাহরণ।
 
@@ -256,7 +255,7 @@ Minimum coins for 5: 1
 Ways to make 5: 4
 ```
 
-## 🛣️ 85. How would you solve grid-based DP problems?
+## 85. How would you solve grid-based DP problems?
 
 ```mermaid
 flowchart LR

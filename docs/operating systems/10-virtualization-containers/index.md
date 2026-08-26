@@ -4,7 +4,7 @@ title: 'Virtualization & Containers'
 ---
 
 
-## 🖥️ 42. What is virtualization, and what problem does it solve?
+## 42. What is virtualization, and what problem does it solve?
 
 ```mermaid
 flowchart TB
@@ -37,7 +37,6 @@ Physical Server
        └── VM 3: BSD
 ```
 
----
 
 ### What is a hypervisor, and what is its role?
 
@@ -55,9 +54,8 @@ Hypervisor-এর কাজ:
 
 প্রতিটি VM-এর ভেতরে একটি **guest OS** চলে। Hypervisor ensure করে যাতে এক VM অন্য VM-এর memory বা device state corrupt করতে না পারে।
 
----
 
-## 🧱 43. What is the difference between a Type 1 and a Type 2 hypervisor?
+## 43. What is the difference between a Type 1 and a Type 2 hypervisor?
 
 ```mermaid
 flowchart TB
@@ -74,7 +72,6 @@ Hypervisor দুই ধরনের:
 * **Type 1 Hypervisor (Bare-metal)**
 * **Type 2 Hypervisor (Hosted)**
 
----
 
 ### Type 1 Hypervisor
 
@@ -104,7 +101,6 @@ Hardware
 
 > **Note:** Hyper-V Windows ecosystem-এর সাথে integrated হলেও architecture অনুযায়ী সাধারণত Type 1 hypervisor হিসেবে classify করা হয়।
 
----
 
 ### Type 2 Hypervisor
 
@@ -136,7 +132,6 @@ Hardware
 * VMware Fusion
 * Parallels Desktop
 
----
 
 ### Comparison
 
@@ -148,9 +143,8 @@ Hardware
 | Isolation boundary | সাধারণত smaller privileged layer; management components-ও relevant | host OS security ও hypervisor app—দুইটির ওপর depend করে |
 | Examples | ESXi, Hyper-V, Xen | VirtualBox, VMware Workstation |
 
----
 
-## 📦 44. What is the difference between a virtual machine and a container?
+## 44. What is the difference between a virtual machine and a container?
 
 ```mermaid
 flowchart TB
@@ -166,7 +160,6 @@ flowchart TB
 
 **Container** OS-level virtualization ব্যবহার করে। Containers সাধারণত host OS kernel share করে, কিন্তু isolated user-space environment পায়।
 
----
 
 ### VM architecture
 
@@ -179,7 +172,6 @@ Hardware
 
 VM-এর প্রতিটি guest OS নিজের kernel, drivers, system services এবং application stack নিয়ে চলে।
 
----
 
 ### Container architecture
 
@@ -193,7 +185,6 @@ Hardware
 
 Container-এর নিজস্ব full kernel থাকে না। সে host kernel share করে, কিন্তু namespaces/cgroups/security mechanism দিয়ে isolation পায়।
 
----
 
 ### VM vs Container
 
@@ -208,7 +199,6 @@ Container-এর নিজস্ব full kernel থাকে না। সে ho
 | Image size | large | smaller |
 | Use case | strong isolation, multi-OS, legacy apps | microservices, packaging, deployment |
 
----
 
 ### Why are containers generally more lightweight and faster to start than VMs?
 
@@ -226,9 +216,8 @@ Containers lightweight কারণ:
 
 > Container VM-এর replacement সবসময় নয়। VM stronger isolation এবং different OS kernel support দেয়; container faster packaging/deployment দেয়।
 
----
 
-## 🔒 45. How do containers achieve isolation using Linux namespaces and cgroups?
+## 45. How do containers achieve isolation using Linux namespaces and cgroups?
 
 ```mermaid
 flowchart LR
@@ -246,7 +235,6 @@ Linux container মূলত kernel features ব্যবহার করে:
 * **cgroups** — process কত resource ব্যবহার করতে পারবে তা control করে
 * capabilities/seccomp/LSM — privilege ও syscall/security boundary সীমিত করে
 
----
 
 ### What types of namespaces exist, and what does each isolate?
 
@@ -254,7 +242,6 @@ Linux container মূলত kernel features ব্যবহার করে:
 
 Process ID space isolate করে। Container-এর ভিতরে process নিজেকে PID 1 মনে করতে পারে, যদিও host-এ তার আলাদা PID থাকে।
 
----
 
 **Network namespace**
 
@@ -262,43 +249,36 @@ Network interfaces, IP address, routing table, firewall rules isolate করে�
 
 Container নিজের virtual network interface পেতে পারে।
 
----
 
 **Mount namespace**
 
 Filesystem mount points isolate করে। Container নিজের root filesystem view পায়।
 
----
 
 **UTS namespace**
 
 Hostname এবং domain name isolate করে।
 
----
 
 **IPC namespace**
 
 System V IPC, POSIX message queues ইত্যাদি isolate করে।
 
----
 
 **User namespace**
 
 User/group ID mapping isolate করে। Container-এর ভিতরে root user host-এর real root না-ও হতে পারে।
 
----
 
 **Cgroup namespace**
 
 Process নিজের cgroup hierarchy কীভাবে দেখবে তা isolate করে।
 
----
 
 **Time namespace**
 
 Linux time namespace `CLOCK_MONOTONIC` ও `CLOCK_BOOTTIME` family-এর offsets virtualize করতে পারে। এটি wall-clock `CLOCK_REALTIME` virtualize করে না।
 
----
 
 ### Namespace Summary
 
@@ -313,7 +293,6 @@ Linux time namespace `CLOCK_MONOTONIC` ও `CLOCK_BOOTTIME` family-এর offset
 | Cgroup | cgroup hierarchy view |
 | Time | clock offsets |
 
----
 
 ### How do cgroups enforce resource limits?
 
@@ -338,7 +317,6 @@ Container C: limited block I/O bandwidth
 
 যদি container memory limit ছাড়িয়ে যায়, kernel OOM handling trigger করতে পারে। CPU quota থাকলে scheduler container process-গুলোকে নির্দিষ্ট limit-এর বেশি CPU time দেবে না।
 
----
 
 ### Containers are isolated, not fully separate machines
 
@@ -354,9 +332,8 @@ Security hardening-এর জন্য often ব্যবহার হয়:
 * minimal images
 * rootless containers
 
----
 
-## ⚙️ 46. What is the difference between full virtualization, paravirtualization, and hardware-assisted virtualization?
+## 46. What is the difference between full virtualization, paravirtualization, and hardware-assisted virtualization?
 
 ```mermaid
 flowchart TB
@@ -369,7 +346,6 @@ Virtualization implementation-এর কয়েকটি approach আছে।
 
 > এগুলো সবসময় mutually exclusive category নয়। Modern VM প্রায়ই hardware-assisted CPU/memory virtualization-এর সঙ্গে paravirtualized I/O driver (যেমন virtio) ব্যবহার করে; “full virtualization” guest compatibility model-কে বোঝাতে পারে।
 
----
 
 ### Full Virtualization
 
@@ -386,7 +362,6 @@ Hypervisor virtual hardware provide করে এবং privileged operations tr
 
 * pure software emulation হলে overhead বেশি হতে পারে
 
----
 
 ### Paravirtualization
 
@@ -406,7 +381,6 @@ Examples:
 * Xen paravirtualization historically important
 * Virtio drivers in KVM environments paravirtualized I/O-এর common example
 
----
 
 ### Hardware-assisted Virtualization
 
@@ -419,7 +393,6 @@ Modern CPU virtualization extensions provide করে:
 
 CPU আলাদা execution mode/support দেয় যাতে guest OS অনেক privileged instruction safeভাবে execute করতে পারে, আর sensitive event হলে control hypervisor-এর কাছে যায়।
 
----
 
 ### How does hardware-assisted virtualization improve performance?
 
@@ -442,7 +415,6 @@ Memory virtualization-এর ক্ষেত্রে:
 
 Guest virtual address → guest physical address → host physical address translation hardware support দিয়ে দ্রুত করা যায়।
 
----
 
 ### Comparison
 
@@ -452,7 +424,6 @@ Guest virtual address → guest physical address → host physical address trans
 | Paravirtualization | হ্যাঁ বা special drivers | guest hypervisor-aware | ভালো, especially I/O |
 | Hardware-assisted | না | CPU virtualization extensions | modern default, efficient |
 
----
 
 ### VM vs Container vs Process: quick mental model
 
@@ -468,5 +439,3 @@ VM           = virtual hardware + separate guest OS kernel
 * **Container** fast startup, packaging, deployment এবং density দেয়।
 * **Hypervisor** VM manage করে।
 * **Namespaces + cgroups** container isolation/resource control দেয়।
-
----

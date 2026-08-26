@@ -4,7 +4,7 @@ title: 'Trees'
 ---
 
 
-## 🌲 41. What is a tree data structure, and what is its terminology (root, leaf, height, depth, degree)?
+## 41. What is a tree data structure, and what is its terminology (root, leaf, height, depth, degree)?
 
 **Tree** হলো একটি non-linear, hierarchical data structure যেখানে data গুলো parent-child সম্পর্কের মাধ্যমে সংযুক্ত থাকে। এটি অনেকটা উল্টানো গাছের মতো দেখতে, যেখানে সবচেয়ে উপরে থাকে **root** এবং নিচের দিকে বিভিন্ন **branch** ছড়িয়ে থাকে।
 
@@ -95,9 +95,8 @@ Tree আসলে graph এর special case। Tree এ কিছু extra rule 
 এখানে cycle আছে: 1 -> 2 -> 4 -> 3 -> 1
 ```
 
----
 
-## 🔀 42. What is the difference between a binary tree, a binary search tree (BST), and a balanced tree?
+## 42. What is the difference between a binary tree, a binary search tree (BST), and a balanced tree?
 
 **Binary Tree** হলো এমন একটি tree data structure যেখানে প্রতিটি node-এর সর্বোচ্চ **দুইটি child** থাকতে পারে — **left child** এবং **right child**। এখানে node গুলোর মধ্যে কোনো নির্দিষ্ট **ordering rule** থাকে না, অর্থাৎ data যেকোনো ক্রমে বসানো যায়।
 
@@ -196,9 +195,8 @@ Balanced tree এর height `log n`, তাই search/insert/delete `O(log n)`�
 
 > **Terminology note:** প্রতিটি node-এর height difference সর্বোচ্চ 1 হওয়া বিশেষভাবে **height-balanced/AVL-style** condition। Red-Black Tree-এর মতো অন্য balanced BST একই local rule মানে না, কিন্তু overall height `O(log n)` guarantee করে।
 
----
 
-## 🚶 43. What are the different tree traversal methods?
+## 43. What are the different tree traversal methods?
 
 **Tree traversal** মানে tree এর সব node একটা নির্দিষ্ট order এ visit করা। Common traversal:
 - **Pre-order**: Root -> Left -> Right
@@ -366,9 +364,8 @@ vector<int> levelOrder(Node* root) {
 
 **Example output:** `1 2 3 4 5`
 
----
 
-## 📏 44. How do you find the height (or maximum depth) of a binary tree?
+## 44. How do you find the height (or maximum depth) of a binary tree?
 
 **Height (Maximum Depth)** হলো **root থেকে সবচেয়ে দূরের leaf node পর্যন্ত longest path-এর দৈর্ঘ্য**।
 
@@ -400,7 +397,6 @@ Height দুইভাবে define করা হয়—
 
 **Height (Maximum Depth) = 3**
 
----
 
 **Edge Count Convention**
 
@@ -416,7 +412,6 @@ Height দুইভাবে define করা হয়—
 
 **Height = 2**
 
----
 
 **Interview-এ কোনটা ব্যবহার হয়?**
 
@@ -470,9 +465,8 @@ int maxDepthBFS(Node* root) {
 **Time Complexity**: `O(n)`
 **Space Complexity**: `O(w)`, যেখানে `w` হলো maximum width of tree
 
----
 
-## ⚖️ 45. How do you check whether a binary tree is height-balanced?
+## 45. How do you check whether a binary tree is height-balanced?
 
 একটা binary tree **height-balanced** যদি প্রতিটি node এর left subtree এবং right subtree এর height difference সর্বোচ্চ `1` হয়।
 
@@ -532,9 +526,8 @@ balance_factor = height(left subtree) - height(right subtree)
 
 AVL tree insert/delete এর পর rotation করে balance ঠিক রাখে, তাই search/insert/delete `O(log n)` থাকে।
 
----
 
-## 📐 46. What is the diameter of a binary tree, and how do you compute it?
+## 46. What is the diameter of a binary tree, and how do you compute it?
 
 **Diameter** হলো tree এর যেকোনো দুই node এর মধ্যে longest path। অনেক problem এ diameter count করা হয় **number of edges** হিসেবে।
 
@@ -594,9 +587,8 @@ int diameterOfBinaryTree(Node* root) {
 **Time Complexity**: `O(n)`
 **Space Complexity**: `O(h)`
 
----
 
-## 🔄 47. How would you serialize and deserialize a binary tree?
+## 47. How would you serialize and deserialize a binary tree?
 
 **Serialization** হলো একটি Binary Tree-কে এমন একটি **String** বা **List**-এ রূপান্তর করা, যাতে সেটিকে সহজে—
 
@@ -619,7 +611,6 @@ int diameterOfBinaryTree(Node* root) {
 
 > **তবে Inorder Traversal একা ব্যবহার করে Tree Reconstruct করা যায় না**, কারণ একই Inorder Traversal থেকে একাধিক ভিন্ন Tree তৈরি হতে পারে।
 
----
 
 ### Null Node কেন Store করতে হয়?
 
@@ -667,7 +658,6 @@ Serialization-এর সময় **Null Child** অবশ্যই Store কর
 
 অতএব Structure হারিয়ে যায়।
 
----
 
 **Preorder + Null Marker**
 
@@ -750,9 +740,8 @@ Node* deserialize(string data) {
 **Time Complexity**: `O(n)`
 **Space Complexity**: `O(n)` serialized data এবং recursion/queue এর জন্য
 
----
 
-## 🧪 Complete binary-tree example
+## Complete binary-tree example
 
 ```cpp
 #include <bits/stdc++.h>
