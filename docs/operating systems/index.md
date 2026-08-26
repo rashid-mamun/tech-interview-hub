@@ -1,35 +1,30 @@
 ---
 sidebar_position: 1
-title: 'Operating Systems'
+title: Operating Systems
 ---
 
-# 🖥️ Operating Systems Interview Guide
+# Operating Systems Interview Guide
 
-এই section OS fundamentals থেকে process/thread execution, synchronization, memory, storage এবং virtualization পর্যন্ত ধারাবাহিক learning path দেয়।
+Operating system CPU, memory, storage এবং devices-কে safe abstractions হিসেবে process-এর কাছে উপস্থাপন করে। Backend performance, concurrency এবং container behavior বুঝতে process scheduling থেকে virtual memory পর্যন্ত এই foundation জরুরি।
 
 ```mermaid
 flowchart LR
-    F[OS fundamentals] --> P[Processes] --> T[Threads]
-    T --> C[CPU scheduling] --> S[Synchronization] --> D[Deadlocks]
-    D --> M[Memory management] --> V[Virtual memory]
-    V --> IO[Disk and I/O] --> VC[Virtualization and containers]
-    M --> A[Dynamic allocation]
+    O[OS foundations] --> P[Processes and threads] --> C[Concurrency]
+    C --> M[Memory and virtual memory] --> I[Storage and I/O]
+    I --> V[Virtualization and containers]
 ```
 
-## Chapters
+## Learning path
 
 1. [OS Fundamentals](./1-os-fundamentals/index.md)
-2. [Processes and Process Management](./2-processes/index.md)
-3. [Threads and Multithreading](./3-threads/index.md)
-4. [CPU Scheduling](./4-cpu-scheduling/index.md)
-5. [Process Synchronization](./5-synchronization/index.md)
-6. [Deadlocks](./6-deadlocks/index.md)
-7. [Memory Management](./7-memory-management/index.md)
-8. [Virtual Memory](./8-virtual-memory/index.md)
-9. [Disk Scheduling and Storage](./9-disk-storage/index.md)
-10. [Virtualization and Containers](./10-virtualization-containers/index.md)
-11. [Dynamic Memory Allocation](./11-dynamic-memory-allocation/index.md)
+2. [Processes](./2-processes/index.md) and [Threads](./3-threads/index.md)
+3. [CPU Scheduling](./4-cpu-scheduling/index.md)
+4. [Synchronization](./5-synchronization/index.md) and [Deadlocks](./6-deadlocks/index.md)
+5. [Memory Management](./7-memory-management/index.md) and [Virtual Memory](./8-virtual-memory/index.md)
+6. [Disk and Storage](./9-disk-storage/index.md)
+7. [Virtualization and Containers](./10-virtualization-containers/index.md)
+8. [Dynamic Memory Allocation](./11-dynamic-memory-allocation/index.md)
 
-## Suggested study order
+## Interview focus
 
-প্রথমে process, thread ও scheduling পড়ুন। এরপর synchronization/deadlock এবং paging/virtual memory বুঝুন। সবশেষে storage, virtualization ও allocator internals পড়লে পুরো OS execution path সংযুক্তভাবে বোঝা যাবে।
+শুধু definition নয়, state transition ব্যাখ্যা করুন: thread blocked হলে scheduler কী করে, page fault হলে কোন steps ঘটে, lock contention throughput কেন কমায়, deadlock-এর conditions কীভাবে তৈরি হয়, এবং container isolation VM থেকে কীভাবে আলাদা। Diagram বা timeline ব্যবহার করলে concurrency answer আরও নির্ভুল হয়।

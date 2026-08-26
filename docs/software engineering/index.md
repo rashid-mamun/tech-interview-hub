@@ -1,21 +1,20 @@
 ---
 sidebar_position: 1
-title: 'Software Engineering'
+title: Software Engineering
 ---
 
-Software engineering শুধু code লেখা নয়; problem বোঝা থেকে শুরু করে architecture, implementation, verification, delivery এবং continuous improvement পর্যন্ত পুরো discipline। এই section-এর chapter-গুলো interview question-এর পাশাপাশি decision-making context ও practical example দেয়।
+# Software Engineering Interview Guide
+
+Software engineering শুধু code লেখা নয়; সঠিক problem নির্বাচন, requirements পরিষ্কার করা, maintainable design তৈরি, quality verify এবং safely deliver করার discipline। এই section process terminology-এর সঙ্গে বাস্তব decision-making ও trade-off যুক্ত করে।
 
 ```mermaid
 flowchart LR
-    Requirements[Requirements] --> Architecture[Architecture and design]
-    Architecture --> Delivery[Iterative delivery]
-    Delivery --> Testing[Testing and feedback]
-    Testing --> Operations[Release and operations]
-    Operations -->|learning and change| Requirements
-    Planning[Estimation and risk] -. supports .-> Delivery
+    R[Requirements] --> D[Architecture and design] --> B[Build]
+    B --> T[Test and feedback] --> O[Release and operate]
+    O -->|learning| R
 ```
 
-## Chapters
+## Learning path
 
 1. [SDLC Models and Methodologies](./sdlc-models-methodologies/)
 2. [Agile, Scrum, and Kanban](./agile-scrum-kanban/)
@@ -26,6 +25,6 @@ flowchart LR
 7. [Software Testing Techniques](./software-testing-techniques/)
 8. [Estimation, Planning, and Project Management](./estimation-planning-project-management/)
 
-## How to study
+## How to build strong answers
 
-প্রথমে lifecycle ও requirements পড়ুন, এরপর architecture/modularity এবং UML দিয়ে design reasoning তৈরি করুন। Testing chapter quality strategy বোঝায়, আর শেষ chapter estimation, scope, risk ও delivery trade-off একসাথে যুক্ত করে।
+একটি practice project বেছে নিয়ে প্রতিটি concept প্রয়োগ করুন: stakeholder ও constraints লিখুন, functional/non-functional requirements আলাদা করুন, architecture boundary আঁকুন, test strategy দিন এবং delivery risk estimate করুন। Interview answer-এ context ছাড়া “best practice” বলবেন না—কোন constraint-এর কারণে decisionটি উপযুক্ত, সেটিই গুরুত্বপূর্ণ।

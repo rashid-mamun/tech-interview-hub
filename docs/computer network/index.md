@@ -1,4 +1,6 @@
-# 🌍 How the Internet Works: Backend Developer Interview Questions
+# Computer Networking Interview Guide
+
+একটি browser request URL থেকে server response হওয়া পর্যন্ত DNS, IP routing, transport connection, TLS এবং HTTP—সব layer একসঙ্গে কাজ করে। এই section backend developer-এর দৃষ্টিতে সেই end-to-end flow এবং common failure points ব্যাখ্যা করে।
 
 ```mermaid
 flowchart LR
@@ -21,4 +23,11 @@ flowchart LR
 
 ## Suggested study order
 
-প্রথমে request কীভাবে Internet ও DNS পেরিয়ে server-এ পৌঁছায় তা বুঝুন। এরপর IP/TCP/UDP transport behavior এবং সবশেষে HTTP/HTTPS application flow পড়ুন।
+প্রথমে Internet, client-server এবং DNS দিয়ে request-এর যাত্রা বুঝুন। এরপর IP addressing ও routing, TCP বনাম UDP এবং connection establishment পড়ুন। সবশেষে HTTP semantics, TLS handshake, certificate validation এবং timeout/failure scenario একসঙ্গে অনুশীলন করুন।
+
+## Interview focus
+
+- DNS resolve হলেও request কেন fail করতে পারে?
+- TCP reliability কীভাবে ordering, acknowledgement ও retransmission নিশ্চিত করে?
+- Connection, read এবং idle timeout কীভাবে আলাদা?
+- HTTPS কোন threat প্রতিরোধ করে, আর কোনটি করে না?

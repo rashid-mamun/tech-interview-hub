@@ -217,7 +217,7 @@
   border: 0;
   border-radius: 0;
   box-sizing: border-box;
-  padding: 12px 16px 28px;
+  padding: 18px 28px 36px;
   box-shadow: none;
   margin: 0;
   max-width: none;
@@ -233,7 +233,7 @@
 .theme-doc-markdown h2,
 .theme-doc-markdown h3 {
   letter-spacing: 0;
-  font-weight: 700;
+  font-weight: 600;
   margin-bottom: 0.8rem;
   max-width: 100%;
   overflow-wrap: anywhere;
@@ -267,7 +267,7 @@
 .theme-doc-markdown h3 {
   font-size: clamp(1.05rem, 1.15vw, 1.18rem);
   line-height: 1.45;
-  font-weight: 700;
+  font-weight: 600;
   margin-top: 1.35rem;
 }
 
@@ -299,6 +299,15 @@
   margin-bottom: 0.4rem;
 }
 
+.theme-doc-markdown p {
+  max-width: 82ch;
+}
+
+.theme-doc-markdown > ul,
+.theme-doc-markdown > ol {
+  max-width: 88ch;
+}
+
 [data-theme='dark'] .theme-doc-markdown p,
 [data-theme='dark'] .theme-doc-markdown li {
   color: var(--docs-text);
@@ -315,21 +324,42 @@
 }
 
 .theme-doc-markdown blockquote {
-  border-left: 4px solid var(--docs-success);
-  border-radius: 0 8px 8px 0;
+  border: 1px solid #c9e9dc;
+  border-radius: 6px;
   background: #eefaf5;
   padding: 0.9rem 1rem;
   color: var(--docs-text);
 }
 
+.theme-doc-markdown header + h2 {
+  margin-top: 1.35rem;
+  padding-top: 0;
+  border-top: 0;
+}
+
 [data-theme='dark'] .theme-doc-markdown blockquote {
+  border-color: #285b48;
   background: #10281f;
 }
 
 .theme-doc-markdown table {
-  display: table;
+  display: block;
   width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
   font-size: 14px;
+  scrollbar-width: thin;
+}
+
+.theme-doc-markdown table th,
+.theme-doc-markdown table td {
+  min-width: 8.5rem;
+  vertical-align: top;
+}
+
+.theme-doc-markdown table th:first-child,
+.theme-doc-markdown table td:first-child {
+  min-width: 7rem;
 }
 
 .theme-doc-markdown thead tr {
@@ -337,16 +367,148 @@
 }
 
 .theme-doc-markdown pre {
-  border-radius: 8px;
+  border-radius: 6px;
   border: 1px solid var(--docs-border);
   box-shadow: none;
 }
 
 .theme-doc-markdown img {
-  max-width: 100%;
+  display: block;
+  max-width: min(100%, 560px);
+  width: auto;
+  max-height: min(400px, 65vh);
+  height: auto;
+  margin: 1.1rem auto 1.4rem;
   border: 1px solid var(--docs-border);
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--ifm-background-surface-color);
+  object-fit: contain;
+}
+
+.theme-doc-markdown .docusaurus-mermaid-container {
+  display: flex;
+  width: min(100%, 760px);
+  max-width: 100%;
+  align-items: center;
+  justify-content: center;
+  margin: 1rem auto 1.4rem;
+  padding: 0.5rem 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.theme-doc-markdown .docusaurus-mermaid-container svg {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 460px;
+  flex: 0 0 auto;
+}
+
+/* Mermaid study palette: distinct nodes make flows easier to scan. */
+.theme-doc-markdown .docusaurus-mermaid-container .node rect,
+.theme-doc-markdown .docusaurus-mermaid-container .node circle,
+.theme-doc-markdown .docusaurus-mermaid-container .node ellipse,
+.theme-doc-markdown .docusaurus-mermaid-container .node polygon,
+.theme-doc-markdown .docusaurus-mermaid-container .node path {
+  fill: #eef6ff !important;
+  stroke: #4f8fe8 !important;
+  stroke-width: 1.4px !important;
+}
+
+.theme-doc-markdown .docusaurus-mermaid-container .nodes .node:nth-child(3n + 2) rect,
+.theme-doc-markdown .docusaurus-mermaid-container .nodes .node:nth-child(3n + 2) circle,
+.theme-doc-markdown .docusaurus-mermaid-container .nodes .node:nth-child(3n + 2) polygon {
+  fill: #eafaf5 !important;
+  stroke: #21a179 !important;
+}
+
+.theme-doc-markdown .docusaurus-mermaid-container .nodes .node:nth-child(3n) rect,
+.theme-doc-markdown .docusaurus-mermaid-container .nodes .node:nth-child(3n) circle,
+.theme-doc-markdown .docusaurus-mermaid-container .nodes .node:nth-child(3n) polygon {
+  fill: #fff7e8 !important;
+  stroke: #dc9a2b !important;
+}
+
+.theme-doc-markdown .docusaurus-mermaid-container .node rect {
+  rx: 7px;
+  ry: 7px;
+}
+
+.theme-doc-markdown .docusaurus-mermaid-container .flowchart-link,
+.theme-doc-markdown .docusaurus-mermaid-container .edgePath path {
+  stroke: #58708e !important;
+  stroke-width: 1.7px !important;
+}
+
+.theme-doc-markdown .docusaurus-mermaid-container marker path,
+.theme-doc-markdown .docusaurus-mermaid-container .arrowheadPath {
+  fill: #58708e !important;
+  stroke: #58708e !important;
+}
+
+.theme-doc-markdown .docusaurus-mermaid-container .cluster rect {
+  fill: #f8fbff !important;
+  stroke: #b7c9df !important;
+  stroke-dasharray: 4 3;
+}
+
+.theme-doc-markdown .docusaurus-mermaid-container .actor,
+.theme-doc-markdown .docusaurus-mermaid-container .labelBox {
+  fill: #eef6ff !important;
+  stroke: #4f8fe8 !important;
+}
+
+.theme-doc-markdown .docusaurus-mermaid-container .note {
+  fill: #fff7e8 !important;
+  stroke: #dc9a2b !important;
+}
+
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container {
+  background: transparent;
+}
+
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .node rect,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .node circle,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .node ellipse,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .node polygon,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .node path,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .actor,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .labelBox {
+  fill: #172d47 !important;
+  stroke: #66a9f5 !important;
+}
+
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .nodes .node:nth-child(3n + 2) rect,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .nodes .node:nth-child(3n + 2) circle,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .nodes .node:nth-child(3n + 2) polygon {
+  fill: #123b35 !important;
+  stroke: #45c7a1 !important;
+}
+
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .nodes .node:nth-child(3n) rect,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .nodes .node:nth-child(3n) circle,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .nodes .node:nth-child(3n) polygon,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .note {
+  fill: #402f16 !important;
+  stroke: #e4a83f !important;
+}
+
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .label,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .label span,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .label p,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .actor,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container text {
+  color: #edf5ff !important;
+  fill: #edf5ff !important;
+}
+
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .cluster rect {
+  fill: #111d2c !important;
+  stroke: #46617f !important;
 }
 
 .docs-hub-grid {
@@ -363,7 +525,7 @@
   gap: 8px;
   padding: 18px;
   border: 1px solid var(--docs-border);
-  border-radius: 8px;
+  border-radius: 6px;
   color: var(--docs-text);
   background: var(--ifm-background-surface-color);
   text-decoration: none;
@@ -411,7 +573,7 @@
 }
 
 .table-of-contents__link {
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 6px 7px;
   margin: 2px 4px 2px 0;
   display: block;
@@ -445,7 +607,7 @@
 
 .pagination-nav__link {
   border: 1px solid var(--docs-border);
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--ifm-background-surface-color);
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
   min-height: 92px;
@@ -798,13 +960,30 @@ body.docs-left-hidden.docs-right-hidden .theme-doc-markdown {
   }
 
   .theme-doc-markdown h3 {
-    font-size: 1.1rem;
+    font-size: 1.02rem;
   }
 
   .theme-doc-markdown p,
   .theme-doc-markdown li {
     font-size: 15px;
     line-height: 1.78;
+  }
+
+  .theme-doc-markdown img {
+    max-height: 65vh;
+    margin: 0.9rem auto 1.15rem;
+  }
+
+  .theme-doc-markdown .docusaurus-mermaid-container {
+    margin: 0.85rem 0 1.15rem;
+    padding: 0.35rem 0;
+  }
+
+  .theme-doc-markdown .docusaurus-mermaid-container svg {
+    width: auto !important;
+    min-width: 0;
+    max-width: 100%;
+    max-height: 60vh;
   }
 
   [class*='docMainContainer_'] .container {
