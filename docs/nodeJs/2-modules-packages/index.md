@@ -27,23 +27,24 @@ title: 'Modules and Packages'
 
 ---
 
-## 17. Yarn কী, এবং npm থেকে কীভাবে আলাদা?
+## 16. Yarn কী, এবং npm থেকে কীভাবে আলাদা?
 
 **Yarn** হলো Facebook-এর তৈরি একটি alternative package manager, যেটা npm-এর কিছু সমস্যা সমাধানের জন্য আনা হয়েছিল।
 
 | বিষয় | npm | Yarn |
 |---|---|---|
-| **Speed** | তুলনামূলক ধীর (আগে) | Parallel install করে, তাই দ্রুত |
+| **Speed** | তুলনামূলক ধীর (আগে; npm v7+ থেকে অনেকটা কাছাকাছি) | Parallel install করে, তাই ঐতিহাসিকভাবে দ্রুত |
 | **Lock file** | `package-lock.json` | `yarn.lock` |
 | **Offline cache** | সীমিত | শক্তিশালী offline cache |
-| **Workspaces** | আছে | আগে থেকেই mature support |
-| **Security** | npm audit | Checksum verification |
+| **Workspaces** | আছে (npm v7+ থেকে) | আগে থেকেই mature support |
+| **Integrity/Checksum verification** | আছে — `package-lock.json`-এ SRI hash (npm v5+ থেকে) | আছে — `yarn.lock`-এ checksum |
+| **Vulnerability scanning** | `npm audit` | `yarn audit` |
 
-Yarn-এর `yarn.lock` file exact versions lock করে রাখে, ফলে যেকোনো machine-এ same dependency tree পাওয়া যায়। আধুনিক npm-ও এখন অনেক কাছাকাছি এসে গেছে, কিন্তু Yarn-এর **Plug'n'Play (PnP)** mode `node_modules` ছাড়াই কাজ করতে পারে — এটা একটা বড় পার্থক্য।
+Yarn-এর `yarn.lock` file exact versions lock করে রাখে, ফলে যেকোনো machine-এ same dependency tree পাওয়া যায়। আধুনিক npm-ও এখন অনেক কাছাকাছি এসে গেছে (npm-এর `package-lock.json`-ও checksum verify করে এবং `npm audit` দিয়ে vulnerability scan করা যায়), কিন্তু Yarn-এর **Plug'n'Play (PnP)** mode `node_modules` ছাড়াই কাজ করতে পারে — এটা এখনও একটা বড় পার্থক্য।
 
 ---
 
-## 18. `node_modules` folder-এর কাজ কী?
+## 17. `node_modules` folder-এর কাজ কী?
 
 `node_modules` হলো সেই folder যেখানে তোমার project-এর সব installed dependency-গুলো রাখা হয়। `npm install` দিলে `package.json`-এ listed সব package এখানে download হয়।
 
@@ -117,4 +118,4 @@ node_modules/
       lodash@3.0/   ← package-B এর আলাদা version দরকার, তাই nested
 ```
 
-এতে duplication কমে, path ছোট থাকে, এবং performance ভালো হয়।উপরের diagram-এ দেখতে পাচ্ছো npm v1/v2-তে `lodash` দুইবার install হচ্ছে, কিন্তু npm v3+-এ একবারই top-level-এ রাখা হয়েছে এবং সবাই সেটা share করছে।
+এতে duplication কমে, path ছোট থাকে, এবং performance ভালো হয়। উপরের diagram-এ দেখতে পাচ্ছো npm v1/v2-তে `lodash` দুইবার install হচ্ছে, কিন্তু npm v3+-এ একবারই top-level-এ রাখা হয়েছে এবং সবাই সেটা share করছে।

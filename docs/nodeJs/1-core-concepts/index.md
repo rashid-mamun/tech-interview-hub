@@ -32,7 +32,7 @@ Node.js-এর সাথে আসে বিশ্বের সবচেয়�
 - 🎥 **Streaming applications** — Netflix, YouTube-এর মতো platforms
 - 🌍 **Single Page Application (SPA)**-এর backend হিসেবে
 
-> ⚠️ **একটু সতর্কতা:**  
+> ⚠️ **একটু সতর্কতা:**
 > Node.js **CPU-intensive tasks** (heavy computation, image processing, machine learning) এর জন্য আদর্শ নয়, কারণ single thread block হয়ে গেলে পুরো application slow হয়ে যেতে পারে। এই ক্ষেত্রে Python বা Java বেশি উপযুক্ত।
 
 ### ⚡ How does Node.js's single-threaded nature impact its performance under high concurrency?
@@ -653,7 +653,7 @@ Event Loop একটি নির্দিষ্ট cycle-এ ঘোরে। �
    ├───────────────────────┤
    │  3. Idle / Prepare    │ ← Internal only
    ├───────────────────────┤
-   │  4. Poll ⭐           │ ← নতুন I/O events (সবচেয়ে গুরুত্বপূর্ণ)
+   │  4. Poll ⭐           │ ← নতুন I/O events (সবচেয়ে গুরুত্বপূর্ণ)
    ├───────────────────────┤
    │  5. Check             │ ← setImmediate
    ├───────────────────────┤
@@ -697,7 +697,7 @@ Timer 2 — 100ms
 
 **🔵 Phase 2: Pending Callbacks**:
 আগের **I/O cycle**-এ complete হয়নি এমন কিছু system-level error callback এখানে চলে। যেমন TCP socket error।
-> সাধারণ development-এ এই phase সরাসরি দেখা যায় না — এটি OS-level error handle করে。
+> সাধারণ development-এ এই phase সরাসরি দেখা যায় না — এটি OS-level error handle করে।
 
 ---
 
@@ -757,7 +757,14 @@ setImmediate
 setTimeout
 ```
 
-> I/O callback (Poll phase) থেকে বের হলে event loop সরাসরি Check phase-এ যায়, তাই setImmediate আগে execute হয়
+> I/O callback (Poll phase) থেকে বের হলে event loop সরাসরি Check phase-এ যায়, তাই এখানে `setImmediate` সবসময় `setTimeout`-এর আগে execute হবে — এটা **guaranteed**।
+>
+> ⚠️ তবে এই guarantee শুধু **I/O callback-এর ভেতর** থেকে call করলে প্রযোজ্য। যদি `setTimeout` আর `setImmediate` দুটোই **top-level / main module**-এ (কোনো I/O callback-এর বাইরে) call করা হয়, তাহলে কোনটা আগে চলবে তা **guaranteed নয়** — এটা নির্ভর করে process performance এবং timer-এর জন্য কতটা সময় লেগেছে তার উপর, যা প্রতিবার run করলে ভিন্ন হতে পারে। যেমন:
+> ```javascript
+> setTimeout(() => console.log('timeout'), 0);
+> setImmediate(() => console.log('immediate'));
+> // Output অনির্দিষ্ট — 'timeout' আগে যেতে পারে, আবার 'immediate'ও আগে যেতে পারে
+> ```
 
 ---
 
@@ -782,7 +789,7 @@ server.close();
 
 এই দুটো **সব phase-এর আগে ও মাঝে** চলে — এরা সবার উপরে priority পায়:
 
-**1. `process.nextTick()`**: 
+**1. `process.nextTick()`**:
 Current operation শেষ হলে **সাথে সাথেই** চলে, Event Loop-এর পরের phase-এ যাওয়ার আগেই।
 
 **2. Promise Microtasks (`.then`, `async/await`)**
@@ -811,6 +818,8 @@ console.log('6. Synchronous আবার');
 3. setImmediate
 ```
 
+> ⚠️ এখানেও note করার বিষয়: `2. setTimeout` এবং `3. setImmediate`-এর এই order top-level context-এ **guaranteed না** — উপরের ব্যাখ্যা অনুযায়ী প্রতিবার run করলে ভিন্ন হতে পারে।
+
 ```ascii
 ┌─────────────────────────────────────────────────┐
 │           Execution Priority (উপর = আগে)        │
@@ -832,12 +841,12 @@ JavaScript-এ সব asynchronous কাজ **একই queue-এ** রাখ�
 * **Microtask Queue** → High priority, ছোট ও জরুরি কাজ
 * **Macrotask Queue** → Low priority, বড় ও পরে করার কাজ
 
-| বিষয়           | Microtask Queue                 | Macrotask Queue             |
+| বিষয়           | Microtask Queue                 | Macrotask Queue             |
 | -------------- | ------------------------------- | --------------------------- |
 | অন্য নাম       | Job Queue                       | Callback Queue / Task Queue |
 | Priority       | 🔴 সর্বোচ্চ                     | 🟡 তুলনামূলক কম             |
-| কখন execute হয় | প্রতিটি phase ও callback-এর পরে | নির্দিষ্ট phase-এ           |
-| Execution      | সম্পূর্ণ খালি না হওয়া পর্যন্ত   | phase অনুযায়ী execute হয়    |
+| কখন execute হয় | প্রতিটি phase ও callback-এর পরে | নির্দিষ্ট phase-এ           |
+| Execution      | সম্পূর্ণ খালি না হওয়া পর্যন্ত   | phase অনুযায়ী execute হয়    |
 
 ---
 ### 🤔 Why do microtasks execute before macrotasks?
@@ -1013,28 +1022,18 @@ const final = await Promise.resolve(result).then(transform);
 
 ### ⏰ How does `setTimeout(fn, 0)` actually work and why is it not executed immediately?
 
-`setTimeout(fn, 0)` দেখতে "এখনই চালাও" মনে হলেও এটি কখনোই synchronous নয়। এর পেছনে তিনটি কারণ আছে।
+`setTimeout(fn, 0)` দেখতে "এখনই চালাও" মনে হলেও এটি কখনোই synchronous নয়। এর পেছনের কারণগুলো browser আর Node.js-এ কিছুটা আলাদা — যেহেতু এই ডকুমেন্ট মূলত Node.js নিয়ে, দুটোই আলাদা করে দেখানো হলো।
 
-**কারণ ১ — Minimum delay:**
+**Node.js-এ:**
 
-HTML specification অনুযায়ী nested `setTimeout`-এর minimum delay **4ms**। এমনকি `0` দিলেও browser সেটি `1ms` (বা বেশি) হিসেবে treat করে।
-
-```js
-console.time('actual delay');
-setTimeout(() => {
-  console.timeEnd('actual delay'); // ~1-4ms, কখনো 0ms নয়
-}, 0);
-```
-
-**কারণ ২ — Macrotask queue-এ যায়:**
-
-`setTimeout` callback টি call stack-এ সরাসরি যায় না — Web API delay শেষে এটিকে **macrotask queue**-তে রাখে। Event loop তখনই এটি তুলবে যখন call stack সম্পূর্ণ খালি এবং microtask queue খালি।
+- Node.js-এর timer implementation `0` বা negative delay দিলে সেটাকে internally **`1ms`**-এ clamp করে দেয় — browser-এর মতো `4ms` minimum delay নিয়ম Node.js-এ প্রযোজ্য না।
+- মূল কারণ হলো `setTimeout` callback সরাসরি call stack-এ যায় না — এটি libuv-কে দেওয়া হয়, এবং delay শেষ হলে Timers phase-এ callback **macrotask queue**-তে ঢোকে। Event loop তখনই এটি তুলবে যখন call stack সম্পূর্ণ খালি, microtask queue খালি, এবং Event Loop timer phase-এ পৌঁছায়।
 
 ```js
 console.log('A');         // call stack-এ সরাসরি
 
-setTimeout(() => {        // Web API-তে পাঠানো হলো
-  console.log('C');       // macrotask queue → তারপর call stack
+setTimeout(() => {        // libuv timer-এ পাঠানো হলো
+  console.log('C');       // macrotask (Timers phase) → তারপর call stack
 }, 0);
 
 console.log('B');         // call stack-এ সরাসরি
@@ -1043,9 +1042,11 @@ console.log('B');         // call stack-এ সরাসরি
 // 'C' কখনো A ও B-এর মাঝে আসবে না
 ```
 
-**কারণ ৩ — System timer resolution:**
+- এছাড়া OS-এর timer interrupt resolution-ও একটা factor — Linux/Mac-এ সাধারণত ~1ms, Windows-এ historically বেশি হতে পারে। তাই `0ms` চাইলেও OS/libuv যতক্ষণ না timer check করে ততক্ষণ callback queue-তে যাবে না।
 
-Operating system-এর timer interrupt সাধারণত ১৫.৬ms (Windows) বা ১ms (Linux/Mac) interval-এ কাজ করে। তাই `0ms` চাইলেও OS যতক্ষণ না timer check করে ততক্ষণ callback queue-তে যাবে না।
+**Browser-এ (তুলনার জন্য):**
+
+- HTML specification অনুযায়ী **nested** `setTimeout` call-এ (৫ বারের বেশি nesting) minimum delay `4ms` প্রযোজ্য হয়; প্রথম কয়েকটা call-এ এই নিয়ম প্রযোজ্য হয় না। এই নিয়মটা Node.js-এর জন্য নয়, শুধু browser environment-এর জন্য।
 
 **`setTimeout(fn, 0)`-এর practical use case:**
 
@@ -1129,5 +1130,4 @@ C. await এর পরে
 ---
 
 > **Microtask** হলো VIP guest — সে সবার আগে ঢোকে, এবং তার দল শেষ না হওয়া পর্যন্ত কাউকে ঢুকতে দেয় না।
-> **Macrotask** হলো সাধারণ queue — তারা phase অনুযায়ী ঢোকে, কিন্তু প্রতিবার ঢোকার আগে VIP list চেক হয়。
-
+> **Macrotask** হলো সাধারণ queue — তারা phase অনুযায়ী ঢোকে, কিন্তু প্রতিবার ঢোকার আগে VIP list চেক হয়।

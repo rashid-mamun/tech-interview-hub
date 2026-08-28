@@ -1,6 +1,7 @@
 ---
 sidebar_position: 1
-title: 'Memory Management'
+title: 'Node.js Memory Management'
+sidebar_label: 'Memory Management'
 ---
 
 ## 1. How is memory managed in JavaScript?
@@ -29,7 +30,7 @@ JavaScript দুটি আলাদা জায়গায় data রাখ�
 │   │  age = 25    │   │  { name: 'Ali' }  │  │
 │   │  score = 90  │   │  [1, 2, 3]        │  │
 │   │  isOn = true │   │  function() {...} │  │
-│   │              │   │                   │  │
+│   │              │   │  'hello' (string) │  │
 │   │  Fast ⚡     │   │  Flexible 🗃️     │  │
 │   └──────────────┘   └───────────────────┘  │
 └─────────────────────────────────────────────┘
@@ -37,7 +38,7 @@ JavaScript দুটি আলাদা জায়গায় data রাখ�
 
 **Stack:**
 - **Fixed size**, ordered, LIFO (Last In First Out)
-- Primitive value সরাসরি এখানে store হয়
+- Primitive value (number, boolean, null, undefined ইত্যাদি) সরাসরি এখানে store হয়
 - Function call হলে stack-এ **stack frame** যোগ হয়, return হলে সরে যায়
 - **অত্যন্ত দ্রুত** — CPU সরাসরি access করে
 
@@ -50,31 +51,34 @@ JavaScript দুটি আলাদা জায়গায় data রাখ�
 ```js
 // Stack-এ store হয়:
 let age = 25;        // number value সরাসরি stack-এ
-let name = 'Ali';    // string — small strings stack-এ, বড় strings heap-এ
 let isOn = true;     // boolean stack-এ
 
 // Heap-এ store হয়:
+let name = 'Ali';                    // string primitive হলেও internally
+                                      // heap-এ একটি string object হিসেবে থাকে
 let user = { name: 'Ali', age: 25 }; // object heap-এ
 let nums = [1, 2, 3];                // array heap-এ
-// user এবং nums — এই variable গুলো stack-এ আছে,
-// কিন্তু তারা heap-এর address point করছে
+// name, user, nums — এই variable গুলোর reference/value stack-এ আছে,
+// কিন্তু string, object, array-এর প্রকৃত data heap-এ থাকে
 ```
+
+> **নোট:** JavaScript spec অনুযায়ী `string` একটি **primitive** type — মানে এটি immutable এবং value দিয়ে compare হয় (`a === b`)। কিন্তু এর মানে এই না যে string সবসময় "stack-এ" থাকে। বাস্তব engine implementation-এ (যেমন V8) string data প্রায়ই heap-এ একটি string object হিসেবে রাখা হয়, ছোট হোক বা বড় — engine internally caching/interning করতে পারে, কিন্তু "ছোট string stack-এ, বড় string heap-এ" এই ধারণাটি সঠিক নয়।
 
 ---
 
 ### Primitive vs reference types
 
-**Primitive types** (Stack-এ সরাসরি value):
+**Primitive types** (JS spec অনুযায়ী value semantics — copy হলে value copy হয়):
 
-| Type | Example | Stack-এ |
+| Type | Example | নোট |
 |---|---|---|
-| `number` | `42`, `3.14` | মান সরাসরি |
-| `string` | `'hello'` | ছোট string stack-এ, বড় heap-এ |
-| `boolean` | `true`, `false` | মান সরাসরি |
-| `null` | `null` | মান সরাসরি |
-| `undefined` | `undefined` | মান সরাসরি |
-| `symbol` | `Symbol('id')` | মান সরাসরি |
-| `bigint` | `9007n` | মান সরাসরি |
+| `number` | `42`, `3.14` | সাধারণত সরাসরি value হিসেবে আচরণ করে |
+| `string` | `'hello'` | immutable, value দিয়ে compare হয়; internally heap-এ string object |
+| `boolean` | `true`, `false` | সরাসরি value হিসেবে আচরণ করে |
+| `null` | `null` | সরাসরি value |
+| `undefined` | `undefined` | সরাসরি value |
+| `symbol` | `Symbol('id')` | unique, সরাসরি value হিসেবে আচরণ করে |
+| `bigint` | `9007199254740993n` | সরাসরি value হিসেবে আচরণ করে |
 
 **Primitive copy — value copy হয়:**
 
@@ -147,15 +151,17 @@ console.log(person.name); // 'Changed' — বাইরে থেকেও ব�
 
 JavaScript-এ memory allocation তিনটি পর্যায়ে ঘটে:
 
-**পর্যায় ১ — Static allocation (compile time):**
-Primitive value এবং function declaration-এর জন্য JavaScript engine আগে থেকেই memory ঠিক করে রাখে।
+**পর্যায় ১ — Primitive value allocation (execution-এর শুরুতেই):**
+Primitive value-এর size fixed হওয়ায় (যেমন number সবসময় 8 bytes) JavaScript engine সহজেই ও দ্রুত এদের জন্য memory বরাদ্দ করতে পারে। এটি traditional static languages (C/C++)-এর মতো সত্যিকারের "compile-time allocation" নয় — কারণ JavaScript ahead-of-time compiled ভাষা নয়, বরং JIT (Just-In-Time) compiled/interpreted। তবে fixed-size হওয়ায় allocation predictable ও দ্রুত হয়।
 
 ```js
-// Engine আগেই জানে এদের size:
-let count = 0;       // 8 bytes (number)
-let flag = false;    // 1 byte (boolean)
-const MAX = 1000;    // 8 bytes (number)
+// Fixed size হওয়ায় engine দ্রুত allocate করতে পারে:
+let count = 0;       // number
+let flag = false;    // boolean
+const MAX = 1000;    // number
 ```
+
+> **নোট:** এখানে সরাসরি byte-size উল্লেখ করা হয়নি, কারণ প্রকৃত internal representation (V8-এর SMI tagging, NaN-boxing ইত্যাদি) engine ও optimization-ভেদে ভিন্ন হতে পারে — এগুলো implementation detail, JS spec-এর অংশ নয়।
 
 **পর্যায় ২ — Dynamic allocation (runtime):**
 Object এবং Array তৈরি হলে runtime-এ heap-এ memory নেওয়া হয়।
@@ -196,7 +202,7 @@ V8 Heap
 ├── Old Space (Old Generation)    ← দীর্ঘস্থায়ী object, বড়
 ├── Code Space                    ← compiled JIT code
 ├── Map Space                     ← hidden classes এবং meta info
-└── Large Object Space            ← 1MB+ বড় object
+└── Large Object Space            ← বড় (~1MB+) object
 ```
 
 ```js
@@ -247,6 +253,9 @@ function createCycle() {
 }
 createCycle();
 // a ও b উভয়ই unreachable → GC দুটোকেই free করবে ✅
+// (এটাই দেখায় কেন JS mark-and-sweep ব্যবহার করে, শুধু
+// reference-counting নয় — reference-counting circular reference
+// ধরতে পারত না)
 ```
 
 ---
@@ -749,7 +758,7 @@ controller.abort(); // fetch বাতিল, listener সরে যাবে
 
 ### Use weak references (WeakMap, WeakSet)
 
-`WeakMap` এবং `WeakSet` — key/value হিসেবে object রাখে, কিন্তু GC-এর কাছে সেটি **strong reference** হিসেবে গণ্য হয় না। Key object unreachable হলে WeakMap-এর entry automatically সরে যায়।
+`WeakMap` এবং `WeakSet` — object রাখে, কিন্তু GC-এর কাছে সেটি **strong reference** হিসেবে গণ্য হয় না। Object unreachable হলে WeakMap/WeakSet-এর entry automatically সরে যায়।
 
 ```js
 // ❌ Regular Map — object GC হতে পারে না
@@ -798,12 +807,15 @@ attachData(btn, { clickCount: 0, userId: 42 });
 
 **WeakMap vs WeakSet — তুলনা:**
 
+`WeakMap` key-value pair রাখে (key অবশ্যই object হতে হবে), কিন্তু `WeakSet` শুধু value (member) রাখে key-value pair নয়।
+
 | | `Map` | `WeakMap` | `WeakSet` |
 |---|---|---|---|
-| Key type | যেকোনো | Object only | Object only |
+| Structure | Key-Value pair | Key-Value pair | শুধু Value (member) |
+| Key/Value type | যেকোনো | Key: Object only | Value: Object only |
 | GC prevent করে? | ✅ হ্যাঁ | ❌ না | ❌ না |
 | Iterable? | ✅ হ্যাঁ | ❌ না | ❌ না |
 | `.size` আছে? | ✅ হ্যাঁ | ❌ না | ❌ না |
-| কখন ব্যবহার | General cache | Object metadata | Object membership |
+| কখন ব্যবহার | General cache | Object metadata (key-value) | Object membership check |
 
-> **💡 সুপারিশ:** Object-এর সাথে extra data রাখতে হলে সবসময় `WeakMap` ব্যবহার করুন — এটি automatic memory cleanup নিশ্চিত করে।
+> **💡 সুপারিশ:** Object-এর সাথে extra data (key-value আকারে) রাখতে হলে `WeakMap`, আর শুধু "এই object-টা কি set-এ আছে কিনা" চেক করতে হলে `WeakSet` ব্যবহার করুন — দুটোই automatic memory cleanup নিশ্চিত করে।

@@ -255,6 +255,16 @@ _sip._tcp.example.com  →  Priority 10, Port 5060, sip.example.com
 
 ## 11. What is the DNS hierarchy (Root DNS servers, TLDs, and authoritative DNS servers)?
 
+```mermaid
+flowchart TD
+    Root[Root zone] --> COM[.com TLD]
+    Root --> ORG[.org TLD]
+    Root --> BD[.bd TLD]
+    COM --> EX[example.com authoritative zone]
+    EX --> WWW[www.example.com A or AAAA]
+    EX --> MAIL[example.com MX]
+```
+
 DNS একটি **Tree-shaped** হায়ারার্কি অনুসরণ করে। একদম উপরে Root, তারপর TLD, তারপর Authoritative — এভাবে ধাপে ধাপে নিচে নামে।
 
 #### Root DNS Server
@@ -320,7 +330,7 @@ TLD সার্ভারও IP জানে না — শুধু জান�
 | **Root Server পরিচয়** (A–M) | ১৩টি |
 | **আসল ভৌগোলিক সার্ভার** | ১০০০+ (সারা বিশ্বে) |
 
-১৩টির বেশি কেন হয় না? কারণ **DNS প্রোটোকল UDP packet-এ সর্বোচ্চ ৫১২ bytes** ধরে, আর ১৩টি IPv4 ঠিকানাই সেই সীমার মধ্যে ফিট করে।
+এই ১৩টি নাম ঐতিহাসিকভাবে root-hints response-কে classic ৫১২-byte DNS/UDP সীমার মধ্যে রাখার design constraint থেকে এসেছে। আধুনিক DNS-এ EDNS(0) এবং TCP থাকায় “DNS সর্বোচ্চ ৫১২ byte”—এটি বর্তমানের absolute limit নয়; ১৩টি হলো logical root-server identity, physical instance নয়।
 
 ### 🌍 Anycast — ১০০০+ সার্ভারের রহস্য
 
@@ -389,7 +399,7 @@ Anycast স্বয়ংক্রিয়ভাবে
 ---
 
 ## 14. What happens when a DNS query fails, and how is it handled?
-![](./dns_query_failure_flow.svg)
+![DNS query failure resolution flow](./dns_query_failure_flow.svg)
 ### DNS Query Fail হলে কী হয়?
 
 DNS query বিভিন্ন কারণে fail করতে পারে। প্রতিটি ব্যর্থতার নিজস্ব কারণ এবং সমাধান আছে।
@@ -418,7 +428,7 @@ Timeout হলে Resolver **একই সার্ভারে ২–৩ বা
 
 #### ৩. Cache — শেষ ভরসা
 
-সব Resolver ব্যর্থ হলে **Cache**-এ পুরনো উত্তর আছে কিনা দেখে। TTL শেষ না হলে সেই পুরনো IP ব্যবহার করে — এটিকে **Stale Cache** বলে।
+Resolver প্রথমে TTL-valid cached answer ব্যবহার করতে পারে—এটি normal cache hit, stale নয়। TTL শেষ হলে সাধারণত answer expire হয়; কেবল resolver-এর **serve-stale** policy enabled থাকলে সীমিত সময়ের জন্য expired answer দেওয়া হতে পারে।
 
 #### ৪. Error Response — চূড়ান্ত ব্যর্থতা
 
@@ -472,7 +482,7 @@ Cloudflare  → 1.1.1.1 / 1.0.0.1
 #### 🛡️ How do applications handle DNS failures gracefully?
 
 * **🔁 Retry Logic:** ব্যাকএন্ড অ্যাপ্লিকেশনগুলো অনেক সময় কোনো থার্ড-পার্টি এপিআই (API) কল করার সময় DNS ফেইলিউর হলে একটি নির্দিষ্ট সময় পর পুনরায় বা এক্সপোনেনশিয়াল ব্যাকঅফ (Exponential Backoff) এর মাধ্যমে আবার রিকোয়েস্ট করার চেষ্টা করে।
-* **🔀 Fallback IPs/Endpoints:** খুবই ক্রিটিকাল সিস্টেমে ডোমেইন নেম রিজলভ ব্যর্থ হলে অ্যাপ্লিকেশন সরাসরি ফলব্যাক আইপি (hardcoded IP) বা সেকেন্ডারি কোনো এন্ডপয়েন্ট ব্যবহার করতে পারে।
+* **🔀 Secondary endpoint:** Critical system আলাদা hostname/provider-এর tested secondary endpoint রাখতে পারে। সাধারণ HTTPS service-এর IP hardcode করা ঝুঁকিপূর্ণ—IP বদলাতে পারে এবং virtual hosting/TLS certificate validation ভেঙে যেতে পারে।
 * **⚖️ Multiple Resolvers:** সার্ভার লেভেলে প্রাইমারি এবং সেকেন্ডারি DNS কনফিগার (যেমন `8.8.8.8` এবং `1.1.1.1`) করা থাকে যাতে একটি রিসলভার কাজ না করলে অন্যটি কাজ করে।
 
 #### 🔄 What is DNS failover and how is it configured?
@@ -484,6 +494,19 @@ Cloudflare  → 1.1.1.1 / 1.0.0.1
 ---
 
 ## 15. What is DNS security, and how do attacks like DNS spoofing work?
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant R as Recursive resolver
+    participant A as Attacker
+    participant N as Authoritative DNS
+    C->>R: Query bank.example
+    A-->>R: Forged answer
+    N-->>R: Legitimate signed answer
+    Note over R: DNSSEC validation rejects forged data
+    R-->>C: Validated answer or SERVFAIL
+```
 
 DNS তৈরি করার সময় সিকিউরিটি নিয়ে তেমন মাথা ঘামানো হয়নি, এর ডেটাগুলো সাধারণত প্লেইন টেক্সট বা ওপেন ফর্মে আদান-প্রদান হয়। এই দুর্বলতার সুযোগে দুষ্কৃতিকারীরা বিভিন্ন আক্রমণ করে।
 
@@ -506,6 +529,17 @@ DNS তৈরি করার সময় সিকিউরিটি নিয
 ---
 
 ## 16. How do backend developers configure DNS for load balancing or failover?
+
+```mermaid
+flowchart TD
+    User[DNS query] --> Policy{Routing policy}
+    Policy -->|healthy and nearest| A[Region A]
+    Policy -->|weighted rollout| B[Region B]
+    Health[Health checks] --> Policy
+    A -. unhealthy .-> Fail[Remove endpoint after detection]
+    Fail --> B
+    Cache[Client and resolver TTL cache] -. delays full failover .-> User
+```
 
 ব্যাকএন্ড ডেভেলপার বা ডেভপস ইঞ্জিনিয়াররা ক্লায়েন্টদের রিকোয়েস্টগুলো একাধিক সার্ভারে ভাগ করে দেওয়ার জন্য DNS কনফিগার করেন, যেন কোনো একটি সার্ভারে ওভারলোড না পড়ে।
 

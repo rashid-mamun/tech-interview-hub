@@ -3,209 +3,533 @@ sidebar_position: 1
 title: 'Distributed Systems'
 ---
 
-
 ## 42. What are the fallacies of distributed computing?
 
-**The 8 Fallacies of Distributed Computing** হলো সেই ভুল ধারণাগুলো যা নতুন বা অনভিজ্ঞ ডেভেলপাররা distributed system design করার সময় করে থাকেন।
+**Fallacies of Distributed Computing** হলো ৮টি ভুল ধারণা (assumption) যেগুলো নতুন distributed system builders প্রায়ই বিশ্বাস করে ফেলেন, কিন্তু বাস্তবে এগুলো সত্যি নয়। L. Peter Deutsch এবং তার Sun Microsystems-এর সহকর্মীরা এই তালিকাটা তৈরি করেছিলেন। ধারণাগুলো হলো:
 
-| # | Fallacy (ভুল ধারণা) | বাস্তব সত্য |
-|---|---|---|
-| 1 | The network is reliable | নেটওয়ার্ক যেকোনো সময় fail করতে পারে |
-| 2 | Latency is zero | Network call সবসময় delay আনে |
-| 3 | Bandwidth is infinite | Bandwidth সীমিত এবং দামি |
-| 4 | The network is secure | Attacks, eavesdropping সবসময় সম্ভব |
-| 5 | Topology doesn't change | Server, node, IP পরিবর্তন হয় |
-| 6 | There is one administrator | Multiple teams, multiple policies |
-| 7 | Transport cost is zero | Serialization, network cost real |
-| 8 | The network is homogeneous | বিভিন্ন OS, hardware, protocol |
+1. **The network is reliable** — নেটওয়ার্ক সবসময় কাজ করবে, packet loss হবে না।
+2. **Latency is zero** — একটা request পাঠানো এবং response পাওয়ার মধ্যে কোনো delay নেই।
+3. **Bandwidth is infinite** — যত ইচ্ছা data পাঠানো যাবে, কোনো limit নেই।
+4. **The network is secure** — network এ কোনো malicious actor নেই।
+5. **Topology doesn't change** — server, router, connection সবসময় একই থাকবে।
+6. **There is one administrator** — পুরো system একজনই manage করে।
+7. **Transport cost is zero** — data পাঠাতে কোনো resource/cost লাগে না।
+8. **The network is homogeneous** — সব node একই protocol/hardware ব্যবহার করে।
+
+বাস্তবে এই আটটা assumption-ই ভুল, এবং প্রতিটা distributed system design করার সময় এগুলো মাথায় রাখতে হয়।
 
 ### How does each fallacy affect system design decisions?
-- **"Network is reliable":** Retry logic, timeout, circuit breaker implement করুন।
-- **"Latency is zero":** Service call গুলো async করুন, batch করুন।
-- **"Bandwidth is infinite":** Compression, efficient serialization (Protobuf) ব্যবহার করুন।
-- **"Network is secure":** mTLS, encryption at rest and in transit।
+
+| Fallacy | Design Impact |
+|---|---|
+| Network is reliable | **Retry logic**, **timeout**, এবং **idempotent operation** design করতে হয়, কারণ request যেকোনো সময় fail করতে পারে। |
+| Latency is zero | Synchronous call কমিয়ে **asynchronous messaging** বা **caching** ব্যবহার করতে হয় যাতে user experience খারাপ না হয়। |
+| Bandwidth is infinite | Payload size ছোট রাখা, **compression**, **pagination**, এবং data serialization format (protobuf, avro) optimize করা দরকার। |
+| Network is secure | **mTLS**, **authentication/authorization**, এবং encryption in-transit বাধ্যতামূলক করতে হয়। |
+| Topology doesn't change | **Service discovery** (Consul, Eureka) এবং **DNS-based routing** ব্যবহার করতে হয়, hard-coded IP address এড়িয়ে চলতে হয়। |
+| One administrator | **Distributed configuration management**, **RBAC**, এবং multi-team coordination process দরকার হয়। |
+| Transport cost is zero | Network call এর সংখ্যা কমানো (batching), এবং cost-aware architecture design করা। |
+| Network is homogeneous | **API versioning**, standard protocol (HTTP, gRPC) এবং backward compatibility নিশ্চিত করা। |
+
+সারমর্ম হলো — প্রতিটা fallacy সরাসরি নির্দেশ করে যে distributed system-এ **failure একটা normal ঘটনা**, exception নয়। তাই design-এর সময় "network call fail হতে পারে" এই assumption নিয়েই কোড লিখতে হয়।
 
 ### What is "the network is reliable" fallacy and how do you design around it?
-- **সমস্যা:** Service A থেকে Service B কে synchronous call করলে B down থাকলে A ও fail।
-- **ডিজাইন:**
-  - **Timeout:** নির্দিষ্ট সময়ের মধ্যে response না এলে fail।
-  - **Retry with exponential backoff।**
-  - **Circuit Breaker:** বারবার fail হলে সাময়িক বন্ধ।
-  - **Fallback response:** Cache বা default value দিন।
+
+এই fallacy বলে যে developer-রা ধরে নেন network call সবসময় সফল হবে — কিন্তু বাস্তবে packet loss, connection drop, DNS failure, hardware failure ইত্যাদি প্রতিনিয়ত ঘটে। এটাকে design এ handle করার প্রধান কৌশলগুলো হলো:
+
+- **Timeouts** — অনির্দিষ্টকাল অপেক্ষা না করে একটা নির্দিষ্ট সময় পরে fail করা।
+- **Retries with exponential backoff** — বারবার সাথে সাথে retry না করে ধীরে ধীরে wait time বাড়ানো।
+- **Circuit breaker** — বারবার fail হতে থাকলে downstream call বন্ধ রাখা (Q47 দেখুন)।
+- **Idempotency** — একই request একাধিকবার গেলেও যেন side effect একবারই হয়।
+
+```javascript
+// Retry with exponential backoff এবং timeout ব্যবহার করে network call
+async function callServiceWithRetry(fn, maxRetries = 3, baseDelayMs = 200) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 2000); // 2s timeout
+
+    try {
+      const response = await fetch('https://payment-service/api/charge', {
+        signal: controller.signal,
+        method: 'POST',
+        headers: { 'Idempotency-Key': 'order-12345' }, // idempotent request
+      });
+      clearTimeout(timeout);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.json();
+    } catch (err) {
+      clearTimeout(timeout);
+      if (attempt === maxRetries - 1) throw err;
+      const delay = baseDelayMs * 2 ** attempt; // exponential backoff
+      await new Promise((r) => setTimeout(r, delay));
+    }
+  }
+}
+```
+
+এখানে `Idempotency-Key` ব্যবহার করা হয়েছে যাতে retry হলেও একই charge দুইবার না হয় — এটা "network is reliable" fallacy handle করার একটা core practice।
 
 ---
 
 ## 43. What is a distributed transaction and how do you handle it?
 
-**Distributed Transaction:** একাধিক database বা microservice জুড়ে atomic operation করা।
+**Distributed transaction** হলো এমন একটা transaction যেটা একাধিক আলাদা database, service, বা node জুড়ে চলে, কিন্তু তাদের সবাইকে একসাথে **ACID** (Atomicity, Consistency, Isolation, Durability) guarantee মেনে সম্পন্ন হতে হয়। উদাহরণ হিসেবে বলা যায় — একটা e-commerce order place করার সময় একইসাথে "Order Service"-এ order তৈরি হচ্ছে, "Inventory Service"-এ stock কমছে, এবং "Payment Service"-এ টাকা কাটা হচ্ছে। এই তিনটা কাজ যদি আলাদা database-এ থাকে, তাহলে সবগুলো একসাথে succeed অথবা একসাথে fail করতে হবে — নইলে data inconsistent হয়ে যাবে।
 
-- **উদাহরণ:** E-commerce order — Order DB তে save + Inventory DB থেকে deduct + Payment DB তে charge — তিনটিই হতে হবে otherwise rollback।
+Distributed transaction handle করার প্রধান দুইটা পদ্ধতি হলো:
+1. **Two-Phase Commit (2PC)** — strong consistency, কিন্তু blocking এবং কম scalable।
+2. **SAGA pattern** — eventual consistency, কিন্তু highly scalable এবং microservices-friendly।
 
 ### What is the two-phase commit (2PC) protocol?
-**Phase 1 (Prepare):** Coordinator সব participant কে বলে "তুমি কি commit করতে পারবে?"
-- প্রতিটি participant YES বা NO বলে।
 
-**Phase 2 (Commit/Rollback):**
-- সবাই YES → Coordinator commit করতে বলে।
-- যেকোনো একজন NO → Coordinator abort করতে বলে।
+2PC একটা distributed algorithm যেখানে একটা **Coordinator (Transaction Manager)** সব **Participant**-দের (individual database/service) সাথে দুই ধাপে কাজ করে, যাতে সবাই একসাথে commit বা একসাথে rollback করে।
 
-**সমস্যা:**
-- Coordinator crash হলে participants blocked থাকে।
-- Slow — দুই round trip।
-- Scalability নেই।
+**Phase 1 — Prepare (Voting Phase):**
+Coordinator প্রতিটা participant-কে জিজ্ঞেস করে, "তুমি কি commit করতে প্রস্তুত?" প্রতিটা participant তার কাজ করে (কিন্তু commit করে না), resource lock করে রাখে, এবং "Yes" বা "No" vote পাঠায়।
+
+**Phase 2 — Commit/Abort:**
+যদি সবাই "Yes" বলে, coordinator সবাইকে "Commit" নির্দেশ পাঠায়। কোনো একজনও "No" বললে, সবাইকে "Rollback" নির্দেশ পাঠানো হয়।
+
+```mermaid
+sequenceDiagram
+    participant C as Coordinator
+    participant A as Participant A (DB)
+    participant B as Participant B (DB)
+
+    Note over C,B: Phase 1 - Prepare
+    C->>A: Prepare (can you commit?)
+    C->>B: Prepare (can you commit?)
+    A-->>C: Yes (locked, ready)
+    B-->>C: Yes (locked, ready)
+
+    Note over C,B: Phase 2 - Commit
+    C->>A: Commit
+    C->>B: Commit
+    A-->>C: Ack
+    B-->>C: Ack
+```
+
+**সমস্যা:** 2PC-তে coordinator যদি Phase 2-তে crash করে, participant-রা lock ধরে রেখে অনির্দিষ্টকাল অপেক্ষা করে (**blocking protocol**)। এটা throughput কমিয়ে দেয় এবং microservices architecture-এ বহুল ব্যবহৃত নয়।
 
 ### What is the SAGA pattern and how does it compare to 2PC?
-**SAGA** হলো long-running transaction কে ছোট local transaction এ ভাগ করা, প্রতিটির জন্য **compensating transaction** রাখা।
 
-```
-Order saga:
-1. Create Order (local transaction)
-2. Reserve Inventory → Fail হলে: Cancel Order
-3. Charge Payment → Fail হলে: Release Inventory + Cancel Order
-4. Ship Order → Fail হলে: Refund Payment + Release Inventory + Cancel Order
-```
+SAGA হলো একটা sequence of **local transaction**, যেখানে প্রতিটা step নিজের database-এ commit করে ফেলে এবং পরের step-কে event/message পাঠায়। যদি মাঝপথে কোনো step fail করে, তাহলে আগের সম্পন্ন হওয়া step গুলোকে undo করার জন্য **compensating transaction** চালানো হয়।
 
-| বৈশিষ্ট্য | 2PC | SAGA |
+| বিষয় | 2PC | SAGA |
 |---|---|---|
-| **Consistency** | Strong | Eventual |
-| **Availability** | কম (locking) | বেশি |
-| **Complexity** | কম (protocol built-in) | বেশি (compensating transactions) |
-| **Best For** | Single DB distributed | Microservices |
+| Consistency | Strong (ACID) | Eventual consistency |
+| Locking | সব resource lock হয়ে থাকে | কোনো long-held lock নেই |
+| Failure handling | Rollback (আসল transaction বাতিল) | Compensating transaction (উল্টো কাজ চালানো) |
+| Scalability | কম, blocking নেচার | বেশি, microservices-friendly |
+| Complexity | Coordinator লজিক জটিল | Compensation logic design করা জটিল |
+| ব্যবহার | Monolith/single DB, banking core system | Microservices, e-commerce order flow |
+
+সহজভাবে — 2PC নিরাপদ কিন্তু ধীর ও fragile, আর SAGA দ্রুত ও scalable কিন্তু সাময়িক inconsistency মেনে নিতে হয়।
 
 ---
 
 ## 44. What is the SAGA pattern in microservices?
 
+Microservices architecture-এ যেহেতু প্রতিটা service-এর নিজস্ব database থাকে (**Database per Service** pattern), তাই traditional ACID transaction ব্যবহার করা সম্ভব হয় না। SAGA pattern এই সমস্যার সমাধান দেয় — একটা বড় business transaction-কে ছোট ছোট local transaction-এ ভাগ করে, প্রতিটা local transaction একটা service-এর মধ্যেই commit হয়, এবং প্রতিটা transaction-এর জন্য একটা **compensating transaction** define করা থাকে যেটা ব্যর্থ হলে আগের কাজ undo করে।
+
+উদাহরণ — Order placement SAGA:
+1. Order Service: Order তৈরি করে (status: PENDING)
+2. Payment Service: টাকা কাটে
+3. Inventory Service: Stock কমায়
+4. Shipping Service: Shipment schedule করে
+
+যদি step 3-এ stock না থাকে, তাহলে step 2-এর টাকা **refund** (compensation) করতে হবে এবং step 1-এর order **cancel** করতে হবে।
+
 ### What is the difference between choreography and orchestration in SAGA?
-| বৈশিষ্ট্য | Choreography | Orchestration |
+
+**Choreography** — কোনো central controller নেই। প্রতিটা service একটা event publish করে, আর অন্য service সেই event শুনে নিজের কাজ করে এবং নতুন event publish করে। এটা **decentralized**।
+
+```mermaid
+sequenceDiagram
+    participant O as Order Service
+    participant P as Payment Service
+    participant I as Inventory Service
+    participant S as Shipping Service
+
+    O->>P: OrderCreated event
+    P->>I: PaymentCompleted event
+    I->>S: InventoryReserved event
+    S-->>O: ShipmentScheduled event
+```
+
+**Orchestration** — একটা central **Orchestrator** (SAGA Execution Coordinator) থাকে যে প্রতিটা service-কে সরাসরি command পাঠায় এবং পুরো flow control করে। এটা **centralized**।
+
+```mermaid
+sequenceDiagram
+    participant Orc as Saga Orchestrator
+    participant O as Order Service
+    participant P as Payment Service
+    participant I as Inventory Service
+
+    Orc->>O: Create Order
+    O-->>Orc: Order Created
+    Orc->>P: Charge Payment
+    P-->>Orc: Payment Success
+    Orc->>I: Reserve Inventory
+    I-->>Orc: Failed (out of stock)
+    Orc->>P: Refund Payment (compensation)
+    Orc->>O: Cancel Order (compensation)
+```
+
+| বিষয় | Choreography | Orchestration |
 |---|---|---|
-| **নিয়ন্ত্রণ** | Event-driven — service নিজেই সিদ্ধান্ত নেয় | Central orchestrator সিদ্ধান্ত নেয় |
-| **Coupling** | Loose coupling | Orchestrator সব জানে |
-| **Visibility** | Flow track করা কঠিন | Central log — easy to trace |
-| **Failure Handling** | জটিল | Orchestrator handle করে |
-| **Tool** | Kafka events | Temporal, AWS Step Functions |
+| Control | Decentralized (event-driven) | Centralized (orchestrator) |
+| Coupling | Loose, কিন্তু flow বোঝা কঠিন | Orchestrator জানে পুরো flow |
+| Complexity বাড়লে | Service সংখ্যা বাড়লে debug করা কঠিন হয়ে যায় | Orchestrator-এ complexity concentrate হয়, কিন্তু manageable |
+| Best fit | ছোট, কম number of steps-এর saga | বড়, জটিল multi-step business process |
 
 ### How do you handle partial failures in a SAGA?
-- **Compensating Transactions:** প্রতিটি step এর undo operation আগে থেকে লিখুন।
-- **Idempotent operations:** Retry safe করুন।
-- **Saga log:** কোথায় পৌঁছেছে track করুন — crash resume করতে।
+
+Partial failure মানে হলো saga-এর মাঝপথে কোনো step fail করেছে, কিন্তু আগের কিছু step ইতিমধ্যে commit হয়ে গেছে। এটা handle করার কৌশলগুলো:
+
+- **Compensating transactions** — প্রতিটা forward step-এর জন্য একটা semantically opposite step define করা (যেমন `ChargePayment` এর compensation হলো `RefundPayment`)।
+- **Idempotent operations** — compensation বা retry একাধিকবার চললেও যেন একই ফলাফল আসে।
+- **Saga log/state persistence** — orchestrator crash করলে যেন সে কোথায় ছিল সেটা পুনরুদ্ধার (recover) করতে পারে।
+- **Semantic lock/pending state** — যেমন order-কে সাথে সাথে "CONFIRMED" না করে "PENDING" রাখা, যাতে অন্য process জানে এটা এখনো finalize হয়নি।
+
+```javascript
+// একটা simplified saga step যার নিজস্ব compensation logic আছে
+const sagaSteps = [
+  {
+    action: () => paymentService.charge(orderId),
+    compensate: () => paymentService.refund(orderId),
+  },
+  {
+    action: () => inventoryService.reserve(orderId),
+    compensate: () => inventoryService.release(orderId),
+  },
+];
+
+async function runSaga(steps) {
+  const completed = [];
+  try {
+    for (const step of steps) {
+      await step.action();
+      completed.push(step);
+    }
+  } catch (err) {
+    // ব্যর্থ হলে, ইতিমধ্যে সম্পন্ন হওয়া step গুলো উল্টো ক্রমে compensate করা হয়
+    for (const step of completed.reverse()) {
+      await step.compensate();
+    }
+    throw err;
+  }
+}
+```
 
 ---
 
 ## 45. What is leader election and why is it needed in distributed systems?
 
-**Leader Election** হলো distributed system এ একটি node কে "leader" বানানো যে সমন্বয় করবে।
+**Leader election** হলো একটা প্রক্রিয়া যার মাধ্যমে distributed system-এর একাধিক node-এর মধ্য থেকে একজনকে **leader (বা primary/master)** হিসেবে বেছে নেওয়া হয়, বাকিরা **follower** হিসেবে থাকে। এটা দরকার কারণ:
 
-- **কেন দরকার?** দুটি node একই সময় write করলে conflict। একটি leader থাকলে শুধু সে লেখে।
-- **Use cases:** Primary DB selection, job scheduler (শুধু একটি instance job চালায়), coordination।
+- **Coordination সহজ হয়** — সিদ্ধান্ত নেওয়ার জন্য একজন single point of authority থাকলে conflict কমে যায়।
+- **Write consistency নিশ্চিত হয়** — শুধু leader-ই write গ্রহণ করে, তাই একাধিক node একসাথে conflicting write করার সম্ভাবনা থাকে না।
+- **High availability** — leader down হয়ে গেলে নতুন leader নির্বাচিত হয়, ফলে system চলতেই থাকে (যেমন Kafka partition leader, database replication master, Kubernetes control plane)।
 
 ### How does the Raft consensus algorithm work?
-Raft তিনটি ভূমিকা: **Leader, Follower, Candidate**।
 
-1. শুরুতে সব Follower।
-2. Follower timeout এ কেউ leader heartbeat না পেলে Candidate হয়।
-3. Candidate নিজেকে vote দেয়, অন্যদের কাছে vote চায়।
-4. Majority vote পেলে Leader।
-5. Leader client এর request নেয়, follower দের replicate করে।
+Raft একটা **consensus algorithm** যেটা বোঝা সহজ (Paxos-এর তুলনায়) এবং leader election + log replication দুটোই handle করে। Raft-এ প্রতিটা node তিনটা state-এর যেকোনো একটায় থাকতে পারে:
+
+- **Follower** — passive, শুধু leader-এর নির্দেশ শোনে।
+- **Candidate** — leader না থাকলে নিজেকে leader বানানোর জন্য vote চায়।
+- **Leader** — সব client request এবং log replication handle করে।
+
+```mermaid
+stateDiagram-v2
+    [*] --> Follower
+    Follower --> Candidate: Election timeout (leader-এর heartbeat না পেলে)
+    Candidate --> Leader: Majority vote পেলে
+    Candidate --> Follower: অন্য কেউ leader হয়ে গেলে
+    Leader --> Follower: বড় term সহ নতুন leader দেখা গেলে
+    Candidate --> Candidate: Split vote, নতুন term-এ retry
+```
+
+Raft-এ সময়কে **term**-এ ভাগ করা হয় (একটা counter)। প্রতিটা term-এ সর্বোচ্চ একজন leader থাকতে পারে। প্রক্রিয়াটা:
+
+1. প্রতিটা follower একটা randomized **election timeout** নিয়ে অপেক্ষা করে। কোনো leader-এর heartbeat না পেলে সে নিজেকে **candidate** বানিয়ে নতুন term শুরু করে এবং সবার কাছে **RequestVote** পাঠায়।
+2. যদি candidate **majority (quorum)** vote পায়, সে leader হয়ে যায় এবং সবাইকে heartbeat (`AppendEntries`) পাঠাতে থাকে।
+3. Leader client-এর write request গ্রহণ করে, log entry বানায়, majority follower-কে replicate করায়, এবং majority acknowledge করলে সেটা **committed** হয়।
+
+Majority-based ভোটিং এর কারণে Raft **network partition**-এও নিরাপদভাবে কাজ করে — যেই দিকে majority থাকে, শুধু সেদিকেই একজন valid leader থাকতে পারে।
 
 ### What happens during a split-brain scenario?
-- **Split-brain:** Network partition এ দুটি node গ্রুপ নিজেদেরই leader মনে করে।
-- **সমস্যা:** দুটি group আলাদা write করে — inconsistency।
-- **সমাধান:** Quorum (majority) — leader হতে হলে majority node এর সাথে যোগাযোগ থাকতে হবে।
+
+**Split-brain** ঘটে যখন network partition-এর কারণে একাধিক node নিজেকে leader মনে করে এবং একইসাথে write গ্রহণ করতে থাকে — ফলে data diverge/conflict হয়ে যায়।
+
+```mermaid
+graph TD
+    subgraph "Partition A (3 nodes)"
+    L1[Node 1 - thinks it's Leader]
+    N2[Node 2]
+    N3[Node 3]
+    end
+    subgraph "Partition B (2 nodes)"
+    L2[Node 4 - thinks it's Leader]
+    N5[Node 5]
+    end
+    L1 -.network split.- L2
+```
+
+Raft-এর মতো **quorum-based (majority-vote)** algorithm এই সমস্যা প্রতিরোধ করে — কারণ minority partition (যেমন উপরে Partition B, 2/5 node) কখনো majority vote পাবে না, তাই সেখানে কোনো নতুন leader নির্বাচিত হতে পারবে না, এবং সেই partition শুধু read-only বা unavailable হয়ে থাকবে। এভাবে **CAP theorem** অনুযায়ী availability-এর কিছুটা ছাড় দিয়ে **consistency** নিশ্চিত করা হয়।
+
+যেসব system-এ majority-based consensus নেই (যেমন misconfigured master-master replication), সেখানে সত্যিকারের split-brain হতে পারে, এবং সমাধান করতে **fencing** (পুরনো leader-কে জোর করে বন্ধ করা) বা manual conflict resolution লাগে।
 
 ---
 
 ## 46. What is a distributed lock and how do you implement one?
 
-**Distributed Lock:** একাধিক server/process এর মধ্যে shared resource এর exclusive access নিশ্চিত করা।
+**Distributed lock** হলো এমন একটা mechanism যা একাধিক process/node/server জুড়ে থাকা একটা shared resource-এ একসাথে শুধু একটা process-কেই access করতে দেয় — অনেকটা multi-threaded programming-এর mutex-এর মতো, কিন্তু network জুড়ে। উদাহরণ: দুইটা server instance যেন একই cron job একসাথে না চালায়, বা দুইজন user যেন একই seat একসাথে book করতে না পারে।
+
+সাধারণত এটা implement করা হয় একটা shared coordination store দিয়ে — যেমন **Redis**, **ZooKeeper**, বা **etcd**।
+
+```javascript
+// Redis SET NX EX ব্যবহার করে সহজ distributed lock
+async function acquireLock(redisClient, lockKey, lockValue, ttlMs = 5000) {
+  // NX: key না থাকলেই set হবে, PX: TTL সেট করা হচ্ছে
+  const result = await redisClient.set(lockKey, lockValue, 'NX', 'PX', ttlMs);
+  return result === 'OK';
+}
+
+async function releaseLock(redisClient, lockKey, lockValue) {
+  // শুধু নিজের value হলেই delete করা হবে (Lua script দিয়ে atomic ভাবে)
+  const script = `
+    if redis.call("GET", KEYS[1]) == ARGV[1] then
+      return redis.call("DEL", KEYS[1])
+    else
+      return 0
+    end
+  `;
+  return redisClient.eval(script, 1, lockKey, lockValue);
+}
+```
 
 ### What is the Redlock algorithm for distributed locking with Redis?
-- **Single Redis:** Simple কিন্তু Redis down হলে lock হারায়।
-- **Redlock:** ৫টি স্বাধীন Redis node এ lock নেওয়া।
-  1. সব ৫ node এ lock নেওয়ার চেষ্টা।
-  2. Majority (৩টি) থেকে lock পেলে সফল।
-  3. Lock timeout এর মধ্যে operation করতে হবে।
-  4. শেষে সব node থেকে lock release।
+
+Single Redis instance-এ lock রাখলে সেই instance down হলে lock তথ্য হারিয়ে যেতে পারে। এই সমস্যা সমাধানের জন্য Redis-এর creator **Redlock algorithm** প্রস্তাব করেছেন, যেখানে **N (সাধারণত ৫টা)** independent Redis instance ব্যবহার করা হয়:
+
+1. Client একটা unique random value নিয়ে সবগুলো (৫টা) Redis instance-এ একই key set করার চেষ্টা করে, প্রতিটাতে একটা short timeout সহ।
+2. যদি client **majority (কমপক্ষে N/2 + 1, অর্থাৎ ৩টা)** instance-এ lock পেতে সক্ষম হয়, এবং মোট সময় lock-এর validity time-এর চেয়ে কম লাগে, তাহলে lock **অর্জিত (acquired)** ধরা হয়।
+3. Lock release করার সময় সবগুলো instance-এ delete পাঠানো হয়।
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant R1 as Redis-1
+    participant R2 as Redis-2
+    participant R3 as Redis-3
+    participant R4 as Redis-4
+    participant R5 as Redis-5
+
+    C->>R1: SET lock_key val NX PX
+    C->>R2: SET lock_key val NX PX
+    C->>R3: SET lock_key val NX PX
+    C->>R4: SET lock_key val NX PX (timeout)
+    C->>R5: SET lock_key val NX PX
+    R1-->>C: OK
+    R2-->>C: OK
+    R3-->>C: OK
+    R5-->>C: OK
+    Note over C: 4/5 majority পেয়েছে -> Lock acquired
+```
 
 ### What are the risks of distributed locks?
-- **Clock skew:** Server গুলোর ঘড়ি ভিন্ন থাকলে lock আগে expire হতে পারে।
-- **Long GC pause:** Java GC lock থাকাকালীন পুরো process থামিয়ে দিলে lock expire হতে পারে।
-- **Network delay:** Operation lock expire হওয়ার পরেও চলতে পারে।
+
+- **Clock drift / GC pause** — যদি client একটা lock ধরে রাখা অবস্থায় **long GC pause** বা process freeze-এ পড়ে, lock-এর TTL শেষ হয়ে অন্য client লক পেয়ে যেতে পারে, কিন্তু প্রথম client পরে জেগে উঠে ধরে নেয় সে এখনো owner — এতে **দুইজনই একসাথে critical section-এ ঢুকে যায়**।
+- **Network partition** — Redlock-এ কিছু instance-এর সাথে যোগাযোগ বিচ্ছিন্ন হলে majority হিসাব ভুল হতে পারে; Martin Kleppmann এই কারণেই Redlock-এর নিরাপত্তা নিয়ে প্রশ্ন তুলেছিলেন।
+- **Lock এর TTL ভুল সেট করা** — খুব কম হলে কাজ শেষ হওয়ার আগেই lock expire হয়ে যেতে পারে; খুব বেশি হলে failure-এর পরে অনেকক্ষণ resource block থাকে।
+- **Single point of failure** — যদি coordination store (Redis/ZooKeeper) নিজেই down হয়ে যায়, পুরো system lock নিতে পারবে না।
+- **Fencing token ছাড়া ব্যবহার করলে** — lock expire হয়ে যাওয়ার পরেও পুরনো client resource-এ write চালিয়ে যেতে পারে, তাই resource-এর সাথে **fencing token** (monotonically increasing number) যুক্ত করা নিরাপদ practice।
 
 ### When should you use optimistic locking instead of a distributed lock?
-- **Optimistic Locking:** Version number বা timestamp দিয়ে conflict detect।
-  ```sql
-  UPDATE products SET stock=stock-1, version=version+1
-  WHERE id=1 AND version=5  -- version মেলে না? Update fail।
-  ```
-- **ব্যবহার করুন:** Low conflict scenario (বেশিরভাগ সময় conflict হয় না)।
-- **Distributed lock:** High conflict বা critical section (payment, inventory)।
+
+**Optimistic locking** ব্যবহার করা উচিত যখন conflict খুবই কম ঘটে (rare) এবং lock ধরে রাখার cost বেশি। এখানে lock না নিয়ে, প্রতিটা record-এ একটা **version number** বা **timestamp** রাখা হয়, এবং update করার সময় check করা হয় version এখনো একই আছে কিনা।
+
+```sql
+-- Optimistic locking উদাহরণ: version check সহ UPDATE
+UPDATE accounts
+SET balance = balance - 100, version = version + 1
+WHERE id = 42 AND version = 7;
+-- যদি row affected = 0 হয়, বুঝতে হবে অন্য কেউ ইতিমধ্যে update করেছে -> retry করতে হবে
+```
+
+**কখন optimistic locking:** High-read, low-write scenario; conflict rare; latency-sensitive path (lock নেওয়ার overhead এড়াতে চাইলে)।
+**কখন distributed lock:** Conflict frequent; একসাথে দুইজন কাজ করলে গুরুতর ক্ষতি (যেমন duplicate payment, seat double-booking); critical section-এর সময়কাল ছোট এবং predictable।
 
 ---
 
 ## 47. How do you design a system for fault tolerance and high availability?
 
+Fault tolerant এবং highly available system design করতে যেসব principle মেনে চলতে হয়:
+
+- **Redundancy** — প্রতিটা critical component-এর একাধিক copy (replica) রাখা, যাতে একটা fail করলেও অন্যটা কাজ চালিয়ে যায়।
+- **Failure detection** — health check, heartbeat দিয়ে দ্রুত failure শনাক্ত করা।
+- **Graceful degradation** — পুরো system down না করে, কিছু non-critical feature বন্ধ রেখে core function চালু রাখা।
+- **Automated failover** — leader/primary down হলে automatically replica-কে promote করা।
+- **Geographic distribution** — একাধিক data center/availability zone-এ deploy করা।
+- **Patterns ব্যবহার** — Circuit breaker, retry, bulkhead, timeout (নিচে বিস্তারিত)।
+
 ### What is the difference between fault tolerance and high availability?
-| বৈশিষ্ট্য | Fault Tolerance | High Availability |
+
+| বিষয় | Fault Tolerance | High Availability (HA) |
 |---|---|---|
-| **লক্ষ্য** | Failure সত্ত্বেও সম্পূর্ণ কাজ করা | Downtime minimize করা |
-| **পদ্ধতি** | Redundancy, no single point of failure | Fast failover, quick recovery |
-| **উদাহরণ** | RAID — disk fail হলেও data নেই | Active-passive DB — primary fail হলে replica নেয় |
-| **Cost** | বেশি (সব duplicate করতে হয়) | মাঝারি |
+| সংজ্ঞা | Component fail করলেও system **কোনো interruption ছাড়াই** সঠিকভাবে কাজ চালিয়ে যায় | System বেশিরভাগ সময় **available/uptime** থাকে, downtime খুব কম হয় (measured by "nines", যেমন 99.99%) |
+| Downtime | সাধারণত **zero downtime** লক্ষ্য | সামান্য downtime (failover-এর সময়) acceptable |
+| Cost | অনেক বেশি ব্যয়বহুল (real-time replication, redundant hardware) | তুলনামূলক কম ব্যয়বহুল |
+| উদাহরণ | Aircraft control system, payment processing core | সাধারণ web application, SaaS product |
+
+সহজ কথায়, fault tolerance হলো HA-এর একটা কঠোরতর (stricter) রূপ — সব fault-tolerant system HA, কিন্তু সব HA system fault-tolerant নয়।
 
 ### What is a circuit breaker pattern?
-**Circuit Breaker** তিনটি state এ থাকে:
 
+Circuit breaker pattern একটা downstream service বারবার fail হতে থাকলে সেটাতে আর নতুন request না পাঠিয়ে সাথে সাথে fail করে দেয় (fail fast), যাতে caller resource নষ্ট না করে এবং failing service-কে recover করার সময় দেওয়া যায়। এটা তিনটা state-এ কাজ করে:
+
+```mermaid
+stateDiagram-v2
+    [*] --> Closed
+    Closed --> Open: Failure threshold অতিক্রম করলে
+    Open --> HalfOpen: Timeout শেষে (recovery test করার জন্য)
+    HalfOpen --> Closed: Test request সফল হলে
+    HalfOpen --> Open: Test request ব্যর্থ হলে
 ```
-Closed (Normal) → request pass হয়
-    ↓ N বার fail হলে
-Open (Broken) → request আর পাঠানো হয় না, fast fail
-    ↓ Timeout পরে
-Half-Open (Testing) → কিছু request পাঠাই, সফল হলে
-    ↓ সফল হলে
-Closed (Normal)
+
+- **Closed** — স্বাভাবিক অবস্থা, সব request downstream-এ যায়।
+- **Open** — failure threshold পার হয়ে গেলে, সব request সাথে সাথে reject হয় (downstream-এ পাঠানো হয় না)।
+- **Half-Open** — একটা নির্দিষ্ট সময় পরে, একটা বা কয়েকটা trial request পাঠিয়ে দেখা হয় service recover করেছে কিনা।
+
+```javascript
+class CircuitBreaker {
+  constructor(fn, { failureThreshold = 5, cooldownMs = 10000 } = {}) {
+    this.fn = fn;
+    this.failureThreshold = failureThreshold;
+    this.cooldownMs = cooldownMs;
+    this.state = 'CLOSED';
+    this.failureCount = 0;
+    this.nextAttempt = Date.now();
+  }
+
+  async call(...args) {
+    if (this.state === 'OPEN') {
+      if (Date.now() < this.nextAttempt) {
+        throw new Error('Circuit is OPEN - failing fast');
+      }
+      this.state = 'HALF_OPEN';
+    }
+    try {
+      const result = await this.fn(...args);
+      this.onSuccess();
+      return result;
+    } catch (err) {
+      this.onFailure();
+      throw err;
+    }
+  }
+
+  onSuccess() {
+    this.failureCount = 0;
+    this.state = 'CLOSED';
+  }
+
+  onFailure() {
+    this.failureCount++;
+    if (this.failureCount >= this.failureThreshold) {
+      this.state = 'OPEN';
+      this.nextAttempt = Date.now() + this.cooldownMs;
+    }
+  }
+}
 ```
 
 ### What is the retry pattern and what are its risks?
-- **Retry:** Temporary failure এ automatic retry।
-- **Risk:** Retry storm — সব client একসাথে retry করলে server আরও overloaded।
-- **সমাধান:** Exponential backoff + random jitter।
 
-```python
-import time, random
+Retry pattern হলো — কোনো call transient failure (temporary error, যেমন network glitch)-এর কারণে fail করলে, একটা নির্দিষ্ট strategy অনুযায়ী আবার চেষ্টা করা।
 
-def retry_with_backoff(fn, max_retries=5):
-    for attempt in range(max_retries):
-        try:
-            return fn()
-        except Exception:
-            wait = (2 ** attempt) + random.uniform(0, 1)
-            time.sleep(wait)
-```
+**সাধারণ strategy:** Fixed delay, Exponential backoff, Exponential backoff + jitter (randomness যোগ করা যাতে সব client একসাথে retry না করে)।
+
+**ঝুঁকিসমূহ:**
+- **Retry storm / Thundering herd** — অনেক client একসাথে retry করলে already-struggling service-এর উপর load আরও বেড়ে যায়, situation আরও খারাপ হয়।
+- **Non-idempotent operation-এ ক্ষতি** — যদি operation idempotent না হয় (যেমন payment charge), retry করলে duplicate side-effect ঘটতে পারে।
+- **Latency বেড়ে যাওয়া** — বারবার retry করলে end-user response time অনেক বেড়ে যায়।
+- **Cascading failure** — retry, circuit breaker ছাড়া ব্যবহার করলে failing service-কে আরও চাপে ফেলে পুরো system-কে ধসিয়ে দিতে পারে।
+
+তাই retry সবসময় **exponential backoff + jitter + max retry limit + circuit breaker**-এর সাথে combine করে ব্যবহার করা উচিত।
 
 ### What is bulkhead isolation?
-- জাহাজের bulkhead (জলরোধী বিভাজন) থেকে নাম।
-- System কে isolated compartment এ ভাগ করুন — একটি compartment fail হলে বাকি চলে।
-- **Thread Pool Isolation:** প্রতিটি service call এর জন্য আলাদা thread pool। একটি service slow হলে অন্যগুলো ব্লক হবে না।
+
+**Bulkhead pattern** জাহাজের bulkhead (আলাদা আলাদা water-tight compartment) থেকে অনুপ্রাণিত — জাহাজের একটা অংশে ছিদ্র হলেও পুরো জাহাজ ডুবে যায় না, কারণ প্রতিটা compartment আলাদা। একইভাবে, software system-এ **resource (thread pool, connection pool, CPU/memory quota) আলাদা আলাদা service বা feature-এর জন্য ভাগ করে দেওয়া হয়**, যাতে একটা service overload/slow হয়ে গেলে সেটা অন্য service-এর resource খেয়ে ফেলে পুরো system-কে down করে না দেয়।
+
+```mermaid
+graph LR
+    subgraph "Bulkhead Isolation"
+    A[Thread Pool: Product Service - 20 threads]
+    B[Thread Pool: Recommendation Service - 10 threads]
+    C[Thread Pool: Payment Service - 30 threads]
+    end
+    Client --> A
+    Client --> B
+    Client --> C
+```
+
+উদাহরণ — যদি "Recommendation Service" slow হয়ে যায় এবং তার সবগুলো thread block হয়ে যায়, সেটা শুধু নিজের 10-thread pool-ই শেষ করে, "Payment Service"-এর 30-thread pool অক্ষত থাকে, ফলে checkout flow চলতেই থাকে।
 
 ---
 
 ## 48. What is the two generals problem and what does it illustrate?
 
-**Two Generals Problem:** দুটি সেনাবাহিনী একে অপরকে confirm message পাঠাচ্ছে unreliable নেটওয়ার্কে — কিন্তু কেউ কখনো ১০০% নিশ্চিত হতে পারে না যে অপরজন message পেয়েছে কিনা।
+**Two Generals Problem** একটা classic thought experiment যা দেখায় যে একটা **অবিশ্বস্ত (unreliable) communication channel**-এর মাধ্যমে দুই পক্ষের মধ্যে **perfect agreement (consensus)** অর্জন করা তাত্ত্বিকভাবে অসম্ভব।
+
+**সমস্যাটা:** দুইজন জেনারেল (General A এবং General B) একটা শহরকে দুই দিক থেকে ঘিরে রেখেছে। তাদের জিততে হলে **একই সময়ে একসাথে আক্রমণ** করতে হবে — একজন একা আক্রমণ করলে সে হেরে যাবে। তারা শুধুমাত্র messenger পাঠিয়ে যোগাযোগ করতে পারে, কিন্তু messenger শত্রুর হাতে ধরা পড়ে messenger হারিয়ে যেতে পারে (message loss)।
+
+```mermaid
+sequenceDiagram
+    participant A as General A
+    participant B as General B
+    A->>B: "আগামীকাল সকাল ৬টায় আক্রমণ করব" (messenger)
+    Note over A,B: Message হারিয়ে যেতে পারে!
+    B-->>A: "সম্মত" (acknowledgment messenger)
+    Note over A,B: এই ack-ও হারিয়ে যেতে পারে!
+    Note over A,B: A নিশ্চিত হতে চায় B ack পেয়েছে -> নতুন ack চায়... (infinite loop)
+```
+
+সমস্যা হলো — General A একটা message পাঠায়, কিন্তু সে নিশ্চিত হতে পারে না B সেটা পেয়েছে কিনা, যতক্ষণ না B একটা acknowledgment পাঠায়। কিন্তু সেই acknowledgment-ও হারিয়ে যেতে পারে, তাই B-ও নিশ্চিত হতে পারে না A তার ack পেয়েছে কিনা। এভাবে **কোনো finite সংখ্যক message exchange দিয়েই ১০০% নিশ্চয়তা পাওয়া সম্ভব নয়** — এটা mathematically প্রমাণিত।
 
 ### Why can you not guarantee consensus in an unreliable network?
-- General A → message পাঠায় → lost হতে পারে।
-- General B → acknowledgment পাঠায় → সেটিও lost হতে পারে।
-- কতটি ack পাঠালেও last ack এর lost হওয়ার সম্ভাবনা থাকে।
-- **Mathematical proof:** Unreliable channel এ perfect consensus impossible।
+
+কারণ প্রতিটা confirmation message নিজেও একটা নতুন confirmation দাবি করে — এটা একটা **infinite regress**। যদি n-তম message-এর acknowledgment না পাওয়া যায়, sender জানে না সেই message পৌঁছেছে কিনা নাকি ack-টা হারিয়ে গেছে। তাই finite protocol দিয়ে **absolute certainty**-সহ consensus পাওয়া অসম্ভব — যেকোনো unreliable (asynchronous, message-loss-prone) network-এ এটা একটা fundamental **impossibility result**, অনেকটা FLP impossibility result-এর মতোই।
 
 ### How does this relate to real-world distributed systems?
-- TCP handshake ঠিক এই সমস্যাটি মোকাবেলা করে — কিন্তু guarantee দেয় না, probability কমায়।
-- **Practical solution:** Idempotency + Retry + Timeout। Perfect guarantee ছাড়াই practical system বানানো হয়।
+
+বাস্তব distributed system-গুলো এই impossibility-কে সম্পূর্ণভাবে "সমাধান" করে না, বরং **probability এবং timeout-ভিত্তিক practical compromise** ব্যবহার করে:
+
+- **TCP** নিজেই একটা practical সমাধান — packet loss হলে retransmit করে, এবং যথেষ্ট retry-এর পরে যথেষ্ট উচ্চ নিশ্চয়তা (কিন্তু ১০০% না) অর্জন করে।
+- **Consensus algorithm (Raft, Paxos)** absolute guarantee না দিয়ে **majority quorum + timeout** ব্যবহার করে "practically reliable" সিদ্ধান্ত নেয়।
+- **Two-Phase Commit / SAGA (Q43)** — distributed transaction-এও একই মূল সমস্যা প্রযোজ্য, তাই timeout, retry, এবং compensating transaction দিয়ে সেটা handle করা হয়।
+- **At-least-once / at-most-once delivery** — message queue (Kafka, RabbitMQ) সিস্টেমগুলো absolute guarantee-এর বদলে delivery semantics বেছে নিতে দেয়, এবং idempotency দিয়ে duplicate handle করা হয়।
+
+মূল শিক্ষা: distributed system design করার সময় **"perfect certainty" আশা করা যাবে না** — বরং timeout, retry, quorum, এবং idempotency দিয়ে "acceptable/practical reliability" তৈরি করতে হয়।
 
 ### What is the Byzantine Generals Problem?
-- Two Generals এর extension — কিছু generals traitor (malicious node)।
-- **Byzantine Fault Tolerance (BFT):** Malicious node সত্ত্বেও consensus।
-- **ব্যবহার:** Blockchain (Bitcoin, Ethereum)।
-- Normal distributed systems এ BFT দরকার নেই — crash fault tolerance যথেষ্ট।
+
+Two Generals Problem-এ ধরে নেওয়া হয় messenger শুধু হারিয়ে যেতে পারে (**fail-stop failure**), কিন্তু সবাই honest। **Byzantine Generals Problem** এটাকে আরও কঠিন করে তোলে — এখানে একাধিক (n-জন) জেনারেল থাকে, এবং তাদের মধ্যে কিছু জেনারেল **malicious/traitor** হতে পারে, যারা ইচ্ছাকৃতভাবে ভুল বা contradictory তথ্য পাঠাতে পারে বিভ্রান্তি তৈরি করার জন্য।
+
+```mermaid
+graph TD
+    G1[General 1 - Loyal]
+    G2[General 2 - Loyal]
+    G3[General 3 - Traitor]
+    G1 -->|"Attack"| G2
+    G1 -->|"Attack"| G3
+    G3 -->|"বলে: Retreat (G1-কে)"| G1
+    G3 -->|"বলে: Attack (G2-কে)"| G2
+```
+
+এখানে challenge হলো — loyal জেনারেলরা কীভাবে একে অপরের সাথে সমন্বয় করে একই সিদ্ধান্তে (attack বা retreat) পৌঁছাবে, যখন কিছু participant ইচ্ছাকৃতভাবে মিথ্যা বলছে? প্রমাণিত হয়েছে যে এটা সমাধানযোগ্য **যদি loyal জেনারেলের সংখ্যা মোট জেনারেলের ২/৩ এর বেশি হয়** (n ≥ 3f + 1, যেখানে f হলো traitor-এর সংখ্যা)।
+
+**বাস্তব প্রয়োগ:**
+- **Blockchain / Cryptocurrency** — Bitcoin-এর **Proof of Work** এবং অন্যান্য blockchain-এর **BFT (Byzantine Fault Tolerant)** consensus algorithm (যেমন PBFT, Tendermint) সরাসরি এই সমস্যার সমাধান, যেখানে network-এর malicious node থাকা সত্ত্বেও পুরো network একটা valid ledger-এ সম্মত হতে পারে।
+- **Distributed system-এর সাধারণ consensus (Raft, Paxos)** সাধারণত **crash-fault tolerant (CFT)** ধরে নেয়, malicious node ধরে নেয় না — তাই সেগুলো Byzantine fault handle করে না। Byzantine fault tolerance দরকার হয় যেখানে node-গুলো compromised/malicious হওয়ার সম্ভাবনা থাকে (যেমন public blockchain, multi-organization consortium system)।

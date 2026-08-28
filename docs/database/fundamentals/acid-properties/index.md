@@ -3,7 +3,16 @@ sidebar_position: 3
 title: 'ACID Properties'
 ---
 
+
 ## ৩. What are ACID properties?
+
+```mermaid
+flowchart LR
+    T[Transaction] --> A[Atomicity]
+    T --> C[Consistency]
+    T --> I[Isolation]
+    T --> D[Durability]
+```
 ACID properties হলো database transaction এর চারটি fundamental characteristic যা data integrity এবং reliability ensure করে।
 
 Transaction হলো ডাটাবেসের এক বা একাধিক অপারেশনের একটি সিঙ্গেল লজিক্যাল ইউনিট। উদাহরণস্বরূপ, ব্যাংক থেকে টাকা ট্রান্সফার করার প্রক্রিয়ায় দুটি অপারেশন থাকে: একাউন্ট এ থেকে টাকা কাটা এবং একাউন্ট বি-তে টাকা যোগ করা। এই পুরো প্রক্রিয়াটি মিলে একটি Transaction তৈরি হয়।
@@ -33,13 +42,14 @@ UPDATE accounts SET balance = balance + 1000 WHERE account_id = 'A002';
 
 -- যদি উপরের দুটি কাজই সফল হয়, তবেই ডেটা সেভ হবে
 COMMIT; 
--- যদি কোনো ধাপে ফেইল করে, সিস্টেম অটোমেটিক ROLLBACK করবে।
+-- কোনো ধাপ ব্যর্থ হলে application/error handler থেকে ROLLBACK করতে হবে।
+-- Crash recovery-তে DBMS অসম্পূর্ণ transaction-এর persisted change undo করে।
 
 ```
 
 #### ২. **Consistency (সামঞ্জস্য)**:
 
-Consistency নিশ্চিত করে যে transaction শুরু হওয়ার আগে এবং শেষ হওয়ার পরে ডাটাবেস সবসময় একটি valid state-এ থাকবে। ডাটাবেসে ডিফাইন করা সব constraints (Primary Key, Foreign Key, CHECK constraints) এবং business rules কঠোরভাবে পালিত হবে।
+Consistency নিশ্চিত করে যে transaction একটি valid state থেকে আরেকটি valid state-এ যাবে। DBMS ঘোষিত constraints (Primary Key, Foreign Key, CHECK constraints) enforce করে; database-এ encode না করা business rule application/transaction logic-কেই enforce করতে হয়।
 
 ডাটাবেস Constraints, Cascades এবং Triggers-এর মাধ্যমে Consistency নিশ্চিত করে। কোনো transaction যদি রুল ব্রেক করে, সিস্টেম তাৎক্ষণিক তা Rollback করে দেয়।
 
@@ -68,19 +78,18 @@ Isolation-এর অভাবে কিছু Read Phenomena (যেমন: Dirt
 
 | Isolation Level | বর্ণনা | Performance |
 | --- | --- | --- |
-| **Read Uncommitted** | অন্য transaction-এর uncommitted ডেটাও পড়তে পারে (Dirty Read হয়)। | সবচেয়ে ফাস্ট, কিন্তু ডেটা একুরেসি কম। |
+| **Read Uncommitted** | DBMS support করলে অন্য transaction-এর uncommitted ডেটা পড়তে পারে। | কম isolation; fastest হবে এমন guarantee নেই। |
 | **Read Committed** | শুধুমাত্র committed ডেটা পড়তে পারে। (PostgreSQL/Oracle এর ডিফল্ট)। | ব্যালেন্সড (ভালো পারফরম্যান্স ও একুরেসি)। |
-| **Repeatable Read** | একই ডেটা বারবার পড়লে সবসময় একই রেজাল্ট দেয় (MySQL এর ডিফল্ট)। | একটু স্লো, ডেটা লক করে রাখে। |
-| **Serializable** | Transaction-গুলো একে অপরের পর সিরিয়ালি রান করে। | সবচেয়ে স্লো, কিন্তু ১০০% সেফ। |
+| **Repeatable Read** | একই row পুনরায় পড়লে পরিবর্তিত committed value দেখা ঠেকায়; phantom handling DBMS-ভেদে ভিন্ন। | Lock বা MVCC implementation অনুযায়ী খরচ ভিন্ন। |
+| **Serializable** | Concurrent ফলকে কোনো serial order-এর সমতুল্য রাখে; transaction বাস্তবে একটির পর একটি চলতেই হবে এমন নয়। | সবচেয়ে কঠোর; conflict হলে wait/retry/serialization failure হতে পারে। |
 
 
 ```sql
--- Transaction কে কঠোরভাবে isolate করতে:
+-- PostgreSQL-style example
+BEGIN;
 SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
-
-BEGIN TRANSACTION;
-SELECT balance FROM accounts WHERE account_id = 'A001'; 
--- অন্য কোনো ইউজার এখন এই একাউন্টের ব্যালেন্স আপডেট করতে পারবে না
+SELECT balance FROM accounts WHERE account_id = 'A001' FOR UPDATE;
+-- FOR UPDATE selected row-এ conflicting writer-কে wait করায়।
 UPDATE accounts SET balance = balance - 500 WHERE account_id = 'A001';
 COMMIT;
 
@@ -88,7 +97,7 @@ COMMIT;
 
 #### ৪. **Durability (স্থায়িত্ব)**:
 
-Durability গ্যারান্টি দেয় যে, একবার transaction সফলভাবে `COMMIT` হওয়ার পর তার পরিবর্তনগুলো স্থায়ীভাবে হার্ড ড্রাইভ বা স্টোরেজে সেভ হয়ে যাবে। এরপর যদি পাওয়ার ফেইলিওর বা সিস্টেম ক্র্যাশও হয়, তবুও ডেটা হারাবে না।
+Durability গ্যারান্টি দেয় যে সফল `COMMIT`-এর ফল configured durability contract অনুযায়ী crash recovery-র পরও থাকবে। এটি সাধারণত WAL/redo log ও durable flush দিয়ে করা হয়; asynchronous commit বা relaxed `fsync` setting ব্যবহার করলে guarantee দুর্বল হতে পারে।
 
 ডাটাবেস **WAL (Write-Ahead Logging)** বা **Redo Logs** মেকানিজম ব্যবহার করে। মূল ডেটা ফাইলে পরিবর্তন লেখার আগেই ডাটাবেস একটি লগ ফাইলে পরিবর্তনের রেকর্ড লিখে রাখে (fsync)। সিস্টেম রিস্টার্ট হলে ডাটাবেস এই লগ ফাইল পড়ে ডেটা রিকভার করে।
 
@@ -107,7 +116,7 @@ ACID properties business-critical application এর জন্য absolutely ess
 
 #### ১. **Data Integrity Protection**:
 
-ACID নিশ্চিত করে যে ডাটাবেসের ডেটা সবসময় সঠিক এবং যৌক্তিক থাকে।
+ACID transaction failure ও concurrency-এর মধ্যেও declared invariant রক্ষা করতে সাহায্য করে; application/database-এ encode না করা rule নিজে থেকে সঠিক করে না।
 * **কেন দরকার:** যদি **Atomicity** না থাকত, তবে বড় কোনো লেনদেনের অর্ধেক সম্পন্ন হতো আর অর্ধেক হারিয়ে যেত। যেমন: টাকা ট্রান্সফারের সময় আপনার একাউন্ট থেকে টাকা কেটে যেত কিন্তু প্রাপক পেত না।
 * **প্রভাব:** এটি নিশ্চিত করে যে ডাটাবেসে কোনো "অর্ধ-সমাপ্ত" বা "ভুল" তথ্য থাকবে না।
 

@@ -3,7 +3,16 @@ sidebar_position: 1
 title: 'Indexing'
 ---
 
+
 ## **39. What is an Index?**
+
+```mermaid
+flowchart LR
+    Q[Query predicate] --> Root[B-tree root]
+    Root --> Branch[Branch page]
+    Branch --> Leaf[Leaf entry]
+    Leaf --> Row[Matching row]
+```
 
 Index হল একটি database structure যা data retrieval operations এর speed বাড়ানোর জন্য ব্যবহৃত হয়। এটি একটি বইয়ের index এর মতো কাজ করে। যেমন বইয়ের শেষে index থাকে যেখানে বিষয়বস্তু এবং page number লেখা থাকে, ঠিক তেমনি database index এ column values এবং তাদের corresponding row locations থাকে।
 
@@ -99,17 +108,24 @@ Optimizer বিভিন্ন execution plans compare করে:
 
 ## **40.Difference between Clustered and Non-Clustered Index**
 
+```mermaid
+flowchart LR
+    Clustered[Clustered index leaf] --> Rows[Table rows stored in index order]
+    NonClustered[Non-clustered leaf] --> Locator[Row locator or primary key]
+    Locator --> Rows
+```
+
 #### 1.Clustered Index
-Clustered index হল একটি index যা table এর physical data storage order নির্ধারণ করে। এটি table এর actual data pages এর সাথে integrated থাকে।
+Clustered index ধারণাটি বিশেষ করে SQL Server-style terminology-তে table row-কে index leaf level-এ রাখে। PostgreSQL-এর `CLUSTER` স্থায়ী maintenance guarantee নয়, আর InnoDB primary key-কে clustered storage হিসেবে ব্যবহার করে—তাই behavior DBMS-specific।
 
 **বৈশিষ্ট্যসমূহ:**
 
 * Clustered index মানে হলো **table-এর actual data rows গুলো index-এর order অনুযায়ী সাজানো থাকে**।
-* Table এর data physically sorted থাকে clustered index key অনুযায়ী
+* SQL Server/InnoDB-এর clustered structure-তে leaf-level row key order-এ organized থাকে; disk block physically contiguous থাকার guarantee নেই
 * Table এবং index একই physical structure share করে
 * Data retrieval এর জন্য additional lookup প্রয়োজন হয় না
 * একটা table-এর data একটিই ভাবে সাজানো যায়, তাই **একটা table-এ সর্বোচ্চ ১টা clustered index থাকতে পারে**।
-* সাধারণত **Primary Key** column এ clustered index তৈরি হয়।
+* SQL Server-এ primary key default-এ clustered হতে পারে যদি অন্যভাবে বলা না হয়; InnoDB primary key clustered। এটি universal SQL rule নয়।
 
 **Example:**
 ধরো একটা `Students` table আছে এবং `StudentID` column-এ clustered index আছে।
@@ -125,7 +141,7 @@ Non-clustered index হল একটি separate structure যা table data এ
 * Table থেকে separate physical structure
 * Additional lookup operation প্রয়োজন (Key Lookup)
 * এটা actual data table-এর উপরে আলাদা structure হিসাবে তৈরি হয়।
-* এক টেবিলে অনেকগুলো non-clustered index থাকতে পারে (SQL Server এ 999 পর্যন্ত, MySQL-এ সাধারণত 64 পর্যন্ত)।
+* এক টেবিলে অনেকগুলো secondary/non-clustered index থাকতে পারে; exact limit DBMS, version ও storage engine-নির্ভর।
 
 **Example:**
 যদি `Name` column-এ non-clustered index বানাও, তাহলে index structure-এ নামগুলো sorted থাকবে কিন্তু actual table data সাজানো থাকবে না। Index থেকে pointer এর মাধ্যমে আসল row fetch করতে হবে।
@@ -144,16 +160,15 @@ Non-clustered index হল একটি separate structure যা table data এ
 
 ###  How many clustered indexes can a table have?
 
-* একটা table-এ **শুধু ১টা clustered index** থাকতে পারে।
-  কারণ data-এর physical order একটিই হতে পারে।
+* SQL Server terminology-তে একটি table-এ **একটি clustered index** থাকতে পারে, কারণ table row নিজেই তার leaf level।
 
 কিন্তু non-clustered index অনেকগুলো হতে পারে।
 
 
 ### What determines the physical order of data?
 
-* **Clustered index** data-র physical order নির্ধারণ করে।
-* যদি table-এ clustered index না থাকে, তখন data heap আকারে থাকে (unordered, no specific order)।
+* SQL Server-এ clustered key row-এর logical storage order নির্ধারণ করে।
+* Clustered index না থাকলে SQL Server table heap হয়। PostgreSQL ও অন্য DBMS-এর storage terminology/behavior আলাদা।
 
 অর্থাৎ:
 
@@ -165,6 +180,14 @@ Non-clustered index হল একটি separate structure যা table data এ
 
 
 ## **41.What is a Composite Index?**
+
+```mermaid
+flowchart LR
+    Index[(Index on last_name, first_name, id)] --> A[last_name]
+    A --> B[first_name within last_name]
+    B --> C[id within both]
+    Prefix[Leftmost-prefix queries] --> A
+```
 
 Composite index (Multi-column index বা Compound index) হল এমন একটি index যা একাধিক column এর combination এর উপর তৈরি করা হয়। এটি multiple columns এর values একসাথে consider করে index structure তৈরি করে।
 
@@ -236,6 +259,13 @@ Index Selectivity = (Number of distinct values in column) / (Total number of row
 ---
 
 ## **42. What is a Covering Index?**
+
+```mermaid
+flowchart LR
+    Query[SELECT status, total WHERE customer_id=?] --> Cover[(Index customer_id INCLUDE status,total)]
+    Cover --> Result[Return result from index]
+    Table[(Base table)] -. no lookup needed .-> Result
+```
 
 **Covering Index** হল এমন একটি index যাতে query এর জন্য প্রয়োজনীয় সব columns থাকে। অর্থাৎ, query execute করার জন্য database engine কে actual table data access করার দরকার হয় না - শুধু index থেকেই সব required data পেয়ে যায়।
 
@@ -614,6 +644,14 @@ Bitmap Index সাধারণত ব্যবহৃত হয়:
 
 ## **46. What is Index Fragmentation?**
 
+```mermaid
+flowchart LR
+    Inserts[Random inserts and updates] --> Split[Page splits]
+    Split --> Sparse[Low page density and scattered pages]
+    Sparse --> IO[More I/O]
+    Measure[Measure actual fragmentation and workload] --> Action{Reorganize, rebuild or leave alone}
+```
+
 **Index Fragmentation** হল এমন একটি condition যখন index pages তাদের logical order অনুযায়ী physically stored থাকে না। Index fragmentation occurs when the logical order of data pages in an index no longer matches their physical order on disk. This misalignment can cause SQL Server to work harder to retrieve ordered data, negatively impacting performance.
 
 * সহজভাবে বললে, index যখন **out-of-order pages** বা **non-contiguous blocks** এ store হয়।
@@ -634,7 +672,7 @@ Bitmap Index সাধারণত ব্যবহৃত হয়:
 
 Index fragmentation database performance এ অনেকভাবে প্রভাব ফেলে:
 
-1. **Slower Query Performance**: Query যখন index scan করে, non-contiguous pages পড়তে হয় → extra I/O → execution slow হয়।
+1. **Potentially Slower Scans**: বিশেষ করে rotational disk-এ ordered range scan-এ non-contiguous page extra I/O করতে পারে; SSD, cache এবং workload অনুযায়ী impact ভিন্ন।
 
 2. **Increased Disk I/O**: Fragmented index মানে disk থেকে বেশি blocks read করতে হবে।
 
@@ -688,6 +726,14 @@ Fragmented indexes fix করতে **rebuild or reorganize** করা হয়�
 
 ## **47. What is Query Optimization?**
 
+```mermaid
+flowchart LR
+    SQL[SQL text] --> Parse[Parse and rewrite]
+    Parse --> Plans[Generate candidate plans]
+    Stats[(Statistics)] --> Cost[Estimate cardinality and cost]
+    Plans --> Cost --> Choose[Choose lowest estimated-cost plan]
+```
+
 **Query Optimization** হলো database system এর এমন একটি process, যেখানে **SQL query কে efficiently execute করার best plan** তৈরি করা হয়।
 
 * যখন আমরা query লিখি, database engine multiple ways চিন্তা করে data access করার জন্য।
@@ -707,7 +753,7 @@ Slow query optimize করার জন্য বিভিন্ন technique �
    * Column যা filter (`WHERE`) বা join এ frequent ব্যবহৃত হয়, সেখানে **Index** ব্যবহার করা।
    * Composite or covering index প্রয়োজনে ব্যবহার করা।
 
-2. **Avoid SELECT**
+2. **Avoid unnecessary `SELECT *`**
 
    * শুধু প্রয়োজনীয় column select করা।
    * যেমন: `SELECT name, email FROM users` instead of `SELECT *`.
@@ -765,7 +811,91 @@ Slow query optimize করার জন্য বিভিন্ন technique �
 
 
 
-## **48. What is Database Caching?**
+## **48. What is a Query Execution Plan?**
+
+```mermaid
+flowchart BT
+    Scan[Table or index scan] --> Filter
+    Seek[Index seek] --> Join[Join operator]
+    Filter --> Join
+    Join --> Sort --> Result
+```
+
+Query execution plan দেখায় optimizer কোন access path, join algorithm এবং operation order বেছে নিয়েছে। `EXPLAIN` estimated plan দেয়; PostgreSQL-এর `EXPLAIN ANALYZE` query চালিয়ে actual timing ও row count-ও দেখায়। Production write query-তে `ANALYZE` ব্যবহারের আগে সতর্ক থাকতে হবে, কারণ statement সত্যিই execute হয়।
+
+```sql
+-- PostgreSQL example
+EXPLAIN
+SELECT order_id, order_date
+FROM orders
+WHERE customer_id = 42;
+```
+
+**Sample response (shape simplified):**
+
+```text
+Index Scan using idx_orders_customer on orders
+  Index Cond: (customer_id = 42)
+```
+
+Plan পড়ার সময় outermost result থেকে child node দেখুন এবং বিশেষভাবে লক্ষ্য করুন:
+
+- Sequential Scan বনাম Index Scan
+- estimated rows বনাম actual rows
+- join type: Nested Loop, Hash Join বা Merge Join
+- expensive Sort, temporary spill এবং repeated loop
+
+Cost-based optimizer table statistics, available indexes এবং cost parameters ব্যবহার করে সম্ভাব্য plan-এর estimated cost তুলনা করে। Cost কোনো millisecond value নয়; এটি optimizer-এর relative unit।
+
+```mermaid
+flowchart TD
+    SQL[SQL query] --> Rewrite[Parse and rewrite]
+    Rewrite --> Candidates[Candidate plans]
+    Stats[Table statistics] --> Estimate[Estimate rows and cost]
+    Candidates --> Estimate
+    Estimate --> Plan[Lowest estimated cost plan]
+    Plan --> Execute[Execute operators]
+```
+
+## **49. What are Database Statistics?**
+
+Database statistics হলো table size, distinct value, NULL fraction, value distribution এবং column correlation-এর মতো summary metadata। Optimizer এগুলো দিয়ে predicate কত row ফেরাবে তা estimate করে।
+
+```sql
+-- PostgreSQL example: refresh planner statistics
+ANALYZE orders;
+
+-- MySQL example
+ANALYZE TABLE orders;
+```
+
+**Sample response (MySQL):**
+
+```text
+Table      | Op      | Msg_type | Msg_text
+orders     | analyze | status   | OK
+```
+
+Bulk load বা বড় data distribution change-এর পরে outdated statistics ভুল cardinality estimate তৈরি করতে পারে; ফলে optimizer ভুল join order বা scan বেছে নিতে পারে। Auto-analyze সাধারণত যথেষ্ট হলেও volatile table-এর threshold/schedule workload অনুযায়ী tune এবং plan দিয়ে verify করতে হয়।
+
+```mermaid
+flowchart LR
+    Data[(Table data)] --> Analyze[ANALYZE]
+    Analyze --> Stats[Statistics catalog]
+    Stats --> Optimizer[Optimizer estimates]
+    Optimizer --> Plan[Execution plan]
+```
+
+## **50. What is Database Caching?**
+
+```mermaid
+flowchart LR
+    App --> Cache{Cache lookup}
+    Cache -->|hit| App
+    Cache -->|miss| DB[(Database)]
+    DB --> Cache
+    Write[Write or invalidation event] --> Cache
+```
 
 **Database Caching** হলো এমন একটি technique যেখানে database frequently accessed data **memory বা cache layer** এ temporarily store করে, যাতে **query execution দ্রুত হয়**।
 
@@ -818,4 +948,3 @@ SELECT * FROM products WHERE category_id = 10;
 1. Reduce database load
 2. Faster response time
 3. Efficient resource utilization
-

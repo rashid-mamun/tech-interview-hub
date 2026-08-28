@@ -1,11 +1,19 @@
 ---
 sidebar_position: 1
-title: "Views & Materialized Views"
+title: "Views"
 ---
+
 
 # Views & Materialized Views
 
 ## **62. What is a view in database?**
+
+```mermaid
+flowchart LR
+    Tables[(Base tables)] --> View[View query]
+    Tables --> Snapshot[(Materialized result)]
+    Refresh[Refresh] --> Snapshot
+```
 
 **View** হলো ডাটাবেজের একটি virtual table, যা এক বা একাধিক মূল table থেকে ডেটা নিয়ে তৈরি হয়। এটি physically কোনো ডেটা স্টোর করে না; বরং এটি মূলত একটি সেভ করা SQL query, যা কল করা হলে রান হয়ে ডেটা প্রদর্শন করে।
 

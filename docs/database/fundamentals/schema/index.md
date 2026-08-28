@@ -3,11 +3,19 @@ sidebar_position: 4
 title: 'Schema'
 ---
 
+
 # Database Schema
 
 **Database Schema** হলো একটি ডাটাবেসের Blueprint or Skeleton। এটি ডাটাবেসের logical structure সংজ্ঞায়িত করে, অর্থাৎ data কীভাবে organization করা হবে, table মধ্যে সম্পর্ক কেমন হবে এবং কী কী  Constraints থাকবে—সবই schema মাধ্যমে নির্ধারিত হয়।
 
 ## ৪. What is a schema in databases?
+
+```mermaid
+erDiagram
+    USERS ||--o{ ORDERS : places
+    ORDERS ||--|{ ORDER_ITEMS : contains
+    PRODUCTS ||--o{ ORDER_ITEMS : referenced_by
+```
 
 **Database Schema** হলো database এর blueprint বা structural design যা define করে:
 
@@ -19,7 +27,7 @@ title: 'Schema'
 - **Constraints**: Data validation rule এবং integrity check
 - **Indexes**: Query performance optimize করার জন্য
 
-#### উদাহরণ:
+#### উদাহরণ (MySQL 8+):
 ```sql
 -- E-commerce database schema example
 CREATE TABLE users (
@@ -28,6 +36,11 @@ CREATE TABLE users (
     email VARCHAR(100) UNIQUE,
     phone VARCHAR(15),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE categories (
+    category_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL UNIQUE
 );
 
 CREATE TABLE products (
@@ -47,7 +60,19 @@ CREATE TABLE orders (
     status ENUM('pending', 'confirmed', 'shipped', 'delivered'),
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
+
+CREATE TABLE order_items (
+    order_id INT NOT NULL,
+    product_id INT NOT NULL,
+    quantity INT NOT NULL CHECK (quantity > 0),
+    unit_price DECIMAL(10,2) NOT NULL CHECK (unit_price >= 0),
+    PRIMARY KEY (order_id, product_id),
+    FOREIGN KEY (order_id) REFERENCES orders(order_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id)
+);
 ```
+
+উপরের creation order-এ referenced table আগে তৈরি হয়েছে, তাই snippetটি fresh MySQL schema-তে চালানো যায়।
 
 #### Schema Design এর গুরুত্ব:
 * **Data Consistency:** ভুল ধরনের ডেটা ইনপুট দেওয়া থেকে রক্ষা করে।

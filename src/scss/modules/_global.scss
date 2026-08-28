@@ -83,8 +83,11 @@ pre code {
 .theme-doc-markdown :not(pre)>code {
   font-size: 0.9em;
   line-height: 1.2;
-  padding: 0.08em 0.36em;
-  border-radius: 0.4rem;
+  padding: 0.08em 0.34em;
+  border: 1px solid var(--docs-border);
+  border-radius: 4px;
+  background: var(--docs-soft-bg);
+  color: color-mix(in srgb, var(--ifm-heading-color) 82%, var(--ifm-color-primary));
   font-family: var(--font-monospace) !important;
   white-space: normal;
   overflow-wrap: anywhere;
