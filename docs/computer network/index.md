@@ -1,3 +1,10 @@
+---
+sidebar_position: 1
+title: Computer Network
+description: Study computer networking interview questions covering the Internet, DNS, client-server architecture, protocols, TCP/IP, UDP, handshakes, HTTP, and HTTPS.
+keywords: [computer network interview questions, networking interview guide, TCP IP interview, DNS HTTP interview]
+---
+
 # Computer Networking Interview Guide
 
 একটি browser request URL থেকে server response হওয়া পর্যন্ত DNS, IP routing, transport connection, TLS এবং HTTP—সব layer একসঙ্গে কাজ করে। এই section backend developer-এর দৃষ্টিতে সেই end-to-end flow এবং common failure points ব্যাখ্যা করে।

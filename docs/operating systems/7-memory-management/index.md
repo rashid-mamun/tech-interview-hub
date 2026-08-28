@@ -1,6 +1,7 @@
 ---
 sidebar_position: 7
-title: 'Memory Management'
+title: 'Operating System Memory Management'
+sidebar_label: 'Memory Management'
 ---
 
 

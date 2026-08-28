@@ -399,7 +399,7 @@ Anycast স্বয়ংক্রিয়ভাবে
 ---
 
 ## 14. What happens when a DNS query fails, and how is it handled?
-![](./dns_query_failure_flow.svg)
+![DNS query failure resolution flow](./dns_query_failure_flow.svg)
 ### DNS Query Fail হলে কী হয়?
 
 DNS query বিভিন্ন কারণে fail করতে পারে। প্রতিটি ব্যর্থতার নিজস্ব কারণ এবং সমাধান আছে।

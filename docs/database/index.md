@@ -1,3 +1,10 @@
+---
+sidebar_position: 1
+title: Database
+description: Prepare database interview questions covering SQL, schema design, normalization, indexing, transactions, concurrency, NoSQL, scaling, and performance.
+keywords: [database interview questions, SQL interview guide, database indexing interview, transactions and normalization]
+---
+
 # Database Interview Guide
 
 Database interview-এ SQL লিখতে পারার পাশাপাশি data model, consistency, concurrency, indexing এবং scale নিয়ে trade-off করতে হয়। এই guide একটি query কীভাবে execute হয় থেকে শুরু করে production database failure diagnose করা পর্যন্ত ধারাবাহিক learning path দেয়।

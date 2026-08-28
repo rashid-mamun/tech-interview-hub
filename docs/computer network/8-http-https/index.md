@@ -537,7 +537,7 @@ Defense: HttpOnly flag ✅
 ```text
 তুমি bank.com এ logged in।
 Evil site এ গেলে:
-<img src="bank.com/transfer?to=attacker&amount=10000">
+<img src="bank.com/transfer?to=attacker&amount=10000" alt="Hidden malicious transfer request">
 Browser automatically cookie পাঠায়! 😱
 Defense: SameSite=Strict ✅
 ```

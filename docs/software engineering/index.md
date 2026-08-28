@@ -1,6 +1,8 @@
 ---
 sidebar_position: 1
 title: Software Engineering
+description: Review software engineering interview questions on SDLC, Agile, requirements, architecture, modularity, UML, testing, estimation, and project management.
+keywords: [software engineering interview questions, SDLC interview, Agile interview guide, software architecture interview]
 ---
 
 # Software Engineering Interview Guide

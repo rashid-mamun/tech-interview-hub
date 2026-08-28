@@ -1,6 +1,7 @@
 ---
 sidebar_position: 1
-title: 'Memory Management'
+title: 'Node.js Memory Management'
+sidebar_label: 'Memory Management'
 ---
 
 ## 1. How is memory managed in JavaScript?

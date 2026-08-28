@@ -8,7 +8,7 @@ const siteBaseUrl = '/tech-interview-hub/';
 const publicUrl = `${siteUrl}${siteBaseUrl.slice(0, -1)}`;
 const repoUrl = 'https://github.com/rashid-mamun/tech-interview-hub';
 const siteDescription =
-  'Structured interview notes for backend, database, networking, Docker, Node.js, and system design.';
+  'Bangla-friendly technical interview notes on data structures, OOP, networking, operating systems, databases, software engineering, system design, Node.js, and NestJS.';
 
 const config: Config = {
   title: 'Tech Interview Hub',
@@ -55,7 +55,7 @@ const config: Config = {
     mermaid: {
       theme: { light: 'neutral', dark: 'dark' }
     },
-    image: 'img/social-card.svg',
+    image: 'img/social-card.png',
     navbar: {
       logo: {
         alt: 'Tech Interview Hub',
@@ -78,7 +78,7 @@ const config: Config = {
       {
         name: 'keywords',
         content:
-          'tech interview hub, tech-interview-hub, rashid mamun, backend interview questions, system design interview, node js interview questions, database interview questions, computer networking interview questions, docker interview questions, nestjs interview questions, bangla programming notes, developer interview preparation, tech-interview-hub github'
+          'tech interview hub, technical interview notes, data structures interview questions, object oriented programming interview, computer networking interview, operating systems interview, database interview questions, software engineering interview, system design interview, node js interview questions, nestjs interview questions, bangla programming notes'
       },
       { name: 'author', content: 'Rashid Mamun' },
       { name: 'google-site-verification', content: 'cAhJkw9HN0dfCLlevCXA591yh_UUW-nH7yzYZqZhVss' },
@@ -92,18 +92,18 @@ const config: Config = {
       {
         property: 'og:description',
         content:
-          'Bangla-friendly technical interview documentation for backend developers covering system design, networking, database, Docker, Node.js, and NestJS.'
+          'Bangla-friendly technical interview notes covering data structures, OOP, computer networks, operating systems, databases, software engineering, system design, Node.js, and NestJS.'
       },
       { property: 'og:url', content: publicUrl },
-      { property: 'og:image', content: `${publicUrl}/img/social-card.svg` },
+      { property: 'og:image', content: `${publicUrl}/img/social-card.png` },
       { name: 'twitter:card', content: 'summary_large_image' },
       { name: 'twitter:title', content: 'Tech Interview Hub - Developer Interview Documentation' },
       {
         name: 'twitter:description',
         content:
-          'Structured backend, system design, database, networking, Docker, Node.js, and NestJS interview notes.'
+          'Technical interview notes for data structures, OOP, networking, operating systems, databases, software engineering, system design, Node.js, and NestJS.'
       },
-      { name: 'twitter:image', content: `${publicUrl}/img/social-card.svg` },
+      { name: 'twitter:image', content: `${publicUrl}/img/social-card.png` },
       { name: 'github:repository', content: repoUrl }
     ],
     prism: {
@@ -126,13 +126,6 @@ const config: Config = {
   } satisfies Preset.ThemeConfig,
   headTags: [
     {
-      tagName: 'link',
-      attributes: {
-        rel: 'canonical',
-        href: publicUrl
-      }
-    },
-    {
       tagName: 'script',
       attributes: {
         type: 'application/ld+json'
@@ -144,7 +137,7 @@ const config: Config = {
         alternateName: ['tech-interview-hub', 'Rashid Mamun Tech Interview Hub'],
         url: publicUrl,
         description:
-          'Bangla-friendly technical interview documentation for backend developers covering system design, networking, database, Docker, Node.js, and NestJS.',
+          'Bangla-friendly technical interview notes covering data structures, OOP, computer networks, operating systems, databases, software engineering, system design, Node.js, and NestJS.',
         inLanguage: ['en', 'bn'],
         author: {
           '@type': 'Person',
@@ -176,7 +169,7 @@ const config: Config = {
           url: 'https://github.com/rashid-mamun'
         },
         description:
-          'Open-source technical interview documentation website for backend, system design, networking, database, Docker, Node.js, and NestJS preparation.'
+          'Open-source technical interview documentation for data structures, OOP, networking, operating systems, databases, software engineering, system design, Node.js, and NestJS.'
       })
     }
   ]

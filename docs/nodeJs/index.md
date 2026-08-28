@@ -1,6 +1,8 @@
 ---
 sidebar_position: 1
 title: Node.js
+description: Prepare Node.js interview questions on the event loop, asynchronous programming, streams, modules, Express, security, performance, and backend architecture.
+keywords: [Node.js interview questions, Node js interview guide, event loop interview, backend JavaScript interview]
 ---
 
 # Node.js Interview Guide

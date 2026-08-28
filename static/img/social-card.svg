@@ -6,9 +6,10 @@
   <path d="M146 154L164 142L182 154V178L164 190L146 178V154Z" stroke="white" stroke-width="5" stroke-linejoin="round"/>
   <path d="M164 142V190M146 154L164 166L182 154" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
   <text x="128" y="274" fill="#0C1728" font-family="Inter, Arial, sans-serif" font-size="78" font-weight="800">Tech Interview Hub</text>
-  <text x="128" y="348" fill="#334155" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="600">Backend, System Design, Database, Networking, Docker, Node.js and NestJS notes</text>
-  <text x="128" y="420" fill="#1463D8" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="800">github.com/rashid-mamun/tech-interview-hub</text>
-  <text x="128" y="472" fill="#64748B" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="500">Bangla-friendly developer interview documentation</text>
+  <text x="128" y="340" fill="#334155" font-family="Inter, Arial, sans-serif" font-size="31" font-weight="600">Data Structures · OOP · Networks · Operating Systems · Database</text>
+  <text x="128" y="390" fill="#334155" font-family="Inter, Arial, sans-serif" font-size="31" font-weight="600">Software Engineering · System Design · Node.js · NestJS</text>
+  <text x="128" y="452" fill="#1463D8" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="800">github.com/rashid-mamun/tech-interview-hub</text>
+  <text x="128" y="500" fill="#64748B" font-family="Inter, Arial, sans-serif" font-size="26" font-weight="500">Bangla-friendly technical interview documentation</text>
   <defs>
     <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
       <path d="M32 0H0V32" stroke="#E3EAF4" stroke-width="1"/>

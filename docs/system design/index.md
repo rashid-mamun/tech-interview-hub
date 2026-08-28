@@ -1,6 +1,8 @@
 ---
 sidebar_position: 1
 title: System Design
+description: Master system design interview questions covering scalability, databases, caching, queues, APIs, distributed systems, microservices, reliability, and security.
+keywords: [system design interview questions, system design interview guide, distributed systems interview, backend architecture interview]
 ---
 
 # System Design Interview Guide

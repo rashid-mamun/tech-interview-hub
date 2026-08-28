@@ -1,6 +1,8 @@
 ---
 sidebar_position: 1
 title: Data Structures
+description: Master data structures and algorithms interview questions covering complexity, arrays, trees, graphs, hashing, sorting, dynamic programming, and problem-solving patterns.
+keywords: [data structures interview questions, algorithms interview guide, DSA interview preparation, coding interview notes]
 ---
 
 # Data Structures and Algorithms Interview Guide

@@ -1,6 +1,7 @@
 ---
 sidebar_position: 1
-title: 'Security'
+title: 'Node.js Security'
+sidebar_label: 'Security'
 ---
 
 ## 1. How do you secure a Node.js application?

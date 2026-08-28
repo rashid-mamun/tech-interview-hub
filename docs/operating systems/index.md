@@ -1,6 +1,8 @@
 ---
 sidebar_position: 1
 title: Operating Systems
+description: Learn operating systems interview questions on processes, threads, CPU scheduling, synchronization, deadlocks, memory, storage, and virtualization.
+keywords: [operating systems interview questions, OS interview guide, process and thread interview, memory management interview]
 ---
 
 # Operating Systems Interview Guide
