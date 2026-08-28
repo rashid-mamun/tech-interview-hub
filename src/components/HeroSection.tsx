@@ -27,7 +27,9 @@ export const HeroSection = () => {
                 topic and optimized for long-form reading.
               </p>
               <div className="hero-section__actions">
-                <Link className="hero-section__button button button--primary button--lg" to="/docs">
+                <Link
+                  className="hero-section__button button button--primary button--lg"
+                  to="/docs/software%20engineering/">
                   Start Reading
                 </Link>
               </div>

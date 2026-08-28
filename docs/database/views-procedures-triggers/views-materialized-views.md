@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-title: "Views & Materialized Views"
+title: "Views"
 ---
 
 

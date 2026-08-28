@@ -305,10 +305,11 @@ sequenceDiagram
     participant JVM
     participant Object as "Cat object (heap)"
 
-    Client->>JVM: Animal a = new Cat();<br/>a.sound();
+    Client->>JVM: Assign a Cat object to an Animal reference
+    Client->>JVM: Call a.sound()
     JVM->>Object: actual class জানার জন্য object header check
     Object-->>JVM: actual class = Cat
-    JVM->>JVM: Cat class এর method table থেকে<br/>sound() খুঁজে বের করা
+    JVM->>JVM: Look up sound in the Cat method table
     JVM-->>Client: "Cat meows" execute হয়
 ```
 

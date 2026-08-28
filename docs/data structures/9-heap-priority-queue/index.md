@@ -225,7 +225,7 @@ flowchart TB
     A0 --> A2[2: 15]
     A1 --> A3[3: 30]
     A1 --> A4[4: 40]
-    Formula[For index i: left=2i+1, right=2i+2, parent=floor((i-1)/2)]
+    Formula["For index i: left=2i+1, right=2i+2, parent=floor((i-1)/2)"]
 ```
 
 **Heap** একটি বিশেষ ধরনের **Complete Binary Tree**, যা সাধারণত **Array**-এর মাধ্যমে খুব efficient ভাবে implement করা যায় — কোনো explicit **pointer** (left/right child pointer) ছাড়াই।

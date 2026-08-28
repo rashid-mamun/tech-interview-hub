@@ -338,10 +338,10 @@ bool isValidBST(TreeNode* root, long minVal = LONG_MIN, long maxVal = LONG_MAX) 
 
 ```mermaid
 flowchart LR
-    Sorted[Insert 1, 2, 3, 4] --> Skewed[Skewed BST height n]
-    Skewed --> Linear[Search O(n)]
-    Sorted --> Balanced[AVL or Red-Black rotations]
-    Balanced --> Log[Height O(log n), operations O(log n)]
+    Sorted["Insert 1, 2, 3, 4"] --> Skewed["Skewed BST: height n"]
+    Skewed --> Linear["Search: O(n)"]
+    Sorted --> Balanced["AVL or Red-Black rotations"]
+    Balanced --> Log["Height: O(log n); operations: O(log n)"]
 ```
 
 সাধারণ **BST**-এর **search, insert, delete** operation-গুলোর efficiency সম্পূর্ণভাবে নির্ভর করে tree-এর **height**-এর উপর। প্রতিটি operation-এ root থেকে শুরু করে একটি **single path** ধরে নিচের দিকে নামতে হয়, এবং worst case-এ এই path-এর length-ই হলো সেই operation-এর **time complexity**।

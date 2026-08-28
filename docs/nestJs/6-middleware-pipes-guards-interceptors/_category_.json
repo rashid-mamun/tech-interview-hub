@@ -1,4 +1,4 @@
 {
     "position": 6,
-    "label": "Middleware, Pipes, Guards & Interceptors"
+    "label": "Request Pipeline"
 }
