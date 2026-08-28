@@ -100,7 +100,27 @@ fs.readFile("file.txt", "utf8", function (err, data) {
 
 ---
 
-### ❓ What is inversion of control?
+### What is inversion of control?
+
+যখন একটি callback অন্য একটি function বা library-কে pass করা হয়, তখন **আপনার code-এর execution-এর নিয়ন্ত্রণ** আপনার হাত থেকে বেরিয়ে সেই third-party function-এর হাতে চলে যায় — একেই বলে **Inversion of Control**। আপনি নিজে callback-টি call করছেন না, বরং **বিশ্বাস** করছেন যে অন্য function সেটি সঠিকভাবে call করবে।
+
+এই "বিশ্বাস"-এর মধ্যেই সমস্যা লুকিয়ে থাকে, কারণ সেই function যদি buggy বা malicious হয়, তাহলে callback-টি:
+
+- **কখনো call না-ও হতে পারে** (silently ignored)।
+- **একাধিকবার call হতে পারে** (আশানুরূপ একবারের বদলে)।
+- **খুব দ্রুত (synchronously) অথবা খুব দেরিতে call হতে পারে**, যা race condition তৈরি করতে পারে।
+- **ভুল argument বা ভুল `this` context নিয়ে call হতে পারে**।
+
+```js
+// ❌ ঝুঁকিপূর্ণ — thirdPartyLibrary-এর উপর সম্পূর্ণ নির্ভরশীল
+thirdPartyLibrary.process(data, function (err, result) {
+  chargeCustomerCard(); // যদি callback দুইবার চলে, customer-এর card দুইবার charge হবে!
+});
+```
+
+**Promise কীভাবে এই সমস্যা কমায়:**
+
+Promise-এর ক্ষেত্রে control পুরোপুরি অন্যের হাতে থাকে না — Promise নিজেই guarantee দেয় যে এটি ঠিক একবার resolve/reject হবে, state একবার fix হয়ে গেলে আর বদলাবে না (immutability), এবং handler গুলো সবসময় asynchronously call হবে (কখনো synchronously নয়)। এই কারণে Promise/`async-await`-কে callback-এর তুলনায় বেশি predictable এবং trustworthy মনে করা হয়।
 
 ### 🔄 How do you convert a callback-based library to Promises using `util.promisify`?
 Node.js-এর built-in `util` module-এ `promisify` function আছে, যেটি error-first callback convention follow করা যেকোনো function-কে automatically Promise-based function-এ রূপান্তর করে।
@@ -441,6 +461,28 @@ async function getUser() {
 
 ### ⏸️ How does `await` pause execution?
 
+`await` শুধুমাত্র সেই **`async` function-টির execution** pause করে যেখানে এটি লেখা হয়েছে — পুরো program বা JavaScript-এর main thread কে block করে না। `await`-এ পৌঁছালে function-টি সাথে সাথে control event loop-কে ফিরিয়ে দেয়, ফলে বাকি synchronous code (এবং অন্য কোনো function) চলতে থাকতে পারে। Promise টি resolve/reject হলে, JavaScript engine সেই `async` function-এর execution ঠিক যেখানে থেমে ছিল সেখান থেকে আবার শুরু করে (এটি ভেতরে ভেতরে Promise `.then()`-এরই syntactic sugar)।
+
+```js
+console.log("1: শুরু");
+
+async function fetchData() {
+  console.log("2: fetch শুরু হলো");
+  await new Promise((resolve) => setTimeout(resolve, 100)); // এখানে শুধু fetchData() pause হয়
+  console.log("4: fetch শেষ, resume হলো");
+}
+
+fetchData();
+
+console.log("3: fetchData() call করার পরপরই এটি চলে — main thread block হয়নি!");
+
+// Output:
+// 1: শুরু
+// 2: fetch শুরু হলো
+// 3: fetchData() call করার পরপরই এটি চলে — main thread block হয়নি!
+// 4: fetch শেষ, resume হলো   (~100ms পরে)
+```
+
 :::info 🔗 Related Questions
 
 - Is `async/await` blocking or non-blocking?
@@ -605,9 +647,9 @@ fs.readFile("file.txt", () => {
 ```js
 console.log("1: sync start");
 
-setTimeout(() => console.log("4: setTimeout"), 0);
+setTimeout(() => console.log("setTimeout"), 0);
 
-setImmediate(() => console.log("5: setImmediate"));
+setImmediate(() => console.log("setImmediate"));
 
 queueMicrotask(() => console.log("3: microtask"));
 
@@ -620,8 +662,9 @@ console.log("2: sync end");
 // 2: sync end
 // 3: microtask        ← current task শেষে, সাথে সাথে
 // 3: promise
-// 4: setTimeout       ← পরের event loop iteration-এ
-// 5: setImmediate     ← I/O phase-এর পরে
+// এরপর 'setTimeout' এবং 'setImmediate' — এই দুটোর মধ্যে কোনটা আগে চলবে
+// তা top-level code-এ অনিশ্চিত (উপরে উল্লেখিত কারণেই); I/O callback-এর
+// ভেতর থেকে চালালে setImmediate সবসময় setTimeout-এর আগে চলত।
 ```
 
 **Event loop-এ execution order:**
@@ -642,6 +685,39 @@ Check Phase      ← setImmediate()  [Node.js only]
 ---
 
 ## 📌 25. How do you run async operations in parallel vs sequentially?
+
+সংক্ষেপে — dependency আছে কিনা সেটাই মূল বিবেচ্য বিষয়:
+
+- **Sequential:** পরের operation-টি যদি আগের operation-এর result-এর উপর নির্ভর করে, তাহলে `await` একটার পর একটা করতে হয়। প্রতিটি step-এর সময় যোগ হয়ে মোট সময় বাড়ে।
+- **Parallel:** operation গুলো একে অপরের উপর নির্ভরশীল না হলে, সব একসাথে শুরু করে `Promise.all()` (বা `Promise.allSettled()`) দিয়ে একসাথে অপেক্ষা করা উচিত। মোট সময় সবচেয়ে ধীর operation-টির সমান হয়, আলাদা আলাদা সময়ের যোগফল নয়।
+
+```js
+// ❌ Sequential — অপ্রয়োজনীয়ভাবে ধীর, কারণ posts, user-এর উপর নির্ভর করছে না
+async function loadSequential() {
+  const user = await fetchUser(); // ৩০০ms
+  const posts = await fetchPosts(); // আরো ৩০০ms
+  return { user, posts }; // মোট ~৬০০ms
+}
+
+// ✅ Parallel — dependency নেই, তাই একসাথে চালানো উচিত
+async function loadParallel() {
+  const [user, posts] = await Promise.all([fetchUser(), fetchPosts()]);
+  return { user, posts }; // মোট ~৩০০ms
+}
+```
+
+**কখন sequential-ই সঠিক পছন্দ:**
+
+```js
+// ✅ এখানে sequential-ই একমাত্র উপায়, কারণ orders, user.id-এর উপর নির্ভর করছে
+async function loadDependent() {
+  const user = await fetchUser(); // আগে user লাগবে
+  const orders = await fetchOrders(user.id); // তারপর orders
+  return { user, orders };
+}
+```
+
+বিস্তারিত pattern (`Promise.all`, `Promise.allSettled`, `Promise.race`, concurrency limiting) নিচে ২৭ নম্বর প্রশ্নে আলোচনা করা হয়েছে।
 
 :::info 🔗 Related Questions
 
@@ -722,7 +798,7 @@ async.parallel(
 ```
 
 |             | `async.series`             | `async.parallel`         |
-| ----------- | -------------------------- | ------------------------ |
+| ----------- | --------------------------- | ------------------------- |
 | Execution   | একটার পর একটা              | একসাথে                   |
 | মোট সময়    | সব task-এর সময়ের যোগফল    | সবচেয়ে ধীর task-এর সময় |
 | কখন ব্যবহার | একটির output আরেকটির input | tasks পরস্পর independent |
@@ -730,6 +806,18 @@ async.parallel(
 ---
 
 ### ⚖️ How does the `async` module compare to native `Promise.all`?
+
+দুটোরই লক্ষ্য একই — একাধিক asynchronous task manage করা — কিন্তু approach আলাদা:
+
+| বিষয় | `async` module | Native `Promise` / `async-await` |
+|---|---|---|
+| Dependency | External npm package লাগে | JavaScript/Node.js-এ built-in, কিছু install করতে হয় না |
+| Callback style | Error-first callback ব্যবহার করে | Promise-based, `then`/`await` ব্যবহার করে |
+| Control flow | `series`, `parallel`, `waterfall`, `queue`-এর মতো ready-made helper আছে | শুধু `Promise.all`, `Promise.allSettled`, `Promise.race` — জটিল flow নিজে গঠন করতে হয় |
+| Concurrency limiting | `async.parallelLimit`, `async.queue` দিয়ে built-in সাপোর্ট | নিজে লিখতে হয়, অথবা `p-limit`-এর মতো আলাদা library লাগে |
+| আধুনিক codebase-এ ব্যবহার | কম — legacy বা খুবই complex flow-তে | বেশি — de facto standard |
+
+**সংক্ষেপে:** নতুন কোনো Node.js project শুরু করলে সাধারণত native `Promise`/`async-await` (`Promise.all`, `Promise.allSettled` ইত্যাদি) যথেষ্ট। `async` module মূলত তখনই বেছে নেওয়া হয় যখন legacy callback-based codebase-এ কাজ করতে হয়, অথবা `waterfall`/`queue`-এর মতো built-in concurrency-control helper গুলোর দরকার হয় যেগুলো native Promise API-তে সরাসরি নেই।
 
 ---
 
@@ -775,7 +863,7 @@ results.forEach((result) => {
 ```
 
 |                | `Promise.all`        | `Promise.allSettled`              |
-| -------------- | -------------------- | --------------------------------- |
+| -------------- | --------------------- | ----------------------------------- |
 | একটি fail করলে | সব বাতিল             | বাকিগুলো চলতে থাকে                |
 | Result         | শুধু values-এর array | `{status, value/reason}`-এর array |
 | কখন ব্যবহার    | সব result দরকার      | partial failure acceptable        |
@@ -939,7 +1027,7 @@ emitter.emit("connection", socket2); // ❌ আর চলবে না
 **কখন কোনটি ব্যবহার করবেন:**
 
 |               | `on`                           | `once`                              |
-| ------------- | ------------------------------ | ----------------------------------- |
+| ------------- | ------------------------------- | ------------------------------------ |
 | কতবার চলে     | বারবার                         | শুধু একবার                          |
 | কখন ব্যবহার   | ongoing events (data, message) | one-time events (ready, connection) |
 | Manual remove | `off()` দিয়ে করতে হয়         | Automatic                           |
@@ -1126,11 +1214,11 @@ fail(); // ❌ await নেই, .catch() নেই
 **দুটোর তুলনা:**
 
 |                          | `uncaughtException` | `unhandledRejection`               |
-| ------------------------ | ------------------- | ---------------------------------- |
-| Source                   | Synchronous `throw` | Promise rejection                  |
-| Callback parameters      | `(err, origin)`     | `(reason, promise)`                |
-| Node.js default behavior | Process crash       | Node.js 15+ থেকে crash             |
-| Handle করার উপায়        | `try/catch`         | `.catch()` বা `try/catch` in async |
+| ------------------------ | -------------------- | ------------------------------------ |
+| Source                   | Synchronous `throw`  | Promise rejection                  |
+| Callback parameters      | `(err, origin)`      | `(reason, promise)`                |
+| Node.js default behavior | Process crash        | Node.js 15+ থেকে crash             |
+| Handle করার উপায়        | `try/catch`          | `.catch()` বা `try/catch` in async |
 
 ---
 
@@ -1474,11 +1562,11 @@ storage.run({ requestId: "B" }, () => handleRequest());
 ```
 
 |                     | `async_hooks` | `AsyncLocalStorage` |
-| ------------------- | ------------- | ------------------- |
+| ------------------- | -------------- | --------------------- |
 | Level               | Low-level     | High-level          |
 | Performance         | বেশি overhead | অনেক কম overhead    |
 | ব্যবহারের সহজতা     | জটিল          | সহজ                 |
-| Context propagation | Manual        | Automatic           |
+| Context propagation | Manual        | Automatic            |
 
 ---
 

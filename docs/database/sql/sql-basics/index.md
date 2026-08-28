@@ -3,7 +3,17 @@ sidebar_position: 1
 title: 'SQL Basics'
 ---
 
+
 ## **11. What is SQL?**
+
+```mermaid
+flowchart LR
+    Select[SELECT] --> From[FROM]
+    From --> Where[WHERE]
+    Where --> Group[GROUP BY]
+    Group --> Having[HAVING]
+    Having --> Order[ORDER BY]
+```
 
 SQL (Structured Query Language) হল একটি standard programming language যা relational database management systems (RDBMS) এর সাথে communicate করার জন্য ব্যবহৃত হয়। এটি data store, manipulate, এবং retrieve করার জন্য ব্যবহৃত হয়।
 
@@ -270,10 +280,11 @@ COMMIT;  -- INSERT টা confirm হবে
 #### **Auto-commit Mode:**
 বেশিরভাগ database systems এ **auto-commit mode** enable থাকে by default।
 
-**DDL Commands:**
+**DDL Commands (dialect-dependent):**
 ```sql
--- এগুলো automatically commit হয়
-CREATE TABLE test (id INT);  -- Immediate commit
+-- MySQL/Oracle-এ অনেক DDL implicit commit করে।
+-- PostgreSQL/SQL Server-এ অনেক DDL explicit transaction-এ rollback করা যায়।
+CREATE TABLE test (id INT);
 DROP TABLE test;             -- Immediate commit
 ALTER TABLE users ADD age INT; -- Immediate commit
 ```
@@ -660,7 +671,7 @@ ROLLBACK;  -- ✓ Can be rolled back
 
 #### **DROP - Database Dependent:**
 
-**Most Databases:**
+**MySQL/Oracle-এর অনেক DDL operation:**
 ```sql
 BEGIN TRANSACTION;
 DROP TABLE employees;

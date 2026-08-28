@@ -1,4 +1,20 @@
+---
+sidebar_position: 1
+title: NestJS
+description: Study NestJS interview questions covering modules, dependency injection, controllers, providers, pipes, guards, interceptors, testing, and microservices.
+keywords: [NestJS interview questions, NestJS interview guide, dependency injection interview, NestJS backend interview]
+---
+
 # NestJS Interview Questions
+
+NestJS interview-এ decorator বা CLI command মুখস্থ করার চেয়ে request lifecycle এবং dependency graph বোঝা বেশি গুরুত্বপূর্ণ। Module boundary, dependency injection, validation, guards, interceptors, persistence, testing ও deployment কীভাবে একসঙ্গে কাজ করে—এই question bank সেই reasoning practice করায়।
+
+## How to use this question bank
+
+1. Core concepts, modules, controllers এবং dependency injection আগে শেষ করুন।
+2. একটি request middleware থেকে pipe, guard, interceptor, handler ও exception filter পর্যন্ত trace করুন।
+3. Authentication, database ও microservice প্রশ্নে security এবং failure behavior উল্লেখ করুন।
+4. প্রতিটি design answer testability, coupling এবং operational cost দিয়ে evaluate করুন।
 
 > **150+ core questions · 420+ follow-up questions · 20 topics**
 > Fixed all bugs, added 7 missing topics, expanded all thin sections, 2–3 follow-ups per question.

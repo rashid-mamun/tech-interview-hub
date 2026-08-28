@@ -285,19 +285,28 @@ async function idempotentConsumer(channel, msg) {
 **Solution 3: Kafka-তে exactly-once semantics:**
 
 ```javascript
-// Kafka producer-এ idempotent mode enable করা
+// Kafka producer-এ idempotent mode এবং transaction enable করা
 const producer = kafka.producer({
-  idempotent: true,           // duplicate message পাঠাবে না
-  transactionalId: 'payment-producer', // exactly-once guarantee
+  idempotent: true,                     // duplicate message পাঠাবে না
+  transactionalId: 'payment-producer',  // transaction-এর জন্য প্রয়োজন
+  maxInFlightRequests: 1,               // transactional producer-এর জন্য recommended
 });
 
 async function sendWithTransaction(event) {
-  await producer.transaction(async (tx) => {
-    await tx.send({
+  // kafkajs-এ transaction callback-style নয় — producer.transaction()
+  // একটি transaction object return করে, যেটাতে send/commit/abort করতে হয়
+  const transaction = await producer.transaction();
+
+  try {
+    await transaction.send({
       topic: 'payment-events',
       messages: [{ key: event.orderId, value: JSON.stringify(event) }],
     });
-  });
+    await transaction.commit();
+  } catch (error) {
+    await transaction.abort();
+    throw error;
+  }
 }
 ```
 
@@ -1805,7 +1814,7 @@ const server = https.createServer({
 app.use((req, res, next) => {
   const clientCert = req.socket.getPeerCertificate();
 
-  if (!clientCert || !req.client.authorized) {
+  if (!clientCert || !req.socket.authorized) {
     return res.status(401).json({ error: 'Valid client certificate required' });
   }
 
@@ -1820,17 +1829,22 @@ server.listen(3001);
 
 ```javascript
 // secure-client.js — mTLS দিয়ে অন্য service call করা
-const https = require('https');
+// নোট: Node.js-এর built-in fetch (undici-ভিত্তিক) classic http.Agent/https.Agent
+// নেয় না — { agent } option pass করলে চুপচাপ ignore হয়ে যায়, TLS cert প্রযুক্ত হবে না।
+// এর বদলে undici-র নিজস্ব Agent এবং dispatcher option ব্যবহার করতে হয়।
 const fs = require('fs');
+const { Agent } = require('undici');
 
-const agent = new https.Agent({
-  key:  fs.readFileSync('./certs/client.key'),
-  cert: fs.readFileSync('./certs/client.crt'),
-  ca:   fs.readFileSync('./certs/ca.crt'),
+const dispatcher = new Agent({
+  connect: {
+    key:  fs.readFileSync('./certs/client.key'),
+    cert: fs.readFileSync('./certs/client.crt'),
+    ca:   fs.readFileSync('./certs/ca.crt'),
+  },
 });
 
 async function secureServiceCall(url, options = {}) {
-  const response = await fetch(url, { ...options, agent });
+  const response = await fetch(url, { ...options, dispatcher });
   return response.json();
 }
 ```
@@ -1842,9 +1856,10 @@ async function secureServiceCall(url, options = {}) {
 const jwt = require('jsonwebtoken');
 
 class ServiceAuthManager {
-  constructor(serviceName, privateKey) {
+  constructor(serviceName, privateKey, publicKey) {
     this.serviceName = serviceName;
     this.privateKey = privateKey;
+    this.publicKey = publicKey; // token verify করার জন্য দরকার
     this.tokenCache = new Map();
   }
 
@@ -1881,7 +1896,7 @@ class ServiceAuthManager {
   // Incoming token verify করা
   verifyServiceToken(token, expectedAudience) {
     try {
-      const decoded = jwt.verify(token, publicKey, {
+      const decoded = jwt.verify(token, this.publicKey, {
         algorithms: ['RS256'],
         audience: expectedAudience,
       });
@@ -1900,7 +1915,7 @@ class ServiceAuthManager {
 }
 
 // Middleware
-const authManager = new ServiceAuthManager('payment-service', privateKey);
+const authManager = new ServiceAuthManager('payment-service', privateKey, publicKey);
 
 function requireServiceAuth(req, res, next) {
   const token = req.headers['x-service-token'];
@@ -1984,6 +1999,7 @@ async function initializeApp() {
 
 ```javascript
 // security-middleware.js — gateway-এ সব security check
+const crypto = require('crypto');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
@@ -2028,7 +2044,15 @@ function verifyRequestSignature(req, secret) {
     .update(`${timestamp}.${JSON.stringify(req.body)}`)
     .digest('hex');
 
-  if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSig))) {
+  // ⚠️ timingSafeEqual-এর দুই Buffer-এর length সমান না হলে এটি throw করে,
+  // তাই length আগে check করা নিরাপদ:
+  const sigBuf = Buffer.from(signature, 'hex');
+  const expectedBuf = Buffer.from(expectedSig, 'hex');
+
+  if (
+    sigBuf.length !== expectedBuf.length ||
+    !crypto.timingSafeEqual(sigBuf, expectedBuf)
+  ) {
     throw new Error('Invalid signature');
   }
 }

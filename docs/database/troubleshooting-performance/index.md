@@ -5,7 +5,17 @@ title: 'Troubleshooting and Performance'
 
 
 
+
 ## 🛑 151. Database suddenly became slow after deployment. How do you debug?
+
+```mermaid
+flowchart LR
+    Symptom[Slow request] --> Measure[Measure latency and load]
+    Measure --> Plan[Inspect query plan]
+    Plan --> Cause[Find bottleneck]
+    Cause --> Fix[Apply one change]
+    Fix --> Verify[Measure again]
+```
 
 প্রোডাকশন ডেপ্লয়মেন্টের পর ডাটাবেস হঠাৎ স্লো হয়ে যাওয়া সফটওয়্যার ইঞ্জিনিয়ারিংয়ের সবচেয়ে কমন ইমার্জেন্সি (P0 Incident) গুলোর একটি। 
 
@@ -33,6 +43,14 @@ title: 'Troubleshooting and Performance'
 ---
 
 ## 🐢 152. How do you identify and fix a slow query?
+
+```mermaid
+flowchart LR
+    A[Capture slow query] --> B[Inspect execution plan]
+    B --> C[Check scans, joins, estimates]
+    C --> D[Rewrite query or add suitable index]
+    D --> E[Measure again]
+```
 
 ডাটাবেসে স্লো কোয়ারি (Slow Query) একটি নিরব ঘাতক, যা পুরো সিস্টেমকে অচল করে দিতে পারে। 
 
@@ -65,6 +83,14 @@ EXPLAIN ANALYZE SELECT * FROM users WHERE status='active';
 ---
 
 ## 💾 153. Database is running out of disk space. What do you do?
+
+```mermaid
+flowchart LR
+    A[Disk alert] --> B[Identify data, log, temp growth]
+    B --> C[Free safe space]
+    C --> D[Expand storage]
+    D --> E[Add retention and growth monitoring]
+```
 
 ডাটাবেসের স্পেস ১০০% ফুল হয়ে গেলে ডাটাবেস পুরোপুরি ফ্রিজ হয়ে যায়, কোনো Insert বা Update কাজ করে না। 
 
@@ -100,6 +126,14 @@ SELECT pg_total_relation_size('table_name');
 
 ## 🔌 154. Too many database connections error. How to resolve?
 
+```mermaid
+flowchart LR
+    A[Connection limit reached] --> B[Find idle and leaked sessions]
+    B --> C[Fix connection lifecycle]
+    C --> D[Use bounded connection pool]
+    D --> E[Tune limit only after capacity check]
+```
+
 > ⚠️ **Error:** `FATAL: sorry, too many clients already`
 > এই এররটির মানে হলো আপনার অ্যাপ্লিকেশন লিমিট পার করে এত বেশি কানেকশন ডাটাবেসে খুলেছে যে ডাটাবেস নতুন রিকোয়েস্ট রিজেক্ট করে দিচ্ছে। 
 
@@ -115,7 +149,7 @@ Connection Leak হয় যখন অ্যাপ্লিকেশন ডা�
 ### 🏊‍♂️ What is connection pooling and how does it help?
 ডাটাবেসের সাথে কানেকশন ওপেন করা (TCP Handshake, Authentication) অত্যন্ত সময়সাপেক্ষ এবং খরুচে। 
 * **Connection Pooling:** (যেমন: PgBouncer, HikariCP) হলো অ্যাপ্লিকেশন এবং ডাটাবেসের মাঝখানে থাকা একটি লেয়ার। এটি ডাটাবেসের সাথে অল্প কিছু (ধরি ৫০টি) পার্মানেন্ট কানেকশন খুলে রাখে (Pool)।
-* অ্যাপ্লিকেশন থেকে ৫ হাজার ইউজার রিকোয়েস্ট আসলেও, পোলিং ওই ৫০টি কানেকশনের মধ্যেই সবাইকে রাউন্ড-রবিন করে সার্ভ করে। কেউ কাজ শেষ করলে ওই রেডিমেড কানেকশনটি অন্য একজনকে ধরিয়ে দেয়। এতে `Too many connections` এরর কখনোই আসে না।
+* অ্যাপ্লিকেশন থেকে ৫ হাজার ইউজার রিকোয়েস্ট এলেও pool সীমিত connection reuse করে। তবে pool size, queue limit, timeout বা leaked connection ভুল হলে `Too many connections` এখনও হতে পারে—pooling ঝুঁকি কমায়, guarantee নয়।
 
 ### ⚙️ How do you tune max_connections parameter?
 ডাটাবেসের `max_connections` ভ্যালুটি হুট করে অনেক বাড়িয়ে দেয়া একটি মারাত্মক ভুল। 
@@ -128,6 +162,14 @@ Connection Leak হয় যখন অ্যাপ্লিকেশন ডা�
 ---
 
 ## ⏱️ 155. Replication lag is very high. What would you do?
+
+```mermaid
+flowchart LR
+    P[Primary generates changes] --> Q[Replication queue grows]
+    Q --> R[Replica applies slowly]
+    R --> C{CPU, IO, network, long query?}
+    C --> F[Remove bottleneck and monitor lag]
+```
 
 Replication Lag বা রেপ্লিকেশন ডিলে তখন হয়, যখন Primary (Master) ডাটাবেস থেকে ডেটা Secondary (Slave) ডাটাবেসে আসতে এবং আপডেট হতে অনেক বেশি সময় নিচ্ছে। ফলে ইউজার Secondary থেকে ডেটা পড়লে পুরোনো ভুল ডেটা দেখতে পায়। 
 
@@ -158,6 +200,15 @@ SHOW SLAVE STATUS\G;
 ---
 
 ## 💥 156. Database crashed and won't start. Troubleshooting steps?
+
+```mermaid
+flowchart LR
+    A[Database will not start] --> B[Preserve logs and files]
+    B --> C[Check disk, permissions, config, corruption]
+    C --> D{Recoverable locally?}
+    D -->|Yes| E[Repair and restart safely]
+    D -->|No| F[Restore or fail over]
+```
 
 ডাটাবেস ক্র্যাশ করে স্টার্ট না হওয়া সার্ভার এডমিনদের জন্য সবচেয়ে ভীতিকর নাইটমেয়ার। 
 
@@ -192,6 +243,14 @@ journalctl -u postgresql
 
 ## 🔄 157. Deadlocks are occurring frequently. How do you resolve?
 
+```mermaid
+flowchart LR
+    A[Capture deadlock graph] --> B[Find conflicting statements]
+    B --> C[Use consistent lock order]
+    C --> D[Shorten transactions and add indexes]
+    D --> E[Retry aborted transaction]
+```
+
 ডেডলক (Deadlock) হলো এমন একটি অবস্থা যেখানে দুটি আলাদা ট্রানজেকশন নিজেদের লকের (Lock) কাজ শেষ করার জন্য অনন্তকাল একে অপরের জন্য অপেক্ষা করতে থাকে। 
 
 > 📌 **Example:** ট্রানজেকশন A টেবিল-১ লক করেছে এবং টেবিল-২ খুঁজছে। এদিকে ট্রানজেকশন B টেবিল-২ লক করেছে এবং টেবিল-১ খুঁজছে। কেউই লক ছাড়বে না, তাই সৃষ্টি হয় ডেডলক। শেষমেশ ডাটাবেস ইঞ্জিন এক ট্রানজেকশনকে ফেইল (Kill) করে দিয়ে ডেডলক ভাঙতে বাধ্য হয়।
@@ -223,6 +282,17 @@ SHOW ENGINE INNODB STATUS;
 
 ## 📦 158. Database backup is taking too long. How to optimize?
 
+```mermaid
+flowchart LR
+    A[Measure backup stages] --> B{Main bottleneck}
+    B -->|Read IO| C[Snapshot or incremental backup]
+    B -->|Network| D[Compress or use local staging]
+    B -->|Storage| E[Parallelize and scale target]
+    C --> F[Test restore time]
+    D --> F
+    E --> F
+```
+
 টেরাবাইট স্কেলের ডেটাবেস ব্যাকআপ নিতে কয়েক ঘণ্টা থেকে দিন পর্যন্ত সময় লাগতে পারে, যা প্রোডাকশন সিস্টেমে মারাত্মক ড্রপ বা স্লো-নেসের সৃষ্টি করে।
 
 **কীভাবে অপটিমাইজ করবেন?**
@@ -243,7 +313,7 @@ SHOW ENGINE INNODB STATUS;
 ব্যাকআপ নেয়ার সময় ডাটাবেস ইঞ্জিন ডিস্ক পারফরম্যান্সে (I/O) প্রেশার দেয় এবং টেবিলও লক (Table Locking) করতে পারে। 
 
 * **Solution 1 (Physical Snapshot):** AWS (EBS Snapshot) বা LVM (Logical Volume Manager) এর মাধ্যমে হার্ডডিস্কের স্ন্যাপশট নেওয়া, যা ফ্র্যাকশন অফ সেকেন্ডে হয়ে যায়। সিস্টেম কোনো ইফেক্টই অনুভব করে না।
-* **Solution 2 (Slave Backup):** কখনোই মাস্টার (Primary) ডাটাবেস থেকে ব্যাকআপ না নেওয়া। একটি রিড-রেপ্লিকা বা স্লেভ (Secondary) ডাটাবেস থেকে ব্যাকআপ রান করা, যাতে প্রোডাকশনের রাইড/রিড পারফরম্যান্সে বিন্দুমাত্র কোনো ইমপ্যাক্ট না পড়ে। 
+* **Solution 2 (Replica Backup):** উপযুক্ত replica থেকে backup নিলে primary-এর load কমে। তবে replication lag, consistency point এবং replica I/O impact যাচাই করতে হবে; critical backup restore-test ছাড়া নির্ভরযোগ্য ধরা যাবে না।
 ��় Connection Pool ব্যবহার করা উচিত।
 
 ---

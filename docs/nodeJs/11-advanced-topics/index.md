@@ -45,7 +45,7 @@ child.on('message', (msg) => console.log('Message from child:', msg));
 
 ### What are the security risks of using `exec` with user input?
 
-`exec` method-টি একটি **Shell** (যেমন `/bin/sh` বা `cmd.exe`) open করে command execute করে। তাই যদি আপনি directly user input-কে `exec`-এর ভেতরে পাস করেন, তবে **Command Injection** attack হওয়ার মারাত্মক ঝুঁকি থাকে। 
+`exec` method-টি একটি **Shell** (যেমন `/bin/sh` বা `cmd.exe`) open করে command execute করে। তাই যদি আপনি directly user input-কে `exec`-এর ভেতরে পাস করেন, তবে **Command Injection** attack হওয়ার মারাত্মক ঝুঁকি থাকে।
 
 **ঝুঁকিপূর্ণ কোড:**
 ```javascript
@@ -71,7 +71,7 @@ const ls = spawn('ls', ['-l', userFolder]);
 
 ## 98. What is the `fs` module, and how do you use it?
 
-`fs` (File System) module হলো Node.js-এর একটি core module যা file এবং directory-র সাথে interact করার জন্য ব্যবহৃত হয়। এর মাধ্যমে file read, write, update, delete, এবং directory manage করা যায়। 
+`fs` (File System) module হলো Node.js-এর একটি core module যা file এবং directory-র সাথে interact করার জন্য ব্যবহৃত হয়। এর মাধ্যমে file read, write, update, delete, এবং directory manage করা যায়।
 
 `fs` module-এ প্রতিটি operation-এর ৩ ধরনের API আছে:
 1. **Synchronous:** `fs.readFileSync()` - এটি event loop block করে। শুধুমাত্র app startup-এর সময় ব্যবহার করা উচিত।
@@ -86,14 +86,14 @@ async function fileOperations() {
   try {
     // Write
     await fs.writeFile('example.txt', 'Hello Node.js!');
-    
+
     // Read
     const data = await fs.readFile('example.txt', 'utf8');
     console.log(data); // 'Hello Node.js!'
-    
+
     // Append
     await fs.appendFile('example.txt', '\nNew line appended.');
-    
+
     // Delete
     await fs.unlink('example.txt');
   } catch (err) {
@@ -195,7 +195,7 @@ decrypted += decipher.final('utf8');
 
 ## 101. What is the `zlib` module, and when is it useful?
 
-`zlib` module data compression এবং decompression-এর জন্য ব্যবহৃত হয়। এটি Gzip, Deflate এবং Brotli-এর মতো compression algorithm সাপোর্ট করে। 
+`zlib` module data compression এবং decompression-এর জন্য ব্যবহৃত হয়। এটি Gzip, Deflate এবং Brotli-এর মতো compression algorithm সাপোর্ট করে।
 
 **কখন ব্যবহার করবেন:**
 - HTTP API Response size ছোট করার জন্য, যাতে network bandwidth বাঁচে এবং API দ্রুত load হয় (যদিও `compression` middleware এটি সহজে করে দেয়)।
@@ -220,10 +220,10 @@ readStream.pipe(gzip).pipe(writeStream).on('finish', () => {
 Compression-এর ক্ষেত্রে দুটি প্রধান factor কাজ করে: **CPU Usage** এবং **File Size (Bandwidth)**।
 
 - **High Compression Level (Level 9):** Data-কে সর্বোচ্চ পরিমাণ compress করে, ফলে file size খুব ছোট হয় এবং network bandwidth বাঁচে। কিন্তু এই level-এ compress করতে **CPU-তে প্রচুর চাপ পড়ে** এবং সময় বেশি লাগে (Latency বাড়ে)।
-- **Low Compression Level (Level 1):** দ্রুত compress করে এবং CPU usage কম হয়, কিন্তু object/file size খুব একটা ছোট হয় মিঠা।
+- **Low Compression Level (Level 1):** দ্রুত compress করে এবং CPU usage কম হয়, কিন্তু file size খুব একটা ছোট হয় না।
 - **Default/Balanced (Level 6):** Node.js `zlib` default-ভাবে level 6 ব্যবহার করে, যা speed এবং compression ratio-এর মধ্যে চমৎকার balance দেয়।
 
-**সিদ্ধান্ত:** 
+**সিদ্ধান্ত:**
 - **Static Files (CSS/JS):** একবার compress করে বারবার serve করা হয়, তাই সর্বোচ্চ compression (Level 9) ব্যবহার করা উচিত।
 - **Dynamic API Responses:** প্রতি request-এ real-time compress করতে হয়, তাই CPU বাঁচাতে Level 4-6 ব্যবহার করা বুদ্ধিমানের কাজ।
 
@@ -241,7 +241,7 @@ const net = require('net');
 
 const server = net.createServer((socket) => {
   console.log('Client connected.');
-  
+
   socket.on('data', (data) => {
     console.log(`Received: ${data.toString()}`);
     socket.write('Echo from server: ' + data);
@@ -277,7 +277,7 @@ const emptyBuf = Buffer.alloc(10);
 
 ### What is a zero-copy operation and how do Buffers enable it?
 
-**Zero-copy** হলো OS (Operating System) লেভেলের একটি optimization যেখানে data-কে disk থেকে network socket-এ পাঠানোর সময় CPU-কে involve করে user-space memory-তে copy করা হয় না। 
+**Zero-copy** হলো OS (Operating System) লেভেলের একটি optimization যেখানে data-কে disk থেকে network socket-এ পাঠানোর সময় CPU-কে involve করে user-space memory-তে copy করা হয় না।
 
 সাধারণত একটি file read করে HTTP response-এ পাঠাতে হলে data প্রথমে **Kernel Context** থেকে **User Context** (Node.js application memory) এ copy হয়, এবং তারপর আবার Network Interface-এ copy হয়। এতে memory ও CPU খরচ হয়।
 
@@ -303,7 +303,7 @@ const numCPUs = require('os').cpus().length;
 
 if (cluster.isPrimary) {
   console.log(`Primary server started. Forking ${numCPUs} workers...`);
-  
+
   // CPU-এর প্রতিটি কোরের জন্য একটি করে worker
   for (let i = 0; i < numCPUs; i++) {
     cluster.fork();
@@ -325,19 +325,19 @@ if (cluster.isPrimary) {
 
 ### How do you share state between cluster workers?
 
-যেহেতু প্রতিটি Cluster Worker একটি সম্পূর্ণ আলাদা process, তাই তারা নিজেদের মধ্যে Memory (Variables, In-memory cache, Session data) share করতে পারে না। Worker 1-এ থাকা কোনো JavaScript object, Worker 2 থেকে access করা অসম্ভব। 
+যেহেতু প্রতিটি Cluster Worker একটি সম্পূর্ণ আলাদা process, তাই তারা নিজেদের মধ্যে Memory (Variables, In-memory cache, Session data) share করতে পারে না। Worker 1-এ থাকা কোনো JavaScript object, Worker 2 থেকে access করা অসম্ভব।
 
 **State share করার উপায়সমূহ:**
-1. **External Database / Caching Service (Best Practice):** 
+1. **External Database / Caching Service (Best Practice):**
    সবচেয়ে আধুনিক এবং স্কেলেবল উপায় হলো **Redis** বা **Memcached** ব্যবহার করা। প্রতিটি worker session, cache বা socket information এই সেন্ট্রাল Redis server-এ সেভ করবে এবং প্রয়োজনমতো read করবে।
 2. **Inter-Process Communication (IPC):**
    Primary process এবং Worker-এর মধ্যে messaging-এর মাধ্যমে ডেটা শেয়ার করা। Worker `process.send({ msg: 'update' })` পাঠিয়ে Primary-কে জানাবে এবং Primary `cluster.workers` লুপ করে অন্য সব worker-কে তা জানিয়ে দেবে। (তবে এটি স্কেল করা কঠিন এবং slow)।
-3. **Sticky Sessions (Socket.io-এর ক্ষেত্রে):** 
+3. **Sticky Sessions (Socket.io-এর ক্ষেত্রে):**
    State sharing এড়ানোর জন্য Load Balancer-এ `Sticky Session` কনফিগার করা হয়, যাতে নির্দিষ্ট কোনো User-এর সব request সবসময় একই Worker-এর কাছেই যায়। এ পদ্ধতিতে memory share করার প্রয়োজন পড়ে না।
 
 ## 105. What are native addons in Node.js (N-API)?
 
-**Native Addons** হলো C বা C++ এ লেখা ডাইনামিকলি লিঙ্ক করা shared object, যেগুলোকে `require()` function ব্যবহার করে সরাসরি Node.js-এ সাধারণ JavaScript module-এর মতো লোড এবং ব্যবহার করা যায়। 
+**Native Addons** হলো C বা C++ এ লেখা ডাইনামিকলি লিঙ্ক করা shared object, যেগুলোকে `require()` function ব্যবহার করে সরাসরি Node.js-এ সাধারণ JavaScript module-এর মতো লোড এবং ব্যবহার করা যায়।
 
 JavaScript-এ সব কাজ করা সম্ভব হলেও, কিছু নির্দিষ্ট লো-লেভেল বা heavy-computation কাজের জন্য C++ অনেক বেশি কার্যকরী। Native Addons সেই সুবিধাটি দেয়।
 
@@ -350,10 +350,10 @@ JavaScript-এ সব কাজ করা সম্ভব হলেও, কি�
 
 ### What is N-API and how does it provide ABI stability?
 
-**N-API (Node-API)** হলো C/C++ Addon তৈরি করার জন্য C language-এ লেখা একটি অফিশিয়াল API, যা Node.js প্রোজেক্ট কর্তৃক মেইনটেইন করা হয়। 
+**N-API (Node-API)** হলো C/C++ Addon তৈরি করার জন্য C language-এ লেখা একটি অফিশিয়াল API, যা Node.js প্রোজেক্ট কর্তৃক মেইনটেইন করা হয়।
 
 **ABI Stability (Application Binary Interface Stability):**
-আগে Native Addon-গুলো সরাসরি Google-এর V8 ইঞ্জিন API ব্যবহার করে লেখা হতো। এর সমস্যা ছিল, যখনই Node.js-এর নতুন ভার্সন আসতো এবং V8 ইঞ্জিন আপডেট হতো, তখন Addon-গুলো ভেঙে যেতো। ডেভেলপারদের প্রতিটি Node Version-এর জন্য অ্যাডঅনটি রি-কম্পাইল (Re-compile) করতে হতো। 
+আগে Native Addon-গুলো সরাসরি Google-এর V8 ইঞ্জিন API ব্যবহার করে লেখা হতো। এর সমস্যা ছিল, যখনই Node.js-এর নতুন ভার্সন আসতো এবং V8 ইঞ্জিন আপডেট হতো, তখন Addon-গুলো ভেঙে যেতো। ডেভেলপারদের প্রতিটি Node Version-এর জন্য অ্যাডঅনটি রি-কম্পাইল (Re-compile) করতে হতো।
 
-**N-API এই সমস্যার সমাধান করেছে:** 
-এটি V8 এবং Addon-এর মাঝখানে একটি " abstraction layer" তৈরি করে দেয়। ফলে, আপনি একবার C++ কোড লিখে কম্পাইল করলে সেটি **ABI-stable** হয়ে যায়। এর মানে হলো, Node.js-এর ভার্সন (যেমন v14 থেকে v18) পরিবর্তন বা আপগ্রেড হলেও আপনার Compiled Addon-টি ব্রেক করবে না এবং কোনো Re-compilation ছাড়াই কাজ করবে।
+**N-API এই সমস্যার সমাধান করেছে:**
+এটি V8 এবং Addon-এর মাঝখানে একটি "abstraction layer" তৈরি করে দেয়। ফলে, আপনি একবার C++ কোড লিখে কম্পাইল করলে সেটি **ABI-stable** হয়ে যায়। এর মানে হলো, Node.js-এর ভার্সন (যেমন v14 থেকে v18) পরিবর্তন বা আপগ্রেড হলেও আপনার Compiled Addon-টি ব্রেক করবে না এবং কোনো Re-compilation ছাড়াই কাজ করবে।

@@ -4,6 +4,17 @@ title: 'TCP Handshakes'
 ---
 
 ## 🤝 52. What is a 3-way handshake in TCP?
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant S as Server
+    C->>S: SYN, seq=x
+    S-->>C: SYN-ACK, seq=y, ack=x+1
+    C->>S: ACK, ack=y+1
+    Note over C,S: Connection established
+    C->>S: Application data
+```
 **3-Way Handshake** হলো TCP প্রোটোকলে এমন একটি প্রক্রিয়া, যার মাধ্যমে ক্লায়েন্ট এবং সার্ভার একে অপরের সাথে ডেটা আদান-প্রদানের আগে একটি লজিক্যাল কানেকশন তৈরি করে। 
 - ডেটা ট্রান্সফার শুরু করার আগে ক্লায়েন্ট এবং সার্ভারকে অবশ্যই কিছু নিয়ম (যেমন ইনিশিয়াল সিকোয়েন্স নাম্বার, উইন্ডো সাইজ) বিনিময় করতে হয়, আর এ কাজগুলো এই হ্যান্ডশেকের মাধ্যমে করা হয়। 
 
@@ -266,7 +277,7 @@ Server বলছে: "ঠিক আছে! আমিও ready,
 ├────────────────────┬───────────────────────────┤
 │ Source Port        │  443                      │
 │ Destination Port   │  54321 (client এর port)   │
-│ Sequence Number    │  ISN = 8372916451 (random)│
+│ Sequence Number    │  ISN = 837291645 (random) │
 │ ACK Number         │  2917438643 (client ISN+1)│
 │ Flags              │  SYN = 1, ACK = 1         │
 │ Window Size        │  28960 bytes              │
@@ -278,7 +289,7 @@ Server বলছে: "ঠিক আছে! আমিও ready,
 
 **🔢 Server এর নিজস্ব Sequence Number**
 ```text
-Server ISN = 8372916451  ← server এর নিজস্ব random number
+Server ISN = 837291645  ← server এর নিজস্ব random 32-bit number
 
 Client এর ISN এর সাথে কোনো সম্পর্ক নেই!
 দুজনের আলাদা আলাদা sequence চলবে।
@@ -322,14 +333,14 @@ Window Scale = 6  ← server এর scale factor
 │              ACK PACKET                        │
 ├────────────────────┬───────────────────────────┤
 │ Sequence Number    │  2917438643               │
-│ ACK Number         │  8372916452 (server ISN+1)│
+│ ACK Number         │  837291646 (server ISN+1) │
 │ Flags              │  SYN = 0, ACK = 1         │
 └────────────────────┴───────────────────────────┘
 ```
 Client বলছে:
 ```text
-"তোমার 8372916451 পেয়েছি ✅
- এখন 8372916452 থেকে পাঠাও!"
+"তোমার 837291645 পেয়েছি ✅
+ এখন 837291646 থেকে পাঠাও!"
 ```
 
 ---
@@ -344,14 +355,14 @@ CLIENT                          SERVER
   │                               │ "Client ISN মনে রাখলাম"
   │                               │ "আমার ISN generate করলাম"
   │                    SYN-ACK    │
-  │                    seq=8372916451
+  │                    seq=837291645
   │                    ack=2917438643
   │◀────────────────── win=28960  │
   │                    MSS=1460   │
   │                               │
   │  ACK                          │
   │  seq=2917438643               │
-  │  ack=8372916452 ─────────────▶│
+  │  ack=837291646 ──────────────▶│
   │                               │
   │  ══ CONNECTION ESTABLISHED ══ │
 ```
@@ -366,7 +377,7 @@ SACK              Yes               Yes             Enabled ✅
 Window Scale      7 (×128)          6 (×64)         দুজনের নিজেরটা ✅
 Timestamps        Yes               Yes             Enabled ✅
 Initial Seq (C)   2917438642        —               Client এর ✅
-Initial Seq (S)   —                 8372916451      Server এর ✅
+Initial Seq (S)   —                 837291645       Server এর ✅
 ```
 
 ---
@@ -411,11 +422,25 @@ Attacker আন্দাজ করতে পারে না → Safe! ✅
 ---
 ## 📤 55. How is data transmitted after the handshake is complete?
 
+```mermaid
+sequenceDiagram
+    participant S as Sender
+    participant R as Receiver
+    S->>R: seq=1, bytes 1-1460
+    S->>R: seq=1461, bytes 1461-2920
+    R-->>S: cumulative ACK=2921
+    S-xR: seq=2921 lost
+    S->>R: seq=4381 arrives out of order
+    R-->>S: duplicate ACK=2921
+    S->>R: retransmit seq=2921
+    R-->>S: cumulative ACK advances
+```
+
 #### 🔗 Connection Established — এখন কী?
 ```text
 Handshake শেষ। দুজন জানে:
 ✅ Client ISN = 2917438642
-✅ Server ISN = 8372916451
+✅ Server ISN = 837291645
 ✅ MSS = 1460 bytes
 ✅ Window Size agreed
 ✅ SACK, Timestamps enabled
@@ -657,7 +682,7 @@ Network
 ### ⏱️ What is Nagle's algorithm and when should it be disabled?
 TCP তে যখন খুব ছোট ছোট ডেটা (যেমন ১ বাইটের কিবোর্ড স্ট্রোক) পাঠানো হয়, তখন ওই ১ বাইটের জন্য ৪০ বাইটের হেডার যুক্ত হয়ে ব্যান্ডউইথ নষ্ট হয়।
 - **Nagle's Algorithm:** এটি ছোট ছোট মেসেজগুলোকে কয়েক মিলি-সেকেন্ড আটকে রাখে এবং সবগুলো জমিয়ে একটু বড় সাইজ হলে একবারে একটি প্যাকেট বানিয়ে সেন্ড করে।
-- **কখন বন্ধ করতে হবে:** যেসব অ্যাপে ন্যানো-সেকেন্ডের রিয়েল-টাইম রেসপন্স লাগে (যেমন মাল্টিপ্লেয়ার গেম বা SSH টার্মিনাল), সেখানে সামান্য ল্যাটেন্সিও বিরক্তিকর। ওইসব ক্ষেত্রে ডেভেলপাররা কোড লেভেলে `TCP_NODELAY` অপশন অন করে এই অ্যালগরিদম বন্ধ করে দেন।
+- **কখন বন্ধ করতে হবে:** যেসব interactive, latency-sensitive app-এ ছোট message দ্রুত পাঠানো দরকার (যেমন multiplayer game control message বা SSH terminal), সেখানে batching delay সমস্যা হলে `TCP_NODELAY` বিবেচনা করা হয়। আগে measurement করা উচিত, কারণ ছোট packet বেড়ে যাওয়ার trade-off আছে।
 
 ---
 ## 🛡️ 56. What are reliable connection establishment, sequence numbers, and acknowledgments?
@@ -920,6 +945,19 @@ SERVER → CLIENT:
 
 ---
 ## ⚠️ 57. What happens if the TCP 3-way handshake fails?
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant S as Server
+    C->>S: SYN
+    S--xC: SYN-ACK lost
+    Note over C: SYN retransmission timer expires
+    C->>S: SYN retry with backoff
+    S-->>C: SYN-ACK
+    C->>S: ACK
+    Note over C,S: Retry limit exceeded would produce timeout
+```
 যদি হ্যান্ডশেকের কোনো একটি প্যাকেট (SYN বা SYN-ACK বা ACK) নেটওয়ার্কে ড্রপ বা মিস হয়ে যায়, তবে ক্লায়েন্ট এবং সার্ভার একে অপরের সাথে কানেক্ট হতে পারে না এবং ডেটা ট্রান্সফার শুরু হয় না। ব্রাউজার তখন "Connection Timed Out" বা "Site Cannot Be Reached" এরর শো করে।
 
 ### 🔄 What is the TCP SYN-ACK retransmission behavior?

@@ -213,15 +213,18 @@
 }
 
 .theme-doc-markdown {
+  --docs-content-inline-padding: 26px;
   background: var(--ifm-background-surface-color);
   border: 0;
   border-radius: 0;
   box-sizing: border-box;
-  padding: 12px 16px 28px;
+  padding: 18px 28px 36px;
   box-shadow: none;
   margin: 0;
-  max-width: none;
+  max-width: 900px;
   width: 100%;
+  margin-left: auto;
+  margin-right: auto;
   overflow-wrap: break-word;
 }
 
@@ -231,12 +234,13 @@
 
 .theme-doc-markdown h1,
 .theme-doc-markdown h2,
-.theme-doc-markdown h3 {
+.theme-doc-markdown h3,
+.theme-doc-markdown h4,
+.theme-doc-markdown h5 {
   letter-spacing: 0;
-  font-weight: 700;
-  margin-bottom: 0.8rem;
   max-width: 100%;
   overflow-wrap: anywhere;
+  color: var(--ifm-heading-color);
 }
 
 .theme-doc-markdown h1 {
@@ -244,14 +248,16 @@
   line-height: 1.32;
   font-weight: 800;
   padding-bottom: 0.9rem;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid var(--docs-border);
+  margin: 0 0 1.35rem;
+  border-bottom: 2px solid var(--docs-border);
 }
 
 .theme-doc-markdown h2 {
-  margin-top: 1.7rem;
-  padding-top: 0.85rem;
+  margin: 2.5rem 0 1rem;
+  padding: 0.72rem 0.8rem;
   border-top: 1px solid var(--docs-border);
+  border-bottom: 1px solid var(--docs-border);
+  background: linear-gradient(90deg, var(--docs-accent-soft), transparent 82%);
   font-size: clamp(1.22rem, 1.45vw, 1.45rem);
   line-height: 1.42;
   font-weight: 700;
@@ -260,7 +266,7 @@
 .theme-doc-markdown > h2:first-child,
 .theme-doc-markdown > h1:first-child {
   margin-top: 0;
-  padding-top: 0;
+  padding-top: 0.72rem;
   border-top: 0;
 }
 
@@ -268,21 +274,41 @@
   font-size: clamp(1.05rem, 1.15vw, 1.18rem);
   line-height: 1.45;
   font-weight: 700;
-  margin-top: 1.35rem;
+  margin: 1.85rem 0 0.7rem;
+  padding-bottom: 0.38rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--docs-border) 72%, transparent);
 }
 
 .theme-doc-markdown h1 code,
 .theme-doc-markdown h2 code,
-.theme-doc-markdown h3 code {
+.theme-doc-markdown h3 code,
+.theme-doc-markdown h4 code,
+.theme-doc-markdown h5 code {
   font-size: 0.78em;
   line-height: 1;
   padding: 0.05em 0.32em;
 }
 
 .theme-doc-markdown h4 {
-  font-size: 1.05rem;
-  line-height: 1.4;
+  font-size: 1rem;
+  line-height: 1.45;
   font-weight: 700;
+  margin: 1.4rem 0 0.55rem;
+  color: color-mix(in srgb, var(--ifm-heading-color) 84%, var(--ifm-color-primary));
+}
+
+.theme-doc-markdown h5 {
+  font-size: 0.92rem;
+  line-height: 1.45;
+  font-weight: 700;
+  margin: 1.15rem 0 0.45rem;
+  color: var(--docs-text-muted);
+}
+
+.theme-doc-markdown h2 + h3,
+.theme-doc-markdown h3 + h4,
+.theme-doc-markdown h4 + h5 {
+  margin-top: 0.85rem;
 }
 
 .theme-doc-markdown p,
@@ -299,6 +325,16 @@
   margin-bottom: 0.4rem;
 }
 
+.theme-doc-markdown p {
+  max-width: 82ch;
+  margin-top: 0;
+}
+
+.theme-doc-markdown > ul,
+.theme-doc-markdown > ol {
+  max-width: 88ch;
+}
+
 [data-theme='dark'] .theme-doc-markdown p,
 [data-theme='dark'] .theme-doc-markdown li {
   color: var(--docs-text);
@@ -306,47 +342,318 @@
 
 .theme-doc-markdown ul,
 .theme-doc-markdown ol {
-  padding-left: 1.25rem;
+  margin-top: 0.4rem;
+  margin-bottom: 1.1rem;
+  padding-left: 1.9rem;
+}
+
+.theme-doc-markdown li::marker {
+  color: var(--ifm-color-primary);
+  font-weight: 500;
+}
+
+.theme-doc-markdown ul li::marker {
+  font-size: 0.72em;
+}
+
+.theme-doc-markdown ol li::marker {
+  font-size: 0.92em;
+  font-weight: 600;
+}
+
+.theme-doc-markdown ul ul,
+.theme-doc-markdown ol ol,
+.theme-doc-markdown ul ol,
+.theme-doc-markdown ol ul {
+  margin-top: 0.35rem;
+  margin-bottom: 0.35rem;
+  padding-left: 1.45rem;
+}
+
+.theme-doc-markdown ul ul {
+  list-style-type: circle;
+}
+
+.theme-doc-markdown ul ul ul {
+  list-style-type: square;
+}
+
+.theme-doc-markdown li > p {
+  margin: 0.2rem 0 0.45rem;
 }
 
 .theme-doc-markdown strong {
   color: var(--ifm-heading-color);
-  font-weight: 700;
+  font-weight: 600;
+}
+
+.theme-doc-markdown h1 strong,
+.theme-doc-markdown h2 strong,
+.theme-doc-markdown h3 strong,
+.theme-doc-markdown h4 strong,
+.theme-doc-markdown h5 strong {
+  font-weight: inherit;
 }
 
 .theme-doc-markdown blockquote {
-  border-left: 4px solid var(--docs-success);
-  border-radius: 0 8px 8px 0;
+  margin: 1rem 0 1.35rem;
+  border: 1px solid #c9e9dc;
+  border-radius: 4px;
   background: #eefaf5;
-  padding: 0.9rem 1rem;
+  padding: 0.85rem 1rem;
   color: var(--docs-text);
 }
 
+.theme-doc-markdown blockquote > :last-child {
+  margin-bottom: 0;
+}
+
+.theme-doc-markdown header + h2 {
+  margin-top: 1.35rem;
+  padding-top: 0.72rem;
+  border-top: 0;
+}
+
+/* Question pages are grouped at compile time so every answer element stays
+   visually attached to the heading that owns it. */
+.theme-doc-markdown .question-section {
+  min-width: 0;
+}
+
+.theme-doc-markdown .question-section__answer {
+  min-width: 0;
+}
+
+.theme-doc-markdown .question-section__answer--main {
+  padding-inline-start: 0.2rem;
+}
+
+.theme-doc-markdown .question-section__answer--sub {
+  padding-inline-start: 0.1rem;
+}
+
+.theme-doc-markdown .question-section__answer > ul,
+.theme-doc-markdown .question-section__answer > ol {
+  padding-inline-start: 1.45rem;
+}
+
+.theme-doc-markdown header + .question-section--main > h2 {
+  margin-top: 1.35rem;
+  border-top: 0;
+}
+
+.theme-doc-markdown .question-section--main:first-child > h2 {
+  margin-top: 0;
+  border-top: 0;
+}
+
+.theme-doc-markdown .question-section--main > h2 {
+  margin-inline: calc(var(--docs-content-inline-padding) * -1);
+  padding-inline: 0.8rem;
+}
+
+.theme-doc-markdown .question-section--sub > h3 {
+  margin-top: 1.7rem;
+  margin-inline-start: calc(0.3rem - var(--docs-content-inline-padding));
+}
+
 [data-theme='dark'] .theme-doc-markdown blockquote {
+  border-color: #285b48;
   background: #10281f;
 }
 
 .theme-doc-markdown table {
-  display: table;
+  display: block;
   width: 100%;
+  max-width: 100%;
+  margin: 1rem 0 1.5rem;
+  overflow-x: auto;
   font-size: 14px;
+  scrollbar-width: thin;
+  border: 1px solid var(--docs-border);
+}
+
+.theme-doc-markdown table th,
+.theme-doc-markdown table td {
+  min-width: 8.5rem;
+  padding: 0.68rem 0.78rem;
+  border-color: var(--docs-border);
+  vertical-align: top;
+  line-height: 1.55;
+}
+
+.theme-doc-markdown table th:first-child,
+.theme-doc-markdown table td:first-child {
+  min-width: 7rem;
 }
 
 .theme-doc-markdown thead tr {
   background: var(--docs-soft-bg);
 }
 
+.theme-doc-markdown tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--docs-soft-bg) 58%, transparent);
+}
+
+.theme-doc-markdown hr {
+  height: 0;
+  margin: 2.25rem 0;
+  border: 0;
+  border-top: 1px solid var(--docs-border);
+  background: transparent;
+}
+
 .theme-doc-markdown pre {
-  border-radius: 8px;
+  margin: 0.85rem 0 1.35rem;
+  border-radius: 6px;
   border: 1px solid var(--docs-border);
   box-shadow: none;
 }
 
+.theme-doc-markdown .alert {
+  margin: 1rem 0 1.35rem;
+  border-width: 1px;
+  border-radius: 5px;
+  box-shadow: none;
+}
+
 .theme-doc-markdown img {
-  max-width: 100%;
+  display: block;
+  max-width: min(100%, 560px);
+  width: auto;
+  max-height: min(400px, 65vh);
+  height: auto;
+  margin: 1.1rem auto 1.4rem;
   border: 1px solid var(--docs-border);
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--ifm-background-surface-color);
+  object-fit: contain;
+}
+
+.theme-doc-markdown .docusaurus-mermaid-container {
+  display: flex;
+  width: min(100%, 760px);
+  max-width: 100%;
+  align-items: center;
+  justify-content: center;
+  margin: 1rem auto 1.4rem;
+  padding: 0.5rem 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.theme-doc-markdown .docusaurus-mermaid-container svg {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 460px;
+  flex: 0 0 auto;
+}
+
+/* Mermaid study palette: distinct nodes make flows easier to scan. */
+.theme-doc-markdown .docusaurus-mermaid-container .node rect,
+.theme-doc-markdown .docusaurus-mermaid-container .node circle,
+.theme-doc-markdown .docusaurus-mermaid-container .node ellipse,
+.theme-doc-markdown .docusaurus-mermaid-container .node polygon,
+.theme-doc-markdown .docusaurus-mermaid-container .node path {
+  fill: #eef6ff !important;
+  stroke: #4f8fe8 !important;
+  stroke-width: 1.4px !important;
+}
+
+.theme-doc-markdown .docusaurus-mermaid-container .nodes .node:nth-child(3n + 2) rect,
+.theme-doc-markdown .docusaurus-mermaid-container .nodes .node:nth-child(3n + 2) circle,
+.theme-doc-markdown .docusaurus-mermaid-container .nodes .node:nth-child(3n + 2) polygon {
+  fill: #eafaf5 !important;
+  stroke: #21a179 !important;
+}
+
+.theme-doc-markdown .docusaurus-mermaid-container .nodes .node:nth-child(3n) rect,
+.theme-doc-markdown .docusaurus-mermaid-container .nodes .node:nth-child(3n) circle,
+.theme-doc-markdown .docusaurus-mermaid-container .nodes .node:nth-child(3n) polygon {
+  fill: #fff7e8 !important;
+  stroke: #dc9a2b !important;
+}
+
+.theme-doc-markdown .docusaurus-mermaid-container .node rect {
+  rx: 7px;
+  ry: 7px;
+}
+
+.theme-doc-markdown .docusaurus-mermaid-container .flowchart-link,
+.theme-doc-markdown .docusaurus-mermaid-container .edgePath path {
+  stroke: #58708e !important;
+  stroke-width: 1.7px !important;
+}
+
+.theme-doc-markdown .docusaurus-mermaid-container marker path,
+.theme-doc-markdown .docusaurus-mermaid-container .arrowheadPath {
+  fill: #58708e !important;
+  stroke: #58708e !important;
+}
+
+.theme-doc-markdown .docusaurus-mermaid-container .cluster rect {
+  fill: #f8fbff !important;
+  stroke: #b7c9df !important;
+  stroke-dasharray: 4 3;
+}
+
+.theme-doc-markdown .docusaurus-mermaid-container .actor,
+.theme-doc-markdown .docusaurus-mermaid-container .labelBox {
+  fill: #eef6ff !important;
+  stroke: #4f8fe8 !important;
+}
+
+.theme-doc-markdown .docusaurus-mermaid-container .note {
+  fill: #fff7e8 !important;
+  stroke: #dc9a2b !important;
+}
+
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container {
+  background: transparent;
+}
+
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .node rect,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .node circle,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .node ellipse,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .node polygon,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .node path,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .actor,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .labelBox {
+  fill: #172d47 !important;
+  stroke: #66a9f5 !important;
+}
+
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .nodes .node:nth-child(3n + 2) rect,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .nodes .node:nth-child(3n + 2) circle,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .nodes .node:nth-child(3n + 2) polygon {
+  fill: #123b35 !important;
+  stroke: #45c7a1 !important;
+}
+
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .nodes .node:nth-child(3n) rect,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .nodes .node:nth-child(3n) circle,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .nodes .node:nth-child(3n) polygon,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .note {
+  fill: #402f16 !important;
+  stroke: #e4a83f !important;
+}
+
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .label,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .label span,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .label p,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .actor,
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container text {
+  color: #edf5ff !important;
+  fill: #edf5ff !important;
+}
+
+[data-theme='dark'] .theme-doc-markdown .docusaurus-mermaid-container .cluster rect {
+  fill: #111d2c !important;
+  stroke: #46617f !important;
 }
 
 .docs-hub-grid {
@@ -363,7 +670,7 @@
   gap: 8px;
   padding: 18px;
   border: 1px solid var(--docs-border);
-  border-radius: 8px;
+  border-radius: 6px;
   color: var(--docs-text);
   background: var(--ifm-background-surface-color);
   text-decoration: none;
@@ -411,7 +718,7 @@
 }
 
 .table-of-contents__link {
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 6px 7px;
   margin: 2px 4px 2px 0;
   display: block;
@@ -445,7 +752,7 @@
 
 .pagination-nav__link {
   border: 1px solid var(--docs-border);
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--ifm-background-surface-color);
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
   min-height: 92px;
@@ -692,7 +999,7 @@ body.docs-left-hidden.docs-right-hidden .theme-doc-markdown {
 
 @media only screen and (max-width: 1400px) {
   .theme-doc-markdown {
-    max-width: none;
+    max-width: 900px;
   }
 }
 
@@ -710,6 +1017,7 @@ body.docs-left-hidden.docs-right-hidden .theme-doc-markdown {
   }
 
   .theme-doc-markdown {
+    --docs-content-inline-padding: clamp(1.2rem, 2vw, 2rem);
     max-width: 100%;
     padding: clamp(1.2rem, 2vw, 2rem);
   }
@@ -746,6 +1054,7 @@ body.docs-left-hidden.docs-right-hidden .theme-doc-markdown {
   }
 
   .theme-doc-markdown {
+    --docs-content-inline-padding: 0px;
     border-radius: 8px;
     padding: 0;
     max-width: 100%;
@@ -794,17 +1103,86 @@ body.docs-left-hidden.docs-right-hidden .theme-doc-markdown {
 
   .theme-doc-markdown h2 {
     font-size: 1.2rem;
-    margin-top: 1.4rem;
+    margin-top: 1.9rem;
+    padding: 0.62rem 0.65rem;
+  }
+
+  .theme-doc-markdown .question-section--main > h2 {
+    margin-inline: 0;
+    padding-inline: 0.25rem;
+  }
+
+  .theme-doc-markdown .question-section--sub > h3 {
+    margin-inline-start: 0;
   }
 
   .theme-doc-markdown h3 {
-    font-size: 1.1rem;
+    font-size: 1.02rem;
+    margin-top: 1.45rem;
+  }
+
+  .theme-doc-markdown h4 {
+    font-size: 0.96rem;
+    margin-top: 1.15rem;
+  }
+
+  .theme-doc-markdown h5 {
+    font-size: 0.9rem;
+    margin-top: 1rem;
   }
 
   .theme-doc-markdown p,
   .theme-doc-markdown li {
     font-size: 15px;
     line-height: 1.78;
+  }
+
+  .theme-doc-markdown .question-section__answer--main {
+    padding-inline-start: 0.25rem;
+  }
+
+  .theme-doc-markdown .question-section__answer--sub {
+    padding-inline-start: 0.1rem;
+  }
+
+  .theme-doc-markdown .question-section__answer > ul,
+  .theme-doc-markdown .question-section__answer > ol {
+    padding-inline-start: 1.25rem;
+  }
+
+  .theme-doc-markdown ul,
+  .theme-doc-markdown ol {
+    padding-left: 1.5rem;
+  }
+
+  .theme-doc-markdown ul ul,
+  .theme-doc-markdown ol ol,
+  .theme-doc-markdown ul ol,
+  .theme-doc-markdown ol ul {
+    padding-left: 1.15rem;
+  }
+
+  .theme-doc-markdown table th,
+  .theme-doc-markdown table td {
+    min-width: 7.5rem;
+    padding: 0.58rem 0.65rem;
+  }
+
+  .theme-doc-markdown img {
+    max-height: 65vh;
+    margin: 0.9rem auto 1.15rem;
+  }
+
+  .theme-doc-markdown .docusaurus-mermaid-container {
+    margin: 0.85rem 0 1.15rem;
+    padding: 0.35rem 0;
+  }
+
+  .theme-doc-markdown .docusaurus-mermaid-container svg {
+    width: auto !important;
+    min-width: 0;
+    max-width: 100%;
+    max-height: 60vh;
   }
 
   [class*='docMainContainer_'] .container {

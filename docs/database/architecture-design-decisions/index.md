@@ -3,9 +3,19 @@ sidebar_position: 11
 title: 'Architecture and Design Decisions'
 ---
 
+
 ## 🏗️ **18. Architecture & Design Decisions**
 
 ## **159. When would you choose NoSQL over SQL database?**
+
+```mermaid
+flowchart TD
+    R[Workload requirements] --> D{Data and access pattern}
+    D -->|Relations, joins, strict transactions| SQL[SQL database]
+    D -->|Flexible model, scale-out, specialized access| N[NoSQL database]
+    SQL --> V[Validate with realistic workload]
+    N --> V
+```
 
 NoSQL এবং SQL এর মধ্যে নির্বাচন করা সিস্টেম ডিজাইনের অন্যতম গুরুত্বপূর্ণ সিদ্ধান্ত। আপনি তখন NoSQL বেছে নেবেন যখন আপনার সিস্টেমে প্রথাগত রিলেশনাল ডাটাবেসের (SQL) সীমারেখা পার হয়ে যাওয়ার উপক্রম হয়।
 
@@ -23,7 +33,7 @@ NoSQL এবং SQL এর মধ্যে নির্বাচন করা �
 
 ### How do you handle transactions in NoSQL?
 যদিও NoSQL সাধারণত জয়েন বা মাল্টি-টেবিল ট্রানজেকশন সাপোর্ট করে না, তারপরও ট্রানজেকশন হ্যান্ডেল করার কিছু উপায় আছে:
-1. **Single-Document Atomicity:** MongoDB-তে একটি সম্পূর্ণ ডকুমেন্টের ওপর রাইট অপারেশন অ্যাটমিক। তাই রিলেটেড সব ডেটা (যেমন: অর্ডার এবং অর্ডারের আইটেমগুলো) একটি সিঙ্গেল JSON ডকুমেন্টের ভেতরে Embed করে রাখলে তা 100% অ্যাটমিক হয়।
+1. **Single-Document Atomicity:** MongoDB-তে একটি single-document write atomic। তাই bounded related data embed করলে এক operation-এ document update atomic রাখা যায়; multiple operation বা external side effect এতে atomic হয়ে যায় না।
 2. **Two-Phase Commit (2PC) / Saga Pattern:** অ্যাপ্লিকেশন লেভেলে কোড লিখে একাধিক ডকুমেন্টে আপডেট চালানো এবং কোনো একটি ফেইল করলে কম্পেনসেটিং (Compensating) কোড লিখে আগেরগুলো রোলব্যাক করা (Two-phase commit)।
 
 ---
@@ -58,7 +68,7 @@ NoSQL এবং SQL এর মধ্যে নির্বাচন করা �
 
 ### Which is better for auditing requirements?
 * অডিটিং এবং হিস্ট্রি ট্র্যাকিংয়ের জন্য **Soft Delete** ই বেস্ট। এর মাধ্যমে বোঝা যায় কখন ডেটাটি ডিলিট করা হয়েছিল এবং প্রয়োজনে "Undo / Recover" করা সম্ভব হয়। 
-* ব্যাংকিং ডেটা, ইনভয়েস, বা ট্রানজেকশনে কখনোই Hard Delete করা উচিত নয়। 
+* ব্যাংকিং ledger, invoice বা regulated record সাধারণত retention policy অনুযায়ী immutable/audited রাখা হয়। তবে privacy law, legal retention এবং archival policy দেখে hard delete বা cryptographic erasure-এর প্রয়োজন হতে পারে।
 
 ### Performance implications of soft deletes?
 * **ইনডেক্সিং এবং কুয়েরি স্লো হয়:** ডাটাবেসে ডেটা জমতে জমতে বিশাল হয়ে যায়। এর ফলে সকল কুয়েরিতে `WHERE is_deleted = false` লাগাতে হয়, যা পারফরম্যান্সে বিরূপ প্রভাব ফেলে। 
@@ -105,7 +115,7 @@ Multi-tenancy হলো এমন একটি আর্কিটেকচার
    * *কীভাবে কাজ করে:* সার্ভারের হার্ডডিস্কে (যেমন `/var/www/uploads/`) সেভ করে রাখা এবং ডাটাবেসে ফাইলের পাথ বা নাম সেভ করা।
    * *সমস্যা:* সার্ভার স্কেল-আউট করলে (একাধিক সার্ভার বসালে) এক সার্ভারে আপলোড করা ফাইল অন্য সার্ভার থেকে পাওয়া যায় না। ব্যাকআপ নেয়াও কষ্টকর।
 3. **Object Storage (Amazon S3, Google Cloud Storage):**
-   * *কেন এটি বেস্ট সলিউশন?* অবজেক্ট স্টোরেজ অসীম (Infinite) স্কেলিং সাপোর্ট করে। ফাইল আপলোড করা মাত্রই একটি ফিক্সড URL পাওয়া যায় যা সরাসরি CDN এর মাধ্যমে ফাস্ট ডেলিভারি করা যায়। 
+   * *কেন এটি সাধারণত ভালো সমাধান?* Object storage খুব বড় scale, lifecycle policy ও CDN integration দেয়। Capacity, request rate, cost এবং consistency behavior provider-ভেদে সীমাবদ্ধতা রাখে।
 
 ### How do you ensure consistency between database and file storage?
 যদি AWS S3 তে ইমেজ আপলোড সাকসেসফুল হয় কিন্তু ডাটাবেসে সেই লিংক সেভ হওয়ার আগেই সিস্টেম ফেইল করে—তাহলে S3 তে একটি অনাথ (Orphan) ফাইল পড়ে থাকবে।
@@ -140,7 +150,7 @@ Multi-tenancy হলো এমন একটি আর্কিটেকচার
 আপনার সার্ভার আমেরিকায়, ইউজার বাংলাদেশে, আপনার ডাটাবেস সিঙ্গাপুরে—এই অবস্থায় সময়ের (Date & Time) হিসাব রাখা একটি ভয়ংকর অভিজ্ঞতা হতে পারে যদি আপনি সঠিক প্যাটার্ন ফলো না করেন। 
 
 ### Store UTC vs local time?
-**Golden Rule of Timezones:** ডাটাবেসে সময় সংরক্ষণ করার সময় **সবসময় এবং শুধুমাত্র UTC (Coordinated Universal Time)** ব্যবহার করতে হবে। কখনোই ইউজারের লোকাল টাইম বা সার্ভারের লোকাল টাইম ডাটাবেসে সেভ করা উচিত নয়।
+**সাধারণ নিয়ম:** ঘটে যাওয়া instant সাধারণত UTC-তে রাখুন। তবে ভবিষ্যৎ local schedule (যেমন “প্রতি দিন সকাল ৯টা, Asia/Dhaka”) বা আইনগত local timestamp-এর জন্য UTC instant-এর পাশাপাশি IANA timezone/মূল local value রাখতে হয়।
 * **কেন?** কারণ আমেরিকা বা অন্যান্য দেশে ডে-লাইট সেভিং টাইম (DST) থাকে। ডাটাবেসে লোকাল টাইম রাখলে, কোন সময় ঘড়ির কাঁটা এগোল বা পেছাল তা ট্র্যাকিং করা অসম্ভব হয়ে যাবে এবং কুয়েরি ভুল রেজাল্ট দেবে (যেমন ২৪ ঘণ্টার ডাটাবেস রিপোর্টে ২৫ ঘণ্টা চলে আসবে)।
 
 ### How do you handle timezone conversion?
@@ -182,7 +192,7 @@ SaaS (Software as a Service) অ্যাপ্লিকেশনে ৫ মি�
 * **Consistent Hashing:** ডেটার কী-গুলোকে এমনভাবে হ্যাশ করে বিভিন্ন সার্ভারে ডিস্ট্রিবিউট করা হয়, যাতে সব সার্ভার (Node) সমানভাবে ট্রাফিক পায় এবং কোনো একটি সার্ভার ওভারলোড হয়ে ক্র্যাশ না করে।
 
 ### When to consider write-through vs write-back caching?
-* **Write-through cache:** ডেটা আগে ক্যাশে (Redis) লেখে, একই সাথে ডাটাবেসে লেখে, তারপর ইউজারকে সাক্সেস দেখায়। এটি ডেটা গ্যারান্টি দেয় কিন্তু বেশ স্লো, তাই হাই-রাইটে এটি ভালো নয়।
+* **Write-through cache:** Application/cache layer write-টি backing store-এ synchronously persist হওয়ার পরে success দেয়। এটি cache ও database consistency সহজ করে, কিন্তু extra latency যোগ করে; suitability workload ও durability design-এর ওপর নির্ভর করে।
 * **Write-back cache (Asynchronous):** ডেটা সরাসরি মেমরি ক্যাশে (Redis) লিখে সাথে সাথে ইউজারকে সাক্সেস দেখিয়ে দেয়। আর ব্যাকগ্রাউন্ডে কোনো ওয়ার্কার ধীরেসুস্থে হার্ডডিস্কে (ডাটাবেসে) সেটা সিঙ্ক করতে থাকে। এটি এক্সট্রিম লেভেলের রাইট থ্রুপুট দিতে পারে, তবে সার্ভার হঠাৎ ক্র্যাশ করলে মেমরির কিছু লেটেস্ট ডেটা হারিয়ে যাওয়ার রিস্ক থাকে।
 
 ---

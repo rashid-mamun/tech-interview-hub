@@ -3,9 +3,26 @@ sidebar_position: 9
 title: 'Availability and Scalability'
 ---
 
+
+### Practical routing example
+
+```text
+POST /orders  -> primary database
+GET /catalog  -> read replica
+GET /orders/42 immediately after write -> primary or session-consistent replica
+```
+
 ## 🏢 **9. High Availability & Scalability**
 
 ## **101. What is database clustering?**
+
+```mermaid
+flowchart LR
+    C[Clients] --> LB[Cluster endpoint]
+    LB --> N1[Database node 1]
+    LB --> N2[Database node 2]
+    LB --> N3[Database node 3]
+```
 
 **Database Clustering** হলো একাধিক সাধারণ ডাটাবেস সার্ভারকে (Node) এমনভাবে একত্রে যুক্ত করার একটি প্রযুক্তি, যাতে অ্যাপ্লিকেশন বা ইউজারের কাছে মনে হয় যে তারা একটি মাত্র শক্তিশালী ডাটাবেসের সাথেই যোগাযোগ করছে। এটি মূলত ডাটাবেসকে হাইলি এভেইল্যাবল (High Availability - HA) এবং স্কেলেবল করার জন্য ব্যবহৃত হয়। 
 
@@ -17,10 +34,10 @@ title: 'Availability and Scalability'
 
 | Feature | Active-Active Clustering | Active-Passive Clustering |
 |---------|-------------------------|---------------------------|
-| **ওয়ার্কিং মডেল** | ক্লাস্টারের **সবগুলো নোড একসাথে সচল** থাকে এবং সবগুলিতে রিড/রাইট করা যায়। | শুধুমাত্র **একটি নোড (Primary) প্রধান হিসেবে কাজ করে**, বাকিগুলো ব্যাকআপ (Standby) হিসেবে বসে থাকে। |
-| **লোড ব্যালেন্সিং** | ইউজারের রিকোয়েস্ট সব নোডের মধ্যে সমানভাবে ভাগ হয়ে যায়, ফলে পারফরম্যান্স অনেক বাড়ে। | কোনো লোড ব্যালেন্সিং হয় না, কারণ রিকোয়েস্ট শুধু একটি নোডেই আসে। |
-| **ফেইলওভার (Failover)**| একটি ডাউন হলে অন্যগুলো স্বাভাবিকভাবেই কাজ চালিয়ে যায়, ব্যবহারকারী টেরই পায় না। | প্রাইমারি ডাউন হলে স্ট্যান্ডবাই নোড চালু হতে একটু সময় নেয় (downtime হতে পারে)। |
-| **রিসোর্স ব্যবহার** | সব সময় সব সার্ভারের প্রসেসর ও র‍্যাম কাজে লাগে বলে ১০০% রিসোর্স এর সদ্ব্যবহার হয়। | ব্যাকআপ নোড অলস বসে থাকায় রিসোর্সের অপচয় হয়। |
+| **ওয়ার্কিং মডেল** | একাধিক active node traffic নেয়; সব node-এ write করা যাবে কি না product/topology-নির্ভর | একটি active primary traffic নেয়, standby promotion-এর জন্য প্রস্তুত থাকে |
+| **লোড ব্যালেন্সিং** | Eligible traffic node-গুলোর মধ্যে ভাগ হয়; write conflict/coordination cost থাকতে পারে | Write primary-তে যায়; standby/read replica read traffic নিতে পারে |
+| **ফেইলওভার (Failover)**| surviving node traffic নিতে পারে, তবে detection, routing ও retry-তে brief disruption হতে পারে | standby promotion ও client rerouting-এর সময় downtime হতে পারে |
+| **রিসোর্স ব্যবহার** | বেশি node serve করে, কিন্তু replication/coordination overhead থাকে | standby health check, WAL replay, backup বা read workload-এ ব্যবহৃত হতে পারে |
 | **কমপ্লেক্সিটি** | কনফ্লিক্ট ম্যানেজমেন্ট (data conflict) সামলানো বেশ জটিল ও ব্যয়বহুল। | ইমপ্লিমেন্ট করা অনেক সহজ এবং কম ব্যয়বহুল। |
 
 ### How does failover work in clusters?
@@ -34,6 +51,12 @@ title: 'Availability and Scalability'
 
 ## **102. What is database replication?**
 
+```mermaid
+flowchart LR
+    P[Primary: writes] -->|replication log| R1[Replica 1: reads]
+    P -->|replication log| R2[Replica 2: reads]
+```
+
 **Database Replication** হলো একটি সার্ভার থেকে এক বা একাধিক অন্য সার্ভারে ডাটাবেসের হুবহু কপি বা ক্লোন (Clone) তৈরি করে রাখার প্রক্রিয়া। ক্লাস্টারিং যেখানে পারফরম্যান্স এবং লোড শেয়ারিংয়ের ওপর জোর দেয়, রেপ্লিকেশন সেখানে ডেটার ব্যাকআপ এবং রিডিং স্পিড বাড়ানোর ওপর জোর দেয়।
 
 এর মূল সুবিধা হলো—যদি মেন ডাটাবেসে (Master) কোনো কারণে ডেটা ডিলিট হয়ে যায় বা হার্ডডিস্ক পুড়ে যায়, সার্ভারের অন্যান্য কপি (Slave) থেকে ডেটা খুব সহজেই উদ্ধার করা যায়।
@@ -44,7 +67,7 @@ title: 'Availability and Scalability'
 
 **১. Synchronous Replication (সিনক্রোনাস):**
 * **কীভাবে কাজ করে:** যখন ইউজার মূল ডাটাবেসে (Master) কোনো ডেটা সেভ করে, তখন মাস্টার ডাটাবেস সেই ডেটা সাথে সাথে স্লেভ (Slave) ডাটাবেসগুলোতে পাঠায়। যতক্ষণ না অন্য স্লেভগুলো কনফার্ম করে যে "হ্যাঁ, আমরা আপডেট পেয়েছি", ততক্ষণ মাস্টার ইউজারকে 'Success' মেসেজ দেয় না।
-* **সুবিধা:** ডেটার ১০০% গ্যারান্টি (Zero Data Loss)।
+* **সুবিধা:** Commit acknowledgement যথেষ্ট synchronous replica-এর durable write-এর জন্য অপেক্ষা করলে acknowledged data-loss window কমে। Quorum, failure mode ও configuration না দেখে “zero data loss” guarantee করা যায় না।
 * **অসুবিধা:** সিস্টেম অনেক স্লো হয়ে যায়, কারণ একটি ডাটাবেস আপডেট করার জন্য অন্যগুলোর উত্তরের অপেক্ষায় থাকতে হয়।
 
 **২. Asynchronous Replication (অ্যাসিনক্রোনাস):**
@@ -64,6 +87,14 @@ title: 'Availability and Scalability'
 
 ## **103. What is database sharding?**
 
+```mermaid
+flowchart LR
+    Q[Query with shard key] --> Router
+    Router --> S1[Shard 1: users 1-1000]
+    Router --> S2[Shard 2: users 1001-2000]
+    Router --> S3[Shard 3: users 2001+]
+```
+
 **Database Sharding** হলো একটি বিশাল ডাটাবেস টেবিলকে কেটে ছোট ছোট টুকরোতে (Shard) ভাগ করে আলাদা আলাদা সার্ভার মেশিনের হার্ডডিস্কে ছড়িয়ে রাখার পদ্ধতি। এটি মূলত স্কেলেবিলিটির (Scalability) চূড়ান্ত হাতিয়ার।
 
 যখন একটি সার্ভারের পক্ষে লাখ লাখ ইউজারের ডেটা রাখা সম্ভব হয় না, তখন ডেটাগুলোকে শার্ডিং করে একাধিক সার্ভারের সাহায্য নেয়া হয়। 
@@ -77,7 +108,7 @@ title: 'Availability and Scalability'
 | **কীভাবে ভাগ করে?** | টেবিলকে **কলাম (Column)** অনুযায়ী ভাগ করা হয়। | টেবিলকে **রো (Row)** অনুযায়ী ভাগ করা হয়। |
 | **উদাহরণ** | একটি ইউজার টেবিলে ২০০ কলাম থাকলে, "Login Info" ఒక সার্ভারে এবং "Profile Info" আরেক সার্ভারে রাখা। | ইউজারের লোকেশন অনুযায়ী—বাংলাদেশের ইউজার সার্ভার ১ এ এবং ইন্ডিয়ার ইউজার সার্ভার ২ এ রাখা। |
 | **ব্যবহারের কারণ** | সিকিউরিটি (যেমন পাসওয়ার্ড আলাদা রাখা) বা যেসব কলাম মানুষ খুব কম পড়ে সেগুলো সরিয়ে নেয়া। | বিশাল ডেটাসেট এবং হাই ট্রাফিক লোড ম্যানেজ করার জন্য। |
-| **স্কেলিং** | সীমিত। একসময় কলাম আর ভাগ করা যায় না। | আনলিমিটেড। নতুন নতুন সার্ভার যোগ করা সহজ। |
+| **স্কেলিং** | একটি node-এর CPU/RAM/storage limit পর্যন্ত; operationally সহজ | বড় scale সম্ভব, কিন্তু rebalance, cross-shard query ও hot-key limit থাকে—unlimited নয় |
 
 ### How do you handle cross-shard queries?
 **Cross-shard Query** হলো এমন একটি কোয়ারি যা সম্পূর্ণ করার জন্য একাধিক সার্ভার বা Shard থেকে ডেটা আনতে হয়। (যেমন: "বিশ্বের সব দেশের ইউজারদের গড় বয়স কত?")। এগুলো সাধারণত খুব স্লো এবং ব্যয়বহুল হয়। 
@@ -91,9 +122,18 @@ title: 'Availability and Scalability'
 
 ## **104. What is read replica?**
 
+```mermaid
+flowchart LR
+    W[Write traffic] --> P[Primary]
+    P --> R1[Read replica 1]
+    P --> R2[Read replica 2]
+    Q[Read traffic] --> R1
+    Q --> R2
+```
+
 **Read Replica** হলো মূল ডাটাবেসের (Master) একটি কপি বা ক্লোন, যা শুধুমাত্র রিড অপারেশন (SELECT queries) করার জন্য তৈরি করা হয়। এখানে ডেটা শুধু মাস্টার থেকে আসে; কেউ এই রেপ্লিকাতে নতুন ডেটা Insert বা Update করতে পারে গঠনমূলক কাজ করতে পারে না।
 
-**Technical definition:** A read replica is a secondary instance of a database that is maintained as an exact, read-only copy of the primary database through asynchronous replication. It is used to offload read-heavy traffic from the master database.
+**Technical definition:** Read replica হলো primary থেকে replication পাওয়া secondary instance, যা read-heavy traffic offload করে। Replication synchronous বা asynchronous হতে পারে; asynchronous replica lag-এর কারণে মুহূর্তে exact copy নাও হতে পারে।
 
 ### How does it improve read performance?
 সাধারণত ওয়েব অ্যাপ্লিকেশনগুলোতে লেখার চেয়ে পড়ার (Read) পরিমাণ অনেক বেশি থাকে (যেমন: নিউজ ওয়েবসাইট বা ই-কমার্সে ১ জন পোস্ট করে আর ১০ হাজার জন তা পড়ে)। 
@@ -114,6 +154,14 @@ title: 'Availability and Scalability'
 
 ## **105. What is load balancing for databases?**
 
+```mermaid
+flowchart LR
+    A[Application requests] --> LB[Load balancer]
+    LB --> D1[Database node 1]
+    LB --> D2[Database node 2]
+    LB --> D3[Database node 3]
+```
+
 **Load Balancing** হলো এমন একটি প্রক্রিয়া, যার মাধ্যমে ডাটাবেসের আগত ট্রাফিককে (কুয়েরি বা রিকোয়েস্ট) একাধিক ডাটাবেস সার্ভারের মধ্যে সুষমভাবে বন্টন (Distribute) করে দেয়া হয়। এর ফলে কোনো একক সার্ভারের ওপর অতিরিক্ত চাপ পড়ে না এবং ডাটাবেস ক্র্যাশ করার সম্ভাবনা অনেক কমে যায়।
 
 **Technical definition:** Database load balancing is the seamless distribution of incoming client connections and query requests across a cluster of database instances to maximize throughput, minimize latency, and ensure high availability.
@@ -133,6 +181,14 @@ title: 'Availability and Scalability'
 ---
 
 ## **106. What is failover and failback?**
+
+```mermaid
+stateDiagram-v2
+    [*] --> PrimaryActive
+    PrimaryActive --> ReplicaPromoted: primary fails
+    ReplicaPromoted --> PrimaryRestored: repair and resync
+    PrimaryRestored --> PrimaryActive: failback
+```
 
 **Failover** এবং **Failback** হলো ডাটাবেসের ইমার্জেন্সি রেসকিউ সিস্টেম। 
 
@@ -159,6 +215,14 @@ title: 'Availability and Scalability'
 ---
 
 ## **107. What is disaster recovery (DR)?**
+
+```mermaid
+flowchart LR
+    P[Primary region] -->|continuous replication| D[DR region]
+    P -->|scheduled backup| B[Off-site backup]
+    F[Regional failure] --> D
+    D --> R[Restore service within RTO and RPO]
+```
 
 **Disaster Recovery (DR)** হলো একটি পূর্ব-পরিকল্পিত স্ট্র্যাটেজি। এটি প্রাকৃতিক দুর্যোগ (ভূমিকম্প, আগুন), সাইবার অ্যাটাক (Ransomware), বা বড় কোনো টেকনিক্যাল সমস্যার কারণে পুরো ডাটা সেন্টার ধ্বংস বা অফলাইন হয়ে গেলে, কীভাবে মূল ব্যবসায়িক কার্যক্রম (IT infrastructure) দ্রুত রিকভার বা পুনরুদ্ধার করা যায়, তার রোডম্যাপ। 
 
@@ -199,6 +263,14 @@ High Availability (HA) যেখানে একটি সার্ভার ড
 
 ## **108. What is database federation?**
 
+```mermaid
+flowchart TB
+    A[Application] --> F[Federation layer]
+    F --> U[User database]
+    F --> O[Order database]
+    F --> P[Product database]
+```
+
 **Database Federation** (বা Federated Database System) হলো একাধিক আলাদা ও স্বাধীন ডাটাবেসকে একত্রে যুক্ত করে এমন একটি ভার্চুয়াল লেয়ার তৈরি করা, যেন অ্যাপ্লিকেশন বা ইউজারের কাছে মনে হয় তারা একটিমাত্র বিশাল ডাটাবেস থেকে ডেটা নিচ্ছে। 
 
 এখানে আসল ডাটাবেসগুলো (যেগুলো ভিন্ন ভেন্ডর যেমন: একটি Oracle, আরেকটি PostgreSQL হতে পারে) তাদের নিজস্ব স্বায়ত্তশাসন (Autonomy) বজায় রাখে, অর্থাৎ তারা নিজেদের মতো স্বাধীনভাবে কাজ করতে পারে।
@@ -224,6 +296,13 @@ High Availability (HA) যেখানে একটি সার্ভার ড
 
 ## **109. What is multi-master replication?**
 
+```mermaid
+flowchart LR
+    M1[Master 1: read and write] <--> M2[Master 2: read and write]
+    M2 <--> M3[Master 3: read and write]
+    M3 <--> M1
+```
+
 **Multi-Master Replication** (যাকে Active-Active Replication ও বলা হয়) হলো এমন একটি আর্কিটেকচার, যেখানে ক্লাস্টারের শুধু একটি মাস্টার নয়, বরং একাধিক (বা প্রতিটি) নোডই মাস্টার হিসেবে আচরণ করে। 
 
 এর মানে হলো, আপনার অ্যাপ্লিকেশনের সব ইউজার যেকোনো ডাটাবেস নোডে ডেটা Read এবং **Write (Insert/Update)** উভয় কাজই করতে পারবে। এরপর মাস্টারগুলো ব্যাকগ্রাউন্ডে নিজেদের মধ্যে ডেটা আদান-প্রদান করে সিঙ্ক করে নেয়।
@@ -246,6 +325,16 @@ High Availability (HA) যেখানে একটি সার্ভার ড
 ---
 
 ## **110. What is distributed database?**
+
+```mermaid
+flowchart TB
+    C[Client] --> D[Distributed database layer]
+    D --> N1[Node A]
+    D --> N2[Node B]
+    D --> N3[Node C]
+    N1 <--> N2
+    N2 <--> N3
+```
 
 **Distributed Database** হলো এমন একটি ডাটাবেস যা কোনো সিঙ্গেল কম্পিউটার বা মেশিনে আবদ্ধ থাকে না, বরং এটি নেটওয়ার্কের মাধ্যমে সংযুক্ত একাধিক সার্ভারে (বা ভৌগোলিক স্থানে) ফিজিক্যালি ছড়িয়ে বা ডিস্ট্রিবিউট করা থাকে। 
 

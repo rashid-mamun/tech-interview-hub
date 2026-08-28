@@ -977,6 +977,13 @@ Google-এর network:
 ---
 
 ## 🚪 39. What are ports and sockets in TCP/IP communication?
+
+```mermaid
+flowchart LR
+    C[Client socket 10.0.0.5:53000] -->|TCP connection| S[Server socket 203.0.113.10:443]
+    S --> P[HTTPS server process]
+    C2[Another client 10.0.0.8:53000] --> S
+```
 ইন্টারনেটে ডাটা ট্রান্সফারের জন্য পোর্ট এবং সকেট অত্যন্ত গুরুত্বপূর্ণ কনসেপ্ট:
 - 🚪 **Port:** আইপি অ্যাড্রেস দিয়ে আপনি একটি বাড়িতে পৌঁছাতে পারবেন, কিন্তু সেই বাড়ির কোন দরজায় যাবেন, তা নির্ধারণ করে পোর্ট। একটি আইপিতে অনেকগুলো পোর্ট (০ থেকে ৬৫,৫৩৫) থাকে, যা কম্পিউটারের ভেতরের নির্দিষ্ট সার্ভিস বা অ্যাপ্লিকেশনের প্রবেশদ্বার হিসেবে কাজ করে। (যেমন HTTP এর জন্য 80, HTTPS এর জন্য 443)।
 - 🔌 **Socket:** সকেট হলো IP অ্যাড্রেস এবং পোর্ট নাম্বারের সমন্বয় (যেমন `192.168.1.1:80`)। এটি দুটি কম্পিউটারের মধ্যে যোগাযোগ স্থাপনকারী একটি লজিক্যাল শেষ প্রান্ত বা এন্ডপয়েন্ট (Endpoint)।
@@ -1023,6 +1030,15 @@ TCP প্রতিটি পাঠানো প্যাকেটে একট�
 ---
 
 ## 🧱 41. How do firewalls use TCP/IP to protect networks?
+
+```mermaid
+flowchart LR
+    Packet[Packet] --> L34{Network firewall\nIP, port, protocol, state}
+    L34 -->|allowed web traffic| WAF{WAF\nHTTP method, path, body}
+    L34 -->|denied| Drop[Drop]
+    WAF -->|safe request| App[Application]
+    WAF -->|SQLi or XSS pattern| Block[Block and log]
+```
 **Firewall (ফায়ারওয়াল)** হলো একটি নেটওয়ার্ক সিকিউরিটি সিস্টেম, যা incoming (Incoming) এবং outgoing (Outgoing) ট্রাফিক মনিটর এবং নিয়ন্ত্রণ করে। 
 - ফায়ারওয়াল TCP/IP লেয়ারের তথ্যগুলো (যেমন: সোর্স আইপি, ডেস্টিনেশন আইপি, সোর্স পোর্ট এবং ডেস্টিনেশন পোর্ট নাম্বার) এবং প্রোটোকল টাইপ (TCP/UDP) পড়ে। 
 - সিস্টেম অ্যাডমিন কিছু রুলস বা পলিসি (Ruleset) ঠিক করে দেন, যার ওপর ভিত্তি করে ফায়ারওয়াল সিদ্ধান্ত নেয় যে প্যাকেজটিকে ঢুকতে দেওয়া হবে (Allow) নাকি ব্লক (Drop/Deny) করে দেওয়া হবে। 
@@ -1038,6 +1054,17 @@ TCP প্রতিটি পাঠানো প্যাকেটে একট�
 ---
 
 ## 🎭 42. What is Network Address Translation (NAT), and how does it work in TCP/IP networks?
+
+```mermaid
+sequenceDiagram
+    participant H as Host 192.168.1.10:51000
+    participant N as NAT 203.0.113.5:40001
+    participant S as Server 198.51.100.20:443
+    H->>N: Outbound packet
+    N->>S: Rewrite source to public IP:port
+    S-->>N: Response to 203.0.113.5:40001
+    N-->>H: Table lookup and reverse translation
+```
 **NAT (Network Address Translation)** হলো রাউটারের এমন একটি প্রসেস, যা একটি সিস্টেম বা প্রাইভেট নেটওয়ার্কের অভ্যন্তরীণ আইপি অ্যাড্রেসগুলোকে একটিমাত্র পাবলিক আইপিতে পরিবর্তন (Translate) করে ইন্টারনেটের সাথে যুক্ত করতে সাহায্য করে।
 
 ### ↔️ What is the difference between SNAT and DNAT?
@@ -1057,6 +1084,17 @@ TCP প্রতিটি পাঠানো প্যাকেটে একট�
 ---
 
 ## ⏱️ 43. How do backend developers handle TCP connection timeouts in API servers? 
+
+```mermaid
+flowchart TD
+    Req[Outbound API request] --> Connect{Connected before connect timeout?}
+    Connect -->|no| CE[Connection timeout]
+    Connect -->|yes| Read{Data before read timeout?}
+    Read -->|no| RE[Read timeout and close]
+    Read -->|yes| Done[Process response]
+    CE --> Retry[Bounded retry with backoff and jitter]
+    RE --> Retry
+```
 ব্যাকএন্ড সার্ভারে (যেমন Node.js বা Python) অনেক বেশি কনকারেন্ট বা সমান্তরাল রিকোয়েস্ট এলে সার্ভার যেন হ্যাং না হয়, তাই ডেভেলপাররা বিভিন্ন লেয়ারে (Nginx, Application) টাইমআউট (Timeouts) সেট করে রাখেন। কোনো ক্লায়েন্ট যদি শুধু কানেক্ট করে বসে থাকে বা খুব ধীরগতিতে ডেটা সেন্ড করে, সার্ভার ওই নির্দিষ্ট টাইমআউট সময়ের পর কানেকশনটি ড্রপ করে দিয়ে মেমরি রিলিজ করে দেয়।
 
 ### ⏳ What is the difference between a connection timeout and a read timeout?
@@ -1075,6 +1113,15 @@ server.headersTimeout = 65000; // should be > keepAliveTimeout
 ---
 
 ## 🚦 44. What is the impact of TCP congestion control on backend performance? 
+
+```mermaid
+stateDiagram-v2
+    [*] --> SlowStart
+    SlowStart --> CongestionAvoidance: threshold reached
+    SlowStart --> Recovery: loss detected
+    CongestionAvoidance --> Recovery: loss or ECN
+    Recovery --> CongestionAvoidance: window reduced
+```
 **TCP Congestion Control** হলো নেটওয়ার্কে ট্রাফিক জ্যাম কমানোর একটি অ্যালগরিদম। যদি ইন্টারনেটের কোনো রাউটারে অতিরিক্ত ভিড় থাকে, তখন প্যাকেট লস শুরু হয়। এটি দেখে সেন্ডার বা ব্যাকএন্ড সার্ভারের TCP লেয়ার তার ডেটা পাঠানোর স্পিড নিজে থেকে রিকোয়েস্ট ছাড়াই স্লো বা কমিয়ে দেয়।
 - **প্রভাব:** এর ফলে ব্যাকএন্ড সার্ভার থেকে ইউজারের ব্রাউজারে রেসপন্স যেতে বেশি সময় লাগে বা বাফারিং হয়। তাই আধুনিক সার্ভারগুলো সঠিক কনজেশন কন্ট্রোল অ্যালগরিদম ব্যবহার করে পারফরম্যান্স বুস্ট করে।
 

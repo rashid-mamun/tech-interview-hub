@@ -3,9 +3,18 @@ sidebar_position: 10
 title: 'Scenario Based Questions'
 ---
 
+
 ## 🛠️ **16. Scenario-Based Questions (System Design)**
 
 ## **143. Design a chat application database (WhatsApp/Messenger)**
+
+```mermaid
+flowchart LR
+    U[Users] --> C[Conversations]
+    C --> M[Messages partitioned by conversation]
+    M --> A[Attachments in object storage]
+    M --> R[Read receipts]
+```
 
 একটি চ্যাট অ্যাপ্লিকেশন ডিজাইন করার সময় সিস্টেমকে রিয়েল-টাইম রেসপন্স (Low Latency) এবং প্রতিদিন জেনারেট হওয়া বিলিয়ন বিলিয়ন ম্যাসেজ (High Write Throughput) সামলাতে হয়। 
 
@@ -43,6 +52,14 @@ CREATE TABLE messages (
 
 ## **144. Design a ride-sharing app database (Uber-style)**
 
+```mermaid
+flowchart LR
+    Rider --> Trip
+    Driver --> Trip
+    Trip --> Location[Live location store]
+    Trip --> Payment
+```
+
 রাইড শেয়ারিং সার্ভিসে রিয়েল-টাইমে চলন্ত গাড়ির ট্র্যাকিং এবং প্যাসেঞ্জারের লোকেশন ম্যাচ করানো সবচেয়ে জটিল কাজ (Geospatial Data Processing)।
 
 **Database Technology Choices:**
@@ -78,6 +95,15 @@ GEORADIUS drivers 90.4125 23.8103 2 km
 ---
 
 ## **145. Design an e-commerce database (Amazon-style)**
+
+```mermaid
+flowchart LR
+    Customer --> Order
+    Order --> Item[Order items]
+    Item --> Product
+    Product --> Inventory
+    Order --> Payment
+```
 
 ই-কমার্স সিস্টেম একটি বিশাল মনোলিথ নয়; এটি অসংখ্য ছোট ছোট মাইক্রোসার্ভিসের (Microservices) সমন্বয়, যেখানে প্রতিটির ডাটাবেস রিকয়ারমেন্ট আলাদা থাকে।
 
@@ -115,6 +141,14 @@ UPDATE inventory SET quantity = quantity - 1 WHERE product_id=101;
 
 ## **146. Design a social media platform database (Facebook/Twitter)**
 
+```mermaid
+flowchart LR
+    User --> Post
+    User --> Follow[Follow graph]
+    Post --> Feed[Fan-out or read-time feed]
+    Post --> Interaction[Likes and comments]
+```
+
 সোশ্যাল মিডিয়া সিস্টেমে ডেটার ট্রাফিক রিড (Read)-হেভি হয়ে থাকে (১ জন পোস্ট করে, ১ লাখ মানুষ দেখে)। তাই হাইলি এভেইল্যাবল এবং এভেনচুয়াল কনসিস্টেন্ট (Eventual Consistency) সিস্টেম ডিজাইন করা হয়। 
 
 ### How do you implement follow/unfollow efficiently?
@@ -143,6 +177,14 @@ RETURN fof
 
 ## **147. Design a banking system database**
 
+```mermaid
+flowchart LR
+    Customer --> Account
+    Account --> Tx[Immutable transactions]
+    Tx --> Ledger[Double-entry ledger]
+    Ledger --> Balance[Derived balance]
+```
+
 ব্যাংকিং সিস্টেম আর সোশ্যাল মিডিয়া এক জিনিস নয়। এখানে ১ সেকেন্ড ডাটা স্লো আসলেও সমস্যা নেই, কিন্তু ১ টাকার ব্যালেন্স ভুল হলে পুরো কোম্পানি ধ্বংস হয়ে যাবে। 
 
 **Database Choices:** 
@@ -165,7 +207,7 @@ COMMIT;
 ```
 
 ### How do you handle transaction history and auditing?
-ব্যাংকিং সিস্টেমে ডেটা কখনোই মুছে ফেলা (DELETE) বা পরিবর্তন (UPDATE) করা যায় না। 
+Banking ledger entry সাধারণত append-only এবং correction reversal entry দিয়ে করা হয়। অন্য operational/PII table-এর update বা delete retention, audit এবং privacy policy অনুযায়ী হতে পারে।
 * এর জন্য **Event Sourcing Pattern** ব্যবহার করা হয়। আপনার বর্তমান ব্যালেন্স মূলত অগণিত জমা এবং খচর হিসেবের (Ledgers) যোগফল। 
 * প্রতিটি ট্রানজেকশনে Immutable, Append-only (শুধু মাত্র নিচে লেখা হবে) ডাটাবেস স্ট্রাকচার ব্যবহার করা হয়, যাতে কেউ ডেটা টেম্পার করলে তা সাথে সাথে ধরা পড়ে। 
 
@@ -177,6 +219,14 @@ COMMIT;
 ---
 
 ## **148. Design a video streaming platform database (Netflix/YouTube)**
+
+```mermaid
+flowchart LR
+    User --> Catalog
+    User --> History[Watch history]
+    Catalog --> Metadata
+    Metadata --> CDN[Video objects and CDN]
+```
 
 ভিডিও স্ট্রিমিংয়ে ডাটাবেস খুব ছোট থাকে, কারণ অরিজিনাল ভিডিও ফাইলগুলো ডাটাবেসে থাকে না। 
 
@@ -200,6 +250,15 @@ COMMIT;
 
 ## **149. Design a stock trading system database**
 
+```mermaid
+flowchart LR
+    Trader --> Order
+    Order --> Engine[Matching engine]
+    Engine --> Trade
+    Trade --> Ledger
+    Trade --> Position
+```
+
 স্টক মার্কেট হচ্ছে একটি আল্ট্রা-লো-লেটেন্সি, সুপার ফাস্ট ট্রানজেকশনাল সিস্টেম। এখানে ট্রেড মিলতে হয় মাইক্রো-সেকেন্ডে। 
 
 ### How do you handle high-frequency trading requirements?
@@ -222,6 +281,15 @@ COMMIT;
 
 ## **150. Design a hospital management system database**
 
+```mermaid
+flowchart LR
+    Patient --> Encounter
+    Doctor --> Encounter
+    Encounter --> Prescription
+    Encounter --> LabResult[Lab result]
+    Patient --> Consent[Consent and audit]
+```
+
 হসপিটাল সিস্টেমে স্পিড বা রিয়েল-টাইমের চেয়ে ডাটা প্রাইভেসি, সিকিউরিটি এবং ডেটার অথেন্টিসিটি সবার ওপরে থাকে।
 
 ### How do you handle patient privacy (HIPAA compliance)?
@@ -242,6 +310,15 @@ HIPAA(Health Insurance Portability and Accountability Act) আইন মেন�
 ---
 
 ## **196. Design a database system that can handle 1 million writes per second**
+
+```mermaid
+flowchart LR
+    Producers --> Queue[Durable queue]
+    Queue --> P[Partition by key]
+    P --> S1[Write shard 1]
+    P --> S2[Write shard 2]
+    P --> S3[Write shard N]
+```
 
 সাধারণ একটি RDBMS (যেমন MySQL বা PostgreSQL) সর্বোচ্চ ৫ হাজার থেকে ১০ হাজার রাইট/সেকেন্ড হ্যান্ডেল করতে পারে। একে ১ মিলিয়ন (১০ লাখ) এ নিতে হলে আর্কিটেকচার পুরোপুরি চেঞ্জ করতে হবে।
 
@@ -267,6 +344,16 @@ CAP Theorem অনুযায়ী ডিস্ট্রিবিউটেড 
 
 ## **197. Database design for a global app (Users across continents)**
 
+```mermaid
+flowchart LR
+    Users --> Geo[Geo router]
+    Geo --> A[Region A]
+    Geo --> B[Region B]
+    Geo --> C[Region C]
+    A <--> B
+    B <--> C
+```
+
 যখন একটি অ্যাপ আমেরিকায় হোস্ট করা থাকে এবং বাংলাদেশের ইউজার সেটি ব্যবহার করে, তখন ডেটা ট্রাভেল করার জন্য প্রায় ২৫০ মিলি-সেকেন্ড নেটওয়ার্ক লেটেন্সি হয়, যা ইউজার এক্সপেরিয়েন্স চরমভাবে নষ্ট করে। 
 
 ### Multi-region deployment strategies?
@@ -288,6 +375,15 @@ CAP Theorem অনুযায়ী ডিস্ট্রিবিউটেড 
 
 ## **198. How do you implement GDPR compliance in database design?**
 
+```mermaid
+flowchart LR
+    Consent --> Collect[Purpose-limited collection]
+    Collect --> Encrypt
+    Encrypt --> Retain[Retention policy]
+    Retain --> Export[Access and portability]
+    Retain --> Erase[Erasure workflow]
+```
+
 GDPR (General Data Protection Regulation) ইউরোপের সবচেয়ে কঠোর নিয়ম। এটি ভেঙে ফেললে কোম্পানির আয়ের একটি বিশাল অংশ জরিমানা হতে পারে। ডাটাবেস লেভেল থেকেই "Privacy by Design" বাস্তবায়ন করতে হয়।
 
 ### Right to be forgotten (Right to erasure) implementation?
@@ -307,6 +403,15 @@ GDPR (General Data Protection Regulation) ইউরোপের সবচেয�
 ---
 
 ## **199. Design a database disaster recovery solution with 99.99% availability**
+
+```mermaid
+flowchart LR
+    P[Primary region] -->|synchronous or asynchronous replica| S[Standby region]
+    P --> B[Immutable backups]
+    Monitor --> Failover
+    Failover --> S
+    B --> Restore[Tested restore]
+```
 
 99.99% Availability (যাকে বলা হয় "Four Nines") মানে হলো আপনার সিস্টেমটি বছরে ম্যাক্সিমাম **৫২ মিনিট** ডাউন থাকার অনুমতি পাবে। এর বেশি ডাউন হলে কোম্পানির বিশাল লস হবে।
 
@@ -328,6 +433,14 @@ GDPR (General Data Protection Regulation) ইউরোপের সবচেয�
 ---
 
 ## **200. How do you future-proof your database architecture?**
+
+```mermaid
+flowchart LR
+    Domain[Stable domain boundaries] --> API[Versioned data access]
+    API --> M[Backward-compatible migrations]
+    M --> O[Observability]
+    O --> C[Capacity tests and evolution]
+```
 
 "Future-proofing" মানে হলো এমনভাবে প্রথম দিনেই সিস্টেমের আর্কিটেকচার সাজানো, যেন ৫-১০ বছর পর কোম্পানির ডেটা ১০০ গুণ বেড়ে গেলেও বা নতুন প্রযুক্তি আসলেও পুরো সিস্টেম রিবিল্ড করতে না হয়। 
 
