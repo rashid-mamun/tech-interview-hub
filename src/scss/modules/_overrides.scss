@@ -221,7 +221,9 @@
   padding: 18px 28px 36px;
   box-shadow: none;
   margin: 0;
-  max-width: 900px;
+  /* Use the available reading column on wide monitors without letting lines
+     become uncomfortably long. Narrow screens still shrink fluidly. */
+  max-width: 1100px;
   width: 100%;
   margin-left: auto;
   margin-right: auto;
@@ -999,7 +1001,7 @@ body.docs-left-hidden.docs-right-hidden .theme-doc-markdown {
 
 @media only screen and (max-width: 1400px) {
   .theme-doc-markdown {
-    max-width: 900px;
+    max-width: 100%;
   }
 }
 
@@ -1028,6 +1030,21 @@ body.docs-left-hidden.docs-right-hidden .theme-doc-markdown {
 }
 
 @media only screen and (max-width: 996px) {
+
+  /* The desktop navbar is intentionally hidden, but mobile still needs the
+     Docusaurus menu button so the documentation navigation remains usable. */
+  :root {
+    --ifm-navbar-height: 60px;
+  }
+
+  .navbar {
+    display: flex;
+    min-height: var(--ifm-navbar-height);
+  }
+
+  .navbar--fixed-top+.main-wrapper {
+    padding-top: var(--ifm-navbar-height) !important;
+  }
 
   /* Hide toggle buttons and right TOC on mobile */
   .docs-layout-toggles {
@@ -1068,8 +1085,8 @@ body.docs-left-hidden.docs-right-hidden .theme-doc-markdown {
 
   .theme-doc-sidebar-container {
     border-right: 0;
-    top: 0;
-    height: 100vh;
+    top: var(--ifm-navbar-height);
+    height: calc(100vh - var(--ifm-navbar-height));
   }
 
   [class*='docMainContainer_'] .container {
@@ -1186,12 +1203,41 @@ body.docs-left-hidden.docs-right-hidden .theme-doc-markdown {
   }
 
   [class*='docMainContainer_'] .container {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
+    padding-left: clamp(0.75rem, 4vw, 1.25rem);
+    padding-right: clamp(0.75rem, 4vw, 1.25rem);
   }
 
   .docs-layout-toggles {
     display: none;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .navbar__inner {
+    padding-inline: 0.75rem;
+  }
+
+  .theme-doc-markdown h1 {
+    font-size: 1.25rem;
+  }
+
+  .theme-doc-markdown h2 {
+    font-size: 1.08rem;
+  }
+
+  .theme-doc-markdown p,
+  .theme-doc-markdown li {
+    font-size: 0.94rem;
+    line-height: 1.72;
+  }
+
+  .pagination-nav {
+    grid-template-columns: 1fr;
+  }
+
+  .pagination-nav__link,
+  .pagination-nav__link--next {
+    grid-column: 1;
   }
 }
 
