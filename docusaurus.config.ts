@@ -25,7 +25,6 @@ const config: Config = {
     defaultLocale: 'en',
     locales: ['en']
   },
-  scripts: [{ src: '/js/docs-layout-toggle.js', defer: true }],
   markdown: {
     mermaid: true
   },
