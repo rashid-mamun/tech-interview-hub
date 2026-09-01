@@ -221,12 +221,12 @@
   padding: 18px 28px 36px;
   box-shadow: none;
   margin: 0;
-  /* Use the available reading column on wide monitors without letting lines
-     become uncomfortably long. Narrow screens still shrink fluidly. */
-  max-width: 1100px;
+  /* Fill all space between the navigation and the table of contents at every
+     desktop resolution. Individual paragraphs retain a readable line length. */
+  max-width: none;
   width: 100%;
-  margin-left: auto;
-  margin-right: auto;
+  margin-left: 0;
+  margin-right: 0;
   overflow-wrap: break-word;
 }
 
@@ -328,13 +328,15 @@
 }
 
 .theme-doc-markdown p {
-  max-width: 82ch;
+  max-width: none;
+  width: 100%;
   margin-top: 0;
 }
 
 .theme-doc-markdown > ul,
 .theme-doc-markdown > ol {
-  max-width: 88ch;
+  max-width: none;
+  width: 100%;
 }
 
 [data-theme='dark'] .theme-doc-markdown p,

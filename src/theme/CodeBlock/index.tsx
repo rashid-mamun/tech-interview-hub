@@ -1,4 +1,4 @@
-import React, {type ComponentProps} from 'react';
+import React, {type ComponentProps, useEffect, useRef} from 'react';
 import OriginalCodeBlock from '@theme-original/CodeBlock';
 
 import styles from './styles.module.css';
@@ -24,6 +24,8 @@ const LANGUAGE_NAMES: Record<string, string> = {
   css: 'CSS',
 };
 
+const AUTO_CLOSE_DELAY_MS = 50_000;
+
 function getLanguage(className?: string): string | undefined {
   const language = className?.match(/(?:^|\s)language-([^\s]+)/)?.[1];
   if (!language) return undefined;
@@ -38,17 +40,41 @@ function getLineCount(children: Props['children']): number | undefined {
 }
 
 export default function CodeBlock(props: Props): JSX.Element {
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const language = getLanguage(props.className);
   const isPlainText = language === 'TEXT';
   const title = isPlainText ? 'Preview' : 'Code Example';
   const lineCount = getLineCount(props.children);
+
+  const clearCloseTimer = () => {
+    if (closeTimerRef.current !== null) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+  };
+
+  useEffect(() => clearCloseTimer, []);
+
+  const handleToggle = (event: React.SyntheticEvent<HTMLDetailsElement>) => {
+    clearCloseTimer();
+
+    const details = event.currentTarget;
+    if (details.open) {
+      closeTimerRef.current = setTimeout(() => {
+        if (details.isConnected) {
+          details.open = false;
+        }
+        closeTimerRef.current = null;
+      }, AUTO_CLOSE_DELAY_MS);
+    }
+  };
 
   if (lineCount !== undefined && lineCount <= 5) {
     return <OriginalCodeBlock {...props} />;
   }
 
   return (
-    <details className={styles.codeDetails}>
+    <details className={styles.codeDetails} onToggle={handleToggle}>
       <summary className={styles.codeSummary}>
         <span className={styles.leading} aria-hidden="true">
           {isPlainText ? 'Aa' : '</>'}
